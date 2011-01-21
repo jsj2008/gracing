@@ -1,0 +1,51 @@
+cplusplus=g++
+target=demo
+
+irr_inc_dir=..\irrlicht-1.7.2\include
+irr_lib_dir=..\irrlicht-1.7.2\lib\Win32-gcc
+platform_libs= -lgdi32 -lwinspool -lcomdlg32 -lole32 -loleaut32 \
+						-luuid -lodbc32 -lodbccp32 -lopengl32 
+cplusplus=g++
+target=demo.exe
+tgt_dir=demo.app
+
+rm=del /f /q
+cp=copy
+mkdir=mkdir
+rmdir=rmdir
+zip="E:\Program Files\7-Zip\7z.exe"
+
+include sources.mak
+
+###########################################################################################
+includes=-I$(irr_inc_dir) 
+ccflags=$(includes) -D_IRR_STATIC_LIB_
+
+ldflags=-L$(irr_lib_dir) $(platform_libs) -lIrrlicht
+
+objs=$(subst .cc,.o,$(sources))
+
+all: $(target) copy_files
+
+$(target): $(objs)
+	$(cplusplus) -o demo.exe $(objs) $(ldflags) 
+
+.cc.o:
+	$(cplusplus) -c $< $(ccflags)
+
+copy_files:
+	$(rm) $(tgt_dir)\*
+	$(rmdir) $(tgt_dir)
+	$(mkdir) $(tgt_dir)
+	$(cp) demo.exe $(tgt_dir)
+	$(cp) resources\track-1.zip  $(tgt_dir)
+	$(cp) resources.win32\Irrlicht.dll $(tgt_dir)
+
+clean:
+	$(rm) *.o
+	$(rm) $(target)
+	$(rm) $(tgt_dir)\*
+	$(rmdir) $(tgt_dir)
+
+
+.PHONY: all copy_files
