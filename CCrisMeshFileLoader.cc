@@ -83,8 +83,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 	core::vector3df vec;
   for(int v=0; v<n_vertices; v++) {
     readVertex(file,vec);
-    printf("  [%d] %3.3f,%3.3f,%3.3f\n",
-        v,vec.X,vec.Y,vec.Z);
 	  vertexBuffer.push_back(vec);
   }
   
@@ -93,219 +91,48 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   //
   mark=readMark(file);
   int n_faces=readInt(file);
+  int vertices[4];
   assert(mark==MARK_FACES_ONLY);
+	video::S3DVertex v;
+  
+  core::array<int> faceCorners;
+	faceCorners.reallocate(32); // should be large enough
 
-  printf("Mark: %X, ",mark);
-  printf("Faces: %d\n",n_faces);
   for(int f=0; f<n_faces; f++) {
     n_vertices=readInt(file);
-    printf("[%d] face<%d>:",f,n_vertices);
-    for(int v=0; v<n_vertices; v++) {
-      int o=readInt(file);
-      printf(" %d",o);
+    for(int vi=0; vi<n_vertices; vi++) {
+      int nn=readInt(file)-1;
+
+      v.Pos = vertexBuffer[nn];
+      v.TCoords.set(0.0f,0.0f);
+      v.Normal.set(0.0f,0.0f,0.0f);
+      currMtl->RecalculateNormals=true;
+
+      int vertLocation;
+      core::map<video::S3DVertex, int>::Node* n = currMtl->VertMap.find(v);
+      if (n)
+      {
+        vertLocation = n->getValue();
+      }
+      else
+      {
+        currMtl->Meshbuffer->Vertices.push_back(v);
+        vertLocation = currMtl->Meshbuffer->Vertices.size() -1;
+        currMtl->VertMap.insert(v, vertLocation);
+      }
+
+      faceCorners.push_back(vertLocation);
     }
-    printf("\n");
+    for ( u32 i = 1; i < faceCorners.size() - 1; ++i )
+    {
+      // Add a triangle
+      currMtl->Meshbuffer->Indices.push_back( faceCorners[i+1] );
+      currMtl->Meshbuffer->Indices.push_back( faceCorners[i] );
+      currMtl->Meshbuffer->Indices.push_back( faceCorners[0] );
+    }
+    faceCorners.set_used(0); // fast clear
+    faceCorners.reallocate(32);
   }
-
-
-  return 0;
-
-	c8* buf = new c8[filesize];
-	memset(buf, 0, filesize);
-	file->read((void*)buf, filesize);
-	const c8* const bufEnd = buf+filesize;
-
-
-
-	// Process obj information
-	const c8* bufPtr = buf;
-	core::stringc grpName, mtlName;
-	bool mtlChanged=false;
-	bool useGroups = false; //!SceneManager->getParameters()->getAttributeAsBool(OBJ_LOADER_IGNORE_GROUPS);
-	bool useMaterials = true; //!SceneManager->getParameters()->getAttributeAsBool(OBJ_LOADER_IGNORE_MATERIAL_FILES);
-	while(bufPtr != bufEnd)
-	{
-		switch(bufPtr[0])
-		{
-		case 'm':	// mtllib (material)
-		{
-			if (useMaterials)
-			{
-				c8 name[WORD_BUFFER_LENGTH];
-				bufPtr = goAndCopyNextWord(name, bufPtr, WORD_BUFFER_LENGTH, bufEnd);
-#ifdef _IRR_DEBUG_OBJ_LOADER_
-				os::Printer::log("Reading material file",name);
-#endif
-				readMTL(name, relPath);
-			}
-		}
-			break;
-
-		case 'v':               // v, vn, vt
-			switch(bufPtr[1])
-			{
-			case ' ':          // vertex
-				{
-					core::vector3df vec;
-					bufPtr = readVec3(bufPtr, vec, bufEnd);
-					vertexBuffer.push_back(vec);
-				}
-				break;
-
-			case 'n':       // normal
-				{
-					core::vector3df vec;
-					bufPtr = readVec3(bufPtr, vec, bufEnd);
-					normalsBuffer.push_back(vec);
-				}
-				break;
-
-			case 't':       // texcoord
-				{
-					core::vector2df vec;
-					bufPtr = readUV(bufPtr, vec, bufEnd);
-					textureCoordBuffer.push_back(vec);
-				}
-				break;
-			}
-			break;
-
-		case 'g': // group name
-			{
-				c8 grp[WORD_BUFFER_LENGTH];
-				bufPtr = goAndCopyNextWord(grp, bufPtr, WORD_BUFFER_LENGTH, bufEnd);
-#ifdef _IRR_DEBUG_OBJ_LOADER_
-	os::Printer::log("Loaded group start",grp);
-#endif
-				if (useGroups)
-				{
-					if (0 != grp[0])
-						grpName = grp;
-					else
-						grpName = "default";
-				}
-				mtlChanged=true;
-			}
-			break;
-
-		case 's': // smoothing can be a group or off (equiv. to 0)
-			{
-				c8 smooth[WORD_BUFFER_LENGTH];
-				bufPtr = goAndCopyNextWord(smooth, bufPtr, WORD_BUFFER_LENGTH, bufEnd);
-#ifdef _IRR_DEBUG_OBJ_LOADER_
-	os::Printer::log("Loaded smoothing group start",smooth);
-#endif
-				if (core::stringc("off")==smooth)
-					smoothingGroup=0;
-				else
-					smoothingGroup=core::strtol10(smooth, 0);
-			}
-			break;
-
-		case 'u': // usemtl
-			// get name of material
-			{
-				c8 matName[WORD_BUFFER_LENGTH];
-				bufPtr = goAndCopyNextWord(matName, bufPtr, WORD_BUFFER_LENGTH, bufEnd);
-#ifdef _IRR_DEBUG_OBJ_LOADER_
-	os::Printer::log("Loaded material start",matName);
-#endif
-				mtlName=matName;
-				mtlChanged=true;
-			}
-			break;
-
-		case 'f':               // face
-		{
-			c8 vertexWord[WORD_BUFFER_LENGTH]; // for retrieving vertex data
-			video::S3DVertex v;
-			// Assign vertex color from currently active material's diffuse colour
-			if (mtlChanged)
-			{
-				// retrieve the material
-				SObjMtl *useMtl = findMtl(mtlName, grpName);
-				// only change material if we found it
-				if (useMtl)
-					currMtl = useMtl;
-				mtlChanged=false;
-			}
-			if (currMtl)
-				v.Color = currMtl->Meshbuffer->Material.DiffuseColor;
-
-			// get all vertices data in this face (current line of obj file)
-			const core::stringc wordBuffer = copyLine(bufPtr, bufEnd);
-			const c8* linePtr = wordBuffer.c_str();
-			const c8* const endPtr = linePtr+wordBuffer.size();
-
-			core::array<int> faceCorners;
-			faceCorners.reallocate(32); // should be large enough
-
-			// read in all vertices
-			linePtr = goNextWord(linePtr, endPtr);
-			while (0 != linePtr[0])
-			{
-				// Array to communicate with retrieveVertexIndices()
-				// sends the buffer sizes and gets the actual indices
-				// if index not set returns -1
-				s32 Idx[3];
-				Idx[1] = Idx[2] = -1;
-
-				// read in next vertex's data
-				u32 wlength = copyWord(vertexWord, linePtr, WORD_BUFFER_LENGTH, bufEnd);
-				// this function will also convert obj's 1-based index to c++'s 0-based index
-				retrieveVertexIndices(vertexWord, Idx, vertexWord+wlength+1, vertexBuffer.size(), textureCoordBuffer.size(), normalsBuffer.size());
-				v.Pos = vertexBuffer[Idx[0]];
-				if ( -1 != Idx[1] )
-					v.TCoords = textureCoordBuffer[Idx[1]];
-				else
-					v.TCoords.set(0.0f,0.0f);
-				if ( -1 != Idx[2] )
-					v.Normal = normalsBuffer[Idx[2]];
-				else
-				{
-					v.Normal.set(0.0f,0.0f,0.0f);
-					currMtl->RecalculateNormals=true;
-				}
-
-				int vertLocation;
-				core::map<video::S3DVertex, int>::Node* n = currMtl->VertMap.find(v);
-				if (n)
-				{
-					vertLocation = n->getValue();
-				}
-				else
-				{
-					currMtl->Meshbuffer->Vertices.push_back(v);
-					vertLocation = currMtl->Meshbuffer->Vertices.size() -1;
-					currMtl->VertMap.insert(v, vertLocation);
-				}
-
-				faceCorners.push_back(vertLocation);
-
-				// go to next vertex
-				linePtr = goNextWord(linePtr, endPtr);
-			}
-
-			// triangulate the face
-			for ( u32 i = 1; i < faceCorners.size() - 1; ++i )
-			{
-				// Add a triangle
-				currMtl->Meshbuffer->Indices.push_back( faceCorners[i+1] );
-				currMtl->Meshbuffer->Indices.push_back( faceCorners[i] );
-				currMtl->Meshbuffer->Indices.push_back( faceCorners[0] );
-			}
-			faceCorners.set_used(0); // fast clear
-			faceCorners.reallocate(32);
-		}
-		break;
-
-		case '#': // comment
-		default:
-			break;
-		}	// end switch(bufPtr[0])
-		// eat up rest of line
-		bufPtr = goNextLine(bufPtr, bufEnd);
-	}	// end while(bufPtr && (bufPtr-buf<filesize))
 
   scene::SMesh* mesh = new scene::SMesh();
 
@@ -341,9 +168,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 		animMesh->recalculateBoundingBox();
 	}
 
-	// Clean up the allocate obj file contents
-	delete [] buf;
-	// more cleaning up
 	cleanUp();
 	mesh->drop();
 
