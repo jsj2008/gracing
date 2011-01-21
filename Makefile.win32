@@ -34,8 +34,8 @@ $(target): $(objs)
 	$(cplusplus) -c $< $(ccflags)
 
 copy_files:
-	$(rm) $(tgt_dir)\*
-	$(rmdir) $(tgt_dir)
+	if exist $(tgt_dir) $(rm) $(tgt_dir)\*
+	if exist $(tgt_dir) $(rmdir) $(tgt_dir)
 	$(mkdir) $(tgt_dir)
 	$(cp) demo.exe $(tgt_dir)
 	$(cp) resources\track-1.zip  $(tgt_dir)
@@ -44,8 +44,8 @@ copy_files:
 clean:
 	$(rm) *.o
 	$(rm) $(target)
-	$(rm) $(tgt_dir)\*
-	$(rmdir) $(tgt_dir)
+	if exist $(tgt_dir) $(rm) $(tgt_dir)\*
+	if exist $(tgt_dir) $(rmdir) $(tgt_dir)
 
 
 .PHONY: all copy_files
