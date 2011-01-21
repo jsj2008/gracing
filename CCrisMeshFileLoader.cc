@@ -1,7 +1,3 @@
-// Copyright (C) 2002-2010 Nikolaus Gebhardt
-// This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in irrlicht.h
-
 #include "IrrCompileConfig.h"
 #ifdef _IRR_COMPILE_WITH_OBJ_LOADER_
 
@@ -16,6 +12,8 @@
 #include "fast_atof.h"
 #include "coreutil.h"
 //#include "os.h"
+//
+#include <assert.h>
 
 using namespace irr;
 
@@ -38,21 +36,15 @@ CCrisMeshFileLoader::~CCrisMeshFileLoader()
 		FileSystem->drop();
 }
 
-
 //! returns true if the file maybe is able to be loaded by this class
 //! based on the file extension (e.g. ".bsp")
 bool CCrisMeshFileLoader::isALoadableFileExtension(const io::path& filename) const
 {
   bool o=core::hasFileExtension ( filename, "track" );
-  printf("helo me '%s',%d\n",filename.c_str(),o);
 	return core::hasFileExtension ( filename, "track" );
 }
 
 
-//! creates/loads an animated mesh from the file.
-//! \return Pointer to the created mesh. Returns 0 if loading failed.
-//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
-//! See IReferenceCounted::drop() for more information.
 scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 {
 	const long filesize = file->getSize();
@@ -72,10 +64,58 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 	const io::path fullName = file->getFileName();
 	const io::path relPath = FileSystem->getFileDir(fullName)+"/";
 
+  u16 mark;
+
+    ///////////////////
+   // read vertices
+  //
+  mark=readMark(file);
+
+  int n_vertices=readInt(file);
+  float f[3];
+
+
+  printf("Mark: %X, ",mark);
+  printf("Vertices: %d\n",n_vertices);
+
+  assert(mark==MARK_VERTICES);
+
+	core::vector3df vec;
+  for(int v=0; v<n_vertices; v++) {
+    readVertex(file,vec);
+    printf("  [%d] %3.3f,%3.3f,%3.3f\n",
+        v,vec.X,vec.Y,vec.Z);
+	  vertexBuffer.push_back(vec);
+  }
+  
+    ///////////////////
+   // read faces
+  //
+  mark=readMark(file);
+  int n_faces=readInt(file);
+  assert(mark==MARK_FACES_ONLY);
+
+  printf("Mark: %X, ",mark);
+  printf("Faces: %d\n",n_faces);
+  for(int f=0; f<n_faces; f++) {
+    n_vertices=readInt(file);
+    printf("[%d] face<%d>:",f,n_vertices);
+    for(int v=0; v<n_vertices; v++) {
+      int o=readInt(file);
+      printf(" %d",o);
+    }
+    printf("\n");
+  }
+
+
+  return 0;
+
 	c8* buf = new c8[filesize];
 	memset(buf, 0, filesize);
 	file->read((void*)buf, filesize);
 	const c8* const bufEnd = buf+filesize;
+
+
 
 	// Process obj information
 	const c8* bufPtr = buf;

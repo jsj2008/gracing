@@ -17,23 +17,48 @@ class CCrisMeshFileLoader : public irr::scene::IMeshLoader
 {
 public:
 
-	//! Constructor
 	CCrisMeshFileLoader(irr::scene::ISceneManager* smgr, irr::io::IFileSystem* fs);
 
-	//! destructor
 	virtual ~CCrisMeshFileLoader();
 
-	//! returns true if the file maybe is able to be loaded by this class
-	//! based on the file extension (e.g. ".obj")
 	virtual bool isALoadableFileExtension(const irr::io::path& filename) const;
 
-	//! creates/loads an animated mesh from the file.
-	//! \return Pointer to the created mesh. Returns 0 if loading failed.
-	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
-	//! See IReferenceCounted::drop() for more information.
 	virtual irr::scene::IAnimatedMesh* createMesh(irr::io::IReadFile* file);
 
 private:
+
+  enum {
+    MARK_VERTICES=0xf100,
+    MARK_FACES_ONLY=0xf101,
+  };
+
+  inline int readInt(irr::io::IReadFile * file) 
+  {
+    int val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
+  inline unsigned readMark(irr::io::IReadFile * file)
+  {
+    unsigned short val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
+  inline double readDouble(irr::io::IReadFile * file)
+  {
+    double val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
+  inline void readVertex(irr::io::IReadFile * file, irr::core::vector3df & vec)
+  {
+    vec.X=readDouble(file);
+    vec.Y=readDouble(file);
+    vec.Z=readDouble(file);
+  }
 
 	struct SObjMtl
 	{
