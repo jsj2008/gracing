@@ -57,7 +57,7 @@ int main()
 
 	IrrlichtDevice *device =
 		createDevice( driverType, dimension2d<u32>(640, 480), 16,
-			false, false, false, 0);
+			false, false, false, &receiver);
 
 	if (!device)
 		return 1;
@@ -77,10 +77,10 @@ int main()
 
 	smgr->addCameraSceneNodeFPS();
 
-
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
 
-	while(device->run())
+  bool done=false;
+	while(device->run() && !done)
 	{
 		driver->beginScene(true, true, SColor(255,100,101,140));
 
@@ -88,6 +88,9 @@ int main()
 		guienv->drawAll();
 
 		driver->endScene();
+	  if(receiver.IsKeyDown(irr::KEY_ESCAPE)) {
+      done=true;
+    }
 	}
 
 	device->drop();
