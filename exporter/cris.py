@@ -6,7 +6,7 @@ Group: 'Export'
 Tooltip: 'Exports meshes to Irrlicht mesh & scene files'
 """
 
-__author__ = ['Gianni Masullo(pc0de)']
+__author__ = ['Gianni Masullo']
 __version__ = '0.4'
 __url__ = [ ]
 __bpydoc__ = """\
@@ -16,8 +16,20 @@ Read the script manual for further information.
 """
 import bpy,os,struct
 
+MARK_VERTICES=0xf100
+MARK_FACES_ONLY=0xf101
+MARK_MATERIAL=0xf102
+
+def binWrite_mark(fp,value):
+  print("%X"%value)
+  fp.write(struct.pack("H",value))
+
 def binWrite_float(fp,value):
   v=struct.pack("d",value)
+  fp.write(v)
+
+def binWrite_int(fp,value):
+  v=struct.pack("i",value)
   fp.write(v)
 
 def binWrite_pointVect(fp,point):
@@ -25,14 +37,20 @@ def binWrite_pointVect(fp,point):
   v=struct.pack("ddd",point[0],point[2],-point[1])
   fp.write(v)
 
+def binWrite_color(fp,color):
+  v=struct.pack("ddd",color[0],color[1],color[2])
+  fp.write(v)
+
 def binWrite_string(fp,string):
+  l=len(string)
+  fp.write(struct.pack("H",l))
   fp.write(struct.pack("s",string))
 
 def binWrite_face(fp,face):
   if len(face) == 4:
-    v=struct.pack("iiii",face[0]+1, face[1]+1, face[2]+1,face[3]+1)
+    v=struct.pack("iiiii",4,face[0]+1, face[1]+1, face[2]+1,face[3]+1)
   else:
-    v=struct.pack("iii",face[0]+1, face[1]+1, face[2]+1)
+    v=struct.pack("iiii",3,face[0]+1, face[1]+1, face[2]+1)
   fp.write(v)
 
 def binWrite_textureCoords(fp,n_vertices,data):
@@ -83,24 +101,18 @@ class export_OT_track(bpy.types.Operator):
     if not ob or ob.type != 'MESH':
         raise NameError('Cannot export: active object %s is not a mesh.' % ob)
 
-    binWrite_string(fp,"\n##\n## exporing mesh '%s'\n##\n"%ob.name)
-
-
-    binWrite_string(fp,"### materials: \n")
-    for mat in ob.material_slots:
-      binWrite_string(fp,"## Name: '%s'\n"%mat.name)
-
     me = ob.data
 
     # export vertices
-    binWrite_string(fp,"#Vertices\n")
+    print("Vertices: %d"%len(me.vertices))
+    binWrite_mark(fp,MARK_VERTICES)
+    binWrite_int(fp,len(me.vertices))
     for v in me.vertices:
       x=v.co
       binWrite_pointVect(fp,x)
 
     # export faces
     if len(me.uv_textures) > 0:
-      binWrite_string("#Faces with texture\n")
       uvtex = me.uv_textures[0]
       for f in me.faces:
         data = uvtex.data[f.index]
@@ -115,20 +127,24 @@ class export_OT_track(bpy.types.Operator):
           vt += 1        
 
     else:
-      binWrite_string(fp,"#Faces without textures\n")
+      binWrite_mark(fp,MARK_FACES_ONLY)
+      binWrite_int(fp,len(me.faces))
       for f in me.faces:
         vs = f.vertices
         binWrite_face(fp,vs)
 
-    binWrite_string(fp,"\n")
-
   def exportMaterial(self,fp,ma):
-    binWrite_string(fp,"mat: '%s'\n"%ma.name)
-    binWrite_string(fp,"ambient: %1.4f\n"%ma.ambient)
-    binWrite_string(fp,"diffuse: %1.4f %1.4f %1.4f\n"%
-        (ma.diffuse_color[0],
-        ma.diffuse_color[1],
-        ma.diffuse_color[2]))
+    print("Exporting material: ",ma.name)
+    alpha=ma.alpha
+    specular=ma.specular_color
+    diffuse=ma.diffuse_color
+    binWrite_mark(fp,MARK_MATERIAL)
+    Ka=[ 1-alpha, 1-alpha, 1-alpha ]
+    binWrite_string(fp,ma.name)
+    binWrite_color(fp,Ka)
+    binWrite_color(fp,diffuse)
+    binWrite_color(fp,specular)
+
     
 
   def execute(self, context):
@@ -136,18 +152,16 @@ class export_OT_track(bpy.types.Operator):
     name = os.path.basename(filepath)
     realpath = os.path.realpath(os.path.expanduser(filepath))
     fp = open(realpath, 'wb')    
-    binWrite_string(fp,"*** crisalide exported file ***\n")
+
+    #materials
+    for ma in bpy.data.materials:
+      self.exportMaterial(fp,ma)
 
     # objects
     for ob in bpy.data.objects:
       if ob.type == 'MESH':
         self.exportMesh(fp,ob)
-      else:
-        binWrite_string(fp,"##\n## obtype: '%s'\n##\n\n"%ob.type)
 
-    #materials
-    for ma in bpy.data.materials:
-      self.exportMaterial(fp,ma)
 
     binWrite_string(fp,"*** crisalide exported file: done ***\n")
 

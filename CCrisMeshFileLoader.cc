@@ -61,6 +61,8 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
 	const u32 WORD_BUFFER_LENGTH = 512;
 
+  GM_LOG("starting\n");
+
 	core::array<core::vector3df> vertexBuffer;
 	core::array<core::vector3df> normalsBuffer;
 	core::array<core::vector2df> textureCoordBuffer;

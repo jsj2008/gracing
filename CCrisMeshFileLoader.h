@@ -12,6 +12,8 @@
 #include "SMeshBuffer.h"
 #include "irrMap.h"
 
+#include "gmlog.h"
+
 //! Meshloader capable of loading obj meshes.
 class CCrisMeshFileLoader : public irr::scene::IMeshLoader
 {
