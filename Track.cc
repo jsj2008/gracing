@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "gmlog.h"
 
 #include "Track.hh"
 
@@ -35,7 +36,7 @@ Track::Track(
   const irr::io::IFileList * fileList=archive->getFileList();
   /*
   cnt=fileList->getFileCount();
-  printf("Files in the archive: %u\n",cnt);
+  GM_LOG("Files in the archive: %u\n",cnt);
   */
 
   irr::s32 manifestIndex;
@@ -43,7 +44,7 @@ Track::Track(
   manifestIndex=fileList->findFile(MANIFEST_NAME);
   
   if(manifestIndex<0) {
-    printf("Not a valid track file\n");
+    GM_LOG("Not a valid track file\n");
     return;
   }
 
@@ -76,7 +77,7 @@ Track::Track(
     nodeType=xmlReader->getNodeType();
     switch(nodeType) {
       case irr::io::EXN_NONE:
-        printf("%d None '%s'\n",i,
+        GM_LOG("%d None '%s'\n",i,
             xmlReader->getNodeName(),
             xmlReader->getNodeType());
       break;
@@ -97,35 +98,38 @@ Track::Track(
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
             case ot_mesh:
-              printf("Loading mesh: %s\n",xmlReader->getNodeName());
+              GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
               irr::io::IReadFile * rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
-              assert(rfile);
-              irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
-              irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
+              if(rfile) {
+                irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
+                irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
 
-              node=smgr->addAnimatedMeshSceneNode( mesh );
-              node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-              node->setMD2Animation(irr::scene::EMAT_STAND);
-              rfile->drop();
+                node=smgr->addAnimatedMeshSceneNode( mesh );
+                node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+                node->setMD2Animation(irr::scene::EMAT_STAND);
+                rfile->drop();
+              } else {
+                GM_LOG("  cannot find file\n");
+              }
               break;
           }
         }
       break;
       case irr::io::EXN_COMMENT:
-        printf("%d Comment '%s'\n",i,
+        GM_LOG("%d Comment '%s'\n",i,
             xmlReader->getNodeName());
       break;
       case irr::io::EXN_CDATA:
-        printf("%d Cdata '%s'\n",i,
+        GM_LOG("%d Cdata '%s'\n",i,
             xmlReader->getNodeName());
       break;
       case irr::io::EXN_UNKNOWN:
-        printf("%d Unknown '%s'\n",i,
+        GM_LOG("%d Unknown '%s'\n",i,
             xmlReader->getNodeName());
       break;
       default:
-      printf("%d '%s', type: %d\n",i,
+      GM_LOG("%d '%s', type: %d\n",i,
           xmlReader->getNodeName(),
           xmlReader->getNodeType());
       break;

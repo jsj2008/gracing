@@ -32,6 +32,7 @@ private:
   enum {
     MARK_VERTICES=0xf100,
     MARK_FACES_ONLY=0xf101,
+    MARK_MATERIAL=0xf102,
   };
 
   inline int readInt(irr::io::IReadFile * file) 
@@ -39,6 +40,30 @@ private:
     int val;
     file->read(&val,sizeof(val));
     return val;
+  }
+
+  // NB: the string must be deleted!!!
+  inline char * readString(irr::io::IReadFile * file)
+  {
+    unsigned len=readShort(file);
+    char * string=new char[len+1];
+    file->read(string,len);
+    string[len]=0;
+    return string;
+  }
+
+  inline unsigned readShort(irr::io::IReadFile * file)
+  {
+    unsigned short val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
+  inline void readTriple(irr::io::IReadFile * file, double * tr) 
+  {
+    tr[0]=readDouble(file);
+    tr[1]=readDouble(file);
+    tr[2]=readDouble(file);
   }
 
   inline unsigned readMark(irr::io::IReadFile * file)

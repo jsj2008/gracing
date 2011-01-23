@@ -2,6 +2,8 @@
 #include "Track.hh"
 #include "CCrisMeshFileLoader.h"
 
+#include "gmlog.h"
+
 using namespace irr;
 
 using namespace core;
@@ -55,6 +57,8 @@ int main()
   MyEventReceiver receiver;
   video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
 
+  GM_LOG("--------- starting gracing\n");
+
 	IrrlichtDevice *device =
 		createDevice( driverType, dimension2d<u32>(640, 480), 16,
 			false, false, false, &receiver);
@@ -68,6 +72,7 @@ int main()
 	ISceneManager* smgr = device->getSceneManager();
 	IGUIEnvironment* guienv = device->getGUIEnvironment();
 
+
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
   smgr->addExternalMeshLoader(mloader);
@@ -77,7 +82,9 @@ int main()
 
 	smgr->addCameraSceneNodeFPS();
 
+
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
+
 
   bool done=false;
 	while(device->run() && !done)

@@ -40,7 +40,6 @@ CCrisMeshFileLoader::~CCrisMeshFileLoader()
 //! based on the file extension (e.g. ".bsp")
 bool CCrisMeshFileLoader::isALoadableFileExtension(const io::path& filename) const
 {
-  bool o=core::hasFileExtension ( filename, "track" );
 	return core::hasFileExtension ( filename, "track" );
 }
 
@@ -67,73 +66,95 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 	const io::path relPath = FileSystem->getFileDir(fullName)+"/";
 
   u16 mark;
+  bool done=false;
+  core::vector3df vec;
+  video::S3DVertex v;
+
+
+  int n_vertices,n_faces;
+  char * name;
 
     ///////////////////
    // read vertices
   //
-  mark=readMark(file);
+  while(!done && file->getPos()<filesize) {
+    mark=readMark(file);
 
-  int n_vertices=readInt(file);
-  float f[3];
+    float f[3];
+    double ka[3];
+    double kd[3];
+    double ks[3];
+    core::array<int> faceCorners;
 
+    GM_LOG("Mark: %X\n",mark);
 
-  printf("Mark: %X, ",mark);
-  printf("Vertices: %d\n",n_vertices);
+    switch(mark) {
 
-  assert(mark==MARK_VERTICES);
+      case MARK_MATERIAL:
+        name=readString(file);
+        GM_LOG("Read material: '%s'\n",name);
+        readTriple(file,ka);
+        readTriple(file,kd);
+        readTriple(file,ks);
+        break;
 
-	core::vector3df vec;
-  for(int v=0; v<n_vertices; v++) {
-    readVertex(file,vec);
-	  vertexBuffer.push_back(vec);
-  }
-  
-    ///////////////////
-   // read faces
-  //
-  mark=readMark(file);
-  int n_faces=readInt(file);
-  int vertices[4];
-  assert(mark==MARK_FACES_ONLY);
-	video::S3DVertex v;
-  
-  core::array<int> faceCorners;
-	faceCorners.reallocate(32); // should be large enough
+      case MARK_VERTICES:
+        n_vertices=readInt(file);
+        GM_LOG("Vertices: %d\n",n_vertices);
+        for(int vi=0; vi<n_vertices; vi++) {
+          readVertex(file,vec);
+          vertexBuffer.push_back(vec);
+        }
+        break;
 
-  for(int f=0; f<n_faces; f++) {
-    n_vertices=readInt(file);
-    for(int vi=0; vi<n_vertices; vi++) {
-      int nn=readInt(file)-1;
+      case MARK_FACES_ONLY:
+        assert(mark==MARK_FACES_ONLY);
+        readInt(file);
+        GM_LOG("Faces: %d\n",n_faces);
 
-      v.Pos = vertexBuffer[nn];
-      v.TCoords.set(0.0f,0.0f);
-      v.Normal.set(0.0f,0.0f,0.0f);
-      currMtl->RecalculateNormals=true;
+        faceCorners.reallocate(32); // should be large enough
 
-      int vertLocation;
-      core::map<video::S3DVertex, int>::Node* n = currMtl->VertMap.find(v);
-      if (n)
-      {
-        vertLocation = n->getValue();
-      }
-      else
-      {
-        currMtl->Meshbuffer->Vertices.push_back(v);
-        vertLocation = currMtl->Meshbuffer->Vertices.size() -1;
-        currMtl->VertMap.insert(v, vertLocation);
-      }
+        for(int f=0; f<n_faces; f++) {
+          n_vertices=readInt(file);
+          for(int vi=0; vi<n_vertices; vi++) {
+            int nn=readInt(file)-1;
 
-      faceCorners.push_back(vertLocation);
+            v.Pos = vertexBuffer[nn];
+            v.TCoords.set(0.0f,0.0f);
+            v.Normal.set(0.0f,0.0f,0.0f);
+            currMtl->RecalculateNormals=true;
+
+            int vertLocation;
+            core::map<video::S3DVertex, int>::Node* n = currMtl->VertMap.find(v);
+            if (n)
+            {
+              vertLocation = n->getValue();
+            }
+            else
+            {
+              currMtl->Meshbuffer->Vertices.push_back(v);
+              vertLocation = currMtl->Meshbuffer->Vertices.size() -1;
+              currMtl->VertMap.insert(v, vertLocation);
+            }
+
+            faceCorners.push_back(vertLocation);
+          }
+          for ( u32 i = 1; i < faceCorners.size() - 1; ++i )
+          {
+            // Add a triangle
+            currMtl->Meshbuffer->Indices.push_back( faceCorners[i+1] );
+            currMtl->Meshbuffer->Indices.push_back( faceCorners[i] );
+            currMtl->Meshbuffer->Indices.push_back( faceCorners[0] );
+          }
+          faceCorners.set_used(0); // fast clear
+          faceCorners.reallocate(32);
+        }
+        break;
+      default:
+        GM_LOG("Unknow mark '%X', abort loading\n",mark);
+        done=true;
+        break;
     }
-    for ( u32 i = 1; i < faceCorners.size() - 1; ++i )
-    {
-      // Add a triangle
-      currMtl->Meshbuffer->Indices.push_back( faceCorners[i+1] );
-      currMtl->Meshbuffer->Indices.push_back( faceCorners[i] );
-      currMtl->Meshbuffer->Indices.push_back( faceCorners[0] );
-    }
-    faceCorners.set_used(0); // fast clear
-    faceCorners.reallocate(32);
   }
 
   scene::SMesh* mesh = new scene::SMesh();
