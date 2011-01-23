@@ -73,10 +73,8 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   int n_vertices,n_faces;
   char * name;
+  SObjMtl * currMaterial=0;
 
-    ///////////////////
-   // read vertices
-  //
   while(!done && file->getPos()<filesize) {
     mark=readMark(file);
 
@@ -92,10 +90,30 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
       case MARK_MATERIAL:
         name=readString(file);
-        GM_LOG("Read material: '%s'\n",name);
+        if(currMaterial) 
+          Materials.push_back(currMaterial);
+        currMaterial=new SObjMtl;
+        currMaterial->Name=name;
         readTriple(file,ka);
         readTriple(file,kd);
         readTriple(file,ks);
+        
+        currMaterial->Meshbuffer->Material.DiffuseColor.setRed(kd[0]*255.0);
+        currMaterial->Meshbuffer->Material.DiffuseColor.setGreen(kd[1]*255.0);
+        currMaterial->Meshbuffer->Material.DiffuseColor.setBlue(kd[2]*255.0);
+
+        currMaterial->Meshbuffer->Material.SpecularColor.setRed(ks[0]*255.0);
+        currMaterial->Meshbuffer->Material.SpecularColor.setGreen(ks[1]*255.0);
+        currMaterial->Meshbuffer->Material.SpecularColor.setBlue(ks[2]*255.0);
+
+        currMaterial->Meshbuffer->Material.AmbientColor.setRed(ka[0]*255.0);
+        currMaterial->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
+        currMaterial->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
+
+        GM_LOG("Read material: '%s',",name);
+        GM_LOG("--->Ka=%f,%f,%f",ka[0],ka[1],ka[2]);
+        GM_LOG(",Kd=%f,%f,%f",kd[0],kd[1],kd[2]);
+        GM_LOG(",Ks=%f,%f,%f\n",ks[0],ks[1],ks[2]);
         break;
 
       case MARK_VERTICES:
@@ -109,7 +127,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
       case MARK_FACES_ONLY:
         assert(mark==MARK_FACES_ONLY);
-        readInt(file);
+        n_faces=readInt(file);
         GM_LOG("Faces: %d\n",n_faces);
 
         faceCorners.reallocate(32); // should be large enough

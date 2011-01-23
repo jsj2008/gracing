@@ -20,6 +20,11 @@ MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
 MARK_MATERIAL=0xf102
 
+def log(str):
+  f=open("/tmp/python-log.txt","a")
+  f.write(str)
+  f.close()
+
 def binWrite_mark(fp,value):
   print("%X"%value)
   fp.write(struct.pack("H",value))
@@ -41,10 +46,12 @@ def binWrite_color(fp,color):
   v=struct.pack("ddd",color[0],color[1],color[2])
   fp.write(v)
 
-def binWrite_string(fp,string):
-  l=len(string)
+def binWrite_string(fp,str):
+  l=len(str)
+  log("Writing '%s' (%d)\n"%(str,l))
   fp.write(struct.pack("H",l))
-  fp.write(struct.pack("s",string))
+  for c in str:
+    fp.write(struct.pack("c",c))
 
 def binWrite_face(fp,face):
   if len(face) == 4:
@@ -163,7 +170,7 @@ class export_OT_track(bpy.types.Operator):
         self.exportMesh(fp,ob)
 
 
-    binWrite_string(fp,"*** crisalide exported file: done ***\n")
+#binWrite_string(fp,"*** crisalide exported file: done ***\n")
 
     fp.close()
 

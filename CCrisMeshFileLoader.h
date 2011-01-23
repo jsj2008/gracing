@@ -46,10 +46,10 @@ private:
   inline char * readString(irr::io::IReadFile * file)
   {
     unsigned len=readShort(file);
-    char * string=new char[len+1];
-    file->read(string,len);
-    string[len]=0;
-    return string;
+    char * str=new char[len+1];
+    file->read(str,len);
+    str[len]=0;
+    return str;
   }
 
   inline unsigned readShort(irr::io::IReadFile * file)
