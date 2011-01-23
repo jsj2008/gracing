@@ -46,24 +46,24 @@ bool CCrisMeshFileLoader::isALoadableFileExtension(const io::path& filename) con
 
 scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 {
-	const long filesize = file->getSize();
-	if (!filesize)
-		return 0;
+  const long filesize = file->getSize();
+  if (!filesize)
+    return 0;
 
-	const u32 WORD_BUFFER_LENGTH = 512;
+  const u32 WORD_BUFFER_LENGTH = 512;
 
   GM_LOG("starting\n");
 
-	core::array<core::vector3df> vertexBuffer;
-	core::array<core::vector3df> normalsBuffer;
-	core::array<core::vector2df> textureCoordBuffer;
+  core::array<core::vector3df> vertexBuffer;
+  core::array<core::vector3df> normalsBuffer;
+  core::array<core::vector2df> textureCoordBuffer;
 
-	SObjMtl * currMtl = new SObjMtl();
-	Materials.push_back(currMtl);
-	u32 smoothingGroup=0;
+  SObjMtl * currMtl = new SObjMtl();
+  Materials.push_back(currMtl);
+  u32 smoothingGroup=0;
 
-	const io::path fullName = file->getFileName();
-	const io::path relPath = FileSystem->getFileDir(fullName)+"/";
+  const io::path fullName = file->getFileName();
+  const io::path relPath = FileSystem->getFileDir(fullName)+"/";
 
   u16 mark;
   bool done=false;
@@ -97,7 +97,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         readTriple(file,ka);
         readTriple(file,kd);
         readTriple(file,ks);
-        
+
         currMaterial->Meshbuffer->Material.DiffuseColor.setRed(kd[0]*255.0);
         currMaterial->Meshbuffer->Material.DiffuseColor.setGreen(kd[1]*255.0);
         currMaterial->Meshbuffer->Material.DiffuseColor.setBlue(kd[2]*255.0);
@@ -177,42 +177,42 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   scene::SMesh* mesh = new scene::SMesh();
 
-	// Combine all the groups (meshbuffers) into the mesh
-	for ( u32 m = 0; m < Materials.size(); ++m )
-	{
-		if ( Materials[m]->Meshbuffer->getIndexCount() > 0 )
-		{
-			Materials[m]->Meshbuffer->recalculateBoundingBox();
-			if (Materials[m]->RecalculateNormals)
-				SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer);
-			if (Materials[m]->Meshbuffer->Material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
-			{
+  // Combine all the groups (meshbuffers) into the mesh
+  for ( u32 m = 0; m < Materials.size(); ++m )
+  {
+    if ( Materials[m]->Meshbuffer->getIndexCount() > 0 )
+    {
+      Materials[m]->Meshbuffer->recalculateBoundingBox();
+      if (Materials[m]->RecalculateNormals)
+        SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer);
+      if (Materials[m]->Meshbuffer->Material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
+      {
         scene::SMesh tmp;
-				tmp.addMeshBuffer(Materials[m]->Meshbuffer);
+        tmp.addMeshBuffer(Materials[m]->Meshbuffer);
         scene::IMesh* tangentMesh = SceneManager->getMeshManipulator()->createMeshWithTangents(&tmp);
-				mesh->addMeshBuffer(tangentMesh->getMeshBuffer(0));
-				tangentMesh->drop();
-			}
-			else
-				mesh->addMeshBuffer( Materials[m]->Meshbuffer );
-		}
-	}
+        mesh->addMeshBuffer(tangentMesh->getMeshBuffer(0));
+        tangentMesh->drop();
+      }
+      else
+        mesh->addMeshBuffer( Materials[m]->Meshbuffer );
+    }
+  }
 
-	// Create the Animated mesh if there's anything in the mesh
+  // Create the Animated mesh if there's anything in the mesh
   scene::SAnimatedMesh* animMesh = 0;
-	if ( 0 != mesh->getMeshBufferCount() )
-	{
-		mesh->recalculateBoundingBox();
-		animMesh = new scene::SAnimatedMesh();
-		animMesh->Type = scene::EAMT_OBJ;
-		animMesh->addMesh(mesh);
-		animMesh->recalculateBoundingBox();
-	}
+  if ( 0 != mesh->getMeshBufferCount() )
+  {
+    mesh->recalculateBoundingBox();
+    animMesh = new scene::SAnimatedMesh();
+    animMesh->Type = scene::EAMT_OBJ;
+    animMesh->addMesh(mesh);
+    animMesh->recalculateBoundingBox();
+  }
 
-	cleanUp();
-	mesh->drop();
+  cleanUp();
+  mesh->drop();
 
-	return animMesh;
+  return animMesh;
 }
 
 
