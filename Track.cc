@@ -19,6 +19,10 @@ Track::Track(
   cnt=m_filesystem->getFileArchiveCount();
 
   bool res=m_filesystem->addFileArchive(filename);
+
+  if(!res) {
+    return ;
+  }
   assert(res);
 
   m_archiveIndex=cnt;

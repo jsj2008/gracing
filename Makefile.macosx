@@ -1,6 +1,7 @@
 
 irr_home=/Users/gianni/Desktop/SDKs/irrlicht-1.7.2
-irr_inc_dir=-I $(irr_home)/include/ -arch i386 -D_IRR_STATIC_LIB_  -DBASE_DIR="\"`pwd`\""
+irr_inc_dir=-I $(irr_home)/include/ -arch i386 -D_IRR_STATIC_LIB_ -DBASE_DIR="\"Resources/\""
+#-DBASE_DIR="\"`pwd`/demo.app\""
 irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -arch i386 -lIrrlicht  -LGL \
 						-L/usr/X11R6/lib -lXxf86vm -lXext -lX11 \
 						-dylib_file \
@@ -8,39 +9,34 @@ irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib 
 target=demo
 tgt_dir=demo.app
-						
 cplusplus=g++
 
+include sources.mak
 ##########################################################
-
 tgt_appl_dir=$(tgt_dir)/Contents/MacOs
-
-ccflags=$(irr_inc_dir) 
-
+tgt_res_dir=$(tgt_dir)/Contents/Resources
+ccflags=$(irr_inc_dir)  -g
 ldflags=-L$(irr_lib_dir)  -lIrrlicht
+
+objs=$(subst .cc,.o,$(sources))
 
 
 all: $(target) copy_files
 
+$(target): $(objs)
+	$(cplusplus) -o $(target) $(objs) $(ldflags) 
 
-$(target): demo.o Track.o
-	$(cplusplus) -o $(target) demo.o  Track.o  $(ldflags) 
-
-demo.o: demo.cc Track.hh
-	$(cplusplus) -c demo.cc $(ccflags)
-
-Track.o: Track.cc Track.hh
-	$(cplusplus) -c Track.cc $(ccflags)
+.cc.o: 
+	$(cplusplus) -c $< $(ccflags)
 
 copy_files:
 	rm -rf $(tgt_dir)
 	mkdir -p $(tgt_dir)
 	mkdir -p $(tgt_appl_dir)
+	mkdir -p $(tgt_res_dir)
 	cp resources.macosx/Info.plist $(tgt_dir)
+	cp resources/track-1.zip $(tgt_res_dir)
 	cp demo $(tgt_appl_dir)/
-
-
-  
 
 clean:
 	rm -f *.o
