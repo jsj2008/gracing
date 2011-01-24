@@ -103,6 +103,48 @@ class export_OT_track(bpy.types.Operator):
     description="Scale mesh", 
     default = 0.1, min = 0.001, max = 1000.0)
 
+  def exportMesh2(self, fp, ob):
+    materials=ob.data.materials
+    faces=ob.data.faces
+    vertices=ob.data.vertices
+    log("exporting '%s'\n"%ob.name)
+
+    vert_flag=[ ]
+    for i in range(len(vertices)):
+      vert_flag.append(-1)
+
+    for mat_idx in range(len(materials)):
+      log("material: '%s'\n"%materials[mat_idx].name)
+      face_idx=0
+      tot_vert=0
+      new_verts=[ ]
+      for face in faces:
+        if face.material_index!=mat_idx:
+          continue
+        new_face=[ ]
+        for v_idx in face.vertices:
+          if vert_flag[v_idx] == -1:
+            new_verts.append(v_idx)
+            vert_flag[v_idx]=tot_vert
+            tot_vert=tot_vert+1
+        face_idx=face_idx+1 
+        
+      for v_idx in new_verts:
+        #real_idx=vert_flag[v_idx]
+        v=vertices[v_idx]
+        log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+
+      for face in faces:
+        if face.material_index!=mat_idx:
+          continue
+        log("face: ")
+        for v_idx in face.vertices:
+          log("%d "%vert_flag[v_idx])
+        log("\n")
+
+          
+
+
   def exportMesh(self, fp, ob):
 
     if not ob or ob.type != 'MESH':
@@ -167,7 +209,7 @@ class export_OT_track(bpy.types.Operator):
     # objects
     for ob in bpy.data.objects:
       if ob.type == 'MESH':
-        self.exportMesh(fp,ob)
+        self.exportMesh2(fp,ob)
 
 
 #binWrite_string(fp,"*** crisalide exported file: done ***\n")
