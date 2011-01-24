@@ -118,38 +118,8 @@ private:
 		bool RecalculateNormals;
 	};
 
-	// helper method for material reading
-	const irr::c8* readTextures(const irr::c8* bufPtr, const irr::c8* const bufEnd, 
-      SObjMtl* currMaterial, const irr::io::path& relPath);
-
-	// returns a pointer to the first printable character available in the buffer
-	const irr::c8* goFirstWord(const irr::c8* buf, const irr::c8* const bufEnd, bool acrossNewlines=true);
-	// returns a pointer to the first printable character after the first non-printable
-	const irr::c8* goNextWord(const irr::c8* buf, const irr::c8* const bufEnd, bool acrossNewlines=true);
-	// returns a pointer to the next printable character after the first line break
-	const irr::c8* goNextLine(const irr::c8* buf, const irr::c8* const bufEnd);
-	// copies the current word from the inBuf to the outBuf
-  irr::u32 copyWord(irr::c8* outBuf, const irr::c8* inBuf, irr::u32 outBufLength, const irr::c8* const pBufEnd);
-	// copies the current line from the inBuf to the outBuf
-  irr::core::stringc copyLine(const irr::c8* inBuf, const irr::c8* const bufEnd);
-
-	// combination of goNextWord followed by copyWord
-	const irr::c8* goAndCopyNextWord(irr::c8* outBuf, const irr::c8* inBuf, irr::u32 outBufLength, const irr::c8* const pBufEnd);
-
-	//! Read the material from the given file
-	void readMTL(const irr::c8* fileName, const irr::io::path& relPath);
-
 	//! Find and return the material with the given name
-	SObjMtl* findMtl(const irr::core::stringc& mtlName, const irr::core::stringc& grpName);
-
-	//! Read RGB color
-	const irr::c8* readColor(const irr::c8* bufPtr, irr::video::SColor& color, const irr::c8* const pBufEnd);
-	//! Read 3d vector of floats
-	const irr::c8* readVec3(const irr::c8* bufPtr, irr::core::vector3df& vec, const irr::c8* const pBufEnd);
-	//! Read 2d vector of floats
-	const irr::c8* readUV(const irr::c8* bufPtr, irr::core::vector2df& vec, const irr::c8* const pBufEnd);
-	//! Read boolean value represented as 'on' or 'off'
-	const irr::c8* readBool(const irr::c8* bufPtr, bool& tf, const irr::c8* const bufEnd);
+	SObjMtl* findMtl(const irr::core::stringc& mtlName);
 
 	// reads and convert to integer the vertex indices in a line of obj file's face statement
 	// -1 for the index if it doesn't exist

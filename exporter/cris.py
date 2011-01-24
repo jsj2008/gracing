@@ -125,7 +125,16 @@ class export_OT_track(bpy.types.Operator):
 
     # export faces
     for mat_idx in range(len(materials)):
+      n_faces=0
+      for face in faces:
+        if face.material_index!=mat_idx:
+          continue
+        n_faces=n_faces+1
       log("material: '%s'\n"%materials[mat_idx].name)
+      binWrite_mark(fp,MARK_USE_MATERIAL)
+      binWrite_string(fp,materials[mat_idx].name)
+      binWrite_mark(fp,MARK_FACES_ONLY)
+      binWrite_int(fp,n_faces)
       for face in faces:
         if face.material_index!=mat_idx:
           continue

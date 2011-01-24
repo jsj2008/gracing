@@ -85,6 +85,7 @@ int main()
 
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
 
+  GM_LOG("---------------------------------------\n");
 
   bool done=false;
   while(device->run() && !done)
