@@ -33,6 +33,7 @@ private:
     MARK_VERTICES=0xf100,
     MARK_FACES_ONLY=0xf101,
     MARK_MATERIAL=0xf102,
+    MARK_USE_MATERIAL=0xf103,
   };
 
   inline int readInt(irr::io::IReadFile * file) 

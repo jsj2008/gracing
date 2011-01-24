@@ -19,6 +19,7 @@ import bpy,os,struct
 MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
 MARK_MATERIAL=0xf102
+MARK_USE_MATERIAL=0xf103
 
 def log(str):
   f=open("/tmp/python-log.txt","a")
@@ -107,17 +108,21 @@ class export_OT_track(bpy.types.Operator):
     materials=ob.data.materials
     faces=ob.data.faces
     vertices=ob.data.vertices
-    log("exporting '%s'\n"%ob.name)
+#    log("exporting '%s'\n"%ob.name)
 
     vert_flag=[ ]
     for i in range(len(vertices)):
       vert_flag.append(-1)
 
     for mat_idx in range(len(materials)):
-      log("material: '%s'\n"%materials[mat_idx].name)
-      face_idx=0
+#log("material: '%s'\n"%materials[mat_idx].name)
       tot_vert=0
+      tot_faces=0
       new_verts=[ ]
+
+      binWrite_mark(fp,MARK_USE_MATERIAL)
+      binWrite_string(fp,materials[mat_idx].name)
+
       for face in faces:
         if face.material_index!=mat_idx:
           continue
@@ -127,7 +132,7 @@ class export_OT_track(bpy.types.Operator):
             new_verts.append(v_idx)
             vert_flag[v_idx]=tot_vert
             tot_vert=tot_vert+1
-        face_idx=face_idx+1 
+        tot_faces=tot_faces+1 
         
 
       binWrite_mark(fp,MARK_VERTICES)
@@ -135,15 +140,14 @@ class export_OT_track(bpy.types.Operator):
       for v_idx in new_verts:
         v=vertices[v_idx]
         binWrite_pointVect(fp,v.co)
-        #log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+        log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
 
+      binWrite_mark(fp,MARK_FACES_ONLY)
+      binWrite_int(fp,tot_faces)
       for face in faces:
         if face.material_index!=mat_idx:
           continue
-      binWrite_mark(fp,MARK_FACES_ONLY)
-      binWrite_int(fp,len(me.faces))
-      for f in me.faces:
-        binWrite_int(fp,len(me.faces))
+        binWrite_int(fp,len(face.vertices))
         for v_idx in face.vertices:
           #log("%d "%vert_flag[v_idx])
           binWrite_int(fp,vert_flag[v_idx])

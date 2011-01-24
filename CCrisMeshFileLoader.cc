@@ -87,6 +87,11 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
     GM_LOG("Mark: %X\n",mark);
 
     switch(mark) {
+      case MARK_USE_MATERIAL:
+        name=readString(file);
+        GM_LOG("Using material: '%s'\n",name);
+        delete name;
+        break;
 
       case MARK_MATERIAL:
         name=readString(file);
@@ -135,7 +140,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         for(int f=0; f<n_faces; f++) {
           n_vertices=readInt(file);
           for(int vi=0; vi<n_vertices; vi++) {
-            int nn=readInt(file)-1;
+            int nn=readInt(file);
 
             v.Pos = vertexBuffer[nn];
             v.TCoords.set(0.0f,0.0f);
