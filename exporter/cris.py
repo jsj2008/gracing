@@ -21,13 +21,20 @@ MARK_FACES_ONLY=0xf101
 MARK_MATERIAL=0xf102
 MARK_USE_MATERIAL=0xf103
 
+# LOG configuration
+LOG_ON_STDOUT=0
+LOG_ON_FILE=1
+LOG_FILENAME="e:\\temp\\log.txt"
+
 def log(str):
-  f=open("/tmp/python-log.txt","a")
-  f.write(str)
-  f.close()
+  if LOG_ON_STDOUT==1:
+    print(str,end="")
+  if LOG_ON_FILE==1:
+    f=open(LOG_FILENAME,"a")
+    f.write(str)
+    f.close()
 
 def binWrite_mark(fp,value):
-  print("%X"%value)
   fp.write(struct.pack("H",value))
 
 def binWrite_float(fp,value):
@@ -49,7 +56,6 @@ def binWrite_color(fp,color):
 
 def binWrite_string(fp,str):
   l=len(str)
-  log("Writing '%s' (%d)\n"%(str,l))
   fp.write(struct.pack("H",l))
   for c in str:
     fp.write(struct.pack("c",c))
@@ -104,11 +110,39 @@ class export_OT_track(bpy.types.Operator):
     description="Scale mesh", 
     default = 0.1, min = 0.001, max = 1000.0)
 
+  def exportMesh3(self, fp, ob):
+    materials=ob.data.materials
+    faces=ob.data.faces
+    vertices=ob.data.vertices
+
+    # export vertices
+    binWrite_mark(fp,MARK_VERTICES)
+    binWrite_int(fp,len(vertices))
+    log("vertices: %d\n"%len(vertices))
+    for v in vertices:
+      binWrite_pointVect(fp,v.co)
+      log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+
+    # export faces
+    for mat_idx in range(len(materials)):
+      log("material: '%s'\n"%materials[mat_idx].name)
+      for face in faces:
+        if face.material_index!=mat_idx:
+          continue
+        log("face:")
+        binWrite_int(fp,len(face.vertices))
+        for v_idx in face.vertices:
+          log("%d "%v_idx)
+          binWrite_int(fp,v_idx)
+        log("\n")
+      log("done with material '%s'\n"%materials[mat_idx].name);
+    log("done")
+
   def exportMesh2(self, fp, ob):
     materials=ob.data.materials
     faces=ob.data.faces
     vertices=ob.data.vertices
-#    log("exporting '%s'\n"%ob.name)
+    log("exporting '%s'\n"%ob.name)
 
     vert_flag=[ ]
     for i in range(len(vertices)):
@@ -133,7 +167,6 @@ class export_OT_track(bpy.types.Operator):
             vert_flag[v_idx]=tot_vert
             tot_vert=tot_vert+1
         tot_faces=tot_faces+1 
-        
 
       binWrite_mark(fp,MARK_VERTICES)
       binWrite_int(fp,len(new_verts))
@@ -147,11 +180,12 @@ class export_OT_track(bpy.types.Operator):
       for face in faces:
         if face.material_index!=mat_idx:
           continue
+        log("face:")
         binWrite_int(fp,len(face.vertices))
         for v_idx in face.vertices:
-          #log("%d "%vert_flag[v_idx])
+          log("%d "%vert_flag[v_idx])
           binWrite_int(fp,vert_flag[v_idx])
-        #log("\n")
+        log("\n")
 
   def exportMesh(self, fp, ob):
 
@@ -191,7 +225,7 @@ class export_OT_track(bpy.types.Operator):
         binWrite_face(fp,vs)
 
   def exportMaterial(self,fp,ma):
-    print("Exporting material: ",ma.name)
+    log("Exporting material: '%s'\n"%ma.name)
     alpha=ma.alpha
     specular=ma.specular_color
     diffuse=ma.diffuse_color
@@ -202,8 +236,6 @@ class export_OT_track(bpy.types.Operator):
     binWrite_color(fp,diffuse)
     binWrite_color(fp,specular)
 
-    
-
   def execute(self, context):
     filepath=self.properties.filepath
     name = os.path.basename(filepath)
@@ -213,14 +245,11 @@ class export_OT_track(bpy.types.Operator):
     #materials
     for ma in bpy.data.materials:
       self.exportMaterial(fp,ma)
-
+  
     # objects
     for ob in bpy.data.objects:
       if ob.type == 'MESH':
-        self.exportMesh2(fp,ob)
-
-
-#binWrite_string(fp,"*** crisalide exported file: done ***\n")
+        self.exportMesh3(fp,ob)
 
     fp.close()
 
