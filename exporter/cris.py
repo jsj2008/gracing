@@ -110,6 +110,7 @@ class export_OT_track(bpy.types.Operator):
     description="Scale mesh", 
     default = 0.1, min = 0.001, max = 1000.0)
 
+
   def exportMesh3(self, fp, ob):
     materials=ob.data.materials
     faces=ob.data.faces
@@ -122,6 +123,16 @@ class export_OT_track(bpy.types.Operator):
     for v in vertices:
       binWrite_pointVect(fp,v.co)
       log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+
+    used_material={}
+    for face in faces:
+      name=materials[face.material_index].name
+      if not name in used_material:
+        used_material[name]=face.material_index
+
+    for key in used_material:
+      idx=used_material[key]
+      self.exportMaterial(fp,materials[idx])
 
     # export faces
     for mat_idx in range(len(materials)):
@@ -158,7 +169,6 @@ class export_OT_track(bpy.types.Operator):
       vert_flag.append(-1)
 
     for mat_idx in range(len(materials)):
-#log("material: '%s'\n"%materials[mat_idx].name)
       tot_vert=0
       tot_faces=0
       new_verts=[ ]
@@ -245,22 +255,52 @@ class export_OT_track(bpy.types.Operator):
     binWrite_color(fp,diffuse)
     binWrite_color(fp,specular)
 
+  def exportCameras(self,tmp_dir_name):
+    objects=bpy.data.objects
+    for camera in objects:
+      if camera.type != "CAMERA":
+        continue
+      log("Exporting camera: '%s'\n"%camera.name)
+      filename=tmp_dir_name+"/"+camera.name+".camera"
+      loc=camera.location
+      rot=camera.rotation_euler
+      fp = open(filename,"w")
+      fp.write("location %f,%f,%f\n"%(\
+        loc[0],loc[1],loc[2]))
+      fp.write("rotation %f,%f,%f\n"%(\
+        rot[0],rot[1],rot[2]))
+      fp.close()
+
+
+  def exportObject(self,tmp_dir_name,obj):
+    if obj.type == 'MESH':
+      filename=tmp_dir_name+"/"+obj.name+".mesh"
+      fp = open(filename, 'wb')    
+      self.exportMesh3(fp,obj)
+      fp.close()
+
+
   def execute(self, context):
     filepath=self.properties.filepath
-    name = os.path.basename(filepath)
     realpath = os.path.realpath(os.path.expanduser(filepath))
-    fp = open(realpath, 'wb')    
+    name = os.path.basename(filepath)
+    dirname = os.path.dirname(filepath)
+    tmpdir = dirname + "/tmp";
 
-    #materials
-    for ma in bpy.data.materials:
-      self.exportMaterial(fp,ma)
-  
-    # objects
+    if not os.path.exists(tmpdir):
+      os.mkdir(tmpdir)
+    else:
+      if os.path.isdir(tmpdir):
+        log("presente directory\n")
+      else:
+        RaiseError("herrorororor!")
+
+    log("Exporing track (dir %s): %s\n"%(dirname,filepath))
+
     for ob in bpy.data.objects:
-      if ob.type == 'MESH':
-        self.exportMesh3(fp,ob)
+      self.exportObject(tmpdir,ob)
 
-    fp.close()
+    self.exportCameras(tmpdir)
 
     return {'FINISHED'}
 
