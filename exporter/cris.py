@@ -129,21 +129,25 @@ class export_OT_track(bpy.types.Operator):
             tot_vert=tot_vert+1
         face_idx=face_idx+1 
         
+
+      binWrite_mark(fp,MARK_VERTICES)
+      binWrite_int(fp,len(new_verts))
       for v_idx in new_verts:
-        #real_idx=vert_flag[v_idx]
         v=vertices[v_idx]
-        log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+        binWrite_pointVect(fp,v.co)
+        #log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
 
       for face in faces:
         if face.material_index!=mat_idx:
           continue
-        log("face: ")
+      binWrite_mark(fp,MARK_FACES_ONLY)
+      binWrite_int(fp,len(me.faces))
+      for f in me.faces:
+        binWrite_int(fp,len(me.faces))
         for v_idx in face.vertices:
-          log("%d "%vert_flag[v_idx])
-        log("\n")
-
-          
-
+          #log("%d "%vert_flag[v_idx])
+          binWrite_int(fp,vert_flag[v_idx])
+        #log("\n")
 
   def exportMesh(self, fp, ob):
 
