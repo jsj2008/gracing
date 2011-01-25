@@ -10,6 +10,7 @@ CameraDataManager::CameraDataManager(io::IReadFile * file)
    GM_LOG("Loading camera\n");
    double pos[3];
    double rot[3];
+   for(int i=0; i<3; i++) pos[i]=rot[i]=0.;
    Util::readTriple(file,pos);
    Util::readTriple(file,rot);
    GM_LOG("  camera position: %f,%f,%f\n",

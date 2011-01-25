@@ -262,9 +262,10 @@ class export_OT_track(bpy.types.Operator):
       filename=tmp_dir_name+"/"+camera.name+".camera"
       loc=camera.location
       rot=camera.rotation_euler
+      log("camera rotation: %f,%f,%f\n"%(rot[0],rot[1],rot[2]))
       fp = open(filename,"wb")
       binWrite_pointVect(fp,loc)
-      binWrite_pointVect(fp,loc)
+      binWrite_pointVect(fp,rot)
       fp.close()
       names.append([ 'camera', filename ])
     return names
