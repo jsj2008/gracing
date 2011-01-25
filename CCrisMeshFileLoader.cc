@@ -170,7 +170,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         GM_LOG("Loading vertices: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
           readVertex(file,vec);
-          //GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
+          GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
           vertexBuffer.push_back(vec);
         }
         break;
