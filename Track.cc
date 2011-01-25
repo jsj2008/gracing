@@ -1,7 +1,9 @@
 #include <assert.h>
 #include "gmlog.h"
 
+
 #include "Track.hh"
+#include "CameraDataManager.hh"
 
 #ifndef BASE_DIR
 #define BASE_DIR "."
@@ -68,8 +70,10 @@ Track::Track(
   enum {
     ot_none,
     ot_mesh,
+    ot_camera,
     ot_unknown
   };
+  irr::io::IReadFile * rfile;
   for(int i=0, inElement=false, nodeStackPtr=0; 
       xmlReader->read(); 
       i++)
@@ -84,6 +88,8 @@ Track::Track(
       case irr::io::EXN_ELEMENT:
         if(strcmp("mesh",xmlReader->getNodeName())==0) {
           ot=ot_mesh;
+        } else if(strcmp("camera",xmlReader->getNodeName())==0) {
+          ot=ot_camera;
         } else {
           ot=ot_unknown;
         }
@@ -99,7 +105,7 @@ Track::Track(
           switch(nodeStack[nodeStackPtr]) {
             case ot_mesh:
               GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
-              irr::io::IReadFile * rfile=archive->
+              rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
@@ -117,6 +123,17 @@ Track::Track(
                 GM_LOG("  cannot find file\n");
               }
               break;
+            case ot_camera:
+              GM_LOG("Loading camera data from: '%s'\n",xmlReader->getNodeName());
+              irr::io::IReadFile * rfile=archive->
+                  createAndOpenFile (xmlReader->getNodeName());
+              if(rfile) {
+                CameraDataManager * cammgr=new CameraDataManager(rfile);
+                rfile->drop();
+              } else {
+                GM_LOG("Cannot load camera data\n");
+              }
+
           }
         }
       break;

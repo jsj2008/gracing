@@ -1,1 +1,1 @@
-sources=demo.cc Track.cc CCrisMeshFileLoader.cc
+sources=demo.cc Track.cc CCrisMeshFileLoader.cc CameraDataManager.cc
