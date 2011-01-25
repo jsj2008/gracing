@@ -80,7 +80,7 @@ int main()
   guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!",
       rect<s32>(10,10,260,22), true);
 
-  smgr->addCameraSceneNodeFPS();
+  //smgr->addCameraSceneNodeFPS();
 
 
   Track * track = new Track(device,BASE_DIR "/track-1.zip");

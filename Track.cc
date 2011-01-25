@@ -129,9 +129,15 @@ Track::Track(
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 CameraDataManager * cammgr=new CameraDataManager(rfile);
+                irr::scene::ICameraSceneNode * camera=smgr->addCameraSceneNodeFPS();
+                irr::core::vector3df p,r;
+                cammgr->getPositionAndRotation(p,r);
+                camera->setPosition(p);
+                camera->setRotation(r);
                 rfile->drop();
               } else {
-                GM_LOG("Cannot load camera data\n");
+                GM_LOG("Cannot load camera data, using default camera\n");
+                smgr->addCameraSceneNodeFPS();
               }
 
           }

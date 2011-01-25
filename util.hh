@@ -1,6 +1,11 @@
 #ifndef UTIL_HH
 #define UTIL_HH
 
+inline double rad2deg(double value)
+{
+  return 57.2957795 * value;
+}
+
 class Util 
 {
   public:

@@ -20,8 +20,8 @@ MARK_MATERIAL=0xf102
 MARK_USE_MATERIAL=0xf103
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
 def log(str):
@@ -45,7 +45,8 @@ def binWrite_int(fp,value):
 
 def binWrite_pointVect(fp,point):
   #TODO: use a transform matrix
-  v=struct.pack("ddd",point[0],point[2],-point[1])
+  #v=struct.pack("ddd",point[0],point[2],-point[1])
+  v=struct.pack("ddd",point[0],point[2],point[1])
   fp.write(v)
 
 def binWrite_color(fp,color):
@@ -328,6 +329,15 @@ class export_OT_track(bpy.types.Operator):
       zf.write(name[1],p)
     zf.write(filename,"TRACK")
     zf.close()
+
+    #### remove temp files
+    os.remove(filename)
+    for name in elements:
+      fname=name[1]
+      os.remove(fname)
+      log("removing '%s'\n"%fname)
+    os.removedirs(tmpdir)
+    log("removing '%s'\n"%tmpdir)
 
 
     return {'FINISHED'}

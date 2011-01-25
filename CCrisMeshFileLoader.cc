@@ -37,7 +37,6 @@ static void logMaterial(irr::video::SMaterial & mat) {
   mat.Shininess=0.;
 #endif
 
-
   GM_LOG("Diffuse %d,%d,%d\n",
       mat.DiffuseColor.getRed(),
       mat.DiffuseColor.getGreen(),
