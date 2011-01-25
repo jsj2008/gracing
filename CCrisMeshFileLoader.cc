@@ -79,7 +79,7 @@ CCrisMeshFileLoader::~CCrisMeshFileLoader()
 
 bool CCrisMeshFileLoader::isALoadableFileExtension(const io::path& filename) const
 {
-	return core::hasFileExtension ( filename, "track" );
+	return core::hasFileExtension ( filename, "mesh" );
 }
 
 

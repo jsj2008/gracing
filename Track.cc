@@ -106,8 +106,12 @@ Track::Track(
                 irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
 
                 node=smgr->addAnimatedMeshSceneNode( mesh );
-                node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-                //node->setMD2Animation(irr::scene::EMAT_STAND);
+                if(node) {
+                  node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+                  //node->setMD2Animation(irr::scene::EMAT_STAND);
+                } else {
+                  GM_LOG("Cannot load mesh\n");
+                }
                 rfile->drop();
               } else {
                 GM_LOG("  cannot find file\n");

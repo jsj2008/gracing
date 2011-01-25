@@ -5,16 +5,14 @@ Blender: 253
 Group: 'Export'
 Tooltip: 'Exports meshes to Irrlicht mesh & scene files'
 """
-
 __author__ = ['Gianni Masullo']
 __version__ = '0.4'
 __url__ = [ ]
 __bpydoc__ = """\
 Crisalide xml exporter
 
-Read the script manual for further information.
 """
-import bpy,os,struct
+import bpy,os,struct,zipfile
 
 MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
@@ -24,7 +22,7 @@ MARK_USE_MATERIAL=0xf103
 # LOG configuration
 LOG_ON_STDOUT=0
 LOG_ON_FILE=1
-LOG_FILENAME="e:\\temp\\log.txt"
+LOG_FILENAME="/tmp/log.txt"
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -122,7 +120,7 @@ class export_OT_track(bpy.types.Operator):
     log("vertices: %d\n"%len(vertices))
     for v in vertices:
       binWrite_pointVect(fp,v.co)
-      log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+      #log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
 
     used_material={}
     for face in faces:
@@ -149,14 +147,13 @@ class export_OT_track(bpy.types.Operator):
       for face in faces:
         if face.material_index!=mat_idx:
           continue
-        log("face:")
+        #log("face:")
         binWrite_int(fp,len(face.vertices))
         for v_idx in face.vertices:
-          log("%d "%v_idx)
+          #log("%d "%v_idx)
           binWrite_int(fp,v_idx)
-        log("\n")
+          #log("\n")
       log("done with material '%s'\n"%materials[mat_idx].name);
-    log("done")
 
   def exportMesh2(self, fp, ob):
     materials=ob.data.materials
@@ -257,6 +254,7 @@ class export_OT_track(bpy.types.Operator):
 
   def exportCameras(self,tmp_dir_name):
     objects=bpy.data.objects
+    names=[]
     for camera in objects:
       if camera.type != "CAMERA":
         continue
@@ -264,12 +262,12 @@ class export_OT_track(bpy.types.Operator):
       filename=tmp_dir_name+"/"+camera.name+".camera"
       loc=camera.location
       rot=camera.rotation_euler
-      fp = open(filename,"w")
-      fp.write("location %f,%f,%f\n"%(\
-        loc[0],loc[1],loc[2]))
-      fp.write("rotation %f,%f,%f\n"%(\
-        rot[0],rot[1],rot[2]))
+      fp = open(filename,"wb")
+      binWrite_pointVect(fp,loc)
+      binWrite_pointVect(fp,loc)
       fp.close()
+      names.append([ 'camera', filename ])
+    return names
 
 
   def exportObject(self,tmp_dir_name,obj):
@@ -278,6 +276,8 @@ class export_OT_track(bpy.types.Operator):
       fp = open(filename, 'wb')    
       self.exportMesh3(fp,obj)
       fp.close()
+      return [ 'mesh' , filename ]
+    return None
 
 
   def execute(self, context):
@@ -296,11 +296,38 @@ class export_OT_track(bpy.types.Operator):
         RaiseError("herrorororor!")
 
     log("Exporing track (dir %s): %s\n"%(dirname,filepath))
+    
+    elements=[]
 
     for ob in bpy.data.objects:
-      self.exportObject(tmpdir,ob)
+      name=self.exportObject(tmpdir,ob)
+      if name != None:
+        log("%s,%s\n"%(name[0],name[1]))
+        elements.append(name)
 
-    self.exportCameras(tmpdir)
+    ns=self.exportCameras(tmpdir)
+    for n in ns:
+      elements.append(n)
+
+    #### create xml file
+    filename=tmpdir + "/TRACK";
+    fp=open(filename,"w")
+    fp.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<track>\n")
+    for name in elements:
+      p=os.path.basename(name[1])
+      fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
+
+    fp.write("</track>")
+    fp.close()
+
+    #### create zip file
+    zf=zipfile.ZipFile(realpath,"w")
+    for name in elements:
+      p=os.path.basename(name[1])
+      zf.write(name[1],p)
+    zf.write(filename,"TRACK")
+    zf.close()
+
 
     return {'FINISHED'}
 

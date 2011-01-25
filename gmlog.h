@@ -13,6 +13,6 @@
    fprintf(stdout,fmt,## __VA_ARGS__);\
 } while(0)
 
-#define GM_LOG(fmt,...) GM_LOG_STDOUT(fmt,## __VA_ARGS__)
+#define GM_LOG(fmt,...) GM_LOG_FILE(fmt,## __VA_ARGS__)
 
 #endif // GMLOG_H
