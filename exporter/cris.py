@@ -12,7 +12,7 @@ __bpydoc__ = """\
 Crisalide xml exporter
 
 """
-import bpy,os,struct,zipfile
+import bpy,os,struct,zipfile,math
 
 MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
@@ -20,8 +20,8 @@ MARK_MATERIAL=0xf102
 MARK_USE_MATERIAL=0xf103
 
 # LOG configuration
-LOG_ON_STDOUT=1
-LOG_ON_FILE=0
+LOG_ON_STDOUT=0
+LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 
 
@@ -157,6 +157,9 @@ class export_OT_track(bpy.types.Operator):
       nz = x*m0[2] + y*m1[2] + z*m2[2]
       T1.append([nx, ny, nz])
 
+    m0 = T1[0]
+    m1 = T1[1]
+    m2 = T1[2]
     for row in Mz:
       x, y, z = row
       nx = x*m0[0] + y*m1[0] + z*m2[0]
@@ -166,6 +169,7 @@ class export_OT_track(bpy.types.Operator):
 
     transform.append([object.scale[0], object.scale[1], object.scale[2]])
     transform.append([object.location[0], object.location[1], object.location[2]])
+  
     return transform
 
 
@@ -196,20 +200,20 @@ class export_OT_track(bpy.types.Operator):
     faces=ob.data.faces
     vertices=ob.data.vertices
 
-    transform=createObjTransformMatrix(self,object)
+    transform=self.createObjTransformMatrix(ob)
 
     # export vertices
     binWrite_mark(fp,MARK_VERTICES)
     binWrite_int(fp,len(vertices))
     log("vertices: %d\n"%len(vertices))
     for v in vertices:
-
+      log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
       if EXP_APPLY_OBJ_TRANSFORM == 1:
-        co=applyTransform(v.co,transform)
+        co=self.applyTransform(v.co,transform)
       else:
         co=v.co
       binWrite_pointVect(fp,co)
-      #log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
+      log("vertex: %f,%f,%f\n"%(co[0],co[1],co[2]))
 
     used_material={}
     for face in faces:
