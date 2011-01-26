@@ -24,6 +24,10 @@ LOG_ON_STDOUT=1
 LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
+
+# EXPORT configuration
+EXP_APPLY_OBJ_TRANSFORM=1
+
 def log(str):
   if LOG_ON_STDOUT==1:
     print(str,end="")
@@ -109,18 +113,102 @@ class export_OT_track(bpy.types.Operator):
     description="Scale mesh", 
     default = 0.1, min = 0.001, max = 1000.0)
 
+  def createObjTransformMatrix(self,object):
+    Mx = []
+    My = []
+    Mz = []
+    T1 = []
+    transform = []
+
+    angle = object.rotation_euler[0]
+    Mx.append([1, 0, 0])
+    y = math.cos(angle)
+    z = -math.sin(angle)
+    Mx.append([0, y, z])
+    y = math.sin(angle)
+    z = math.cos(angle)
+    Mx.append([0, y, z])
+
+    angle = object.rotation_euler[1]
+    x = math.cos(angle)
+    z = math.sin(angle)
+    My.append([x, 0, z])
+    My.append([0, 1, 0])
+    x = -math.sin(angle)
+    z = math.cos(angle)
+    My.append([x, 0, z])
+
+    angle = object.rotation_euler[2]
+    x = math.cos(angle)
+    y = -math.sin(angle)
+    Mz.append([x, y, 0])
+    x = math.sin(angle)
+    y = math.cos(angle)
+    Mz.append([x, y, 0])
+    Mz.append([0, 0, 1])
+
+    m0 = Mx[0]
+    m1 = Mx[1]
+    m2 = Mx[2]
+    for row in My:
+      x, y, z = row
+      nx = x*m0[0] + y*m1[0] + z*m2[0]
+      ny = x*m0[1] + y*m1[1] + z*m2[1]
+      nz = x*m0[2] + y*m1[2] + z*m2[2]
+      T1.append([nx, ny, nz])
+
+    for row in Mz:
+      x, y, z = row
+      nx = x*m0[0] + y*m1[0] + z*m2[0]
+      ny = x*m0[1] + y*m1[1] + z*m2[1]
+      nz = x*m0[2] + y*m1[2] + z*m2[2]
+      transform.append([nx, ny, nz])
+
+    transform.append([object.scale[0], object.scale[1], object.scale[2]])
+    transform.append([object.location[0], object.location[1], object.location[2]])
+    return transform
+
+
+  def applyTransform(self,vertex,matrix):
+    v2 = []
+    nv = []
+
+    x, y, z = vertex
+    sx, sy, sz = matrix[3]
+    lx, ly, lz = matrix[4]
+
+    v2.append(x*sx)
+    v2.append(y*sy)
+    v2.append(z*sz)
+
+    for index in range(len(vertex)):
+      t = matrix[index]
+      nv.append(v2[0]*t[0] + v2[1]*t[1] +v2[2]*t[2])
+
+    nv[0] = nv[0]+lx
+    nv[1] = nv[1]+ly
+    nv[2] = nv[2]+lz
+
+    return nv
 
   def exportMesh3(self, fp, ob):
     materials=ob.data.materials
     faces=ob.data.faces
     vertices=ob.data.vertices
 
+    transform=createObjTransformMatrix(self,object)
+
     # export vertices
     binWrite_mark(fp,MARK_VERTICES)
     binWrite_int(fp,len(vertices))
     log("vertices: %d\n"%len(vertices))
     for v in vertices:
-      binWrite_pointVect(fp,v.co)
+
+      if EXP_APPLY_OBJ_TRANSFORM == 1:
+        co=applyTransform(v.co,transform)
+      else:
+        co=v.co
+      binWrite_pointVect(fp,co)
       #log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
 
     used_material={}
