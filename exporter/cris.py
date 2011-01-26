@@ -14,19 +14,51 @@ Crisalide xml exporter
 """
 import bpy,os,struct,zipfile,math
 
-MARK_VERTICES=0xf100
-MARK_FACES_ONLY=0xf101
-MARK_MATERIAL=0xf102
-MARK_USE_MATERIAL=0xf103
 
 # LOG configuration
 LOG_ON_STDOUT=1
 LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
-
 # EXPORT configuration
 EXP_APPLY_OBJ_TRANSFORM=1
+
+#########################################
+
+# markers 
+MARK_VERTICES=0xf100
+MARK_FACES_ONLY=0xf101
+MARK_MATERIAL=0xf102
+MARK_USE_MATERIAL=0xf103
+MARK_UVCOORD=0xf104
+
+# light types
+LAMP_TYPE_POINT=0
+LAMP_TYPE_SUN=1
+LAMP_TYPE_SPOT=2
+LAMP_TYPE_HEMI=3
+LAMP_TYPE_AREA=4
+
+# material flags
+MATERIA_FLAGS_LIST=[
+  { 'name': 'EMF_WIREFRAME',          'value': 0x1, "default": False },
+  { 'name': 'EMF_POINTCLOUD',         'value': 0x2, "default": False },
+  { 'name': 'EMF_GOURAUD_SHADING',    'value': 0x4, "default": True },
+  { 'name': 'EMF_LIGHTING',           'value': 0x8, "default": False }, #True },
+  { 'name': 'EMF_ZBUFFER',            'value': 0x10, "default": True },
+  { 'name': 'EMF_ZWRITE_ENABLE',      'value': 0x20, "default": True },
+  { 'name': 'EMF_BACK_FACE_CULLING',  'value': 0x40, "default": True },
+  { 'name': 'EMF_FRONT_FACE_CULLING', 'value': 0x80, "default": False },
+  { 'name': 'EMF_BILINEAR_FILTER',    'value': 0x100, "default": True },
+  { 'name': 'EMF_TRILINEAR_FILTER',   'value': 0x200, "default": False },
+  { 'name': 'EMF_ANISOTROPIC_FILTER', 'value': 0x400, "default": False },
+  { 'name': 'EMF_FOG_ENABLE',         'value': 0x800, "default": False },
+  { 'name': 'EMF_NORMALIZE_NORMALS',  'value': 0x1000, "default": False },
+  { 'name': 'EMF_TEXTURE_WRAP',       'value': 0x2000, "default": False },
+  { 'name': 'EMF_ANTI_ALIASING',      'value': 0x4000, "default": False },
+  { 'name': 'EMF_COLOR_MASK',         'value': 0x8000, "default": False },
+  { 'name': 'EMF_COLOR_MATERIAL',     'value': 0x10000, "default": False }
+]
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -38,6 +70,9 @@ def log(str):
 
 def binWrite_mark(fp,value):
   fp.write(struct.pack("H",value))
+
+def binWrite_u32(fp,value):
+  fp.write(struct.pack("I",value))
 
 def binWrite_float(fp,value):
   v=struct.pack("d",value)
@@ -90,6 +125,16 @@ def binWrite_faceWithTexture(fp,face,textIndex):
     fp.write("iiiiii",vs[0]+1, vt, vs[1]+1, vt+1, vs[2]+1, vt+2)
 
   fp.write(v)
+
+
+def getMaterialFlagsWord(mat):
+  # TODO: get "custom property" from mat to
+  #       set flags: uptonow they are set to default
+  word=0
+  for v in MATERIA_FLAGS_LIST:
+    if v["default"]:
+      word = word | v["value"]
+  return word
 
 class export_OT_track(bpy.types.Operator):
   bl_idname = "io_export_scene.crisalide_exporter"
@@ -172,21 +217,12 @@ class export_OT_track(bpy.types.Operator):
   
     return transform
 
-
   def applyTransform(self,v,matrix):
     nv=[0., 0., 0.]
-
-    log("one - %2.3f %2.3f %2.3f\n"%\
-        (v[0], v[1], v[2]))
-
     for c in range(0,3):
       for r in range(0,3):
         nv[c] = nv[c] + v[r] * matrix[r][c]
       nv[c] = nv[c] + matrix[3][c]
-
-    log("2two - %2.3f %2.3f %2.3f\n"%\
-        (nv[0], nv[1], nv[2]))
-
     return nv
 
   def applyTransformOld(self,vertex,matrix):
@@ -349,13 +385,18 @@ class export_OT_track(bpy.types.Operator):
         binWrite_face(fp,vs)
 
   def exportMaterial(self,fp,ma):
-    log("Exporting material: '%s'\n"%ma.name)
     alpha=ma.alpha
     specular=ma.specular_color
     diffuse=ma.diffuse_color
-    binWrite_mark(fp,MARK_MATERIAL)
+    word=getMaterialFlagsWord(ma)
     Ka=[ 1-alpha, 1-alpha, 1-alpha ]
+
+    log("Exporting material: '%s' (flags: %u)\n"%(ma.name,word))
+
+    binWrite_mark(fp,MARK_MATERIAL)
+
     binWrite_string(fp,ma.name)
+    binWrite_u32(fp,word)
     binWrite_color(fp,Ka)
     binWrite_color(fp,diffuse)
     binWrite_color(fp,specular)
@@ -378,6 +419,16 @@ class export_OT_track(bpy.types.Operator):
       names.append([ 'camera', filename ])
     return names
 
+  def exportLamp(self,fp,ob):
+    lamp=ob.data
+    if lamp.type == "POINT":
+      log("exporting lamp '%s', type: '%s'\n"%\
+        (ob.name,lamp.type))
+      binWrite_mark(fp,LAMP_TYPE_POINT)
+      binWrite_pointVect(fp,ob.location)
+    else:
+      log("skipping export lamp '%s', type: '%s'\n"%\
+        (ob.name,lamp.type))
 
   def exportObject(self,tmp_dir_name,obj):
     if obj.type == 'MESH':
@@ -386,6 +437,12 @@ class export_OT_track(bpy.types.Operator):
       self.exportMesh3(fp,obj)
       fp.close()
       return [ 'mesh' , filename ]
+    if obj.type == "LAMP":
+      filename=tmp_dir_name+"/"+obj.name+".lamp"
+      fp = open(filename, 'wb')    
+      self.exportLamp(fp,obj)
+      fp.close()
+      return [ 'lamp', filename ]
     return None
 
 

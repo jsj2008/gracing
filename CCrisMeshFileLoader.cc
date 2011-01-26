@@ -60,9 +60,9 @@ static void logMaterial(irr::video::SMaterial & mat) {
   GM_LOG("Shininess %f\n",
       mat.Shininess);
 }
+
 /////////////////////////////////////////////////////////////////
 
-//! Constructor
 CCrisMeshFileLoader::CCrisMeshFileLoader(scene::ISceneManager* smgr, io::IFileSystem* fs)
 : SceneManager(smgr), FileSystem(fs)
 {
@@ -80,7 +80,6 @@ bool CCrisMeshFileLoader::isALoadableFileExtension(const io::path& filename) con
 {
 	return core::hasFileExtension ( filename, "mesh" );
 }
-
 
 scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 {
@@ -116,6 +115,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   double ka[3];
   double kd[3];
   double ks[3];
+  u32    flags;
   core::array<int> faceCorners;
 
   while(!done && file->getPos()<filesize) {
@@ -133,33 +133,40 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
       case MARK_MATERIAL:
         name=readString(file);
-        currMtl=new SObjMtl;
-        currMtl->Name=name;
-        Materials.push_back(currMtl);
+        flags=readU32(file);
         readTriple(file,ka);
         readTriple(file,kd);
         readTriple(file,ks);
+        currMtl=new SObjMtl;
+        currMtl->Name=name;
+        Materials.push_back(currMtl);
 
-        //currMtl->Meshbuffer->Material.EmissiveColor.setRed(kd[0]*255.0);
-        //currMtl->Meshbuffer->Material.EmissiveColor.setGreen(kd[1]*255.0);
-        //currMtl->Meshbuffer->Material.EmissiveColor.setBlue(kd[2]*255.0);
-
+#if 0
+        currMtl->Meshbuffer->Material.EmissiveColor.setRed(kd[0]*255.0);
+        currMtl->Meshbuffer->Material.EmissiveColor.setGreen(kd[1]*255.0);
+        currMtl->Meshbuffer->Material.EmissiveColor.setBlue(kd[2]*255.0);
+#endif
         currMtl->Meshbuffer->Material.DiffuseColor.setRed(kd[0]*255.0);
         currMtl->Meshbuffer->Material.DiffuseColor.setGreen(kd[1]*255.0);
         currMtl->Meshbuffer->Material.DiffuseColor.setBlue(kd[2]*255.0);
-
         currMtl->Meshbuffer->Material.SpecularColor.setRed(ks[0]*255.0);
         currMtl->Meshbuffer->Material.SpecularColor.setGreen(ks[1]*255.0);
         currMtl->Meshbuffer->Material.SpecularColor.setBlue(ks[2]*255.0);
-
         currMtl->Meshbuffer->Material.AmbientColor.setRed(ka[0]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
 
-        GM_LOG("Read material: '%s'\n",name);
-        /*GM_LOG("--->Ka=%f,%f,%f",ka[0],ka[1],ka[2]);
-        GM_LOG(",Kd=%f,%f,%f",kd[0],kd[1],kd[2]);
-        GM_LOG(",Ks=%f,%f,%f\n",ks[0],ks[1],ks[2]);*/
+#if 0
+        for(u32 i=0,  f=1; i<32; i++, f<<=1) 
+          if(f & flags)  {
+            GM_LOG("setting %X\n",f);
+            currMtl->Meshbuffer->Material.setFlag((video::E_MATERIAL_FLAG)f,true);
+          } else {
+            GM_LOG("unsetting %X\n",f);
+            currMtl->Meshbuffer->Material.setFlag((video::E_MATERIAL_FLAG)f,false);
+          }
+#endif
+        GM_LOG("Read material: '%s' (flags: %X)\n",name,flags);
         break;
 
       case MARK_VERTICES:
@@ -270,8 +277,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 CCrisMeshFileLoader::SObjMtl* CCrisMeshFileLoader::findMtl(const core::stringc& mtlName)
 {
 	CCrisMeshFileLoader::SObjMtl* defMaterial = 0;
-	// search existing Materials for best match
-	// exact match does return immediately, only name match means a new group
 	for (u32 i = 0; i < Materials.size(); ++i) {
 		if ( Materials[i]->Name == mtlName ) {
 				return Materials[i];

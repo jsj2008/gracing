@@ -84,6 +84,8 @@ int main()
 
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
 
+  smgr->setAmbientLight(video::SColorf(1.3,1.3,1.3,1));
+
   bool done=false;
   while(device->run() && !done)
   {

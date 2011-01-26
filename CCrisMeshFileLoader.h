@@ -34,6 +34,7 @@ private:
     MARK_FACES_ONLY=0xf101,
     MARK_MATERIAL=0xf102,
     MARK_USE_MATERIAL=0xf103,
+    MARK_UV_COORD=0xf104
   };
 
   inline int readInt(irr::io::IReadFile * file) 
@@ -56,6 +57,13 @@ private:
   inline unsigned readShort(irr::io::IReadFile * file)
   {
     unsigned short val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
+  inline irr::u32 readU32(irr::io::IReadFile * file)
+  {
+    irr::u32 val;
     file->read(&val,sizeof(val));
     return val;
   }

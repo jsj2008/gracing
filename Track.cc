@@ -71,6 +71,7 @@ Track::Track(
     ot_none,
     ot_mesh,
     ot_camera,
+    ot_lamp,
     ot_unknown
   };
   irr::io::IReadFile * rfile;
@@ -90,6 +91,8 @@ Track::Track(
           ot=ot_mesh;
         } else if(strcmp("camera",xmlReader->getNodeName())==0) {
           ot=ot_camera;
+        } else if(strcmp("lamp",xmlReader->getNodeName())==0) {
+          ot=ot_lamp;
         } else {
           ot=ot_unknown;
         }
@@ -103,6 +106,19 @@ Track::Track(
       case irr::io::EXN_TEXT:
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
+#if 0
+            case ot_lamp:
+              GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
+              rfile=archive->
+                  createAndOpenFile (xmlReader->getNodeName());
+              if(rfile) {
+                loadLights(rfile);
+                rfile->drop();
+              } else {
+                GM_LOG("  --> cannot find file\n");
+              }
+#endif
+              break;
             case ot_mesh:
               GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
               rfile=archive->
@@ -112,7 +128,7 @@ Track::Track(
                 irr::scene::IAnimatedMeshSceneNode* node=0;
                 node=smgr->addAnimatedMeshSceneNode( mesh );
                 if(node) {
-                  node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
+                  //node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
                   //node->setMD2Animation(irr::scene::EMAT_STAND);
                 } else {
                   GM_LOG("Cannot load mesh\n");
@@ -164,4 +180,8 @@ Track::Track(
   }
   
   // TODO: drop references
+}
+
+void Track::loadLights( irr::io::IReadFile * file )
+{
 }
