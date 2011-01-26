@@ -133,9 +133,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
       case MARK_MATERIAL:
         name=readString(file);
-        //if(currMtl && currMtl != defaultMtl) {
-        //  Materials.push_back(currMtl);
-        //}
         currMtl=new SObjMtl;
         currMtl->Name=name;
         Materials.push_back(currMtl);
@@ -143,9 +140,9 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         readTriple(file,kd);
         readTriple(file,ks);
 
-        currMtl->Meshbuffer->Material.EmissiveColor.setRed(kd[0]*255.0);
-        currMtl->Meshbuffer->Material.EmissiveColor.setGreen(kd[1]*255.0);
-        currMtl->Meshbuffer->Material.EmissiveColor.setBlue(kd[2]*255.0);
+        //currMtl->Meshbuffer->Material.EmissiveColor.setRed(kd[0]*255.0);
+        //currMtl->Meshbuffer->Material.EmissiveColor.setGreen(kd[1]*255.0);
+        //currMtl->Meshbuffer->Material.EmissiveColor.setBlue(kd[2]*255.0);
 
         currMtl->Meshbuffer->Material.DiffuseColor.setRed(kd[0]*255.0);
         currMtl->Meshbuffer->Material.DiffuseColor.setGreen(kd[1]*255.0);
@@ -160,9 +157,9 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
 
         GM_LOG("Read material: '%s'\n",name);
-        //GM_LOG("--->Ka=%f,%f,%f",ka[0],ka[1],ka[2]);
-        //GM_LOG(",Kd=%f,%f,%f",kd[0],kd[1],kd[2]);
-        //GM_LOG(",Ks=%f,%f,%f\n",ks[0],ks[1],ks[2]);
+        /*GM_LOG("--->Ka=%f,%f,%f",ka[0],ka[1],ka[2]);
+        GM_LOG(",Kd=%f,%f,%f",kd[0],kd[1],kd[2]);
+        GM_LOG(",Ks=%f,%f,%f\n",ks[0],ks[1],ks[2]);*/
         break;
 
       case MARK_VERTICES:
@@ -246,24 +243,10 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
       Materials[m]->Meshbuffer->recalculateBoundingBox();
       if (Materials[m]->RecalculateNormals)
         SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer);
-#if 0
-      if (Materials[m]->Meshbuffer->Material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
-      {
-        scene::SMesh tmp;
-        tmp.addMeshBuffer(Materials[m]->Meshbuffer);
-        scene::IMesh* tangentMesh = SceneManager->getMeshManipulator()->createMeshWithTangents(&tmp);
-        mesh->addMeshBuffer(tangentMesh->getMeshBuffer(0));
-        tangentMesh->drop();
-      }
-      else {
-#endif
         assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
         irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
         logMaterial(mat);
         mesh->addMeshBuffer( Materials[m]->Meshbuffer );
-#if 0
-      }
-#endif
     }
   }
 
