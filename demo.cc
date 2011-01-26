@@ -28,7 +28,6 @@ class MyEventReceiver : public IEventReceiver
     {
       // Remember whether each key is down or up
       if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
-        printf("key pressed '%d'\n",event.KeyInput.Key);
         KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
       }
 
@@ -84,8 +83,6 @@ int main()
 
 
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
-
-  GM_LOG("---------------------------------------\n");
 
   bool done=false;
   while(device->run() && !done)

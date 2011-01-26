@@ -20,8 +20,8 @@ MARK_MATERIAL=0xf102
 MARK_USE_MATERIAL=0xf103
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
 
@@ -173,7 +173,23 @@ class export_OT_track(bpy.types.Operator):
     return transform
 
 
-  def applyTransform(self,vertex,matrix):
+  def applyTransform(self,v,matrix):
+    nv=[0., 0., 0.]
+
+    log("one - %2.3f %2.3f %2.3f\n"%\
+        (v[0], v[1], v[2]))
+
+    for c in range(0,3):
+      for r in range(0,3):
+        nv[c] = nv[c] + v[r] * matrix[r][c]
+      nv[c] = nv[c] + matrix[3][c]
+
+    log("2two - %2.3f %2.3f %2.3f\n"%\
+        (nv[0], nv[1], nv[2]))
+
+    return nv
+
+  def applyTransformOld(self,vertex,matrix):
     v2 = []
     nv = []
 
@@ -200,20 +216,19 @@ class export_OT_track(bpy.types.Operator):
     faces=ob.data.faces
     vertices=ob.data.vertices
 
-    transform=self.createObjTransformMatrix(ob)
+    #transform=self.createObjTransformMatrix(ob)
+    transform=ob.matrix_world
 
     # export vertices
     binWrite_mark(fp,MARK_VERTICES)
     binWrite_int(fp,len(vertices))
     log("vertices: %d\n"%len(vertices))
     for v in vertices:
-      log("vertex: %f,%f,%f\n"%(v.co[0],v.co[1],v.co[2]))
       if EXP_APPLY_OBJ_TRANSFORM == 1:
         co=self.applyTransform(v.co,transform)
       else:
         co=v.co
       binWrite_pointVect(fp,co)
-      log("vertex: %f,%f,%f\n"%(co[0],co[1],co[2]))
 
     used_material={}
     for face in faces:

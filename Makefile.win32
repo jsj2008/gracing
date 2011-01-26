@@ -38,8 +38,8 @@ copy_files:
 	if exist $(tgt_dir) $(rmdir) $(tgt_dir)
 	$(mkdir) $(tgt_dir)
 	$(cp) demo.exe $(tgt_dir)
-	$(cp) resources\track-1.zip  $(tgt_dir)
 	$(cp) resources.win32\Irrlicht.dll $(tgt_dir)
+	$(cp) resources\track-1.zip  $(tgt_dir)
 
 clean:
 	$(rm) *.o

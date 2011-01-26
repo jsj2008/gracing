@@ -10,6 +10,47 @@
 #endif
 #define MANIFEST_NAME "TRACK"
 
+static void logMaterial(irr::video::SMaterial & mat) {
+#if 0
+  mat.AmbientColor.setRed(255);
+  mat.AmbientColor.setGreen(0);
+  mat.AmbientColor.setBlue(0);
+
+  mat.EmissiveColor.setRed(255);
+  mat.EmissiveColor.setGreen(0);
+  mat.EmissiveColor.setBlue(0);
+
+  mat.SpecularColor.setRed(255);
+  mat.SpecularColor.setGreen(0);
+  mat.SpecularColor.setBlue(0);
+  
+  mat.Shininess=0.;
+#endif
+
+  GM_LOG("Diffuse %d,%d,%d\n",
+      mat.DiffuseColor.getRed(),
+      mat.DiffuseColor.getGreen(),
+      mat.DiffuseColor.getBlue());
+
+  GM_LOG("Ambient %d,%d,%d\n",
+      mat.AmbientColor.getRed(),
+      mat.AmbientColor.getGreen(),
+      mat.AmbientColor.getBlue());
+
+  GM_LOG("Emissive %d,%d,%d\n",
+      mat.EmissiveColor.getRed(),
+      mat.EmissiveColor.getGreen(),
+      mat.EmissiveColor.getBlue());
+
+  GM_LOG("Specular %d,%d,%d\n",
+      mat.SpecularColor.getRed(),
+      mat.SpecularColor.getGreen(),
+      mat.SpecularColor.getBlue());
+
+  GM_LOG("Shininess %f\n",
+      mat.Shininess);
+}
+
 Track::Track(
     irr::IrrlichtDevice * device,
     const char * filename
@@ -109,12 +150,18 @@ Track::Track(
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
-                irr::scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
-
+                irr::scene::IAnimatedMeshSceneNode* node=0;
                 node=smgr->addAnimatedMeshSceneNode( mesh );
                 if(node) {
-                  node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+                  node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
                   //node->setMD2Animation(irr::scene::EMAT_STAND);
+
+                  GM_LOG("Done, with %d materials:\n",node->getMaterialCount());
+                  for(irr::u32 i=0; i<node->getMaterialCount(); i++) {
+                    irr::video::SMaterial & mat=node->getMaterial(i);
+                    logMaterial(mat);
+                  }
+
                 } else {
                   GM_LOG("Cannot load mesh\n");
                 }
@@ -122,6 +169,7 @@ Track::Track(
               } else {
                 GM_LOG("  cannot find file\n");
               }
+              GM_LOG("------------------------------------------------\n");
               break;
             case ot_camera:
               GM_LOG("Loading camera data from: '%s'\n",xmlReader->getNodeName());

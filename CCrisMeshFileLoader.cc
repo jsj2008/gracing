@@ -170,7 +170,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         GM_LOG("Loading vertices: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
           readVertex(file,vec);
-          GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
+          //GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
           vertexBuffer.push_back(vec);
         }
         break;
@@ -197,11 +197,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
             if(currMtl) 
               v.Color = currMtl->Meshbuffer->Material.DiffuseColor;
-
-
-            v.Color.setRed(255);
-            v.Color.setBlue(0);
-            v.Color.setGreen(0);
             v.Pos = vertexBuffer[nn];
             v.TCoords.set(0.0f,0.0f);
             v.Normal.set(0.0f,0.0f,0.0f);
@@ -242,6 +237,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   scene::SMesh* mesh = new scene::SMesh();
 
+  GM_LOG("N materials: %d\n",Materials.size());
   // Combine all the groups (meshbuffers) into the mesh
   for ( u32 m = 0; m < Materials.size(); ++m )
   {
@@ -250,6 +246,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
       Materials[m]->Meshbuffer->recalculateBoundingBox();
       if (Materials[m]->RecalculateNormals)
         SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer);
+#if 0
       if (Materials[m]->Meshbuffer->Material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
       {
         scene::SMesh tmp;
@@ -259,13 +256,14 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         tangentMesh->drop();
       }
       else {
+#endif
+        assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
         irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
-        if(mat.MaterialType==irr::video::EMT_SOLID) {
-          GM_LOG("--------------------------------\n");
-          logMaterial(mat);
-        }
+        logMaterial(mat);
         mesh->addMeshBuffer( Materials[m]->Meshbuffer );
+#if 0
       }
+#endif
     }
   }
 
