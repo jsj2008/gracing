@@ -389,7 +389,7 @@ class export_OT_track(bpy.types.Operator):
     specular=ma.specular_color
     diffuse=ma.diffuse_color
     word=getMaterialFlagsWord(ma)
-    Ka=[ 1-alpha, 1-alpha, 1-alpha ]
+    Ka=[ alpha, alpha, alpha ]
 
     log("Exporting material: '%s' (flags: %u)\n"%(ma.name,word))
 
@@ -397,7 +397,7 @@ class export_OT_track(bpy.types.Operator):
 
     binWrite_string(fp,ma.name)
     binWrite_u32(fp,word)
-    binWrite_color(fp,Ka)
+    binWrite_color(fp,diffuse)
     binWrite_color(fp,diffuse)
     binWrite_color(fp,specular)
 
@@ -426,6 +426,8 @@ class export_OT_track(bpy.types.Operator):
         (ob.name,lamp.type))
       binWrite_mark(fp,LAMP_TYPE_POINT)
       binWrite_pointVect(fp,ob.location)
+      binWrite_pointVect(fp,lamp.color)
+      binWrite_pointVect(fp,lamp.color)
     else:
       log("skipping export lamp '%s', type: '%s'\n"%\
         (ob.name,lamp.type))

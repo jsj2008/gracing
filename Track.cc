@@ -3,6 +3,7 @@
 
 
 #include "Track.hh"
+#include "Util.hh"
 #include "CameraDataManager.hh"
 
 #ifndef BASE_DIR
@@ -106,18 +107,16 @@ Track::Track(
       case irr::io::EXN_TEXT:
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
-#if 0
             case ot_lamp:
-              GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
+              GM_LOG("Loading lamp: %s\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
-                loadLights(rfile);
+                loadLights(rfile,smgr);
                 rfile->drop();
               } else {
                 GM_LOG("  --> cannot find file\n");
               }
-#endif
               break;
             case ot_mesh:
               GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
@@ -182,6 +181,36 @@ Track::Track(
   // TODO: drop references
 }
 
-void Track::loadLights( irr::io::IReadFile * file )
+void Track::loadLights( irr::io::IReadFile * file ,
+  irr::scene::ISceneManager* smgr )
 {
+  irr::u16 mark;
+  double pos[3],dif[3],spe[3];
+
+  mark=Util::readMark(file);
+
+  Util::readTriple(file,pos);
+  Util::readTriple(file,dif);
+  Util::readTriple(file,spe);
+
+
+  GM_LOG("  light position %f,%f,%f, diffuse %f,%f,%f; specular: %f,%f,%f\n",
+      pos[0], pos[1], pos[2],
+      dif[0], dif[1], dif[2],
+      spe[0], spe[1], spe[2]);
+
+  irr::core::vector3df position = irr::core::vector3df(pos[0], pos[1], pos[2]);
+  irr::video::SColorf specularColor = 
+        irr::video::SColorf(spe[0],spe[1],spe[2]);
+  irr::video::SColorf diffuseColor = 
+        irr::video::SColorf(dif[0],dif[1],dif[2]);
+  
+  irr::scene::ILightSceneNode* light = 
+    smgr->addLightSceneNode( 0, position, diffuseColor);
+
+  //light->setLightType(irr::video::ELT_DIRECTIONAL);
+  //light->setRotation( irr::core::vector3df(180, 45, 45) );
+  light->getLightData().SpecularColor = specularColor;
+  smgr->setAmbientLight(diffuseColor);
+  
 }

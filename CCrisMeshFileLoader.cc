@@ -121,7 +121,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   while(!done && file->getPos()<filesize) {
     mark=readMark(file);
 
-
     switch(mark) {
       case MARK_USE_MATERIAL:
         if(matName)
