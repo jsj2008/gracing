@@ -428,6 +428,7 @@ class export_OT_track(bpy.types.Operator):
       binWrite_pointVect(fp,ob.location)
       binWrite_pointVect(fp,lamp.color)
       binWrite_pointVect(fp,lamp.color)
+      binWrite_float(fp,lamp.energy)
     else:
       log("skipping export lamp '%s', type: '%s'\n"%\
         (ob.name,lamp.type))

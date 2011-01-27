@@ -11,6 +11,8 @@
 #include "IAttributes.h"
 #include "fast_atof.h"
 #include "coreutil.h"
+
+#include "Util.hh"
 //#include "os.h"
 //
 #include <assert.h>
@@ -21,43 +23,16 @@ static const u32 WORD_BUFFER_LENGTH = 512;
 
 /////////////////////////////////////////////////////////////////
 static void logMaterial(irr::video::SMaterial & mat) {
-#if 0
-  mat.AmbientColor.setRed(255);
-  mat.AmbientColor.setGreen(0);
-  mat.AmbientColor.setBlue(0);
-
-  mat.EmissiveColor.setRed(255);
-  mat.EmissiveColor.setGreen(0);
-  mat.EmissiveColor.setBlue(0);
-
-  mat.SpecularColor.setRed(255);
-  mat.SpecularColor.setGreen(0);
-  mat.SpecularColor.setBlue(0);
-  
-  mat.Shininess=0.;
-#endif
-
-  GM_LOG("Diffuse %d,%d,%d\n",
-      mat.DiffuseColor.getRed(),
-      mat.DiffuseColor.getGreen(),
-      mat.DiffuseColor.getBlue());
-
-  GM_LOG("Ambient %d,%d,%d\n",
-      mat.AmbientColor.getRed(),
-      mat.AmbientColor.getGreen(),
-      mat.AmbientColor.getBlue());
-
-  GM_LOG("Emissive %d,%d,%d\n",
-      mat.EmissiveColor.getRed(),
-      mat.EmissiveColor.getGreen(),
-      mat.EmissiveColor.getBlue());
-
-  GM_LOG("Specular %d,%d,%d\n",
-      mat.SpecularColor.getRed(),
-      mat.SpecularColor.getGreen(),
-      mat.SpecularColor.getBlue());
-
-  GM_LOG("Shininess %f\n",
+  GM_LOG(
+    " - material: diffuse (%d,%d,%d),"
+    "dmbient (%d,%d,%d),"
+    " emissive (%d,%d,%d),"
+    " specular (%d,%d,%d), "
+    " shininess %f\n",
+      mat.DiffuseColor.getRed(), mat.DiffuseColor.getGreen(), mat.DiffuseColor.getBlue(),
+      mat.AmbientColor.getRed(), mat.AmbientColor.getGreen(), mat.AmbientColor.getBlue(),
+      mat.EmissiveColor.getRed(), mat.EmissiveColor.getGreen(), mat.EmissiveColor.getBlue(),
+      mat.SpecularColor.getRed(), mat.SpecularColor.getGreen(), mat.SpecularColor.getBlue(),
       mat.Shininess);
 }
 
@@ -89,8 +64,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   const u32 WORD_BUFFER_LENGTH = 512;
 
-  GM_LOG("starting\n");
-
   core::array<core::vector3df> vertexBuffer;
   core::array<core::vector3df> normalsBuffer;
   core::array<core::vector2df> textureCoordBuffer;
@@ -119,32 +92,28 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   core::array<int> faceCorners;
 
   while(!done && file->getPos()<filesize) {
-    mark=readMark(file);
+    mark=Util::readMark(file);
 
     switch(mark) {
-      case MARK_USE_MATERIAL:
+      case Util::MARK_USE_MATERIAL:
         if(matName)
           delete matName;
-        matName=readString(file);
+        matName=Util::readString(file);
         matChanged=true;
-        GM_LOG("Using material: '%s'\n",matName);
+        GM_LOG(" - using material: '%s'\n",matName);
         break;
 
-      case MARK_MATERIAL:
-        name=readString(file);
-        flags=readU32(file);
-        readTriple(file,ka);
-        readTriple(file,kd);
-        readTriple(file,ks);
+      case Util::MARK_MATERIAL:
+        name=Util::readString(file);
+        flags=Util::readU32(file);
+        Util::readTriple(file,ka);
+        Util::readTriple(file,kd);
+        Util::readTriple(file,ks);
         currMtl=new SObjMtl;
         currMtl->Name=name;
         Materials.push_back(currMtl);
 
-#if 0
-        currMtl->Meshbuffer->Material.EmissiveColor.setRed(kd[0]*255.0);
-        currMtl->Meshbuffer->Material.EmissiveColor.setGreen(kd[1]*255.0);
-        currMtl->Meshbuffer->Material.EmissiveColor.setBlue(kd[2]*255.0);
-#endif
+        // TODO: handle emissive color
         currMtl->Meshbuffer->Material.DiffuseColor.setRed(kd[0]*255.0);
         currMtl->Meshbuffer->Material.DiffuseColor.setGreen(kd[1]*255.0);
         currMtl->Meshbuffer->Material.DiffuseColor.setBlue(kd[2]*255.0);
@@ -154,33 +123,22 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setRed(ka[0]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
-
-#if 0
-        for(u32 i=0,  f=1; i<32; i++, f<<=1) 
-          if(f & flags)  {
-            GM_LOG("setting %X\n",f);
-            currMtl->Meshbuffer->Material.setFlag((video::E_MATERIAL_FLAG)f,true);
-          } else {
-            GM_LOG("unsetting %X\n",f);
-            currMtl->Meshbuffer->Material.setFlag((video::E_MATERIAL_FLAG)f,false);
-          }
-#endif
-        GM_LOG("Read material: '%s' (flags: %X)\n",name,flags);
+        GM_LOG(" - material: '%s' (flags: %X)\n",name,flags);
         break;
 
-      case MARK_VERTICES:
-        n_vertices=readInt(file);
-        GM_LOG("Loading vertices: %d\n",n_vertices);
+      case Util::MARK_VERTICES:
+        n_vertices=Util::readInt(file);
+        GM_LOG(" - vertices: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
-          readVertex(file,vec);
+          Util::readVertex(file,vec);
           //GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
           vertexBuffer.push_back(vec);
         }
         break;
 
-      case MARK_FACES_ONLY:
-        n_faces=readInt(file);
-        GM_LOG("Faces: %d (material: '%s')\n",n_faces,matName);
+      case Util::MARK_FACES_ONLY:
+        n_faces=Util::readInt(file);
+        GM_LOG(" - faces: %d\n",n_faces);
         if(matChanged) {
           SObjMtl * mtl = findMtl(matName);
           if(mtl)  {
@@ -194,9 +152,9 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         faceCorners.reallocate(32); // should be large enough
 
         for(int f=0; f<n_faces; f++) {
-          n_vertices=readInt(file);
+          n_vertices=Util::readInt(file);
           for(int vi=0; vi<n_vertices; vi++) {
-            int nn=readInt(file);
+            int nn=Util::readInt(file);
 
             if(currMtl) 
               v.Color = currMtl->Meshbuffer->Material.DiffuseColor;
@@ -204,20 +162,15 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
             v.TCoords.set(0.0f,0.0f);
             v.Normal.set(0.0f,0.0f,0.0f);
             currMtl->RecalculateNormals=true;
-
             int vertLocation;
             core::map<video::S3DVertex, int>::Node* n = currMtl->VertMap.find(v);
-            if (n)
-            {
+            if (n) {
               vertLocation = n->getValue();
-            }
-            else
-            {
+            } else {
               currMtl->Meshbuffer->Vertices.push_back(v);
               vertLocation = currMtl->Meshbuffer->Vertices.size() -1;
               currMtl->VertMap.insert(v, vertLocation);
             }
-
             faceCorners.push_back(vertLocation);
           }
           for ( u32 i = 1; i < faceCorners.size() - 1; ++i )
@@ -232,7 +185,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         }
         break;
       default:
-        GM_LOG("Unknow mark '%X', abort loading\n",mark);
+        //GM_LOG("Unknow mark '%X', abort loading\n",mark);
         done=true;
         break;
     }
@@ -240,19 +193,18 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   scene::SMesh* mesh = new scene::SMesh();
 
-  GM_LOG("N materials: %d\n",Materials.size());
   // Combine all the groups (meshbuffers) into the mesh
-  for ( u32 m = 0; m < Materials.size(); ++m )
-  {
-    if ( Materials[m]->Meshbuffer->getIndexCount() > 0 )
-    {
+  for ( u32 m = 0; m < Materials.size(); ++m ) {
+    if ( Materials[m]->Meshbuffer->getIndexCount() > 0 ) {
       Materials[m]->Meshbuffer->recalculateBoundingBox();
-      if (Materials[m]->RecalculateNormals)
-        SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer);
-        assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
-        irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
-        logMaterial(mat);
-        mesh->addMeshBuffer( Materials[m]->Meshbuffer );
+      if (Materials[m]->RecalculateNormals) {
+        GM_LOG(" - recalculating normals\n");
+        SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer,false);
+      }
+      assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
+      irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
+      logMaterial(mat);
+      mesh->addMeshBuffer( Materials[m]->Meshbuffer );
     }
   }
 

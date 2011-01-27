@@ -19,7 +19,7 @@ include sources.mak
 
 ###########################################################################################
 includes=-I$(irr_inc_dir) 
-ccflags=$(includes) -D_IRR_STATIC_LIB_ -g
+ccflags=$(includes) -D_IRR_STATIC_LIB_ -g -DLOG_TO_STDOUT
 
 ldflags=-L$(irr_lib_dir) $(platform_libs) -lIrrlicht
 

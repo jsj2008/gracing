@@ -108,7 +108,7 @@ Track::Track(
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
             case ot_lamp:
-              GM_LOG("Loading lamp: %s\n",xmlReader->getNodeName());
+              GM_LOG("Loading lights: %s\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
@@ -126,17 +126,13 @@ Track::Track(
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
                 irr::scene::IAnimatedMeshSceneNode* node=0;
                 node=smgr->addAnimatedMeshSceneNode( mesh );
-                if(node) {
-                  //node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-                  //node->setMD2Animation(irr::scene::EMAT_STAND);
-                } else {
-                  GM_LOG("Cannot load mesh\n");
+                if(!node) {
+                  GM_LOG("cannot load mesh\n");
                 }
                 rfile->drop();
               } else {
                 GM_LOG("  cannot find file\n");
               }
-              GM_LOG("------------------------------------------------\n");
               break;
             case ot_camera:
               GM_LOG("Loading camera data from: '%s'\n",xmlReader->getNodeName());
@@ -185,32 +181,39 @@ void Track::loadLights( irr::io::IReadFile * file ,
   irr::scene::ISceneManager* smgr )
 {
   irr::u16 mark;
-  double pos[3],dif[3],spe[3];
+  int cnt=0;
+  double pos[3],dif[3],spe[3],radius;
+
+  smgr->setAmbientLight(
+      irr::video::SColorf(.6,.6,.6));
 
   mark=Util::readMark(file);
 
   Util::readTriple(file,pos);
   Util::readTriple(file,dif);
   Util::readTriple(file,spe);
+  radius=Util::readDouble(file);
 
+  cnt++;
 
-  GM_LOG("  light position %f,%f,%f, diffuse %f,%f,%f; specular: %f,%f,%f\n",
+  GM_LOG(" - %02d light\n   - position %f,%f,%f\n   - diffuse %f,%f,%f\n   - specular: %f,%f,%f\n   - radius: %f\n",
+      cnt,
       pos[0], pos[1], pos[2],
       dif[0], dif[1], dif[2],
-      spe[0], spe[1], spe[2]);
+      spe[0], spe[1], spe[2],radius);
 
   irr::core::vector3df position = irr::core::vector3df(pos[0], pos[1], pos[2]);
   irr::video::SColorf specularColor = 
-        irr::video::SColorf(spe[0],spe[1],spe[2]);
+    irr::video::SColorf(spe[0],spe[1],spe[2]);
   irr::video::SColorf diffuseColor = 
-        irr::video::SColorf(dif[0],dif[1],dif[2]);
-  
+    irr::video::SColorf(dif[0],dif[1],dif[2]);
+
+
   irr::scene::ILightSceneNode* light = 
-    smgr->addLightSceneNode( 0, position, diffuseColor);
+    smgr->addLightSceneNode( 0, position, diffuseColor, radius);
 
   //light->setLightType(irr::video::ELT_DIRECTIONAL);
   //light->setRotation( irr::core::vector3df(180, 45, 45) );
   light->getLightData().SpecularColor = specularColor;
-  smgr->setAmbientLight(diffuseColor);
-  
+
 }

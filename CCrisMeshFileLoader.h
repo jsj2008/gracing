@@ -2,8 +2,8 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
-#ifndef __C_OBJ_MESH_FILE_LOADER_H_INCLUDED__
-#define __C_OBJ_MESH_FILE_LOADER_H_INCLUDED__
+#ifndef CRIS_MESH_LOADER_H
+#define CRIS_MESH_LOADER_H
 
 #include "IMeshLoader.h"
 #include "IFileSystem.h"
@@ -28,73 +28,6 @@ public:
 	virtual irr::scene::IAnimatedMesh* createMesh(irr::io::IReadFile* file);
 
 private:
-
-  enum {
-    MARK_VERTICES=0xf100,
-    MARK_FACES_ONLY=0xf101,
-    MARK_MATERIAL=0xf102,
-    MARK_USE_MATERIAL=0xf103,
-    MARK_UV_COORD=0xf104
-  };
-
-  inline int readInt(irr::io::IReadFile * file) 
-  {
-    int val;
-    file->read(&val,sizeof(val));
-    return val;
-  }
-
-  // NB: the string must be deleted!!!
-  inline char * readString(irr::io::IReadFile * file)
-  {
-    unsigned len=readShort(file);
-    char * str=new char[len+1];
-    file->read(str,len);
-    str[len]=0;
-    return str;
-  }
-
-  inline unsigned readShort(irr::io::IReadFile * file)
-  {
-    unsigned short val;
-    file->read(&val,sizeof(val));
-    return val;
-  }
-
-  inline irr::u32 readU32(irr::io::IReadFile * file)
-  {
-    irr::u32 val;
-    file->read(&val,sizeof(val));
-    return val;
-  }
-
-  inline void readTriple(irr::io::IReadFile * file, double * tr) 
-  {
-    tr[0]=readDouble(file);
-    tr[1]=readDouble(file);
-    tr[2]=readDouble(file);
-  }
-
-  inline unsigned readMark(irr::io::IReadFile * file)
-  {
-    unsigned short val;
-    file->read(&val,sizeof(val));
-    return val;
-  }
-
-  inline double readDouble(irr::io::IReadFile * file)
-  {
-    double val;
-    file->read(&val,sizeof(val));
-    return val;
-  }
-
-  inline void readVertex(irr::io::IReadFile * file, irr::core::vector3df & vec)
-  {
-    vec.X=readDouble(file);
-    vec.Y=readDouble(file);
-    vec.Z=readDouble(file);
-  }
 
 	struct SObjMtl
 	{
@@ -126,19 +59,12 @@ private:
 		bool RecalculateNormals;
 	};
 
-	//! Find and return the material with the given name
 	SObjMtl* findMtl(const irr::core::stringc& mtlName);
-
-	// reads and convert to integer the vertex indices in a line of obj file's face statement
-	// -1 for the index if it doesn't exist
-	// indices are changed to 0-based index instead of 1-based from the obj file
-	bool retrieveVertexIndices(irr::c8* vertexData, irr::s32* idx, const irr::c8* bufEnd, irr::u32 vbsize, irr::u32 vtsize, irr::u32 vnsize);
 
 	void cleanUp();
 
   irr::scene::ISceneManager* SceneManager;
-  irr::io::IFileSystem* FileSystem;
-
+  irr::io::IFileSystem*      FileSystem;
   irr::core::array<SObjMtl*> Materials;
 };
 

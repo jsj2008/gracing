@@ -1,6 +1,11 @@
 #ifndef GMLOG_H
 #define GMLOG_H
 #include <stdio.h>
+
+#ifndef LOG_FILE_NAME
+#define LOG_FILE_NAME "/tmp/log.txt"
+#endif
+
 #define GM_LOG_FILE(fmt,...) do {\
   FILE * f=fopen("/tmp/log.txt","a");\
   if(f) {\
@@ -13,6 +18,11 @@
    fprintf(stdout,fmt,## __VA_ARGS__);\
 } while(0)
 
+
+#ifdef LOG_TO_STDOUT
+#define GM_LOG(fmt,...) GM_LOG_STDOUT(fmt,## __VA_ARGS__)
+#else
 #define GM_LOG(fmt,...) GM_LOG_FILE(fmt,## __VA_ARGS__)
+#endif
 
 #endif // GMLOG_H

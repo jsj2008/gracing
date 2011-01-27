@@ -9,6 +9,22 @@ inline double rad2deg(double value)
 class Util 
 {
   public:
+
+  enum {
+    MARK_VERTICES=0xf100,
+    MARK_FACES_ONLY=0xf101,
+    MARK_MATERIAL=0xf102,
+    MARK_USE_MATERIAL=0xf103,
+    MARK_UV_COORD=0xf104
+  };
+
+  static inline irr::u32 readU32(irr::io::IReadFile * file)
+  {
+    irr::u32 val;
+    file->read(&val,sizeof(val));
+    return val;
+  }
+
   static inline int readInt(irr::io::IReadFile * file) 
   {
     int val;
