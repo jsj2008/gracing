@@ -51,8 +51,54 @@ class MyEventReceiver : public IEventReceiver
     bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
 
-int main()
+
+#ifdef __WIN32__
+#include <Windows.h>
+int WINAPI WinMain(   HINSTANCE   hInstance,HINSTANCE   hPrevInstance,LPSTR   lpCmdLine,int nCmdShow)
 {
+   char *apppath = new char [MAX_PATH];
+   strncpy(apppath,  GetCommandLine(), MAX_PATH);
+   if (apppath[0] == '\"') {
+      apppath = (apppath+1);
+      char *lastdit = strchr(apppath, '\"');
+      *lastdit = '\x0';
+   }
+
+   char **argv = NULL;
+   int argc = 1;
+
+   if ( *lpCmdLine != '\x0' ) {
+      char *cmdLineCopy = new char [strlen(lpCmdLine)+1];
+      strcpy ( cmdLineCopy, lpCmdLine );
+
+      char *c = cmdLineCopy;
+      while(c) {
+         ++argc;
+         c = strchr ( (c+1),' ');
+      }
+
+      argv = new char *[argc];
+      argv[0] = apppath;
+
+      if(argc > 1) {
+         argv [1] = cmdLineCopy;
+         char *c = strchr(cmdLineCopy, ' ');
+         int n = 2;
+         while(c) {
+            *c = '\x0';
+            argv [n] = (c+1);
+            ++n;
+            c = strchr((c+1), ' ');
+         }
+      }
+   } else {
+      argv = new char *[1];
+      argv[0] = apppath;
+   }
+#else
+int main(int argc, char ** av)
+{
+#endif
   MyEventReceiver receiver;
   video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
 
@@ -71,7 +117,6 @@ int main()
   ISceneManager* smgr = device->getSceneManager();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
 
-
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
   smgr->addExternalMeshLoader(mloader);
@@ -80,7 +125,6 @@ int main()
       rect<s32>(10,10,260,22), true);
 
   //smgr->addCameraSceneNodeFPS();
-
 
   Track * track = new Track(device,BASE_DIR "/track-1.zip");
 
@@ -93,10 +137,17 @@ int main()
     guienv->drawAll();
 
     driver->endScene();
-    if(receiver.IsKeyDown(irr::KEY_ESCAPE)) {
+    if(receiver.IsKeyDown(irr::KEY_KEY_L))
+      track->load();
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_U))
+      track->unload();
+
+    if(receiver.IsKeyDown(irr::KEY_ESCAPE)) 
       done=true;
-    }
   }
+
+  delete track;
 
   device->drop();
 

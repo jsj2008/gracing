@@ -16,13 +16,18 @@ Track::Track(
     const char * filename
     )
 {
+  m_device=device;
   m_filesystem=device->getFileSystem();
+  m_filename=strdup(filename);
+  m_loaded=false;
+}
 
-  irr::u32 cnt;
+void Track::load()
+{
+  if(m_loaded) return;
 
-  cnt=m_filesystem->getFileArchiveCount();
-
-  bool res=m_filesystem->addFileArchive(filename);
+  irr::u32 cnt=m_filesystem->getFileArchiveCount();
+  bool res=m_filesystem->addFileArchive(m_filename);
 
   if(!res) {
     return ;
@@ -35,13 +40,9 @@ Track::Track(
     getFileArchive(m_archiveIndex);
   assert(archive);
 
+  GM_LOG("here\n");
   
   const irr::io::IFileList * fileList=archive->getFileList();
-  /*
-  cnt=fileList->getFileCount();
-  GM_LOG("Files in the archive: %u\n",cnt);
-  */
-
   irr::s32 manifestIndex;
 
   manifestIndex=fileList->findFile(MANIFEST_NAME);
@@ -56,7 +57,8 @@ Track::Track(
 
   assert(manifestFile);
 
-  irr::io::IXMLReaderUTF8 * xmlReader=m_filesystem->createXMLReaderUTF8 (manifestFile);
+  irr::io::IXMLReaderUTF8 * xmlReader=
+    m_filesystem->createXMLReaderUTF8 (manifestFile);
 
   enum { MAX_DEPTH=128 };
 
@@ -64,7 +66,7 @@ Track::Track(
   int nodeStack[MAX_DEPTH];
 
   int nodeStackPtr;
-  irr::scene::ISceneManager* smgr = device->getSceneManager();
+  irr::scene::ISceneManager* smgr = m_device->getSceneManager();
 
   irr::io::EXML_NODE nodeType;
   bool inElement;
@@ -128,6 +130,10 @@ Track::Track(
                 node=smgr->addAnimatedMeshSceneNode( mesh );
                 if(!node) {
                   GM_LOG("cannot load mesh\n");
+                } else {
+                  GM_LOG(" -> mesh at %X\n",node);
+                  m_sceneNodes.push_back(node);
+                  node->grab();
                 }
                 rfile->drop();
               } else {
@@ -173,9 +179,38 @@ Track::Track(
       break;
     }
   }
-  
-  // TODO: drop references
+  archive->drop();
+  m_filesystem->removeFileArchive(m_archiveIndex);
+  m_loaded=true;
 }
+
+void Track::unload()
+{
+  if(!m_loaded) return;
+	for (irr::u32 i=0; i < m_lights.size(); ++i ) {
+    GM_LOG("  dropping light %X\n",m_sceneNodes[i]);
+    m_lights[i]->remove();
+    m_lights[i]->drop();
+  }
+  m_lights.erase(0,m_lights.size());
+
+	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
+    GM_LOG("  dropping scene node %X\n",m_sceneNodes[i]);
+    m_sceneNodes[i]->remove();
+    m_sceneNodes[i]->drop();
+  }
+  m_sceneNodes.erase(0,m_sceneNodes.size());
+
+  m_loaded=false;
+}
+
+Track::~Track()
+{
+  GM_LOG("Track destruct\n");
+  unload();
+  GM_LOG("Track destruct done\n");
+}
+
 
 void Track::loadLights( irr::io::IReadFile * file ,
   irr::scene::ISceneManager* smgr )
@@ -215,5 +250,6 @@ void Track::loadLights( irr::io::IReadFile * file ,
   //light->setLightType(irr::video::ELT_DIRECTIONAL);
   //light->setRotation( irr::core::vector3df(180, 45, 45) );
   light->getLightData().SpecularColor = specularColor;
+  light->grab();
 
 }

@@ -1,13 +1,13 @@
 cplusplus=g++
 target=demo
 
-irr_inc_dir=..\irrlicht-1.7.2\include
-irr_lib_dir=..\irrlicht-1.7.2\lib\Win32-gcc
+irr_inc_dir=..\..\irrlicht-1.7.2\include
+irr_lib_dir=..\..\irrlicht-1.7.2\lib\Win32-gcc
 platform_libs= -lgdi32 -lwinspool -lcomdlg32 -lole32 -loleaut32 \
 						-luuid -lodbc32 -lodbccp32 -lopengl32 
 cplusplus=g++
 target=demo.exe
-tgt_dir=demo.app
+tgt_dir=..\demo.app
 
 rm=del /f /q
 cp=copy
@@ -15,11 +15,14 @@ mkdir=mkdir
 rmdir=rmdir
 zip="E:\Program Files\7-Zip\7z.exe"
 
+resources_dir=..\resources
+resources_win32_dir=..\resources.win32
+
 include sources.mak
 
 ###########################################################################################
 includes=-I$(irr_inc_dir) 
-ccflags=$(includes) -D_IRR_STATIC_LIB_ -g -DLOG_TO_STDOUT
+ccflags=$(includes) -D_IRR_STATIC_LIB_ -g -DLOG_TO_STDOUT -mwindows
 
 ldflags=-L$(irr_lib_dir) $(platform_libs) -lIrrlicht
 
@@ -38,8 +41,8 @@ copy_files:
 	if exist $(tgt_dir) $(rmdir) $(tgt_dir)
 	$(mkdir) $(tgt_dir)
 	$(cp) demo.exe $(tgt_dir)
-	$(cp) resources.win32\Irrlicht.dll $(tgt_dir)
-	$(cp) resources\track-1.zip  $(tgt_dir)
+	$(cp) $(resources_win32_dir)\Irrlicht.dll $(tgt_dir)
+	$(cp) $(resources_dir)\track-1.zip  $(tgt_dir)
 
 clean:
 	$(rm) *.o
