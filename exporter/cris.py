@@ -252,6 +252,10 @@ class export_OT_track(bpy.types.Operator):
     faces=ob.data.faces
     vertices=ob.data.vertices
 
+    if len(materials)==0:
+      log("Discarding object '%s' coz have no material set\n"%ob.name);
+      return False
+
     #transform=self.createObjTransformMatrix(ob)
     transform=ob.matrix_world
 
@@ -298,6 +302,7 @@ class export_OT_track(bpy.types.Operator):
           binWrite_int(fp,v_idx)
           #log("\n")
       log("done with material '%s'\n"%materials[mat_idx].name);
+    return True
 
   def exportMesh2(self, fp, ob):
     materials=ob.data.materials
@@ -437,9 +442,12 @@ class export_OT_track(bpy.types.Operator):
     if obj.type == 'MESH':
       filename=tmp_dir_name+"/"+obj.name+".mesh"
       fp = open(filename, 'wb')    
-      self.exportMesh3(fp,obj)
+      ret=self.exportMesh3(fp,obj)
       fp.close()
-      return [ 'mesh' , filename ]
+      if ret:
+        return [ 'mesh' , filename ]
+      else:
+        return None
     if obj.type == "LAMP":
       filename=tmp_dir_name+"/"+obj.name+".lamp"
       fp = open(filename, 'wb')    
@@ -447,7 +455,6 @@ class export_OT_track(bpy.types.Operator):
       fp.close()
       return [ 'lamp', filename ]
     return None
-
 
   def execute(self, context):
     filepath=self.properties.filepath
@@ -463,9 +470,7 @@ class export_OT_track(bpy.types.Operator):
         log("presente directory\n")
       else:
         RaiseError("herrorororor!")
-
     log("Exporing track (dir %s): %s\n"%(dirname,filepath))
-    
     elements=[]
 
     for ob in bpy.data.objects:
@@ -485,7 +490,6 @@ class export_OT_track(bpy.types.Operator):
     for name in elements:
       p=os.path.basename(name[1])
       fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
-
     fp.write("</track>")
     fp.close()
 
@@ -505,7 +509,6 @@ class export_OT_track(bpy.types.Operator):
       log("removing '%s'\n"%fname)
     os.removedirs(tmpdir)
     log("removing '%s'\n"%tmpdir)
-
 
     return {'FINISHED'}
 
