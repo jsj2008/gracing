@@ -105,7 +105,7 @@ int main(int argc, char ** av)
   GM_LOG("--------- starting gracing\n");
 
   IrrlichtDevice *device =
-    createDevice( driverType, dimension2d<u32>(640, 480), 16,
+    createDevice( driverType, dimension2d<u32>(800, 600), 16,
         false, false, false, &receiver);
 
   if (!device)

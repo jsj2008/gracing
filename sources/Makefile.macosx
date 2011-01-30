@@ -1,30 +1,45 @@
 
-irr_home=/Users/gianni/Desktop/SDKs/irrlicht-1.7.2
-irr_inc_dir=-I $(irr_home)/include/ -arch i386 -D_IRR_STATIC_LIB_ -DBASE_DIR="\"Resources/\""
-#-DBASE_DIR="\"`pwd`/demo.app\""
-irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -arch i386 -lIrrlicht  -LGL \
+# irrlicht paths and libraries
+irr_home=/Users/gianni/MyLibraries/irrlicht-1.7.2
+irr_inc_dir=-I $(irr_home)/include/ -D_IRR_STATIC_LIB_ -DBASE_DIR="\"Resources/\""
+#-arch i386 
+irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -lIrrlicht  -LGL \
 						-L/usr/X11R6/lib -lXxf86vm -lXext -lX11 \
 						-dylib_file \
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:\
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib 
+#-arch i386 
+irr_libs=-lIrrlicht
+
+# bullet paths and libraries
+bt_home=/Users/gianni/MyLibraries/bullet-2.77
+bt_build_home=/Users/gianni/MyLibraries/bullet-build
+bt_inc_dir=-I$(bt_home)/src
+bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
+#bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
+bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
+
+
 target=demo
-tgt_dir=demo.app
-cplusplus=g++
+tgt_dir=../demo.app
+resources_dir=../resources
+resources_macosx_dir=../resources.macosx
+cplusplus=g++ 
 
 include sources.mak
 ##########################################################
 tgt_appl_dir=$(tgt_dir)/Contents/MacOs
 tgt_res_dir=$(tgt_dir)/Contents/Resources
-ccflags=$(irr_inc_dir)  -g
-ldflags=-L$(irr_lib_dir)  -lIrrlicht
-
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g
+ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
+  -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
 objs=$(subst .cc,.o,$(sources))
 
 
 all: $(target) copy_files
 
 $(target): $(objs)
-	$(cplusplus) -o $(target) $(objs) $(ldflags) 
+	$(cplusplus) -o $(target) $(ldflags)  $(objs)
 
 .cc.o: 
 	$(cplusplus) -c $< $(ccflags)
@@ -34,8 +49,8 @@ copy_files:
 	mkdir -p $(tgt_dir)
 	mkdir -p $(tgt_appl_dir)
 	mkdir -p $(tgt_res_dir)
-	cp resources.macosx/Info.plist $(tgt_dir)
-	cp resources/track-1.zip $(tgt_res_dir)
+	cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
+	cp $(resources_dir)/track-1.zip $(tgt_res_dir)
 	cp demo $(tgt_appl_dir)/
 
 clean:
