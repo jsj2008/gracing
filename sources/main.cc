@@ -130,17 +130,32 @@ int main(int argc, char ** av)
 
   Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
 
+
   bool done=false;
+  bool loaded=false;
   while(device->run() && !done)
   {
+    world->step();
     driver->beginScene(true, true, SColor(255,100,101,140));
 
     smgr->drawAll();
     guienv->drawAll();
 
     driver->endScene();
-    if(receiver.IsKeyDown(irr::KEY_KEY_L))
+    if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
+      if(!loaded) {
+        loaded=true;
+        scene::IAnimatedMesh * sphereMesh=smgr->getMesh("Sphere.mesh");
+        if(sphereMesh) {
+          irr::scene::IAnimatedMeshSceneNode* sphereNode=0;
+          sphereNode=smgr->addAnimatedMeshSceneNode( sphereMesh );
+          world->addDynamicSphere(sphereNode,0.f,10.f,0.f,1.,1.);
+        } else {
+          GM_LOG("cannot load sphere mesh\n");
+        }
+      }
       track->load();
+    }
 
     if(receiver.IsKeyDown(irr::KEY_KEY_U))
       track->unload();

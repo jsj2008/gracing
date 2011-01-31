@@ -185,7 +185,7 @@ void Track::load()
   archive->drop();
   m_filesystem->removeFileArchive(m_archiveIndex);
 	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
-    m_world->addMesh(m_sceneNodes[i]);
+    m_world->addStaticMesh(m_sceneNodes[i]);
   }
   m_loaded=true;
 }

@@ -53,6 +53,7 @@ copy_files:
 	$(cp) demo.exe $(tgt_dir)
 	$(cp) $(resources_win32_dir)\Irrlicht.dll $(tgt_dir)
 	$(cp) $(resources_dir)\track-1.zip  $(tgt_dir)
+	$(cp) $(resources_dir)\Sphere.mesh  $(tgt_dir)
 
 clean:
 	$(rm) *.o
