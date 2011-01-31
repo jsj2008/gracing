@@ -1,5 +1,6 @@
 #include <irrlicht.h>
 #include "Track.hh"
+#include "Vehicle.h"
 #include "CCrisMeshFileLoader.h"
 #include "PhyWorld.h"
 
@@ -127,6 +128,7 @@ int main(int argc, char ** av)
       rect<s32>(10,10,260,22), true);
 
   Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
+  Vehicle * vehicle = new Vehicle(device,world,"");
 
   bool done=false;
   bool loaded=false;

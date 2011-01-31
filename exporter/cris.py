@@ -138,7 +138,7 @@ def getMaterialFlagsWord(mat):
 
 class export_OT_track(bpy.types.Operator):
   bl_idname = "io_export_scene.crisalide_exporter"
-  bl_description = 'Export to crisalide file format (.track)'
+  bl_description = 'Export to track crisalide file format (.zip)'
   bl_label = "Export crisalide file formats"
   bl_space_type = "PROPERTIES"
   bl_region_type = "WINDOW"
@@ -516,14 +516,26 @@ class export_OT_track(bpy.types.Operator):
     context.window_manager.fileselect_add(self)
     return {'RUNNING_MODAL'}
 
-def menu_func(self, context):
+class export_OT_vehicle(bpy.types.Operator):
+  bl_idname = "io_export_scene.crisalide_exporter"
+  bl_description = 'Export vehicle to crisalide file format (.track)'
+  bl_label = "Export crisalide file formats"
+  bl_space_type = "PROPERTIES"
+  bl_region_type = "WINDOW"
+
+def menu_func_track_export(self, context):
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter")
 
+def menu_func_vehicle_export(self, context):
+    self.layout.operator(export_OT_vehicle.bl_idname, text="Crisalide vehicle exporter")
+
 def register():
-    bpy.types.INFO_MT_file_export.append(menu_func)
+    bpy.types.INFO_MT_file_export.append(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.append(menu_func_vehicle_export)
 
 def unregister():
-    bpy.types.INFO_MT_file_export.remove(menu_func)
+    bpy.types.INFO_MT_file_export.remove(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.remove(menu_func_vehicle_export)
 
 if __name__ == "__main__":
   print("*** crisalide exporter ***")
