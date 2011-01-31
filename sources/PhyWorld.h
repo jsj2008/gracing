@@ -16,13 +16,17 @@ class PhyWorld
   private:
 
     struct phyMesh {
+
       btVector3 * vertices;
       int *       indices;
+      irr::scene::ISceneNode * 
+        node;
 
-      phyMesh(int n_vertices,int n_triangleIndices)
+      phyMesh(int n_vertices,int n_triangleIndices, irr::scene::ISceneNode * n)
       {
         vertices=new btVector3[n_vertices];
-        indices=3*n_triangleIndices;
+        indices=new int[3*n_triangleIndices];
+        node=n;
       }
 
       ~phyMesh()
@@ -39,6 +43,7 @@ class PhyWorld
     btDiscreteDynamicsWorld             *m_world;
 
     irr::core::array<phyMesh*>          *m_phyMeshes;
+
 
 };
 
