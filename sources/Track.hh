@@ -1,13 +1,16 @@
 #ifndef TRACK_HH
 #define TRACK_HH
 #include <irrlicht.h>
+#include "PhyWorld.h"
 
 
 
 class Track
 {
   public:
-    Track(irr::IrrlichtDevice * device, const char * filename);
+    Track(irr::IrrlichtDevice * device, 
+        PhyWorld * world,
+        const char * filename);
     ~Track();
 
     void load();
@@ -28,10 +31,10 @@ class Track
     irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
                                                    m_sceneNodes;
 
-
     bool                                           m_loaded;
     const char *                                   m_filename;
     irr::IrrlichtDevice *                          m_device;
+    PhyWorld *                                     m_world;
 };
 
 #endif

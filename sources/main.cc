@@ -1,6 +1,7 @@
 #include <irrlicht.h>
 #include "Track.hh"
 #include "CCrisMeshFileLoader.h"
+#include "PhyWorld.h"
 
 #include "gmlog.h"
 
@@ -116,6 +117,7 @@ int main(int argc, char ** av)
   IVideoDriver* driver = device->getVideoDriver();
   ISceneManager* smgr = device->getSceneManager();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
+  PhyWorld * world=new PhyWorld();
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
@@ -126,7 +128,7 @@ int main(int argc, char ** av)
 
   //smgr->addCameraSceneNodeFPS();
 
-  Track * track = new Track(device,BASE_DIR "/track-1.zip");
+  Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
 
   bool done=false;
   while(device->run() && !done)
