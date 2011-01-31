@@ -17,6 +17,10 @@ PhyWorld::PhyWorld()
 {
   CFG_INIT_D(m_frameRate,1.f/240.f);
   CFG_INIT_D(m_frameSubsteps,1);
+
+
+
+
   CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
 
   m_broadPhase = new btAxisSweep3(btVector3(-1000, -1000, -1000), btVector3(1000, 1000, 1000));
