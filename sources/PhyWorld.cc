@@ -15,7 +15,7 @@ static inline void irr2bt(const core::vector3df & irrVertex,
 
 PhyWorld::PhyWorld()
 {
-  CFG_INIT_D(m_frameRate,1.f/60.f);
+  CFG_INIT_D(m_frameRate,1.f/240.f);
   CFG_INIT_D(m_frameSubsteps,1);
   CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
 
@@ -149,8 +149,10 @@ void PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
   startTransform.setOrigin(btVector3(px,py,pz));
 
   //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-  btDefaultMotionState* motionState = new btDefaultMotionState(startTransform);
-  btRigidBody::btRigidBodyConstructionInfo rbInfo(btMass,motionState,shape,localInertia);
+  btDefaultMotionState* motionState = 
+    new btDefaultMotionState(startTransform);
+  btRigidBody::btRigidBodyConstructionInfo 
+    rbInfo(btMass,motionState,shape,localInertia);
   btRigidBody* body = new btRigidBody(rbInfo);
 
   meshBinder * mbinder=new meshBinder(body,node);
@@ -162,27 +164,19 @@ void PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
 
 void PhyWorld::step()
 {
-  static int stupid_counter=0;
-  static int other_stupid_counter=0;
-  //m_world->stepSimulation(1.f/60.f,10);
   m_world->stepSimulation(m_frameRate,m_frameSubsteps);
-  if(((stupid_counter++)%1000)==0) {
-    GM_LOG("[%d,%d] ------------- start\n",other_stupid_counter,stupid_counter);
-    for (int j=m_world->getNumCollisionObjects()-1; j>=0 ;j--) {
-			btCollisionObject* obj = m_world->getCollisionObjectArray()[j];
-			btRigidBody* body = btRigidBody::upcast(obj);
-			if (body && body->getMotionState())
-			{
-				btTransform trans;
-				body->getMotionState()->getWorldTransform(trans);
-				GM_LOG("world pos = %f,%f,%f\n",
+  for (int j=m_binds.size()-1; j>=0 ;j--) {
+    btRigidBody* body = m_binds[j]->body;
+    if (body && body->getMotionState()) {
+      btTransform trans;
+      btQuaternion quaternion;
+      body->getMotionState()->getWorldTransform(trans);
+      quaternion=trans.getRotation();
+      m_binds[j]->irrNode->setPosition(
+          core::vector3df(
             float(trans.getOrigin().getX()),
             float(trans.getOrigin().getY()),
-            float(trans.getOrigin().getZ()));
-			}
+            float(trans.getOrigin().getZ())));
     }
-    GM_LOG("[%d,%d] end start\n",other_stupid_counter,stupid_counter);
-    other_stupid_counter++;
   }
-  
 }
