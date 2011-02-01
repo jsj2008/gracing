@@ -3,8 +3,6 @@
 #include <irrlicht.h>
 #include "PhyWorld.h"
 
-
-
 class Track
 {
   public:
@@ -23,7 +21,6 @@ class Track
 
     irr::io::IFileSystem *                         m_filesystem;
     irr::u32                                       m_archiveIndex;
-
 
     // resources loaded
     irr::core::array<irr::scene::ILightSceneNode*>   

@@ -44,8 +44,6 @@ void Track::load()
     getFileArchive(m_archiveIndex);
   assert(archive);
 
-  GM_LOG("here\n");
-  
   const irr::io::IFileList * fileList=archive->getFileList();
   irr::s32 manifestIndex;
 

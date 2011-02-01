@@ -16,8 +16,8 @@ import bpy,os,struct,zipfile,math
 
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
 # EXPORT configuration
@@ -267,6 +267,24 @@ def exportObject(tmp_dir_name,obj):
     return [ 'lamp', filename ]
   return None
 
+def exportXml(root_name,basedir,name,elements):
+  filename=basedir + "/" + name;
+  fp=open(filename,"w")
+  fp.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<%s>\n"%root_name)
+  for name in elements:
+    p=os.path.basename(name[1])
+    fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
+  fp.write("</%s>"%root_name)
+  fp.close()
+
+def createZip(path,index_file,index_name,elements):
+    zf=zipfile.ZipFile(path,"w")
+    for name in elements:
+      p=os.path.basename(name[1])
+      zf.write(name[1],p)
+    zf.write(index_file,index_name)
+    zf.close()
+
 class export_OT_track(bpy.types.Operator):
   bl_idname = "io_export_scene.crisalide_track_exporter"
   bl_description = 'Export to track crisalide file format (.zip)'
@@ -317,25 +335,14 @@ class export_OT_track(bpy.types.Operator):
       elements.append(n)
 
     #### create xml file
-    filename=tmpdir + "/TRACK";
-    fp=open(filename,"w")
-    fp.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<track>\n")
-    for name in elements:
-      p=os.path.basename(name[1])
-      fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
-    fp.write("</track>")
-    fp.close()
+    exportXml("track",tmpdir,"TRACK",elements)
 
     #### create zip file
-    zf=zipfile.ZipFile(realpath,"w")
-    for name in elements:
-      p=os.path.basename(name[1])
-      zf.write(name[1],p)
-    zf.write(filename,"TRACK")
-    zf.close()
+    index_filename=tmpdir+"/TRACK"
+    createZip(realpath,index_filename,"TRACK",elements)
 
     #### remove temp files
-    os.remove(filename)
+    os.remove(index_filename)
     for name in elements:
       fname=name[1]
       os.remove(fname)
@@ -402,11 +409,54 @@ class export_OT_vehicle(bpy.types.Operator):
 
     log("Exporting chassis\n")
     for ob in chassis_objs: 
-      name=exportObject(tmpdir,ob)
-      if name != None:
-        log("%s,%s\n"%(name[0],name[1]))
-        elements.append(name)
+      el=exportObject(tmpdir,ob)
+      if el != None:
+        el[0]="chassis"
+        log("%s,%s\n"%(el[0],el[1]))
+        elements.append(el)
       log("  -exporting obj '%s'\n"%ob.name)
+
+    log("Exporting wheels\n");
+    log("  - front left\n")
+    for ob in wheel_fl_objs:
+      el=exportObject(tmpdir,ob)
+      if el != None: 
+        el[0]="wfl";
+        elements.append(el)
+
+    log("  - front right\n")
+    for ob in wheel_fr_objs:
+      el=exportObject(tmpdir,ob)
+      if el != None: 
+        el[0]="wfr";
+        elements.append(el)
+
+    log("  - rear left\n")
+    for ob in wheel_rl_objs:
+      el=exportObject(tmpdir,ob)
+      if el != None: 
+        el[0]="wrl";
+        elements.append(el)
+
+    log("  - rear right\n")
+    for ob in wheel_rr_objs:
+      el=exportObject(tmpdir,ob)
+      if el != None: 
+        el[0]="wrr";
+        elements.append(el)
+
+    exportXml("vehicle",tmpdir,"VEHICLE",elements)
+    index_filename=tmpdir+"/VEHICLE"
+    createZip(realpath,index_filename,"VEHICLE",elements)
+
+    #### remove temp files
+    os.remove(index_filename)
+    for name in elements:
+      fname=name[1]
+      os.remove(fname)
+      log("removing '%s'\n"%fname)
+    os.removedirs(tmpdir)
+    log("removing '%s'\n"%tmpdir)
 
     return {'FINISHED'}
 

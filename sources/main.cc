@@ -128,7 +128,7 @@ int main(int argc, char ** av)
       rect<s32>(10,10,260,22), true);
 
   Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
-  Vehicle * vehicle = new Vehicle(device,world,"");
+  Vehicle * vehicle = new Vehicle(device,world,BASE_DIR "/car_ab.zip");
 
   bool done=false;
   bool loaded=false;
@@ -142,18 +142,7 @@ int main(int argc, char ** av)
 
     driver->endScene();
     if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
-      if(!loaded) {
-        loaded=true;
-        scene::IAnimatedMesh * sphereMesh=smgr->getMesh("Sphere.mesh");
-        if(sphereMesh) {
-          irr::scene::IAnimatedMeshSceneNode* sphereNode=0;
-          sphereNode=smgr->addAnimatedMeshSceneNode( sphereMesh );
-          world->addDynamicSphere(sphereNode,0.f,10.f,0.f,1.,1.);
-        } else {
-          GM_LOG("cannot load sphere mesh\n");
-        }
-      }
-      track->load();
+      vehicle->load();
     }
 
     if(receiver.IsKeyDown(irr::KEY_KEY_U))
