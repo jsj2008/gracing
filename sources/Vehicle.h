@@ -19,10 +19,9 @@
 
 #include <irrlicht.h>
 #include "PhyWorld.h"
+#include "IVehicle.h"
 
-
-
-class Vehicle 
+class Vehicle : public IVehicle
 {
   public:
     Vehicle(
@@ -30,7 +29,14 @@ class Vehicle
         PhyWorld * world,
         const char * source);
 
-    void load();
+    virtual void load();
+
+    virtual void unload();
+
+    virtual void use(unsigned int useFlags);
+
+    virtual void unuse(unsigned int useFlags);
+
 
   private:
     enum {
@@ -65,6 +71,8 @@ class Vehicle
 
     irr::core::array<irr::scene::IAnimatedMesh*>
       m_wheel_fr;
+
+    btRaycastVehicle * m_bulletBody;
 };
 
 #endif

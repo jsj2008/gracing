@@ -1,4 +1,4 @@
-//  gracing - a idiot (but physically powered) racing game 
+//  gracing - an idiot (but physically powered) racing game 
 //  Copyright (C) 2010 gianni masullo
 //
 //  This program is free software; you can redistribute it and/or
@@ -144,7 +144,7 @@ int main(int argc, char ** av)
       rect<s32>(10,10,260,22), true);
 
   Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
-  Vehicle * vehicle = new Vehicle(device,world,BASE_DIR "/car_ab.zip");
+  IVehicle * vehicle = new Vehicle(device,world,BASE_DIR "/car_ab.zip");
 
   bool done=false;
   while(device->run() && !done)

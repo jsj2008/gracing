@@ -1,4 +1,4 @@
-//  gracing - a idiot (but physically powered) racing game 
+//  gracing - an idiot (but physically powered) racing game 
 //  Copyright (C) 2010 gianni masullo
 //
 //  This program is free software; you can redistribute it and/or

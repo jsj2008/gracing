@@ -1,4 +1,4 @@
-//  gracing - a idiot (but physically powered) racing game 
+//  gracing - an idiot (but physically powered) racing game 
 //  Copyright (C) 2010 gianni masullo
 //
 //  This program is free software; you can redistribute it and/or
@@ -35,6 +35,9 @@
 
 CFG_PARAM_D(glob_wheelsDefaultMass)=1.;
 CFG_PARAM_D(glob_chassisDefaultMass)=1.;
+
+
+/////////////////////////////////////////////////////////////////////////
 
 Vehicle::Vehicle(
         irr::IrrlichtDevice * device, 
@@ -199,5 +202,18 @@ void Vehicle::load()
   }
   xmlReader->drop();
   m_loaded=true;
+}
+
+
+void Vehicle::unload()
+{
+}
+
+void Vehicle::use(unsigned int useFlags)
+{
+}
+
+void Vehicle::unuse(unsigned int useFlags)
+{
 }
 
