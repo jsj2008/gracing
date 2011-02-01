@@ -268,7 +268,7 @@ def exportObject(tmp_dir_name,obj):
   return None
 
 class export_OT_track(bpy.types.Operator):
-  bl_idname = "io_export_scene.crisalide_exporter"
+  bl_idname = "io_export_scene.crisalide_track_exporter"
   bl_description = 'Export to track crisalide file format (.zip)'
   bl_label = "Export crisalide file formats"
   bl_space_type = "PROPERTIES"
@@ -290,7 +290,6 @@ class export_OT_track(bpy.types.Operator):
     default = 0.1, min = 0.001, max = 1000.0)
 
   def execute(self, context):
-    log("sugo di mesh\n")
     filepath=self.properties.filepath
     realpath = os.path.realpath(os.path.expanduser(filepath))
     name = os.path.basename(filepath)
@@ -347,10 +346,73 @@ class export_OT_track(bpy.types.Operator):
     return {'FINISHED'}
 
   def invoke(self, context, event):
-    log("sugo di mesh 2\n")
     context.window_manager.fileselect_add(self)
     return {'RUNNING_MODAL'}
 
+class export_OT_vehicle(bpy.types.Operator):
+  bl_idname = "io_export_scene.crisalide_vehicle_exporter"
+  bl_description = 'Export vehicle to crisalide file format (.zip)'
+  bl_label = "Export crisalide file formats"
+  bl_space_type = "PROPERTIES"
+  bl_region_type = "WINDOW"
+
+  filepath = bpy.props.StringProperty(
+    name="File Path", 
+    description="File path used for exporting the crisalide file", 
+    maxlen= 1024, default= "")
+
+  def execute(self, context):
+    log("executing\n");
+
+    filepath=self.properties.filepath
+    realpath = os.path.realpath(os.path.expanduser(filepath))
+    name = os.path.basename(filepath)
+    dirname = os.path.dirname(filepath)
+    tmpdir = dirname + "/tmp";
+
+    chassis_objs=[ ]
+    wheel_fl_objs=[ ]
+    wheel_fr_objs=[ ]
+    wheel_rl_objs=[ ]
+    wheel_rr_objs=[ ]
+    for ob in bpy.data.objects:
+      if ob.name == "wheel.fr":
+        wheel_fr_objs.append(ob)
+      elif ob.name == "wheel.fl":
+        wheel_fl_objs.append(ob)
+      elif ob.name == "wheel.rr":
+        wheel_rr_objs.append(ob)
+      elif ob.name == "wheel.rl":
+        wheel_fl_objs.append(ob)
+      elif ob.type == 'MESH':
+        chassis_objs.append(ob)
+      elif ob.type == "EMPTY" and ob.name == "VehicleData":
+        log("getting vehicle data from '%s'\n"%ob.name)
+    
+    if not os.path.exists(tmpdir):
+      os.mkdir(tmpdir)
+    else:
+      if os.path.isdir(tmpdir):
+        log("presente directory\n")
+      else:
+        RaiseError("herrorororor!")
+
+    log("Exporing vehicle (dir %s): %s\n"%(dirname,filepath))
+    elements=[ ]
+
+    log("Exporting chassis\n")
+    for ob in chassis_objs: 
+      name=exportObject(tmpdir,ob)
+      if name != None:
+        log("%s,%s\n"%(name[0],name[1]))
+        elements.append(name)
+      log("  -exporting obj '%s'\n"%ob.name)
+
+    return {'FINISHED'}
+
+  def invoke(self,context,event):
+    context.window_manager.fileselect_add(self)
+    return {'RUNNING_MODAL'}
 
 def menu_func_track_export(self, context):
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter")
@@ -359,11 +421,12 @@ def menu_func_vehicle_export(self, context):
     self.layout.operator(export_OT_vehicle.bl_idname, text="Crisalide vehicle exporter")
 
 def register():
-    log("registering\n")
     bpy.types.INFO_MT_file_export.append(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.append(menu_func_vehicle_export)
 
 def unregister():
     bpy.types.INFO_MT_file_export.remove(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.remove(menu_func_vehicle_export)
 
 if __name__ == "__main__":
   log("*** crisalide exporter ***\n")
