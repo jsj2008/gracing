@@ -90,6 +90,9 @@ void PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
     case scene::ESNT_ANIMATED_MESH:
       mesh=((scene::IAnimatedMeshSceneNode*)meshNode)->getMesh();
       break;
+    default:
+      assert(0);
+      break;
   }
 
   unsigned int n_buffers;

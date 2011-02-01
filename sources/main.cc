@@ -34,7 +34,7 @@ using namespace gui;
 #define BASE_DIR "."
 #endif
 
-#ifdef _IRR_WINDOWS_
+#ifdef _WIN32_
 #pragma comment(lib, "Irrlicht.lib")
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
@@ -147,7 +147,6 @@ int main(int argc, char ** av)
   Vehicle * vehicle = new Vehicle(device,world,BASE_DIR "/car_ab.zip");
 
   bool done=false;
-  bool loaded=false;
   while(device->run() && !done)
   {
     world->step();

@@ -78,16 +78,12 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   if (!filesize)
     return 0;
 
-  const u32 WORD_BUFFER_LENGTH = 512;
-
   core::array<core::vector3df> vertexBuffer;
   core::array<core::vector3df> normalsBuffer;
   core::array<core::vector2df> textureCoordBuffer;
 
   SObjMtl * currMtl = new SObjMtl();
-  SObjMtl * defaultMtl = currMtl;
   Materials.push_back(currMtl);
-  u32 smoothingGroup=0;
 
   const io::path fullName = file->getFileName();
   const io::path relPath = FileSystem->getFileDir(fullName)+"/";
@@ -100,7 +96,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   char * name;
   char * matName=0;
   bool matChanged=false;
-  float f[3];
   double ka[3];
   double kd[3];
   double ks[3];
@@ -243,7 +238,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
 CCrisMeshFileLoader::SObjMtl* CCrisMeshFileLoader::findMtl(const core::stringc& mtlName)
 {
-	CCrisMeshFileLoader::SObjMtl* defMaterial = 0;
 	for (u32 i = 0; i < Materials.size(); ++i) {
 		if ( Materials[i]->Name == mtlName ) {
 				return Materials[i];

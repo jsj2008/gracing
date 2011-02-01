@@ -24,7 +24,17 @@
 #define NOT_A_VALID_VEHICLE_IF_NOT(cond) assert(cond)
 #define NOT_A_VALID_VEHICLE_IF(cond) assert(!(cond))
 
+#define WARNING_IF(cond,fmt,...) do {\
+  if(cond) {\
+    GM_LOG(fmt, ## __VA_ARGS__);\
+  }\
+} while(0)\
+
+
 #define MANIFEST_NAME "VEHICLE"
+
+CFG_PARAM_D(glob_wheelsDefaultMass)=1.;
+CFG_PARAM_D(glob_chassisDefaultMass)=1.;
 
 Vehicle::Vehicle(
         irr::IrrlichtDevice * device, 
@@ -36,8 +46,9 @@ Vehicle::Vehicle(
    m_filesystem=device->getFileSystem();
    m_sourceName=strdup(source);
    m_loaded=false;
-}
 
+
+}
 
 void Vehicle::load()
 {
@@ -75,7 +86,7 @@ void Vehicle::load()
 
   enum { MAX_DEPTH=128 };
 
-  int i,level,ot;
+  int ot;
   int nodeStack[MAX_DEPTH];
   enum {
     ot_none,
@@ -86,8 +97,9 @@ void Vehicle::load()
     ot_wrl
   };
 
-  bool inElement;
   irr::io::EXML_NODE nodeType;
+  irr::scene::IAnimatedMesh* mesh;
+  irr::scene::ISceneManager * smgr=m_device->getSceneManager();
 
   for(int i=0, inElement=false, nodeStackPtr=0; 
       xmlReader->read(); 
@@ -95,6 +107,9 @@ void Vehicle::load()
   {
     nodeType=xmlReader->getNodeType();
     switch(nodeType) {
+      case irr::io::EXN_UNKNOWN:
+      case irr::io::EXN_CDATA:
+      case irr::io::EXN_COMMENT:
       case irr::io::EXN_NONE:
       break;
       case irr::io::EXN_ELEMENT:
@@ -120,28 +135,63 @@ void Vehicle::load()
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
             case ot_chassis:
-              GM_LOG("loading chassis from '%s'\n",
+              GM_LOG("loading chassis part from '%s'\n",
                   xmlReader->getNodeName());
+              mesh=smgr->getMesh(xmlReader->getNodeName());
+              WARNING_IF(mesh==0," - cannot load file '%s'\n",
+                  xmlReader->getNodeName());
+              if(mesh) {
+                mesh->grab();
+                m_chassis.push_back(mesh);
+              }
               break;
 
             case ot_wfl:
-              GM_LOG("loading front left wheel from '%s'\n",
+              GM_LOG("loading front left wheel part from '%s'\n",
                   xmlReader->getNodeName());
+              mesh=smgr->getMesh(xmlReader->getNodeName());
+              WARNING_IF(mesh==0," - cannot load file '%s'\n",
+                  xmlReader->getNodeName());
+              if(mesh) {
+                mesh->grab();
+                m_wheel_fl.push_back(mesh);
+              }
               break;
 
             case ot_wfr:
-              GM_LOG("loading front right wheel from '%s'\n",
+              GM_LOG("loading front right wheel part from '%s'\n",
                   xmlReader->getNodeName());
+              mesh=smgr->getMesh(xmlReader->getNodeName());
+              WARNING_IF(mesh==0," - cannot load file '%s'\n",
+                  xmlReader->getNodeName());
+              if(mesh) {
+                mesh->grab();
+                m_wheel_fr.push_back(mesh);
+              }
               break;
 
             case ot_wrl:
-              GM_LOG("loading rear left wheel from '%s'\n",
+              GM_LOG("loading rear left wheel part from '%s'\n",
                   xmlReader->getNodeName());
+              mesh=smgr->getMesh(xmlReader->getNodeName());
+              WARNING_IF(mesh==0," - cannot load file '%s'\n",
+                  xmlReader->getNodeName());
+              if(mesh) {
+                mesh->grab();
+                m_wheel_rl.push_back(mesh);
+              }
               break;
 
             case ot_wrr:
-              GM_LOG("loading rear right wheel from '%s'\n",
+              GM_LOG("loading rear right wheel part from '%s'\n",
                   xmlReader->getNodeName());
+              mesh=smgr->getMesh(xmlReader->getNodeName());
+              WARNING_IF(mesh==0," - cannot load file '%s'\n",
+                  xmlReader->getNodeName());
+              if(mesh) {
+                mesh->grab();
+                m_wheel_rr.push_back(mesh);
+              }
               break;
           }
         }

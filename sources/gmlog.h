@@ -18,8 +18,6 @@
    fprintf(stdout,fmt,## __VA_ARGS__);\
 } while(0)
 
-//fprintf(stdout,"%s:%d -| ",__FILE__,__LINE__);\
-
 #ifdef LOG_TO_STDOUT
 #define GM_LOG(fmt,...) GM_LOG_STDOUT(fmt,## __VA_ARGS__)
 #else

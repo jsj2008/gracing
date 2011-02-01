@@ -32,7 +32,7 @@ include sources.mak
 
 ###########################################################################################
 includes=$(irr_inc_dir)  $(bt_inc_dir)
-ccflags=$(includes) -D_IRR_STATIC_LIB_ -g -DLOG_TO_STDOUT -mwindows
+ccflags=$(includes) -D_IRR_STATIC_LIB_ -g -DLOG_TO_STDOUT -mwindows -Wall
 
 ldflags=$(irr_lib_dir) $(platform_libs) $(irr_libs) $(bt_libs) $(bt_lib_dir)
 

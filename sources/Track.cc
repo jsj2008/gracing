@@ -80,14 +80,12 @@ void Track::load()
 
   enum { MAX_DEPTH=128 };
 
-  int i,level,ot;
+  int ot;
   int nodeStack[MAX_DEPTH];
 
-  int nodeStackPtr;
   irr::scene::ISceneManager* smgr = m_device->getSceneManager();
 
   irr::io::EXML_NODE nodeType;
-  bool inElement;
   enum {
     ot_none,
     ot_mesh,
@@ -103,9 +101,6 @@ void Track::load()
     nodeType=xmlReader->getNodeType();
     switch(nodeType) {
       case irr::io::EXN_NONE:
-        GM_LOG("%d None '%s'\n",i,
-            xmlReader->getNodeName(),
-            xmlReader->getNodeType());
       break;
       case irr::io::EXN_ELEMENT:
         if(strcmp("mesh",xmlReader->getNodeName())==0) {
