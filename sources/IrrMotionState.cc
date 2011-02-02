@@ -17,10 +17,17 @@
 
 #include "IrrMotionState.h"
 
-IrrMotionState::IrrMotionState(irr::scene::ISceneNode * node) 
+IrrMotionState::IrrMotionState(irr::scene::ISceneNode * node, const btTransform & initialTrans) 
 {
   m_node=node;
-  m_initialTransform.setIdentity();
+  m_node->grab();
+  m_initialTransform=initialTrans;
+
+}
+
+IrrMotionState::~IrrMotionState()
+{
+  m_node->drop();
 }
 
 void IrrMotionState::getWorldTransform (btTransform &worldTrans)

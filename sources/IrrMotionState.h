@@ -20,14 +20,13 @@
 class IrrMotionState : public btMotionState
 {
   public:
-    IrrMotionState(irr::scene::ISceneNode * node) ;
+    IrrMotionState(irr::scene::ISceneNode * node, const btTransform & initialTrans) ;
+
+    ~IrrMotionState();
 
     virtual void 	getWorldTransform (btTransform &worldTrans);
 
     virtual void 	setWorldTransform (const btTransform &worldTrans);
-
-#if 0
-#endif
 
   private:
     btTransform              m_initialTransform;

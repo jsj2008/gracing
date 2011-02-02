@@ -50,7 +50,16 @@ Vehicle::Vehicle(
    m_sourceName=strdup(source);
    m_loaded=false;
 
-
+  m_gVehicleSteering = 0.f;
+  m_steeringIncrement = 0.04f;
+  m_steeringClamp = 0.3f;
+  m_wheelRadius = 0.5f;
+  m_wheelWidth = 0.4f;
+  m_wheelFriction = 1000;//BT_LARGE_FLOAT;
+  m_suspensionStiffness = 20.f;
+  m_suspensionDamping = 2.3f;
+  m_suspensionCompression = 4.4f;
+  m_rollInfluence = 0.1f;//1.0f;
 }
 
 void Vehicle::load()

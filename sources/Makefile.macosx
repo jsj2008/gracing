@@ -30,7 +30,7 @@ include sources.mak
 ##########################################################
 tgt_appl_dir=$(tgt_dir)/Contents/MacOs
 tgt_res_dir=$(tgt_dir)/Contents/Resources
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall
 ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
 objs=$(subst .cc,.o,$(sources))
@@ -51,6 +51,7 @@ copy_files:
 	mkdir -p $(tgt_res_dir)
 	cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
 	cp $(resources_dir)/track-1.zip $(tgt_res_dir)
+	cp $(resources_dir)/car_ab.zip $(tgt_res_dir)
 	cp demo $(tgt_appl_dir)/
 
 clean:

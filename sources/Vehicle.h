@@ -39,6 +39,18 @@ class Vehicle : public IVehicle
 
 
   private:
+    float m_gVehicleSteering;
+    float m_steeringIncrement;
+    float m_steeringClamp;
+    float m_wheelRadius;
+    float m_wheelWidth;
+    float m_wheelFriction;
+    float m_suspensionStiffness;
+    float m_suspensionDamping;
+    float m_suspensionCompression;
+    float m_rollInfluence;
+
+    
     enum {
       MAX_NUM_OF_WHEELS=4
     };
