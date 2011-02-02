@@ -57,9 +57,12 @@ CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
 /////////////////////////////////////////////////////////////////////////
 
 Vehicle::Vehicle(
-        irr::IrrlichtDevice * device, 
-        PhyWorld * world,
-        const char * source)
+    irr::scene::ISceneNode * parent,
+    irr::IrrlichtDevice * device, 
+    PhyWorld * world,
+    const char * source,
+    irr::s32 id)
+  : IVehicle(parent, device->getSceneManager(),id)
 {
   m_device=device;
   m_world=world;
@@ -122,15 +125,9 @@ void Vehicle::initGraphics()
 
   n=m_chassis.size();
   GM_LOG("- chassis %d nodes\n",n);
-    // actually build nodes
+  // actually build nodes
   for(i=0; i<n; ++i) {
-    node=smgr->addAnimatedMeshSceneNode( m_chassis[i] );
-    m_irrNodes.push_back(node);
-  }
-  for(i=0; i<4; ++i) {
-    node=smgr->addAnimatedMeshSceneNode( m_wheels[i] );
-    GM_LOG("-->%p\n",node);
-    m_irrNodes.push_back(node);
+    node=smgr->addAnimatedMeshSceneNode(m_chassis[i],this);
   }
 
   GM_LOG("----->%d\n",m_irrNodes.size());

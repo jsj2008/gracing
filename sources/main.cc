@@ -144,7 +144,8 @@ int main(int argc, char ** av)
       rect<s32>(10,10,260,22), true);
 
   Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
-  IVehicle * vehicle = new Vehicle(device,world,BASE_DIR "/car_ab.zip");
+  IVehicle * vehicle=0; // = new Vehicle(0,device,world,BASE_DIR "/car_ab.zip");
+
 
   bool done=false;
   while(device->run() && !done)
@@ -157,13 +158,39 @@ int main(int argc, char ** av)
 
     driver->endScene();
 
-    if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
+    if(receiver.IsKeyDown(irr::KEY_KEY_L) && vehicle==0) {
+      vehicle = new Vehicle(smgr->getRootSceneNode(),device,world,BASE_DIR "/car_ab.zip");
       vehicle->load();
       vehicle->use(IVehicle::USE_GRAPHICS);
+
+      scene::ISceneNodeAnimator* anim =
+        smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
+
+      if(anim)
+      {
+        vehicle->addAnimator(anim);
+
+        /*
+           I'm done referring to anim, so must
+           irr::IReferenceCounted::drop() this reference now because it
+           was produced by a createFoo() function. As I shouldn't refer to
+           it again, ensure that I can't by setting to 0.
+           */
+        anim->drop();
+        anim = 0;
+      }
+
+
+
+      //scene::ISceneNodeAnimator* anim =
+      //  smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
+
+      //smgr->addSceneNode(vehicle);
     }
 
-    if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
-      vehicle->unuse(IVehicle::USE_GRAPHICS);
+    if(receiver.IsKeyDown(irr::KEY_KEY_U) && vehicle) {
+      vehicle->drop();
+      vehicle=0;
     }
 
     if(receiver.IsKeyDown(irr::KEY_ESCAPE)) 

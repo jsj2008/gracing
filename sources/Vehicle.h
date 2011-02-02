@@ -25,9 +25,11 @@ class Vehicle : public IVehicle
 {
   public:
     Vehicle(
+        irr::scene::ISceneNode * parent,
         irr::IrrlichtDevice * device, 
         PhyWorld * world,
-        const char * source);
+        const char * source,
+        irr::s32 id=-1);
 
     virtual void load();
 
