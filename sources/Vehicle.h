@@ -39,6 +39,13 @@ class Vehicle : public IVehicle
 
 
   private:
+    
+    void initPhysics();
+    void deinitPhysics();
+    void deinitGraphics();
+    void initGraphics();
+
+
     float m_gVehicleSteering;
     float m_steeringIncrement;
     float m_steeringClamp;
@@ -51,13 +58,7 @@ class Vehicle : public IVehicle
     float m_rollInfluence;
 
     
-    enum {
-      MAX_NUM_OF_WHEELS=4
-    };
-
     const char * m_sourceName;
-
-    int          m_numWheels;
 
     PhyWorld *   m_world;
 
@@ -69,22 +70,40 @@ class Vehicle : public IVehicle
     irr::io::IFileSystem * 
                  m_filesystem;
     
+    unsigned     m_using;
+
+
+    enum {
+      W_REAR_LEFT=0,
+      W_REAR_RIGHT,
+      W_FRONT_LEFT,
+      W_FRONT_RIGHT,
+
+      W_NUM_OF_WHEELS
+    };
+
+    inline bool isFrontWheel(int index) 
+    { 
+      return index==W_FRONT_RIGHT || index==W_FRONT_LEFT;
+    }
+
+    // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   
                          m_chassis;
+    irr::scene::IAnimatedMesh* 
+                         m_wheels[4];
+    irr::core::array<irr::scene::ISceneNode *> 
+                         m_irrNodes;
+    
+    // physics part of the vehicle (bullet stuff)
+  	btCompoundShape*      m_compoundShape;
+    btCollisionShape*     m_chassisShape;
+    btCollisionShape*     m_wheelShape;
+		btVehicleRaycaster *  m_vehicleRayCaster;
+		btRaycastVehicle *    m_raycastVehicle;
+    
 
-    irr::core::array<irr::scene::IAnimatedMesh*>
-      m_wheel_rl;
 
-    irr::core::array<irr::scene::IAnimatedMesh*>
-      m_wheel_rr;
-
-    irr::core::array<irr::scene::IAnimatedMesh*>
-      m_wheel_fl;
-
-    irr::core::array<irr::scene::IAnimatedMesh*>
-      m_wheel_fr;
-
-    btRaycastVehicle * m_bulletBody;
 };
 
 #endif

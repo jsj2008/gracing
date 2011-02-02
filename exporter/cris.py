@@ -390,7 +390,7 @@ class export_OT_vehicle(bpy.types.Operator):
       elif ob.name == "wheel.rr":
         wheel_rr_objs.append(ob)
       elif ob.name == "wheel.rl":
-        wheel_fl_objs.append(ob)
+        wheel_rl_objs.append(ob)
       elif ob.type == 'MESH':
         chassis_objs.append(ob)
       elif ob.type == "EMPTY" and ob.name == "VehicleData":

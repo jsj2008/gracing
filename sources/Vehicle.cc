@@ -28,13 +28,30 @@
   if(cond) {\
     GM_LOG(fmt, ## __VA_ARGS__);\
   }\
-} while(0)\
+} while(0)
+
+#define WARNING(fmt,...) do {\
+  GM_LOG(fmt,## __VA_ARGS__);\
+  GM_LOG("\n");\
+} while(0)
+  
 
 
 #define MANIFEST_NAME "VEHICLE"
 
 CFG_PARAM_D(glob_wheelsDefaultMass)=1.;
 CFG_PARAM_D(glob_chassisDefaultMass)=1.;
+
+CFG_PARAM_D(glob_gVehicleSteering)=0.f;
+CFG_PARAM_D(glob_steeringIncrement)=0.04f;
+CFG_PARAM_D(glob_steeringClamp)=0.3f;
+CFG_PARAM_D(glob_wheelRadius)=0.5f;
+CFG_PARAM_D(glob_wheelWidth)=0.4f;
+CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
+CFG_PARAM_D(glob_suspensionStiffness)=20.f;
+CFG_PARAM_D(glob_suspensionDamping)=2.3f;
+CFG_PARAM_D(glob_suspensionCompression)=4.4f;
+CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -44,22 +61,102 @@ Vehicle::Vehicle(
         PhyWorld * world,
         const char * source)
 {
-   m_device=device;
-   m_world=world;
-   m_filesystem=device->getFileSystem();
-   m_sourceName=strdup(source);
-   m_loaded=false;
+  m_device=device;
+  m_world=world;
+  m_filesystem=device->getFileSystem();
+  m_sourceName=strdup(source);
+  m_loaded=false;
 
-  m_gVehicleSteering = 0.f;
-  m_steeringIncrement = 0.04f;
-  m_steeringClamp = 0.3f;
-  m_wheelRadius = 0.5f;
-  m_wheelWidth = 0.4f;
-  m_wheelFriction = 1000;//BT_LARGE_FLOAT;
-  m_suspensionStiffness = 20.f;
-  m_suspensionDamping = 2.3f;
-  m_suspensionCompression = 4.4f;
-  m_rollInfluence = 0.1f;//1.0f;
+  m_gVehicleSteering = glob_gVehicleSteering;
+  m_steeringIncrement = glob_steeringIncrement;
+  m_steeringClamp = glob_steeringClamp;
+  m_wheelRadius = glob_wheelRadius;
+  m_wheelWidth = glob_wheelWidth;
+  m_wheelFriction = glob_wheelFriction;
+  m_suspensionStiffness = glob_suspensionStiffness;
+  m_suspensionDamping = glob_suspensionDamping;
+  m_suspensionCompression = glob_suspensionCompression;
+  m_rollInfluence = glob_rollInfluence;
+
+  for(int i=0; i<W_NUM_OF_WHEELS; i++) 
+    m_wheels[i]=0;
+
+  m_compoundShape=0;
+  m_chassisShape=0;
+	m_vehicleRayCaster=0;
+	m_raycastVehicle=0;
+
+  m_using=0;
+
+}
+
+void Vehicle::initPhysics()
+{
+  if(!m_loaded) {
+    WARNING("cannot init physics, coz vehicle still not loaded");
+    return;
+  }
+
+	//btCollisionShape* chassisShape = new btBoxShape(btVector3(1.f,0.5f,2.f));
+}
+
+void Vehicle::initGraphics()
+{
+  if(!m_loaded) {
+    WARNING("cannot init graphics, coz vehicle still not loaded");
+    return;
+  }
+
+  if(m_using & USE_GRAPHICS) {
+    WARNING("alread have graphics in plaze");
+    return;
+  }
+
+  irr::u32 n;
+  irr::u32 i;
+  irr::scene::ISceneNode * node;
+  irr::scene::ISceneManager *     smgr=
+    m_device->getSceneManager();
+
+  GM_LOG("creating vehicle scene nodes:\n");
+
+  n=m_chassis.size();
+  GM_LOG("- chassis %d nodes\n",n);
+    // actually build nodes
+  for(i=0; i<n; ++i) {
+    node=smgr->addAnimatedMeshSceneNode( m_chassis[i] );
+    m_irrNodes.push_back(node);
+  }
+  for(i=0; i<4; ++i) {
+    node=smgr->addAnimatedMeshSceneNode( m_wheels[i] );
+    GM_LOG("-->%p\n",node);
+    m_irrNodes.push_back(node);
+  }
+
+  GM_LOG("----->%d\n",m_irrNodes.size());
+
+  m_using|=USE_GRAPHICS;
+}
+
+void Vehicle::deinitGraphics()
+{
+  if(!(m_using & USE_GRAPHICS)) {
+    WARNING("cannot init graphics, already deinited\n");
+    return;
+  }
+  irr::u32 i,n;
+  irr::scene::ISceneNode * node;
+  n=m_irrNodes.size();
+  for(i=0; i<n; ++i) {
+    GM_LOG("fuke %d\n",i);
+    node=m_irrNodes[i];
+    GM_LOG("-->%p\n",node);
+    node->remove();
+    GM_LOG("2fuke %d\n",i);
+  }
+  GM_LOG("suka\n");
+  m_irrNodes.erase(0,n);
+  m_using &= ~USE_GRAPHICS;
 }
 
 void Vehicle::load()
@@ -69,8 +166,6 @@ void Vehicle::load()
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
 
   bool res=m_filesystem->addFileArchive(m_sourceName);
-
-  GM_LOG("--->%d\n",res);
 
   NOT_A_VALID_VEHICLE_IF(!res);
 
@@ -161,12 +256,16 @@ void Vehicle::load()
             case ot_wfl:
               GM_LOG("loading front left wheel part from '%s'\n",
                   xmlReader->getNodeName());
+              if(m_wheels[W_FRONT_LEFT]) {
+                 WARNING("Double definizion of wheel: front left");
+                 break;
+              } 
               mesh=smgr->getMesh(xmlReader->getNodeName());
               WARNING_IF(mesh==0," - cannot load file '%s'\n",
                   xmlReader->getNodeName());
               if(mesh) {
+                m_wheels[W_FRONT_LEFT]=mesh;
                 mesh->grab();
-                m_wheel_fl.push_back(mesh);
               }
               break;
 
@@ -176,9 +275,13 @@ void Vehicle::load()
               mesh=smgr->getMesh(xmlReader->getNodeName());
               WARNING_IF(mesh==0," - cannot load file '%s'\n",
                   xmlReader->getNodeName());
+              if(m_wheels[W_FRONT_RIGHT]) {
+                WARNING("Double definition of wheel: front right");
+                break;
+              }
               if(mesh) {
+                m_wheels[W_FRONT_RIGHT]=mesh;
                 mesh->grab();
-                m_wheel_fr.push_back(mesh);
               }
               break;
 
@@ -188,9 +291,13 @@ void Vehicle::load()
               mesh=smgr->getMesh(xmlReader->getNodeName());
               WARNING_IF(mesh==0," - cannot load file '%s'\n",
                   xmlReader->getNodeName());
+              if(m_wheels[W_REAR_LEFT]) {
+                WARNING("Double definition of wheel: rear left");
+                break;
+              }
               if(mesh) {
+                m_wheels[W_REAR_LEFT]=mesh;
                 mesh->grab();
-                m_wheel_rl.push_back(mesh);
               }
               break;
 
@@ -200,15 +307,20 @@ void Vehicle::load()
               mesh=smgr->getMesh(xmlReader->getNodeName());
               WARNING_IF(mesh==0," - cannot load file '%s'\n",
                   xmlReader->getNodeName());
+              if(m_wheels[W_REAR_RIGHT]) {
+                WARNING("Double definition of wheel: rear right");
+                break;
+              }
               if(mesh) {
+                m_wheels[W_REAR_RIGHT]=mesh;
                 mesh->grab();
-                m_wheel_rr.push_back(mesh);
               }
               break;
           }
         }
     }
   }
+  // TODO: check presence of all parts
   xmlReader->drop();
   m_loaded=true;
 }
@@ -220,9 +332,13 @@ void Vehicle::unload()
 
 void Vehicle::use(unsigned int useFlags)
 {
+  if(useFlags & USE_GRAPHICS) 
+    initGraphics();
 }
 
 void Vehicle::unuse(unsigned int useFlags)
 {
+  if(useFlags & USE_GRAPHICS)
+    deinitGraphics();
 }
 

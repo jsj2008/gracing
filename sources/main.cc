@@ -156,12 +156,15 @@ int main(int argc, char ** av)
     guienv->drawAll();
 
     driver->endScene();
+
     if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
       vehicle->load();
+      vehicle->use(IVehicle::USE_GRAPHICS);
     }
 
-    if(receiver.IsKeyDown(irr::KEY_KEY_U))
-      track->unload();
+    if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
+      vehicle->unuse(IVehicle::USE_GRAPHICS);
+    }
 
     if(receiver.IsKeyDown(irr::KEY_ESCAPE)) 
       done=true;
