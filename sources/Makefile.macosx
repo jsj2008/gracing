@@ -58,6 +58,10 @@ clean:
 	rm -f *.o
 	rm -f $(target)
 	rm -fr $(tgt_dir)
-  
 
-.PHONY: copy_files all clean
+depend:
+	makedepend  -- $(ccflags) -- $(sources) -f depend.mak
+  
+include depend.mak
+
+.PHONY: copy_files all clean depend

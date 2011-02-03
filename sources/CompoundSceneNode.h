@@ -27,41 +27,31 @@ class CompoundSceneNode : public irr::scene::ISceneNode
       : irr::scene::ISceneNode(parent,smgr,id)
     {
       // !! nothing here !!
+      m_mustUpdateBoundingBox=false;
     }
 
     virtual void render()
     {
-      static int cnt=0;
-      GM_LOG("suka %d\n",cnt++);
-#if 0
-      // not necessary coz the scene manager is in charge to call
-      // render on children??
-      irr::scene::ISceneNodeList::Iterator it = Children.begin();
-      for (; it != Children.end(); ++it)
-        (*it)->render();
-#endif
+     
     }
 
 		virtual void addChild(ISceneNode* child)
     {
-      static int cnt=0;
-      GM_LOG("addchild suka %d\n",cnt++);
       if(child && child!=this) {
-        m_boundingBox.addInternalBox(child->getBoundingBox());
-#if 0
-				// Change scene manager?
-				if (SceneManager != child->SceneManager)
-					child->setSceneManager(SceneManager);
-
-				child->grab();
-				child->remove(); // remove from old parent
-				Children.push_back(child);
-				child->Parent = this;
-#endif
+        // m_boundingBox.addInternalBox(child->getBoundingBox());
+        m_mustUpdateBoundingBox=true;
       }
-      //irr::scene::ISceneNode::addChild(child);
-      GM_LOG("risuka\n");
+      irr::scene::ISceneNode::addChild(child);
     }
+
+#if 0
+    void getCompoundBoundingBox(irr::core::aabbox3d<float> & boundingBox)
+    {
+      irr::scene::ISceneNodeList::ConstIterator it = Children.begin();
+      for (; it != Children.end(); ++it) 
+        boundingBox.addInternalBox((*it)->getBoundingBox());
+    }
+#endif
 
     virtual const irr::core::aabbox3d<float> & getBoundingBox() const
     {
@@ -71,6 +61,7 @@ class CompoundSceneNode : public irr::scene::ISceneNode
     void dummy() { int a; a=3.; }
   private:
     irr::core::aabbox3d<float> m_boundingBox;
+    bool                       m_mustUpdateBoundingBox;
 };
 
 

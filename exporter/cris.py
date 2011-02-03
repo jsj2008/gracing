@@ -16,8 +16,8 @@ import bpy,os,struct,zipfile,math
 
 
 # LOG configuration
-LOG_ON_STDOUT=1
-LOG_ON_FILE=0
+LOG_ON_STDOUT=0
+LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 
 # EXPORT configuration
@@ -59,6 +59,13 @@ MATERIA_FLAGS_LIST=[
   { 'name': 'EMF_COLOR_MASK',         'value': 0x8000, "default": False },
   { 'name': 'EMF_COLOR_MATERIAL',     'value': 0x10000, "default": False }
 ]
+
+WIDX_FRONT_LEFT=0
+WIDX_FRONT_RIGHT=1
+WIDX_REAR_LEFT=2
+WIDX_READ_RIGTH=3
+
+WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -363,13 +370,54 @@ class export_OT_vehicle(bpy.types.Operator):
   bl_space_type = "PROPERTIES"
   bl_region_type = "WINDOW"
 
+  wheel_radius=[ 1., 1., 1., 1.  ]
+
+  wheel_position=[\
+    [ 1., 0., 0. ],\
+    [ 1., 0., 0. ],\
+    [ 1., 0., 0. ],\
+    [ 1., 0., 0. ]\
+  ]
+
   filepath = bpy.props.StringProperty(
     name="File Path", 
     description="File path used for exporting the crisalide file", 
     maxlen= 1024, default= "")
 
+  def updateWheelInfo(self, ob):
+
+    if ob.name == "wheel.fr":
+      idx=WIDX_FRONT_RIGHT
+    elif ob.name == "wheel.fl":
+      idx=WIDX_FRONT_LEFT
+    elif ob.name == "wheel.rr":
+      idx=WIDX_REAR_RIGHT
+    elif ob.name == "wheel.rl":
+      idx=WIDX_REAR_LEFT
+    else:
+      idx=-1
+
+    if idx == -1:
+      RaiseError("Internal incosistence")
+
+    dimX=ob.dimensions[0]
+    dimZ=ob.dimensions[1]
+
+    if dimX != dimZ:
+      RaiseError("Wheel is not 'squared'")
+
+    wheel_radius[idx]=dimX / 2.;
+    wheel_position[idx][0]=ob.location[0]
+    wheel_position[idx][1]=ob.location[1]
+    wheel_position[idx][2]=ob.location[2]
+
+
   def execute(self, context):
     log("executing\n");
+
+#####################
+
+#####################
 
     filepath=self.properties.filepath
     realpath = os.path.realpath(os.path.expanduser(filepath))
@@ -384,12 +432,16 @@ class export_OT_vehicle(bpy.types.Operator):
     wheel_rr_objs=[ ]
     for ob in bpy.data.objects:
       if ob.name == "wheel.fr":
+        self.updateWheelInfo(ob)
         wheel_fr_objs.append(ob)
       elif ob.name == "wheel.fl":
+        self.updateWheelInfo(ob)
         wheel_fl_objs.append(ob)
       elif ob.name == "wheel.rr":
+        self.updateWheelInfo(ob)
         wheel_rr_objs.append(ob)
       elif ob.name == "wheel.rl":
+        self.updateWheelInfo(ob)
         wheel_rl_objs.append(ob)
       elif ob.type == 'MESH':
         chassis_objs.append(ob)

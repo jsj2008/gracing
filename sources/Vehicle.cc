@@ -320,6 +320,8 @@ void Vehicle::load()
   // TODO: check presence of all parts
   xmlReader->drop();
   m_loaded=true;
+
+  //
 }
 
 
