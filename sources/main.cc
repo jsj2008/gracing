@@ -15,10 +15,12 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <irrlicht.h>
+
 #include "Track.hh"
 #include "Vehicle.h"
 #include "CCrisMeshFileLoader.h"
 #include "PhyWorld.h"
+#include "VehiclesHandler.h"
 
 #include "gmlog.h"
 
@@ -124,7 +126,7 @@ int main(int argc, char ** av)
 
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(800, 600), 16,
-        false, false, false, &receiver);
+        false, false, false, 0);
 
   if (!device)
     return 1;
@@ -134,70 +136,31 @@ int main(int argc, char ** av)
   IVideoDriver* driver = device->getVideoDriver();
   ISceneManager* smgr = device->getSceneManager();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
-  PhyWorld * world=new PhyWorld();
+  PhyWorld * world = new PhyWorld();
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
   smgr->addExternalMeshLoader(mloader);
 
-  guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!",
-      rect<s32>(10,10,260,22), true);
-
-  Track * track = new Track(device,world,BASE_DIR "/track-1.zip");
-  IVehicle * vehicle=0; // = new Vehicle(0,device,world,BASE_DIR "/car_ab.zip");
-
+  IPhaseHandler * currentPhaseHandler =
+    new VehiclesHandler(device,world);
 
   bool done=false;
+
+  device->setEventReceiver(currentPhaseHandler);
+
   while(device->run() && !done)
   {
-    world->step();
     driver->beginScene(true, true, SColor(255,100,101,140));
 
-    smgr->drawAll();
+    //smgr->drawAll();
+    currentPhaseHandler->step();
+
     guienv->drawAll();
 
     driver->endScene();
 
-    if(receiver.IsKeyDown(irr::KEY_KEY_L) && vehicle==0) {
-      vehicle = new Vehicle(smgr->getRootSceneNode(),device,world,BASE_DIR "/car_ab.zip");
-      vehicle->load();
-      vehicle->use(IVehicle::USE_GRAPHICS);
-
-      scene::ISceneNodeAnimator* anim =
-        smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
-
-      if(anim)
-      {
-        vehicle->addAnimator(anim);
-
-        /*
-           I'm done referring to anim, so must
-           irr::IReferenceCounted::drop() this reference now because it
-           was produced by a createFoo() function. As I shouldn't refer to
-           it again, ensure that I can't by setting to 0.
-           */
-        anim->drop();
-        anim = 0;
-      }
-
-
-
-      //scene::ISceneNodeAnimator* anim =
-      //  smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
-
-      //smgr->addSceneNode(vehicle);
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_U) && vehicle) {
-      vehicle->drop();
-      vehicle=0;
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_ESCAPE)) 
-      done=true;
   }
-
-  delete track;
 
   device->drop();
 

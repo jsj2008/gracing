@@ -14,33 +14,42 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#ifndef IVEHICLE_H
-#define IVEHICLE_H
+#ifndef IPHASEHANDLER_H
+#define IPHASEHANDLER_H
 
-#include "CompoundSceneNode.h"
-// !!! interface for a vehicle !!!
-class IVehicle : public CompoundSceneNode
+#include <irrlicht.h>
+
+#include "PhyWorld.h"
+
+// a game phase handler
+class IPhaseHandler : public irr::IEventReceiver
 {
   public:
-  enum {
-    USE_PHYSICS=0x1,
-    USE_GRAPHICS=0x2,
-  };
+    IPhaseHandler(irr::IrrlichtDevice * device,
+        PhyWorld * world)
+    {
+      m_device=device;
+      m_sceneManager=device->getSceneManager();
+      m_world=world;
+    }
 
-  IVehicle(irr::scene::ISceneNode * parent, irr::scene::ISceneManager * smgr, irr::s32 id=-1) 
-      : CompoundSceneNode(parent,smgr,id)
-  {
-    // empty here
-  }
+    virtual void step()
+    {
+      m_sceneManager->drawAll();
+    }
 
-  virtual void load()=0;
+  protected:
+    irr::IrrlichtDevice  * m_device;
+    irr::scene::ISceneManager  * 
+      m_sceneManager;
+    irr::gui::IGUIEnvironment * m_guiEnv;
+    PhyWorld * m_world;
+ 
+#if 0
+  IGUIEnvironment* guienv = device->getGUIEnvironment();
+  IVideoDriver* driver = device->getVideoDriver();
+  ISceneManager* smgr = device->getSceneManager();
+#endif
 
-  virtual void unload()=0;
-
-  virtual void use(unsigned int useFlags)=0;
-
-  virtual void unuse(unsigned int useFlags)=0;
-
-  // adding more later...
 };
 #endif

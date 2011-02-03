@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#ifndef COMPOUND_SCENE_NODE_H
+#define COMPOUND_SCENE_NODE_H
 #include <irrlicht.h>
 
 #include "gmlog.h"
@@ -64,4 +66,4 @@ class CompoundSceneNode : public irr::scene::ISceneNode
     bool                       m_mustUpdateBoundingBox;
 };
 
-
+#endif

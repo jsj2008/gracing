@@ -27,6 +27,7 @@ class PhyWorld
     PhyWorld();
     ~PhyWorld();
 
+    // OLD STUFF ????
     void addStaticMesh(irr::scene::ISceneNode * node);
 
     void addDynamicSphere(irr::scene::ISceneNode * node, 
@@ -37,6 +38,9 @@ class PhyWorld
         float radius, float mass);
 
     void step();
+
+    static btCollisionShape * 
+      createMeshShape(irr::scene::IMesh * mesh);
 
   private:
 
