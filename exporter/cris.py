@@ -63,7 +63,7 @@ MATERIA_FLAGS_LIST=[
 WIDX_FRONT_LEFT=0
 WIDX_FRONT_RIGHT=1
 WIDX_REAR_LEFT=2
-WIDX_READ_RIGTH=3
+WIDX_REAR_RIGHT=3
 
 WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
 
@@ -279,7 +279,11 @@ def exportXml(root_name,basedir,name,elements):
   fp=open(filename,"w")
   fp.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<%s>\n"%root_name)
   for name in elements:
-    p=os.path.basename(name[1])
+    log("'%s','%s',%d\n"%(name[0],name[1],len(name)))
+    if len(name) == 2:
+      p=os.path.basename(name[1])
+    else:
+      p=name[1]
     fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
   fp.write("</%s>"%root_name)
   fp.close()
@@ -379,6 +383,16 @@ class export_OT_vehicle(bpy.types.Operator):
     [ 1., 0., 0. ]\
   ]
 
+  vehicle_parm_default=[
+   [ "gVehicleSteering", 0.0 ],\
+   [ "steeringIncrement", 0.04 ],\
+   [ "steeringClamp", 0.5 ],\
+   [ "suspensionStiffness", 20.0 ],\
+   [ "suspensionDamping", 2.3 ],\
+   [ "suspensionCompression", 4.4 ],\
+   [ "rollInfluence", 0.1 ],\
+  ]
+  
   filepath = bpy.props.StringProperty(
     name="File Path", 
     description="File path used for exporting the crisalide file", 
@@ -401,15 +415,15 @@ class export_OT_vehicle(bpy.types.Operator):
       RaiseError("Internal incosistence")
 
     dimX=ob.dimensions[0]
-    dimZ=ob.dimensions[1]
+    dimZ=ob.dimensions[2]
 
     if dimX != dimZ:
       RaiseError("Wheel is not 'squared'")
 
-    wheel_radius[idx]=dimX / 2.;
-    wheel_position[idx][0]=ob.location[0]
-    wheel_position[idx][1]=ob.location[1]
-    wheel_position[idx][2]=ob.location[2]
+    self.wheel_radius[idx]=dimX / 2.;
+    self.wheel_position[idx][0]=ob.location[0]
+    self.wheel_position[idx][1]=ob.location[1]
+    self.wheel_position[idx][2]=ob.location[2]
 
 
   def execute(self, context):
@@ -447,6 +461,18 @@ class export_OT_vehicle(bpy.types.Operator):
         chassis_objs.append(ob)
       elif ob.type == "EMPTY" and ob.name == "VehicleData":
         log("getting vehicle data from '%s'\n"%ob.name)
+
+    if len(wheel_rl_objs) == 0:
+      RaiseError("Wheel rear left is missing")
+
+    if len(wheel_rr_objs) == 0:
+      RaiseError("Wheel rear right is missing")
+
+    if len(wheel_fr_objs) == 0:
+      RaiseError("Wheel front right is missing")
+
+    if len(wheel_fl_objs) == 0:
+      RaiseError("Wheel front left is missing")
     
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
@@ -497,7 +523,27 @@ class export_OT_vehicle(bpy.types.Operator):
         el[0]="wrr";
         elements.append(el)
 
-    exportXml("vehicle",tmpdir,"VEHICLE",elements)
+    xmlElements=[ ]
+    for e in elements:
+      xmlElements.append(e)
+
+    for i in range(0,4):
+      name=WHEEL_PREFIX[i] + "radius"
+      value=self.wheel_radius[i]
+      xmlElements.append([ name, value, 1])
+      name=WHEEL_PREFIX[i] + "position"
+      value="%f,%f,%f" % \
+        (self.wheel_position[i][0],\
+        self.wheel_position[i][1],\
+        self.wheel_position[i][2])
+      xmlElements.append([ name, value, 1 ])
+
+    for p in vehicle_parm_default:
+      name=p[0]
+      value="%f"%p[1]
+      xmlElements.append([ name, value, 1 ])
+
+    exportXml("vehicle",tmpdir,"VEHICLE",xmlElements)
     index_filename=tmpdir+"/VEHICLE"
     createZip(realpath,index_filename,"VEHICLE",elements)
 

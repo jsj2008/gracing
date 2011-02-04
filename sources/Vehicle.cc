@@ -126,9 +126,12 @@ void Vehicle::initGraphics()
   n=m_chassis.size();
   GM_LOG("- chassis %d nodes\n",n);
   // actually build nodes
-  for(i=0; i<n; ++i) {
+  for(i=0; i<n; ++i) 
     node=smgr->addAnimatedMeshSceneNode(m_chassis[i],this);
-  }
+
+  for(i=0; i<4; ++i) 
+    smgr->addAnimatedMeshSceneNode(m_wheels[i],this);
+
 
   GM_LOG("----->%d\n",m_irrNodes.size());
 
@@ -163,6 +166,8 @@ void Vehicle::load()
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
 
   bool res=m_filesystem->addFileArchive(m_sourceName);
+
+  GM_LOG("---->%s\n",m_sourceName);
 
   NOT_A_VALID_VEHICLE_IF(!res);
 

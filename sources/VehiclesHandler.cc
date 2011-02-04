@@ -25,7 +25,7 @@ VehiclesHandler::VehiclesHandler(
 {
   Vehicle * h=new Vehicle(
       m_sceneManager->getRootSceneNode(),
-      m_device,world,"car_ab.zip");
+      m_device,world,BASE_DIR "./car_ab.zip");
   h->load();
   h->use(IVehicle::USE_GRAPHICS);
 
