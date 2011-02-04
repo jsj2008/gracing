@@ -33,7 +33,7 @@ using namespace io;
 using namespace gui;
 
 #ifndef BASE_DIR
-#define BASE_DIR "."
+#define BASE_DIR "./"
 #endif
 
 #ifdef _WIN32_

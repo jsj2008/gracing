@@ -54,6 +54,7 @@ copy_files:
 	$(cp) $(resources_win32_dir)\Irrlicht.dll $(tgt_dir)
 	$(cp) $(resources_dir)\track-1.zip  $(tgt_dir)
 	$(cp) $(resources_dir)\car_ab.zip  $(tgt_dir)
+	$(cp) $(resources_dir)\arrow-car.zip  $(tgt_dir)
 	$(cp) $(resources_dir)\Sphere.mesh  $(tgt_dir)
 
 clean:

@@ -93,6 +93,29 @@ class Util
     vec.Z=readDouble(file);
   }
 
+  static inline void parseVector(const char * str, irr::core::vector3df & vec)
+  {
+	  const irr::u32 WORD_BUFFER_LENGTH = 256;
+	  char wordBuffer[WORD_BUFFER_LENGTH];
+    double c[3];
+    const char * ptr, * start;
+    int n;
+    c[0]=c[1]=c[2]=0.f;
+    for(n=0, ptr=str, start=ptr; *ptr && n<3; n++) {
+      if( *ptr && *ptr != ',') {
+        ptr++;
+      } else {
+        c[n]=irr::core::fast_atof(wordBuffer);
+        ++ptr;
+        start=ptr;
+      }
+    }
+
+    vec.X=c[0];
+    vec.Y=c[1];
+    vec.Z=c[2];
+  }
+
 };
 
 #endif

@@ -16,12 +16,14 @@ import bpy,os,struct,zipfile,math
 
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 
 # EXPORT configuration
 EXP_APPLY_OBJ_TRANSFORM=1
+
+EPSILON=0.0001
 
 #########################################
 
@@ -384,7 +386,7 @@ class export_OT_vehicle(bpy.types.Operator):
   ]
 
   vehicle_parm_default=[
-   [ "gVehicleSteering", 0.0 ],\
+   [ "vehicleSteering", 0.0 ],\
    [ "steeringIncrement", 0.04 ],\
    [ "steeringClamp", 0.5 ],\
    [ "suspensionStiffness", 20.0 ],\
@@ -417,7 +419,8 @@ class export_OT_vehicle(bpy.types.Operator):
     dimX=ob.dimensions[0]
     dimZ=ob.dimensions[2]
 
-    if dimX != dimZ:
+    if (dimX - dimZ) < -EPSILON or (dimX - dimZ) > EPSILON:
+      log("Wheel %s %f,%f\n"%(WHEEL_PREFIX[idx],dimX,dimZ));
       RaiseError("Wheel is not 'squared'")
 
     self.wheel_radius[idx]=dimX / 2.;
@@ -525,6 +528,7 @@ class export_OT_vehicle(bpy.types.Operator):
 
     xmlElements=[ ]
     for e in elements:
+      log("-->%s,%s\n"%(e[0],e[1]))
       xmlElements.append(e)
 
     for i in range(0,4):
@@ -538,7 +542,7 @@ class export_OT_vehicle(bpy.types.Operator):
         self.wheel_position[i][2])
       xmlElements.append([ name, value, 1 ])
 
-    for p in vehicle_parm_default:
+    for p in self.vehicle_parm_default:
       name=p[0]
       value="%f"%p[1]
       xmlElements.append([ name, value, 1 ])

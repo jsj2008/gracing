@@ -15,17 +15,24 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "VehiclesHandler.h"
-
 #include "Vehicle.h"
+#include "ResourceManager.h"
+
+#ifndef BASE_DIR
+#define BASE_DIR "./"
+#endif
 
 VehiclesHandler::VehiclesHandler(
     irr::IrrlichtDevice * device, 
     PhyWorld * world)
   : IPhaseHandler(device,world)
 {
+  enum { buffer_len=1024 };
+  char buffer[buffer_len];
+  ResourceManager::getVehicleCompletePath("arrow-car.zip", buffer,buffer_len);
   Vehicle * h=new Vehicle(
       m_sceneManager->getRootSceneNode(),
-      m_device,world,BASE_DIR "./car_ab.zip");
+      m_device,world,buffer);
   h->load();
   h->use(IVehicle::USE_GRAPHICS);
 
