@@ -32,14 +32,6 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-#ifndef BASE_DIR
-#define BASE_DIR "./"
-#endif
-
-#ifdef _WIN32_
-#pragma comment(lib, "Irrlicht.lib")
-#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
-#endif
 class MyEventReceiver : public IEventReceiver
 {
   public:
@@ -131,7 +123,7 @@ int main(int argc, char ** av)
   if (!device)
     return 1;
 
-  device->setWindowCaption(L"Hello World! - Irrlicht Engine Demo");
+  device->setWindowCaption(L"gracing - rosco-p");
 
   IVideoDriver* driver = device->getVideoDriver();
   ISceneManager* smgr = device->getSceneManager();
