@@ -31,6 +31,8 @@ class Vehicle : public IVehicle
         const char * source,
         irr::s32 id=-1);
 
+    ~Vehicle();
+
     virtual void load();
 
     virtual void unload();
@@ -38,7 +40,6 @@ class Vehicle : public IVehicle
     virtual void use(unsigned int useFlags);
 
     virtual void unuse(unsigned int useFlags);
-
 
   private:
     
@@ -104,8 +105,6 @@ class Vehicle : public IVehicle
 		btVehicleRaycaster *  m_vehicleRayCaster;
 		btRaycastVehicle *    m_raycastVehicle;
     
-
-
 };
 
 #endif

@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include "Vehicle.h"
+#include "util.hh"
 #include "gmlog.h"
 
 #define NOT_A_VALID_VEHICLE_IF_NOT(cond) assert(cond)
@@ -93,6 +94,12 @@ Vehicle::Vehicle(
 
 }
 
+Vehicle::~Vehicle()
+{
+  GM_LOG("vehicle destructor\n");
+  this->unload();
+}
+
 void Vehicle::initPhysics()
 {
   if(!m_loaded) {
@@ -118,7 +125,7 @@ void Vehicle::initGraphics()
   irr::u32 n;
   irr::u32 i;
   irr::scene::ISceneNode * node;
-  irr::scene::ISceneManager *     smgr=
+  irr::scene::ISceneManager * smgr=
     m_device->getSceneManager();
 
   GM_LOG("creating vehicle scene nodes:\n");
@@ -126,12 +133,16 @@ void Vehicle::initGraphics()
   n=m_chassis.size();
   GM_LOG("- chassis %d nodes\n",n);
   // actually build nodes
-  for(i=0; i<n; ++i) 
+  for(i=0; i<n; ++i) {
     node=smgr->addAnimatedMeshSceneNode(m_chassis[i],this);
+    m_irrNodes.push_back(node);
+  }
 
-  for(i=0; i<4; ++i) 
-    smgr->addAnimatedMeshSceneNode(m_wheels[i],this);
-
+  for(i=0; i<4; ++i) {
+    node=smgr->addAnimatedMeshSceneNode(m_wheels[i],this);
+    GM_LOG("pushing %p,%p\n",node,m_wheels[i]);
+    m_irrNodes.push_back(node);
+  }
 
   GM_LOG("----->%d\n",m_irrNodes.size());
 
@@ -148,14 +159,12 @@ void Vehicle::deinitGraphics()
   irr::scene::ISceneNode * node;
   n=m_irrNodes.size();
   for(i=0; i<n; ++i) {
-    GM_LOG("fuke %d\n",i);
     node=m_irrNodes[i];
-    GM_LOG("-->%p\n",node);
+    GM_LOG("-->%d,%p\n",i,node);
     node->remove();
-    GM_LOG("2fuke %d\n",i);
   }
-  GM_LOG("suka\n");
-  m_irrNodes.erase(0,n);
+  GM_LOG("done done\n");
+  m_irrNodes.clear();
   m_using &= ~USE_GRAPHICS;
 }
 
@@ -203,7 +212,28 @@ void Vehicle::load()
     ot_wfr,
     ot_wfl,
     ot_wrr,
-    ot_wrl
+    ot_wrl,
+    ot_wrl_position,
+    ot_wrr_position,
+    ot_wfl_position,
+    ot_wfr_position,
+
+    ot_wrl_radius,
+    ot_wrr_radius,
+    ot_wfl_radius,
+    ot_wfr_radius
+  };
+
+  enum {
+    ot_first_position=ot_wrl_position,
+    ot_first_radius=ot_wrl_radius
+  };
+
+  const char * wheel_names[4]={
+    "rear left",
+    "rear right",
+    "front left",
+    "front right"
   };
 
   irr::io::EXML_NODE nodeType;
@@ -224,6 +254,22 @@ void Vehicle::load()
       case irr::io::EXN_ELEMENT:
         if(strcmp("chassis",xmlReader->getNodeName())==0) {
           ot=ot_chassis;
+        } else if(strcmp("wfr_radius",xmlReader->getNodeName())==0) {
+          ot=ot_wfr_radius;
+        } else if(strcmp("wfl_radius",xmlReader->getNodeName())==0) {
+          ot=ot_wfl_radius;
+        } else if(strcmp("wrl_radius",xmlReader->getNodeName())==0) {
+          ot=ot_wrl_radius;
+        } else if(strcmp("wrr_radius",xmlReader->getNodeName())==0) {
+          ot=ot_wrr_radius;
+        } else if(strcmp("wfr_position",xmlReader->getNodeName())==0) {
+          ot=ot_wfr_position;
+        } else if(strcmp("wfl_position",xmlReader->getNodeName())==0) {
+          ot=ot_wfl_position;
+        } else if(strcmp("wrl_position",xmlReader->getNodeName())==0) {
+          ot=ot_wrl_position;
+        } else if(strcmp("wrr_position",xmlReader->getNodeName())==0) {
+          ot=ot_wrr_position;
         } else if(strcmp("wfr",xmlReader->getNodeName())==0) {
           ot=ot_wfr;
         } else if(strcmp("wfl",xmlReader->getNodeName())==0) {
@@ -232,6 +278,8 @@ void Vehicle::load()
           ot=ot_wrr;
         } else if(strcmp("wrl",xmlReader->getNodeName())==0) {
           ot=ot_wrl;
+        } else {
+          ot=ot_none;
         }
         nodeStack[++nodeStackPtr]=ot;
         inElement=true;
@@ -252,6 +300,35 @@ void Vehicle::load()
               if(mesh) {
                 mesh->grab();
                 m_chassis.push_back(mesh);
+              }
+              break;
+
+            case ot_wrl_position:
+            case ot_wrr_position:
+            case ot_wfl_position:
+            case ot_wfr_position:
+              {
+                int widx=nodeStack[nodeStackPtr]-ot_first_position;
+                irr::core::vector3df pos;
+                assert(widx>-1 && widx<4);
+                Util::parseVector(xmlReader->getNodeName(),pos);
+                GM_LOG("Position of '%s' is '%s' -> %2.3f,%2.3f,%2.3f\n",
+                    wheel_names[widx],
+                    xmlReader->getNodeName(),
+                    pos.X,pos.Y,pos.Z);
+              }
+              break;
+
+            case ot_wrl_radius:
+            case ot_wrr_radius:
+            case ot_wfl_radius:
+            case ot_wfr_radius:
+              {
+                int widx=nodeStack[nodeStackPtr]-ot_first_radius;
+                assert(widx>-1 && widx<4);
+                GM_LOG("Radius of '%s' is '%s'\n",
+                    wheel_names[widx],
+                    xmlReader->getNodeName());
               }
               break;
 

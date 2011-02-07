@@ -82,6 +82,8 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   core::array<core::vector3df> normalsBuffer;
   core::array<core::vector2df> textureCoordBuffer;
 
+  GM_LOG("Materials size: %d\n",Materials.size());
+
   SObjMtl * currMtl = new SObjMtl();
   Materials.push_back(currMtl);
 

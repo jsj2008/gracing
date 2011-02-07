@@ -58,6 +58,8 @@ copy_files:
 	cp $(resources_dir)/track-1.zip $(tgt_res_dir)
 	cp $(resources_dir)/car_ab.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/arrow-car.zip $(tgt_vehicles_dir)
+	cp $(resources_dir)/test-1.zip $(tgt_vehicles_dir)
+	cp $(resources_dir)/test-2.zip $(tgt_vehicles_dir)
 	cp demo $(tgt_appl_dir)/
 
 clean:

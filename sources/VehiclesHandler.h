@@ -27,11 +27,29 @@ class VehiclesHandler : public IPhaseHandler
     VehiclesHandler(
       irr::IrrlichtDevice * device, PhyWorld * world);
 
+    ~VehiclesHandler();
+
+    virtual void step();
+
     virtual bool OnEvent(const irr::SEvent& event);
   private:
     irr::core::array<IVehicle*>  
               m_vehicles;
 
+    irr::scene::ISceneNodeAnimator* m_rotator;
+
+    void startVehicle(unsigned index=0);
+    void prevVehicle();
+    void nextVehicle();
+
     unsigned m_currentVehicleIndex;
+
+
+    int      m_status;
+    enum {
+      ST_SHOWING,
+      ST_EXITING,
+      ST_ENTERING
+    };
 };
 #endif

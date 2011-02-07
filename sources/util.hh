@@ -101,11 +101,13 @@ class Util
     const char * ptr, * start;
     int n;
     c[0]=c[1]=c[2]=0.f;
-    for(n=0, ptr=str, start=ptr; *ptr && n<3; n++) {
+
+    for(n=0, ptr=wordBuffer, start=ptr; *ptr && n<3; n++) {
       if( *ptr && *ptr != ',') {
+        
         ptr++;
       } else {
-        c[n]=irr::core::fast_atof(wordBuffer);
+        c[n]=irr::core::fast_atof(start);
         ++ptr;
         start=ptr;
       }
