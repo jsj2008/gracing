@@ -128,11 +128,12 @@ int main(int argc, char ** av)
   IVideoDriver* driver = device->getVideoDriver();
   ISceneManager* smgr = device->getSceneManager();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
-  PhyWorld * world = new PhyWorld();
+  PhyWorld * world = PhyWorld::buildMe();
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
   smgr->addExternalMeshLoader(mloader);
+
 
   IPhaseHandler * currentPhaseHandler =
     new VehiclesHandler(device,world);

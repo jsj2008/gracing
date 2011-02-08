@@ -235,6 +235,13 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   cleanUp();
   mesh->drop();
 
+  const irr::core::aabbox3d<float> & bb=
+      animMesh->getBoundingBox();
+
+  GM_LOG(" - bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
+      bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
+      bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
+
   return animMesh;
 }
 

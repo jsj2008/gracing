@@ -377,6 +377,7 @@ class export_OT_vehicle(bpy.types.Operator):
   bl_region_type = "WINDOW"
 
   wheel_radius=[ 1., 1., 1., 1.  ]
+  wheel_width=[ 1., 1., 1., 1.  ]
 
   wheel_position=[\
     [ 1., 0., 0. ],\
@@ -417,6 +418,7 @@ class export_OT_vehicle(bpy.types.Operator):
       RaiseError("Internal incosistence")
 
     dimX=ob.dimensions[0]
+    dimY=ob.dimensions[1]
     dimZ=ob.dimensions[2]
 
     if (dimX - dimZ) < -EPSILON or (dimX - dimZ) > EPSILON:
@@ -424,6 +426,7 @@ class export_OT_vehicle(bpy.types.Operator):
       RaiseError("Wheel is not 'squared'")
 
     self.wheel_radius[idx]=dimX / 2.;
+    self.wheel_width[idx]=dimY / 2.;
     self.wheel_position[idx][0]=ob.location[0]
     self.wheel_position[idx][1]=ob.location[1]
     self.wheel_position[idx][2]=ob.location[2]
@@ -534,6 +537,9 @@ class export_OT_vehicle(bpy.types.Operator):
     for i in range(0,4):
       name=WHEEL_PREFIX[i] + "radius"
       value=self.wheel_radius[i]
+      xmlElements.append([ name, value, 1])
+      name=WHEEL_PREFIX[i] + "width"
+      value=self.wheel_width[i]
       xmlElements.append([ name, value, 1])
       name=WHEEL_PREFIX[i] + "position"
       value="%f,%f,%f" % \

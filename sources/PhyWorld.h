@@ -21,28 +21,28 @@
 #include "btBulletDynamicsCommon.h"
 
 
-class PhyWorld
+class PhyWorld : public btDiscreteDynamicsWorld           
 {
   public:
-    PhyWorld();
-    ~PhyWorld();
+    static PhyWorld * buildMe();
 
-    // OLD STUFF ????
-    void addStaticMesh(irr::scene::ISceneNode * node);
+    btRigidBody * addDynamicSphere(irr::scene::ISceneNode * node, 
+      float px,float py, float pz,
+      float radius, float mass);
 
-    void addDynamicSphere(irr::scene::ISceneNode * node, 
-        float radius, float mass);
-
-    void addDynamicSphere(irr::scene::ISceneNode * node, 
-        float px,float py, float pz,
-        float radius, float mass);
+    btRigidBody * addStaticMesh(irr::scene::ISceneNode * meshNode);
+    
+    btRigidBody * createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
 
     void step();
 
-    static btCollisionShape * 
-      createMeshShape(irr::scene::IMesh * mesh);
-
+    ~PhyWorld();
   private:
+    PhyWorld(
+        btBroadphaseInterface               *broadPhase,
+        btCollisionDispatcher               *dispatcher,
+        btSequentialImpulseConstraintSolver *solver,
+        btDefaultCollisionConfiguration     *collisionConfiguration);
 
     struct meshBinder {
       btRigidBody *               body;
@@ -61,17 +61,13 @@ class PhyWorld
       }
     };
 
-    btBroadphaseInterface               *m_broadPhase;
-    btDefaultCollisionConfiguration     *m_collisionConfiguration;
-    btCollisionDispatcher               *m_dispatcher;
-    btSequentialImpulseConstraintSolver *m_solver;
-    btDiscreteDynamicsWorld             *m_world;
-
     irr::core::array<meshBinder*>        m_binds;
 
     CFG_PARAM_D(m_frameRate);
     CFG_PARAM_D(m_frameSubsteps);
     CFG_PARAM_V3(m_gravity);
+    CFG_PARAM_D(m_defaultContactProcessingThreshold);
+    
 };
 
 #endif

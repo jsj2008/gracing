@@ -118,6 +118,11 @@ class Util
     vec.Z=c[2];
   }
 
+	static inline double parseFloat(const char * str)
+	{
+		return irr::core::fast_atof(str);
+	}
+
 };
 
 #endif

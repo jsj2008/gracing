@@ -25,6 +25,7 @@ tgt_dir=../demo.app
 resources_dir=../resources
 resources_macosx_dir=../resources.macosx
 cplusplus=g++ 
+ctags=ectags
 
 include sources.mak
 ##########################################################
@@ -44,6 +45,9 @@ all: $(target) copy_files
 
 $(target): $(objs)
 	$(cplusplus) -o $(target) $(ldflags)  $(objs)
+
+tags:
+	$(ctags) $(sources) *.h *.hh
 
 .cc.o: 
 	$(cplusplus) -c $< $(ccflags)
@@ -72,4 +76,4 @@ depend:
   
 include depend.mak
 
-.PHONY: copy_files all clean depend
+.PHONY: copy_files all clean depend tags

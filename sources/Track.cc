@@ -193,9 +193,11 @@ void Track::load()
   }
   archive->drop();
   m_filesystem->removeFileArchive(m_archiveIndex);
+#if 0
 	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
+#endif
   m_loaded=true;
 }
 

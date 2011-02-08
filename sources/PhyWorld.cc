@@ -29,41 +29,84 @@ static inline void irr2bt(const core::vector3df & irrVertex,
   btVertex.setZ(irrVertex.Z);
 }
 
-PhyWorld::PhyWorld()
+PhyWorld* PhyWorld::buildMe()
 {
+  PhyWorld * self;
+
+  btBroadphaseInterface               *broadPhase;
+  btCollisionDispatcher               *dispatcher;
+  btSequentialImpulseConstraintSolver *solver;
+  btDefaultCollisionConfiguration     *collisionConfiguration;
+
+  broadPhase = new btAxisSweep3(btVector3(-1000, -1000, -1000), btVector3(1000, 1000, 1000));
+  collisionConfiguration = new btDefaultCollisionConfiguration();
+  dispatcher = new btCollisionDispatcher(collisionConfiguration);
+  solver = new btSequentialImpulseConstraintSolver();
+
+  self=new PhyWorld(broadPhase,dispatcher,solver,collisionConfiguration);
+
+  return self;
+}
+
+PhyWorld::PhyWorld(
+  btBroadphaseInterface               *broadPhase,
+  btCollisionDispatcher               *dispatcher,
+  btSequentialImpulseConstraintSolver *solver,
+  btDefaultCollisionConfiguration     *collisionConfiguration)
+  : btDiscreteDynamicsWorld(dispatcher, broadPhase, solver, collisionConfiguration)
+{
+  GM_LOG("new dymaics world\n");
   CFG_INIT_D(m_frameRate,1.f/240.f);
   CFG_INIT_D(m_frameSubsteps,1);
-
-
-
-
   CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
-
-  m_broadPhase = new btAxisSweep3(btVector3(-1000, -1000, -1000), btVector3(1000, 1000, 1000));
-  m_collisionConfiguration = new btDefaultCollisionConfiguration();
-  m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-  m_solver = new btSequentialImpulseConstraintSolver();
-  m_world = new btDiscreteDynamicsWorld(m_dispatcher, m_broadPhase, m_solver, m_collisionConfiguration);
-
-	m_world->setGravity(btVector3(
+  CFG_INIT_D(m_defaultContactProcessingThreshold,BT_LARGE_FLOAT);
+	setGravity(btVector3(
         m_gravity[0],
         m_gravity[1],
         m_gravity[2]));
 }
 
+btRigidBody * PhyWorld::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
+{
+	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
+
+	//rigidbody is dynamic if and only if mass is non zero, otherwise static
+	bool isDynamic = (mass != 0.f);
+
+	btVector3 localInertia(0,0,0);
+	if (isDynamic)
+		shape->calculateLocalInertia(mass,localInertia);
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+
+#define USE_MOTIONSTATE 1
+#ifdef USE_MOTIONSTATE
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+
+	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
+
+	btRigidBody* body = new btRigidBody(cInfo);
+	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
+
+#else
+	btRigidBody* body = new btRigidBody(mass,0,shape,localInertia);	
+	body->setWorldTransform(startTransform);
+#endif//
+
+	addRigidBody(body);
+
+	return body;
+}
+
+
 PhyWorld::~PhyWorld()
 {
-  delete m_broadPhase;
-  delete m_collisionConfiguration;
-  delete m_dispatcher;
-  delete m_solver;
-  delete m_world;
 }
 
 /* 
  * add a static mesh to the physics engine 
  */
-void PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
+btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 {
   const core::vector3df &pos   = meshNode->getPosition();
   const core::vector3df &hpr   = meshNode->getRotation();
@@ -147,12 +190,13 @@ void PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
       shape,localInertia);
   btRigidBody* body = new btRigidBody(rbInfo);
   mbinder->body=body;
-  m_world->addRigidBody(body);
+  addRigidBody(body);
 
   m_binds.push_back(mbinder);
+  return body;
 }
 
-void PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node, 
+btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node, 
     float px,float py, float pz,
     float radius, float mass)
 {
@@ -181,13 +225,13 @@ void PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
   meshBinder * mbinder=new meshBinder(body,node);
   m_binds.push_back(mbinder);
 
-  m_world->addRigidBody(body);
-
+  addRigidBody(body);
+  return body;
 }
 
 void PhyWorld::step()
 {
-  m_world->stepSimulation(m_frameRate,m_frameSubsteps);
+  stepSimulation(m_frameRate,m_frameSubsteps);
   for (int j=m_binds.size()-1; j>=0 ;j--) {
     btRigidBody* body = m_binds[j]->body;
     if (body && body->getMotionState()) {

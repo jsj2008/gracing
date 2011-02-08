@@ -35,7 +35,6 @@
   GM_LOG(fmt,## __VA_ARGS__);\
   GM_LOG("\n");\
 } while(0)
-  
 
 
 #define MANIFEST_NAME "VEHICLE"
@@ -82,10 +81,11 @@ Vehicle::Vehicle(
   m_suspensionCompression = glob_suspensionCompression;
   m_rollInfluence = glob_rollInfluence;
 
-  for(int i=0; i<W_NUM_OF_WHEELS; i++) 
+  for(int i=0; i<W_NUM_OF_WHEELS; i++)  {
     m_wheels[i]=0;
+    m_wheelShapes[i]=0;
+  }
 
-  m_compoundShape=0;
   m_chassisShape=0;
 	m_vehicleRayCaster=0;
 	m_raycastVehicle=0;
@@ -107,7 +107,79 @@ void Vehicle::initPhysics()
     return;
   }
 
-	//btCollisionShape* chassisShape = new btBoxShape(btVector3(1.f,0.5f,2.f));
+  if(m_using & USE_GRAPHICS) {
+    WARNING("alread have phisics in plaze");
+    return;
+  }
+
+  // the chassis shape
+  // TODO: use the mesh to create the shape
+
+  m_vehicleShape = new btCompoundShape();
+
+  m_chassisShape = new btBoxShape(btVector3(1.f,0.5f,2.f));
+
+  btTransform localTrans;
+  localTrans.setIdentity();
+
+  m_vehicleShape->addChildShape(localTrans,m_chassisShape);
+
+  btTransform tr;
+	tr.setOrigin(btVector3(0,0.f,0));
+
+  m_carBody=m_world->createRigidBody(800,tr,m_vehicleShape);
+
+
+  for(int i=0; i<4; i++) {
+    m_wheelShapes[i] = 
+      new btCylinderShape(btVector3(
+            m_wheelRadiuses[i],
+            m_wheelWidths[i],
+            m_wheelRadiuses[i]));
+  }
+
+  m_vehicleRayCaster = new btDefaultVehicleRaycaster(m_world);
+	btRaycastVehicle::btVehicleTuning	m_tuning;
+  
+  m_raycastVehicle = new btRaycastVehicle(m_tuning,m_carBody,m_vehicleRayCaster);
+
+  btVector3 wheelDirection(0,-1,0);
+	btVector3 wheelAxleCS(-1,0,0);
+  btScalar suspensionRestLength(0.6);
+  
+  
+  
+  for(int i=0; i<4; i++) {
+		btVector3 conn(m_wheelPositions[i].X,
+        m_wheelPositions[i].Y,
+        m_wheelPositions[i].Z);
+		m_raycastVehicle->addWheel(
+        conn,
+        wheelDirection,
+        wheelAxleCS,
+        suspensionRestLength,
+        m_wheelRadiuses[i],
+        m_tuning,
+        isFrontWheel(i));
+  }
+
+  ///never deactivate the vehicle
+  m_carBody->setActivationState(DISABLE_DEACTIVATION);
+
+  m_world->addVehicle(m_raycastVehicle);
+
+  float connectionHeight = 1.2f;
+
+
+  bool isFrontWheel=true;
+
+  //choose coordinate system
+  int rightIndex = 0;
+  int upIndex = 1;
+  int forwardIndex = 2;
+  
+  m_raycastVehicle->setCoordinateSystem(rightIndex,upIndex,forwardIndex);
+
 }
 
 void Vehicle::initGraphics()
@@ -221,12 +293,18 @@ void Vehicle::load()
     ot_wrl_radius,
     ot_wrr_radius,
     ot_wfl_radius,
-    ot_wfr_radius
+    ot_wfr_radius,
+
+    ot_wrl_width,
+    ot_wrr_width,
+    ot_wfl_width,
+    ot_wfr_width
   };
 
   enum {
     ot_first_position=ot_wrl_position,
-    ot_first_radius=ot_wrl_radius
+    ot_first_radius=ot_wrl_radius,
+    ot_first_width=ot_wrl_width
   };
 
   const char * wheel_names[4]={
@@ -254,6 +332,14 @@ void Vehicle::load()
       case irr::io::EXN_ELEMENT:
         if(strcmp("chassis",xmlReader->getNodeName())==0) {
           ot=ot_chassis;
+        } else if(strcmp("wfr_width",xmlReader->getNodeName())==0) {
+          ot=ot_wfr_width;
+        } else if(strcmp("wfl_width",xmlReader->getNodeName())==0) {
+          ot=ot_wfl_width;
+        } else if(strcmp("wrl_width",xmlReader->getNodeName())==0) {
+          ot=ot_wrl_width;
+        } else if(strcmp("wrr_width",xmlReader->getNodeName())==0) {
+          ot=ot_wrr_width;
         } else if(strcmp("wfr_radius",xmlReader->getNodeName())==0) {
           ot=ot_wfr_radius;
         } else if(strcmp("wfl_radius",xmlReader->getNodeName())==0) {
@@ -311,11 +397,29 @@ void Vehicle::load()
                 int widx=nodeStack[nodeStackPtr]-ot_first_position;
                 irr::core::vector3df pos;
                 assert(widx>-1 && widx<4);
-                Util::parseVector(xmlReader->getNodeName(),pos);
+                Util::parseVector(xmlReader->getNodeName(),m_wheelPositions[i]);
                 GM_LOG("Position of '%s' is '%s' -> %2.3f,%2.3f,%2.3f\n",
                     wheel_names[widx],
                     xmlReader->getNodeName(),
-                    pos.X,pos.Y,pos.Z);
+                    m_wheelPositions[i].X,
+                    m_wheelPositions[i].Y,
+                    m_wheelPositions[i].Z);
+              }
+              break;
+
+            case ot_wrl_width:
+            case ot_wrr_width:
+            case ot_wfl_width:
+            case ot_wfr_width:
+              {
+                int widx=nodeStack[nodeStackPtr]-ot_first_width;
+                assert(widx>-1 && widx<4);
+                double width=Util::parseFloat(xmlReader->getNodeName());
+                m_wheelWidths[widx]=width;
+
+                GM_LOG("Width of '%s' is '%s'\n",
+                    wheel_names[widx],
+                    xmlReader->getNodeName());
               }
               break;
 
@@ -326,6 +430,8 @@ void Vehicle::load()
               {
                 int widx=nodeStack[nodeStackPtr]-ot_first_radius;
                 assert(widx>-1 && widx<4);
+                double radius=Util::parseFloat(xmlReader->getNodeName());
+                m_wheelRadiuses[widx]=radius;
                 GM_LOG("Radius of '%s' is '%s'\n",
                     wheel_names[widx],
                     xmlReader->getNodeName());

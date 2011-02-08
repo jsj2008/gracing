@@ -26,6 +26,12 @@ enum {
   INVALID=0xffff
 };
 
+static const char * cars[]={
+  "test-1.zip",
+  "test-2.zip",
+  "arrow-car.zip",
+};
+
 VehiclesHandler::VehiclesHandler(
     irr::IrrlichtDevice * device, 
     PhyWorld * world)
@@ -39,7 +45,6 @@ VehiclesHandler::VehiclesHandler(
   Vehicle * h1=new Vehicle(
       m_sceneManager->getRootSceneNode(),
       m_device,world,buffer);
-#endif
 
   ResourceManager::getVehicleCompletePath("arrow-car.zip", buffer,buffer_len);
   Vehicle * h2=new Vehicle(
@@ -65,6 +70,15 @@ VehiclesHandler::VehiclesHandler(
   m_vehicles.push_back(h2);
   m_vehicles.push_back(h3);
   m_vehicles.push_back(h4);
+#endif
+  for(unsigned int i=0; i<sizeof(cars)/sizeof(cars[0]); i++) {
+    ResourceManager::getVehicleCompletePath(cars[i], buffer,buffer_len);
+      Vehicle * hh=new Vehicle(
+        m_sceneManager->getRootSceneNode(),
+        m_device,world,buffer);
+      hh->load();
+      m_vehicles.push_back(hh);
+  }
 
 	m_sceneManager->setAmbientLight(irr::video::SColorf(0.2f, 0.2f, 0.2f));
 
@@ -139,6 +153,11 @@ bool VehiclesHandler::OnEvent(const irr::SEvent& event)
 
   if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
     switch(event.KeyInput.Key) {
+      case irr::KEY_RETURN:
+        if(event.KeyInput.PressedDown==false) {
+          GM_LOG("select a vehicle\n");
+        }
+        break;
       case irr::KEY_LEFT:
         if(event.KeyInput.PressedDown==false)
           nextVehicle();

@@ -63,7 +63,7 @@ class Vehicle : public IVehicle
     
     const char * m_sourceName;
 
-    PhyWorld *   m_world;
+    PhyWorld *  m_world;
 
     bool         m_loaded;
 
@@ -97,11 +97,18 @@ class Vehicle : public IVehicle
                          m_wheels[4];
     irr::core::array<irr::scene::ISceneNode *> 
                          m_irrNodes;
+
+    double m_wheelRadiuses[4];
+    double m_wheelWidths[4];
+    irr::core::vector3df m_wheelPositions[4];
     
     // physics part of the vehicle (bullet stuff)
-  	btCompoundShape*      m_compoundShape;
+    btCompoundShape*      m_vehicleShape;
     btCollisionShape*     m_chassisShape;
-    btCollisionShape*     m_wheelShape;
+    btCollisionShape*     m_wheelShapes[4];
+
+    btRigidBody *         m_carBody;
+
 		btVehicleRaycaster *  m_vehicleRayCaster;
 		btRaycastVehicle *    m_raycastVehicle;
     
