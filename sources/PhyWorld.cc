@@ -66,7 +66,9 @@ PhyWorld::PhyWorld(
         m_gravity[2]));
 }
 
-btRigidBody * PhyWorld::createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape)
+btRigidBody * PhyWorld::createRigidBody(
+    irr::scene::ISceneNode * node,
+    float mass, const btTransform& startTransform, btCollisionShape* shape)
 {
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 
@@ -94,6 +96,9 @@ btRigidBody * PhyWorld::createRigidBody(float mass, const btTransform& startTran
 #endif//
 
 	addRigidBody(body);
+
+  meshBinder * mbinder=new meshBinder(body,node);
+  m_binds.push_back(mbinder);
 
 	return body;
 }

@@ -148,6 +148,7 @@ int main(int argc, char ** av)
 
     //smgr->drawAll();
     currentPhaseHandler->step();
+    world->step();
 
     guienv->drawAll();
 

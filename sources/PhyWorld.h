@@ -32,7 +32,9 @@ class PhyWorld : public btDiscreteDynamicsWorld
 
     btRigidBody * addStaticMesh(irr::scene::ISceneNode * meshNode);
     
-    btRigidBody * createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
+    btRigidBody * createRigidBody(
+      irr::scene::ISceneNode * node,
+      float mass, const btTransform& startTransform, btCollisionShape* shape);
 
     void step();
 

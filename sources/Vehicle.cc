@@ -102,12 +102,18 @@ Vehicle::~Vehicle()
 
 void Vehicle::initPhysics()
 {
+  GM_LOG("----->%x\n",m_using);
   if(!m_loaded) {
     WARNING("cannot init physics, coz vehicle still not loaded");
     return;
   }
 
-  if(m_using & USE_GRAPHICS) {
+  if(!(m_using & USE_GRAPHICS)) {
+    WARNING("cannot init phisics, must first init graphics");
+    return;
+  }
+
+  if(m_using & USE_PHYSICS) {
     WARNING("alread have phisics in plaze");
     return;
   }
@@ -127,8 +133,7 @@ void Vehicle::initPhysics()
   btTransform tr;
 	tr.setOrigin(btVector3(0,0.f,0));
 
-  m_carBody=m_world->createRigidBody(800,tr,m_vehicleShape);
-
+  m_carBody=m_world->createRigidBody(this,800,tr,m_vehicleShape);
 
   for(int i=0; i<4; i++) {
     m_wheelShapes[i] = 
@@ -146,8 +151,6 @@ void Vehicle::initPhysics()
   btVector3 wheelDirection(0,-1,0);
 	btVector3 wheelAxleCS(-1,0,0);
   btScalar suspensionRestLength(0.6);
-  
-  
   
   for(int i=0; i<4; i++) {
 		btVector3 conn(m_wheelPositions[i].X,
@@ -168,10 +171,10 @@ void Vehicle::initPhysics()
 
   m_world->addVehicle(m_raycastVehicle);
 
+#if 0
   float connectionHeight = 1.2f;
-
-
   bool isFrontWheel=true;
+#endif
 
   //choose coordinate system
   int rightIndex = 0;
@@ -180,6 +183,7 @@ void Vehicle::initPhysics()
   
   m_raycastVehicle->setCoordinateSystem(rightIndex,upIndex,forwardIndex);
 
+  m_using|=USE_PHYSICS;
 }
 
 void Vehicle::initGraphics()
@@ -244,11 +248,15 @@ void Vehicle::load()
 {
   if(m_loaded)
     return;
+  GM_LOG("---->%s\n",m_sourceName);
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
+
+  GM_LOG("---->%u\n",cnt);
 
   bool res=m_filesystem->addFileArchive(m_sourceName);
 
-  GM_LOG("---->%s\n",m_sourceName);
+  GM_LOG("---->%d\n",res);
+
 
   NOT_A_VALID_VEHICLE_IF(!res);
 
@@ -521,6 +529,8 @@ void Vehicle::use(unsigned int useFlags)
 {
   if(useFlags & USE_GRAPHICS) 
     initGraphics();
+  if(useFlags & USE_PHYSICS)
+    initPhysics();
 }
 
 void Vehicle::unuse(unsigned int useFlags)

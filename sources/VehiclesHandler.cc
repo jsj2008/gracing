@@ -27,9 +27,9 @@ enum {
 };
 
 static const char * cars[]={
-  "test-1.zip",
-  "test-2.zip",
-  "arrow-car.zip",
+  "test-1.zip"//,
+  //"test-2.zip",
+  //"arrow-car.zip"
 };
 
 VehiclesHandler::VehiclesHandler(
@@ -40,43 +40,22 @@ VehiclesHandler::VehiclesHandler(
   enum { buffer_len=1024 };
   char buffer[buffer_len];
 
-#if 0
-  ResourceManager::getVehicleCompletePath("car_ab.zip", buffer,buffer_len);
-  Vehicle * h1=new Vehicle(
-      m_sceneManager->getRootSceneNode(),
-      m_device,world,buffer);
+  unsigned n_vehicles=sizeof(cars)/sizeof(cars[0]);
+  GM_LOG("Loading %d vehcles\n",n_vehicles);
 
-  ResourceManager::getVehicleCompletePath("arrow-car.zip", buffer,buffer_len);
-  Vehicle * h2=new Vehicle(
-      m_sceneManager->getRootSceneNode(),
-      m_device,world,buffer);
-
-  ResourceManager::getVehicleCompletePath("test-1.zip", buffer,buffer_len);
-  Vehicle * h3=new Vehicle(
-      m_sceneManager->getRootSceneNode(),
-      m_device,world,buffer);
-
-  ResourceManager::getVehicleCompletePath("test-2.zip", buffer,buffer_len);
-  Vehicle * h4=new Vehicle(
-      m_sceneManager->getRootSceneNode(),
-      m_device,world,buffer);
-
-  h4->load();
-  h3->load();
-  h2->load();
-  //h1->load();
-
-  //m_vehicles.push_back(h1);
-  m_vehicles.push_back(h2);
-  m_vehicles.push_back(h3);
-  m_vehicles.push_back(h4);
-#endif
-  for(unsigned int i=0; i<sizeof(cars)/sizeof(cars[0]); i++) {
+  for(unsigned int i=0; i<n_vehicles; i++) {
+    GM_LOG("building '%s'\n",cars[i]);
     ResourceManager::getVehicleCompletePath(cars[i], buffer,buffer_len);
       Vehicle * hh=new Vehicle(
         m_sceneManager->getRootSceneNode(),
         m_device,world,buffer);
+      if(hh==0) {
+        GM_LOG("Cannot load '%s'\n",buffer);
+        continue;
+      }
+      GM_LOG("loading '%s'\n",cars[i]);
       hh->load();
+      GM_LOG("pushing\n");
       m_vehicles.push_back(hh);
   }
 
@@ -108,7 +87,7 @@ void VehiclesHandler::startVehicle(unsigned index)
   IVehicle * h=m_vehicles[index];
   m_currentVehicleIndex=index;
   m_status=ST_SHOWING;
-  h->use(IVehicle::USE_GRAPHICS);
+  h->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
   if(m_rotator==0) {
     m_rotator=m_sceneManager->createRotationAnimator(
