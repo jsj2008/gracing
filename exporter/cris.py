@@ -274,7 +274,7 @@ def exportObject(tmp_dir_name,obj):
     exportLamp(fp,obj)
     fp.close()
     return [ 'lamp', filename ]
-  if obj.type == "EMTPY":
+  if obj.type == "EMPTY":
     return [ "pippo", "pluto", 1 ]
 
   return None
@@ -290,12 +290,14 @@ def exportXml(root_name,basedir,name,elements):
     else:
       p=name[1]
     fp.write("  <%s>%s</%s>\n"%(name[0],p,name[0]))
-  fp.write("</%s>"%root_name)
+  fp.write("</%s>\n"%root_name)
   fp.close()
 
 def createZip(path,index_file,index_name,elements):
     zf=zipfile.ZipFile(path,"w")
     for name in elements:
+      if len(name) == 3:
+        continue
       p=os.path.basename(name[1])
       zf.write(name[1],p)
     zf.write(index_file,index_name)
@@ -323,8 +325,15 @@ class export_OT_track(bpy.types.Operator):
     description="Scale mesh", 
     default = 0.1, min = 0.001, max = 1000.0)
 
-  def getTrackInfo(self, elements):
-    pass
+  def getTrackInfo(self, elements,es):
+    for e in es:
+      if e.name == 'track.start':
+        val="%f,%f,%f"%( e.location[0], e.location[1], e.location[2])
+        elements.append([ 'track_start_pos', val, 1])
+        val="%f,%f,%f"%( e.rotation_euler[0], e.rotation_euler[1], e.rotation_euler[2])
+        elements.append([ 'track_start_rot', val, 1])
+       
+
 
   def execute(self, context):
     filepath=self.properties.filepath
@@ -333,6 +342,7 @@ class export_OT_track(bpy.types.Operator):
     dirname = os.path.dirname(filepath)
     tmpdir = dirname + "/tmp";
 
+    empties=[ ]
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
     else:
@@ -344,6 +354,9 @@ class export_OT_track(bpy.types.Operator):
     elements=[]
 
     for ob in bpy.data.objects:
+      if ob.type == "EMPTY":
+        empties.append(ob)
+        continue
       name=exportObject(tmpdir,ob)
       if name != None:
         log("%s,%s\n"%(name[0],name[1]))
@@ -359,7 +372,7 @@ class export_OT_track(bpy.types.Operator):
       xmlElements.append(e)
 
     #### retrieve track info
-    self.getTrackInfo(xmlElements)
+    self.getTrackInfo(xmlElements,empties)
 
     #### create xml file
     exportXml("track",tmpdir,"TRACK",xmlElements)
@@ -447,11 +460,6 @@ class export_OT_vehicle(bpy.types.Operator):
 
 
   def execute(self, context):
-    log("executing\n");
-
-#####################
-
-#####################
 
     filepath=self.properties.filepath
     realpath = os.path.realpath(os.path.expanduser(filepath))
