@@ -21,6 +21,10 @@
 #error Please define VEHICLES_DIR preprocessor macro
 #endif
 
+#ifndef TRACKS_DIR
+#error Please define TRACKS_DIR preprocessor macro
+#endif
+
 class ResourceManager 
 {
   public:
@@ -31,6 +35,24 @@ class ResourceManager
       --buffer_len;
       for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
         buffer[i]=*ddir;
+    }
+    static inline void getTrackCompletePath(const char * trackName, char * buffer, int buffer_len)
+    {
+#ifdef __APPLE__
+      //CFUrlRef url=CFBundleCopyResourceURL(bundle, CFSTR(vehicleName), CFSTR("zip"), CFSTR("Resources"));
+      const char * ddir=TRACKS_DIR;
+      int i;
+      --buffer_len;
+      for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
+        buffer[i]=*ddir;
+      for( ; i<buffer_len && *trackName; ++i, ++trackName)
+        buffer[i]=*trackName;
+      buffer[i]=0;
+#else
+      int i;
+      for(i=0; i<buffer_len && *trackName; ++i)
+        buffer[i]=vehicleName[i];
+#endif
     }
     static inline void getVehicleCompletePath(const char * vehicleName, char * buffer, int buffer_len)
     {

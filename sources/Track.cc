@@ -17,11 +17,13 @@
 #include <assert.h>
 
 #include "gmlog.h"
+#include "gException.h"
 
 #include "Track.hh"
 #include "Util.hh"
 #include "CameraDataManager.hh"
 #include "PhyWorld.h"
+#include "ResourceManager.h"
 
 #ifndef BASE_DIR
 #define BASE_DIR "."
@@ -37,7 +39,12 @@ Track::Track(
 {
   m_device=device;
   m_filesystem=device->getFileSystem();
-  m_filename=strdup(filename);
+  enum {
+    buffer_len=1024
+  };
+  char buffer[buffer_len];
+  ResourceManager::getTrackCompletePath(filename, buffer,buffer_len);
+  m_filename=strdup(buffer);
   m_loaded=false;
   m_world=world;
 }
@@ -46,24 +53,32 @@ void Track::load()
 {
   if(m_loaded) return;
 
+  GM_LOG("laoding track from '%s'\n",m_filename);
+
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
+  GM_LOG("fuck fuck %d,%s\n",cnt,m_filename);
   bool res=m_filesystem->addFileArchive(m_filename);
+  GM_LOG("fuck fock\n");
+
+  GM_LOG("laoding index '%u'\n",cnt);
 
   if(!res) {
     return ;
   }
-  assert(res);
 
   m_archiveIndex=cnt;
 
   irr::io::IFileArchive* archive=m_filesystem->
     getFileArchive(m_archiveIndex);
-  assert(archive);
+  if(!archive) 
+    throw Exception_cannotLoadFile(m_filename);
 
   const irr::io::IFileList * fileList=archive->getFileList();
   irr::s32 manifestIndex;
 
   manifestIndex=fileList->findFile(MANIFEST_NAME);
+
+  GM_LOG("uno\n");
   
   if(manifestIndex<0) {
     GM_LOG("Not a valid track file\n");
@@ -80,6 +95,8 @@ void Track::load()
 
   enum { MAX_DEPTH=128 };
 
+  GM_LOG("due\n");
+
   int ot;
   int nodeStack[MAX_DEPTH];
 
@@ -93,6 +110,7 @@ void Track::load()
     ot_lamp,
     ot_unknown
   };
+  GM_LOG("tre\n");
   irr::io::IReadFile * rfile;
   for(int i=0, inElement=false, nodeStackPtr=0; 
       xmlReader->read(); 

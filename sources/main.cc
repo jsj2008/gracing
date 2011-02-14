@@ -16,6 +16,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <irrlicht.h>
 
+#include "gException.h"
 #include "Track.hh"
 #include "Vehicle.h"
 #include "CCrisMeshFileLoader.h"
@@ -131,23 +132,28 @@ int main(int argc, char ** av)
   PhyWorld * world = PhyWorld::buildMe();
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
-
   smgr->addExternalMeshLoader(mloader);
 
-
-  IPhaseHandler * currentPhaseHandler =
-    new VehiclesHandler(device,world);
+  //IPhaseHandler * currentPhaseHandler =
+  //  new VehiclesHandler(device,world);
 
   bool done=false;
 
-  device->setEventReceiver(currentPhaseHandler);
+  //device->setEventReceiver(currentPhaseHandler);
+
+  Track * thetrack=new Track(device,world,"track-1.zip");
+  try {
+    thetrack->load();
+  } catch(std::exception & e) {
+    GM_LOG("Cannot load track: %s\n",e.what());
+  }
 
   while(device->run() && !done)
   {
     driver->beginScene(true, true, SColor(255,100,101,140));
 
-    //smgr->drawAll();
-    currentPhaseHandler->step();
+    smgr->drawAll();
+    //currentPhaseHandler->step();
     world->step();
 
     guienv->drawAll();
