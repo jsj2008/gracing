@@ -153,6 +153,8 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
   mbinder->irrNode=meshNode;
 
+  meshNode->grab();
+
   GM_LOG("adding mesh: %d buffers\n",n_buffers);
 
   btVector3 btv1,btv2,btv3;
@@ -199,6 +201,19 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
   m_binds.push_back(mbinder);
   return body;
+}
+
+void PhyWorld::clearAll()
+{
+  GM_LOG("Clearing all %d binds\n",m_binds.size());
+
+  for(unsigned int i=0; i<m_binds.size(); i++) {
+    removeRigidBody(m_binds[i]->body);
+    m_binds[i]->irrNode->drop();
+    delete m_binds[i]->body;
+    delete m_binds[i];
+  }
+  m_binds.clear();
 }
 
 btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node, 

@@ -18,6 +18,7 @@
 #define TRACK_HH
 #include <irrlicht.h>
 #include "PhyWorld.h"
+#include "CameraDataManager.hh"
 
 class Track
 {
@@ -44,8 +45,10 @@ class Track
     irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
                                                    m_sceneNodes;
 
+    CameraDataManager *                            m_cammgr;
+
     bool                                           m_loaded;
-    const char *                                   m_filename;
+    std::string                                    m_filename;
     irr::IrrlichtDevice *                          m_device;
     PhyWorld *                                     m_world;
 };

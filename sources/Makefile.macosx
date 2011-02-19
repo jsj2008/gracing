@@ -20,6 +20,8 @@ bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCo
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
 
 
+log_enabled=-DLOG_ENABLED
+
 target=demo
 tgt_dir=../demo.app
 resources_dir=../resources
@@ -34,7 +36,7 @@ tgt_res_dir=$(tgt_dir)/Contents/Resources
 tgt_vehicles_dir=$(tgt_res_dir)/Vehicles
 tgt_tracks_dir=$(tgt_res_dir)/Tracks
 
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall \
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)\
 				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
 				-DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
 				
@@ -67,6 +69,7 @@ copy_files:
 	cp $(resources_dir)/arrow-car.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/test-1.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/test-2.zip $(tgt_vehicles_dir)
+	cp $(resources_dir)/font.png $(tgt_res_dir)
 	cp demo $(tgt_appl_dir)/
 
 clean:

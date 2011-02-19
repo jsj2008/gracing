@@ -17,16 +17,19 @@
 #include <irrlicht.h>
 
 #include "gException.h"
-#include "Track.hh"
-#include "Vehicle.h"
+#include "ResourceManager.h"
 #include "CCrisMeshFileLoader.h"
+#include "Track.hh"
 #include "PhyWorld.h"
-#include "VehiclesHandler.h"
-
 #include "gmlog.h"
 
-using namespace irr;
+#if 0
+#include "Vehicle.h"
+#include "VehiclesHandler.h"
+#endif
 
+
+using namespace irr;
 using namespace core;
 using namespace scene;
 using namespace video;
@@ -112,44 +115,54 @@ int WINAPI WinMain(   HINSTANCE   hInstance,HINSTANCE   hPrevInstance,LPSTR   lp
 int main(int argc, char ** av)
 {
 #endif
-  MyEventReceiver receiver;
-  video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
 
   GM_LOG("--------- starting gracing\n");
+ 
+  ResourceManager * resmanager=ResourceManager::getInstance();
 
+  MyEventReceiver receiver;
+
+  video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(800, 600), 16,
-        false, false, false, 0);
+        false, false, false, &receiver);
+
+  resmanager->setDevice(device);
 
   if (!device)
     return 1;
 
   device->setWindowCaption(L"gracing - rosco-p");
 
-  IVideoDriver* driver = device->getVideoDriver();
   ISceneManager* smgr = device->getSceneManager();
+  IVideoDriver* driver = device->getVideoDriver();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
   PhyWorld * world = PhyWorld::buildMe();
+
+
+  std::string fontPath = resmanager->getResourcePath() + "/font.png";
+	gui::IGUIFont* font = guienv->getFont(fontPath.c_str());
+	if (font)
+		guienv->getSkin()->setFont(font);
+  guienv->addStaticText(L"**********************************\n"
+      "Press:\n"
+      "'l' : load track\n'u' : unload track\n",
+      core::rect<s32>(60,15,600,300));
+
+  
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
   smgr->addExternalMeshLoader(mloader);
 
-  //IPhaseHandler * currentPhaseHandler =
-  //  new VehiclesHandler(device,world);
+  Track * thetrack;
+  thetrack=new Track(device,world,"track-1.zip");
+
+
+  thetrack->load();
 
   bool done=false;
 
-  //device->setEventReceiver(currentPhaseHandler);
-
-  Track * thetrack=new Track(device,world,"track-1.zip");
-  try {
-    thetrack->load();
-  } catch(std::exception & e) {
-    GM_LOG("Cannot load track: %s\n",e.what());
-  }
-
-  while(device->run() && !done)
-  {
+  while(device->run() && !done) {
     driver->beginScene(true, true, SColor(255,100,101,140));
 
     smgr->drawAll();
@@ -160,13 +173,47 @@ int main(int argc, char ** av)
 
     driver->endScene();
 
+
+    if(receiver.IsKeyDown(irr::KEY_ESCAPE))
+      done=true;
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
+      thetrack->load();
+    }
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
+      thetrack->unload();
+    }
+
   }
+
+}
+
+#if 0
+
+  device->grab();
+
+  if (!device)
+    return 1;
+
+  device->setWindowCaption(L"gracing - rosco-p");
+
+
+  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
+  smgr->addExternalMeshLoader(mloader);
+
+  IPhaseHandler * currentPhaseHandler =
+    new VehiclesHandler(device,world);
+
+  bool done=false;
+
+  device->setEventReceiver(currentPhaseHandler);
+
+
 
   device->drop();
 
   return 0;
 }
+#endif
 
-/*
-   That's it. Compile and run.
- **/

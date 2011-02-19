@@ -36,6 +36,9 @@ class PhyWorld : public btDiscreteDynamicsWorld
       irr::scene::ISceneNode * node,
       float mass, const btTransform& startTransform, btCollisionShape* shape);
 
+
+    void clearAll();
+
     void step();
 
     ~PhyWorld();

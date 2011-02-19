@@ -15,7 +15,9 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#include <string>
 #include <stdlib.h>
+#include <irrlicht.h>
 
 #ifndef VEHICLES_DIR
 #error Please define VEHICLES_DIR preprocessor macro
@@ -28,7 +30,14 @@
 class ResourceManager 
 {
   public:
-    static inline void getVehiclesCompletePath(char * buffer, int buffer_len)
+
+    static inline ResourceManager * getInstance() { if(s_instance==0) s_instance=new ResourceManager(); return s_instance; }
+
+    irr::io::path createAbsoluteFilename(const std::string & fileName);
+
+    void setDevice(irr::IrrlichtDevice *device);
+
+    inline void getVehiclesCompletePath(char * buffer, int buffer_len)
     {
       const char * ddir=VEHICLES_DIR;
       int i;
@@ -36,24 +45,11 @@ class ResourceManager
       for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
         buffer[i]=*ddir;
     }
-    static inline void getTrackCompletePath(const char * trackName, char * buffer, int buffer_len)
-    {
-#ifdef __APPLE__
-      //CFUrlRef url=CFBundleCopyResourceURL(bundle, CFSTR(vehicleName), CFSTR("zip"), CFSTR("Resources"));
-      const char * ddir=TRACKS_DIR;
-      int i;
-      --buffer_len;
-      for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
-        buffer[i]=*ddir;
-      for( ; i<buffer_len && *trackName; ++i, ++trackName)
-        buffer[i]=*trackName;
-      buffer[i]=0;
-#else
-      int i;
-      for(i=0; i<buffer_len && *trackName; ++i)
-        buffer[i]=vehicleName[i];
-#endif
-    }
+
+    void getTrackCompletePath(const char * trackName, std::string & path);
+
+    inline const std::string & getResourcePath() { return m_rootDir; }
+
     static inline void getVehicleCompletePath(const char * vehicleName, char * buffer, int buffer_len)
     {
 #ifdef __APPLE__
@@ -72,6 +68,17 @@ class ResourceManager
         buffer[i]=vehicleName[i];
 #endif
     }
+
+  private:
+    static ResourceManager * s_instance;
+    ResourceManager();
+
+
+    irr::IrrlichtDevice * m_device;
+    irr::io::IFileSystem * m_fileSystem;
+
+    std::string m_rootDir;
+    std::string m_trackDir;
 
 };
 

@@ -38,6 +38,35 @@
 
 
 #define MANIFEST_NAME "VEHICLE"
+  enum {
+    ot_none,
+    ot_chassis,
+    ot_wfr,
+    ot_wfl,
+    ot_wrr,
+    ot_wrl,
+    ot_wrl_position,
+    ot_wrr_position,
+    ot_wfl_position,
+    ot_wfr_position,
+
+    ot_wrl_radius,
+    ot_wrr_radius,
+    ot_wfl_radius,
+    ot_wfr_radius,
+
+    ot_wrl_width,
+    ot_wrr_width,
+    ot_wfl_width,
+    ot_wfr_width
+  };
+
+  enum {
+    ot_first_position=ot_wrl_position,
+    ot_first_radius=ot_wrl_radius,
+    ot_first_width=ot_wrl_width
+  };
+
 
 CFG_PARAM_D(glob_wheelsDefaultMass)=1.;
 CFG_PARAM_D(glob_chassisDefaultMass)=1.;
@@ -248,15 +277,11 @@ void Vehicle::load()
 {
   if(m_loaded)
     return;
-  GM_LOG("---->%s\n",m_sourceName);
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
 
-  GM_LOG("---->%u\n",cnt);
+  GM_LOG("@@@ %d\n",cnt);
 
   bool res=m_filesystem->addFileArchive(m_sourceName);
-
-  GM_LOG("---->%d\n",res);
-
 
   NOT_A_VALID_VEHICLE_IF(!res);
 
@@ -286,35 +311,6 @@ void Vehicle::load()
 
   int ot;
   int nodeStack[MAX_DEPTH];
-  enum {
-    ot_none,
-    ot_chassis,
-    ot_wfr,
-    ot_wfl,
-    ot_wrr,
-    ot_wrl,
-    ot_wrl_position,
-    ot_wrr_position,
-    ot_wfl_position,
-    ot_wfr_position,
-
-    ot_wrl_radius,
-    ot_wrr_radius,
-    ot_wfl_radius,
-    ot_wfr_radius,
-
-    ot_wrl_width,
-    ot_wrr_width,
-    ot_wfl_width,
-    ot_wfr_width
-  };
-
-  enum {
-    ot_first_position=ot_wrl_position,
-    ot_first_radius=ot_wrl_radius,
-    ot_first_width=ot_wrl_width
-  };
-
   const char * wheel_names[4]={
     "rear left",
     "rear right",
@@ -513,8 +509,16 @@ void Vehicle::load()
         }
     }
   }
-  // TODO: check presence of all parts
+
+  manifestFile->drop();
+
+  GM_LOG("2 @@@ %d\n",m_filesystem->getFileArchiveCount());
+  m_filesystem->removeFileArchive(archiveIndex);
+  GM_LOG("3 @@@ %d\n",m_filesystem->getFileArchiveCount());
+
   xmlReader->drop();
+
+  // TODO: check presence of all parts
   m_loaded=true;
 
   //

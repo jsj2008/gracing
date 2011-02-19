@@ -21,7 +21,6 @@
 
 #include "Track.hh"
 #include "Util.hh"
-#include "CameraDataManager.hh"
 #include "PhyWorld.h"
 #include "ResourceManager.h"
 
@@ -42,51 +41,63 @@ Track::Track(
   enum {
     buffer_len=1024
   };
-  char buffer[buffer_len];
-  ResourceManager::getTrackCompletePath(filename, buffer,buffer_len);
-  m_filename=strdup(buffer);
+  //char buffer[buffer_len];
+  ResourceManager::getInstance()->getTrackCompletePath(filename, m_filename);
+  //m_filename=strdup(buffer);
   m_loaded=false;
   m_world=world;
+  m_filesystem->grab();
+  //m_device->grab();
+  m_cammgr=0;
 }
 
 void Track::load()
 {
   if(m_loaded) return;
 
-  GM_LOG("laoding track from '%s'\n",m_filename);
-
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
-  GM_LOG("fuck fuck %d,%s\n",cnt,m_filename);
-  bool res=m_filesystem->addFileArchive(m_filename);
-  GM_LOG("fuck fock\n");
 
-  GM_LOG("laoding index '%u'\n",cnt);
+  irr::io::path mypath(m_filename.c_str());
+  
+  bool res=m_filesystem->addFileArchive(mypath);
+
+  GM_LOG(" %d sukinae %d\n",__LINE__,cnt);
 
   if(!res) {
+    GM_LOG("cannot load: '%s'\n",mypath.c_str());
     return ;
   }
 
+  GM_LOG("laoding index '%u' from '%s'\n",cnt,m_filename.c_str());
+
   m_archiveIndex=cnt;
+
 
   irr::io::IFileArchive* archive=m_filesystem->
     getFileArchive(m_archiveIndex);
-  if(!archive) 
-    throw Exception_cannotLoadFile(m_filename);
+  if(!archive) {
+    throw Exception_cannotLoadFile(m_filename.c_str());
+  }
+
 
   const irr::io::IFileList * fileList=archive->getFileList();
   irr::s32 manifestIndex;
 
   manifestIndex=fileList->findFile(MANIFEST_NAME);
 
-  GM_LOG("uno\n");
+  //GM_LOG("uno %d\n",manifestIndex);
   
   if(manifestIndex<0) {
     GM_LOG("Not a valid track file\n");
-    return;
+    throw Exception_cannotLoadFile(m_filename.c_str());
   }
 
   irr::io::IReadFile *  manifestFile=
     archive->createAndOpenFile(manifestIndex);
+  
+  if(!manifestFile) {
+    throw Exception_cannotLoadFile(m_filename.c_str());
+  }
 
   assert(manifestFile);
 
@@ -94,8 +105,6 @@ void Track::load()
     m_filesystem->createXMLReaderUTF8 (manifestFile);
 
   enum { MAX_DEPTH=128 };
-
-  GM_LOG("due\n");
 
   int ot;
   int nodeStack[MAX_DEPTH];
@@ -110,7 +119,6 @@ void Track::load()
     ot_lamp,
     ot_unknown
   };
-  GM_LOG("tre\n");
   irr::io::IReadFile * rfile;
   for(int i=0, inElement=false, nodeStackPtr=0; 
       xmlReader->read(); 
@@ -175,18 +183,21 @@ void Track::load()
               irr::io::IReadFile * rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
-                CameraDataManager * cammgr=new CameraDataManager(rfile);
+                if(m_cammgr)
+                  delete m_cammgr;
+                m_cammgr=new CameraDataManager(rfile);
                 irr::scene::ICameraSceneNode * camera=smgr->addCameraSceneNodeFPS();
                 irr::core::vector3df p,r;
-                cammgr->getPositionAndRotation(p,r);
+                m_cammgr->getPositionAndRotation(p,r);
                 camera->setPosition(p);
                 camera->setRotation(r);
                 rfile->drop();
+                
               } else {
                 GM_LOG("Cannot load camera data, using default camera\n");
                 smgr->addCameraSceneNodeFPS();
               }
-
+            break;
           }
         }
       break;
@@ -209,19 +220,20 @@ void Track::load()
       break;
     }
   }
+  //xmlReader->drop();
+  manifestFile->drop();
   archive->drop();
   m_filesystem->removeFileArchive(m_archiveIndex);
-#if 0
 	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
-#endif
   m_loaded=true;
 }
 
 void Track::unload()
 {
   if(!m_loaded) return;
+
 	for (irr::u32 i=0; i < m_lights.size(); ++i ) {
     m_lights[i]->remove();
     m_lights[i]->drop();
@@ -234,6 +246,9 @@ void Track::unload()
   }
   m_sceneNodes.erase(0,m_sceneNodes.size());
 
+  //if(m_cammgr)
+  //  delete m_cammgr;
+
   m_loaded=false;
 }
 
@@ -241,6 +256,8 @@ Track::~Track()
 {
   GM_LOG("Track destruct\n");
   unload();
+  //m_filesystem->drop();
+  //m_device->drop();
   GM_LOG("Track destruct done\n");
 }
 
