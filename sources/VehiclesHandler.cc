@@ -43,6 +43,7 @@ VehiclesHandler::VehiclesHandler(
   unsigned n_vehicles=sizeof(cars)/sizeof(cars[0]);
   GM_LOG("Loading %d vehcles\n",n_vehicles);
 
+#if 0
   for(unsigned int i=0; i<n_vehicles; i++) {
     GM_LOG("building '%s'\n",cars[i]);
     ResourceManager::getVehicleCompletePath(cars[i], buffer,buffer_len);
@@ -58,6 +59,8 @@ VehiclesHandler::VehiclesHandler(
       GM_LOG("pushing\n");
       m_vehicles.push_back(hh);
   }
+#endif
+
 
 	m_sceneManager->setAmbientLight(irr::video::SColorf(0.2f, 0.2f, 0.2f));
 

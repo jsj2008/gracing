@@ -37,37 +37,10 @@ class ResourceManager
 
     void setDevice(irr::IrrlichtDevice *device);
 
-    inline void getVehiclesCompletePath(char * buffer, int buffer_len)
-    {
-      const char * ddir=VEHICLES_DIR;
-      int i;
-      --buffer_len;
-      for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
-        buffer[i]=*ddir;
-    }
-
+    void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
 
     inline const std::string & getResourcePath() { return m_rootDir; }
-
-    static inline void getVehicleCompletePath(const char * vehicleName, char * buffer, int buffer_len)
-    {
-#ifdef __APPLE__
-      //CFUrlRef url=CFBundleCopyResourceURL(bundle, CFSTR(vehicleName), CFSTR("zip"), CFSTR("Resources"));
-      const char * ddir=VEHICLES_DIR;
-      int i;
-      --buffer_len;
-      for(i=0; i<buffer_len && *ddir; ++i, ++ddir)
-        buffer[i]=*ddir;
-      for( ; i<buffer_len && *vehicleName; ++i, ++vehicleName)
-        buffer[i]=*vehicleName;
-      buffer[i]=0;
-#else
-      int i;
-      for(i=0; i<buffer_len && *vehicleName; ++i)
-        buffer[i]=vehicleName[i];
-#endif
-    }
 
   private:
     static ResourceManager * s_instance;
@@ -79,6 +52,7 @@ class ResourceManager
 
     std::string m_rootDir;
     std::string m_trackDir;
+    std::string m_vehicleDir;
 
 };
 

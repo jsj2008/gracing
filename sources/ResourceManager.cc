@@ -93,6 +93,11 @@ void ResourceManager::getTrackCompletePath(const char * trackName, std::string &
   path=m_trackDir + std::string(trackName);
 }
 
+void ResourceManager::getVehicleCompletePath(const char * vehicleName, std::string & path)
+{    
+  path=m_vehicleDir + std::string(vehicleName);
+}
+
 void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 {
   if(m_device)
@@ -102,5 +107,6 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_fileSystem=m_device->getFileSystem();
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
+  m_vehicleDir = m_rootDir + std::string("/Vehicles/");
 }
     

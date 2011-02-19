@@ -22,9 +22,9 @@
 #include "Track.hh"
 #include "PhyWorld.h"
 #include "gmlog.h"
+#include "Vehicle.h"
 
 #if 0
-#include "Vehicle.h"
 #include "VehiclesHandler.h"
 #endif
 
@@ -140,14 +140,27 @@ int main(int argc, char ** av)
   PhyWorld * world = PhyWorld::buildMe();
 
 
+  std::string vehpath;
+
+
+  resmanager->getVehicleCompletePath("test-1.zip",vehpath);
+
+  Vehicle * vehicle=new Vehicle(
+        smgr->getRootSceneNode(),
+        device,
+        world,
+        vehpath.c_str());
+
   std::string fontPath = resmanager->getResourcePath() + "/font.png";
 	gui::IGUIFont* font = guienv->getFont(fontPath.c_str());
 	if (font)
 		guienv->getSkin()->setFont(font);
   guienv->addStaticText(L"**********************************\n"
       "Press:\n"
-      "'l' : load track\n'u' : unload track\n",
-      core::rect<s32>(60,15,600,300));
+      "'esc' : exit\n"
+      "'l' : load track\n'u' : unload track\n"
+      "'c' : load car\n'd' : unload car\n",
+      core::rect<s32>(60,15,600,400));
 
   
 
@@ -185,35 +198,17 @@ int main(int argc, char ** av)
       thetrack->unload();
     }
 
+    if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
+      vehicle->load();
+      vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+      vehicle->setPosition(thetrack->getStartPosition());
+    }
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
+      vehicle->unload();
+    }
+
   }
 
 }
-
-#if 0
-
-  device->grab();
-
-  if (!device)
-    return 1;
-
-  device->setWindowCaption(L"gracing - rosco-p");
-
-
-  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
-  smgr->addExternalMeshLoader(mloader);
-
-  IPhaseHandler * currentPhaseHandler =
-    new VehiclesHandler(device,world);
-
-  bool done=false;
-
-  device->setEventReceiver(currentPhaseHandler);
-
-
-
-  device->drop();
-
-  return 0;
-}
-#endif
 

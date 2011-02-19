@@ -117,6 +117,8 @@ void Track::load()
     ot_mesh,
     ot_camera,
     ot_lamp,
+    ot_start_pos,
+    ot_start_rot,
     ot_unknown
   };
   irr::io::IReadFile * rfile;
@@ -135,6 +137,8 @@ void Track::load()
           ot=ot_camera;
         } else if(strcmp("lamp",xmlReader->getNodeName())==0) {
           ot=ot_lamp;
+        } else if(strcmp("track_start_pos",xmlReader->getNodeName())==0) {
+          ot=ot_start_pos;
         } else {
           ot=ot_unknown;
         }
@@ -148,6 +152,10 @@ void Track::load()
       case irr::io::EXN_TEXT:
         if(inElement) {
           switch(nodeStack[nodeStackPtr]) {
+            case ot_start_pos:
+              Util::parseVector(xmlReader->getNodeName(), m_startPosition);
+              break;
+
             case ot_lamp:
               GM_LOG("Loading lights: %s\n",xmlReader->getNodeName());
               rfile=archive->

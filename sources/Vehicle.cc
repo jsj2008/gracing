@@ -131,7 +131,6 @@ Vehicle::~Vehicle()
 
 void Vehicle::initPhysics()
 {
-  GM_LOG("----->%x\n",m_using);
   if(!m_loaded) {
     WARNING("cannot init physics, coz vehicle still not loaded");
     return;
@@ -143,7 +142,6 @@ void Vehicle::initPhysics()
   }
 
   if(m_using & USE_PHYSICS) {
-    WARNING("alread have phisics in plaze");
     return;
   }
 
@@ -223,7 +221,6 @@ void Vehicle::initGraphics()
   }
 
   if(m_using & USE_GRAPHICS) {
-    WARNING("alread have graphics in plaze");
     return;
   }
 
@@ -248,8 +245,6 @@ void Vehicle::initGraphics()
     GM_LOG("pushing %p,%p\n",node,m_wheels[i]);
     m_irrNodes.push_back(node);
   }
-
-  GM_LOG("----->%d\n",m_irrNodes.size());
 
   m_using|=USE_GRAPHICS;
 }

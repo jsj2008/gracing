@@ -31,6 +31,9 @@ class Track
     void load();
     void unload();
 
+
+    inline const irr::core::vector3df & getStartPosition() { return m_startPosition; }
+
   private:
 
     void loadLights( irr::io::IReadFile * file ,
@@ -51,6 +54,8 @@ class Track
     std::string                                    m_filename;
     irr::IrrlichtDevice *                          m_device;
     PhyWorld *                                     m_world;
+
+    irr::core::vector3df                           m_startPosition;
 };
 
 #endif

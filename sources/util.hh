@@ -17,6 +17,8 @@
 #ifndef UTIL_HH
 #define UTIL_HH
 
+#include "gmlog.h"
+
 inline double rad2deg(double value)
 {
   return 57.2957795 * value;
@@ -98,19 +100,23 @@ class Util
 	  const irr::u32 WORD_BUFFER_LENGTH = 256;
 	  char wordBuffer[WORD_BUFFER_LENGTH];
     double c[3];
-    const char * ptr, * start;
+    char * ptr;
     int n;
     c[0]=c[1]=c[2]=0.f;
 
-    for(n=0, ptr=wordBuffer, start=ptr; *ptr && n<3; n++) {
-      if( *ptr && *ptr != ',') {
-        
-        ptr++;
+    for(n=0, ptr=wordBuffer; *str && n<3;  str++, ptr++) {
+      if( *str && *str != ',') {
+        *ptr=*str;
       } else {
-        c[n]=irr::core::fast_atof(start);
-        ++ptr;
-        start=ptr;
+        *ptr=0;
+        c[n]=irr::core::fast_atof(wordBuffer);
+        n++;
+        ptr=wordBuffer-1;
       }
+    }
+    if(n<3) {
+      *ptr=0;
+      c[n]=irr::core::fast_atof(wordBuffer);
     }
 
     vec.X=c[0];
