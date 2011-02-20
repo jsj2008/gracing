@@ -49,6 +49,7 @@ Track::Track(
   m_filesystem->grab();
   //m_device->grab();
   m_cammgr=0;
+  m_camera=0;
 }
 
 void Track::load()
@@ -174,7 +175,7 @@ void Track::load()
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
                 irr::scene::IAnimatedMeshSceneNode* node=0;
-                node=smgr->addAnimatedMeshSceneNode( mesh );
+                node=smgr->addAnimatedMeshSceneNode( mesh,0,0xf1ca );
                 if(!node) {
                   GM_LOG("cannot load mesh\n");
                 } else {
@@ -193,12 +194,15 @@ void Track::load()
               if(rfile) {
                 if(m_cammgr)
                   delete m_cammgr;
+                if(m_camera)
+                  m_camera->drop();
                 m_cammgr=new CameraDataManager(rfile);
-                irr::scene::ICameraSceneNode * camera=smgr->addCameraSceneNodeFPS();
+                m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xf1ca);
                 irr::core::vector3df p,r;
                 m_cammgr->getPositionAndRotation(p,r);
-                camera->setPosition(p);
-                camera->setRotation(r);
+                m_camera->setPosition(p);
+                m_camera->setRotation(r);
+                m_camera->grab();
                 rfile->drop();
                 
               } else {
@@ -254,8 +258,16 @@ void Track::unload()
   }
   m_sceneNodes.erase(0,m_sceneNodes.size());
 
-  //if(m_cammgr)
-  //  delete m_cammgr;
+  if(m_camera) {
+    m_camera->remove();
+    m_camera->drop();
+    m_camera=0;
+  }
+
+  if(m_cammgr) {
+    delete m_cammgr;
+    m_cammgr=0;
+  }
 
   m_loaded=false;
 }
@@ -303,10 +315,11 @@ void Track::loadLights( irr::io::IReadFile * file ,
 
 
   irr::scene::ILightSceneNode* light = 
-    smgr->addLightSceneNode( 0, position, diffuseColor, radius);
+    smgr->addLightSceneNode( 0, position, diffuseColor, radius,0xf1ca);
 
   //light->setLightType(irr::video::ELT_DIRECTIONAL);
   //light->setRotation( irr::core::vector3df(180, 45, 45) );
+  m_lights.push_back(light);
   light->getLightData().SpecularColor = specularColor;
   light->grab();
 

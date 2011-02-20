@@ -28,13 +28,45 @@
 #include "VehiclesHandler.h"
 #endif
 
-
 using namespace irr;
 using namespace core;
 using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+
+static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
+{
+  int tot=1;
+  if(level==0) 
+    GM_LOG("------------------------------\n");
+  if(node == 0) {
+    GM_LOG("No node!!\n");
+    return 0;
+  }
+  GM_LOG("[%03d] Node at %p of type %c%c%c%c, id: %04X\n",level,
+      node,
+      (node->getType())&0xff,
+      (node->getType()>>8)&0xff,
+      (node->getType()>>16)&0xff,
+      (node->getType()>>24)&0xff,
+      node->getID());
+
+  const core::list<irr::scene::ISceneNode*>&  list=node->getChildren();
+
+  irr::scene::ISceneNodeList::ConstIterator it = list.begin();
+  for (; it!=list.end(); ++it)
+  {
+    tot+=dumpNode(*it,level+1);
+  }
+
+  if(level==0) {
+    GM_LOG("-----> tot nodes: %d\n",tot);
+    GM_LOG("------------------------------\n");
+  }
+
+  return tot;
+}
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -139,17 +171,17 @@ int main(int argc, char ** av)
   IGUIEnvironment* guienv = device->getGUIEnvironment();
   PhyWorld * world = PhyWorld::buildMe();
 
-
   std::string vehpath;
 
 
-  resmanager->getVehicleCompletePath("test-1.zip",vehpath);
+  resmanager->getVehicleCompletePath("car_ab.zip",vehpath);
 
   Vehicle * vehicle=new Vehicle(
-        smgr->getRootSceneNode(),
+        0, /* smgr->getRootSceneNode(),*/
         device,
         world,
-        vehpath.c_str());
+        vehpath.c_str(),0xcafe);
+
 
   std::string fontPath = resmanager->getResourcePath() + "/font.png";
 	gui::IGUIFont* font = guienv->getFont(fontPath.c_str());
@@ -162,7 +194,6 @@ int main(int argc, char ** av)
       "'c' : load car\n'd' : unload car\n",
       core::rect<s32>(60,15,600,400));
 
-  
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
   smgr->addExternalMeshLoader(mloader);
@@ -170,10 +201,23 @@ int main(int argc, char ** av)
   Track * thetrack;
   thetrack=new Track(device,world,"track-1.zip");
 
-
-  thetrack->load();
-
   bool done=false;
+
+  irr::scene::ILightSceneNode *light;
+
+  light = smgr->addLightSceneNode(0, 
+      irr::core::vector3df(10.f,40.f,-5.f),
+      irr::video::SColorf(0.2f, 0.2f, 0.2f), 90.f,0xbeda);
+
+  dumpNode(smgr->getRootSceneNode());
+
+  bool flagC, flagD;
+  bool flagL, flagU;
+
+  flagL=true;
+  flagU=true;
+  flagC=true;
+  flagD=true;
 
   while(device->run() && !done) {
     driver->beginScene(true, true, SColor(255,100,101,140));
@@ -186,28 +230,55 @@ int main(int argc, char ** av)
 
     driver->endScene();
 
-
-    if(receiver.IsKeyDown(irr::KEY_ESCAPE))
+    if(receiver.IsKeyDown(irr::KEY_ESCAPE) || 
+       receiver.IsKeyDown(irr::KEY_KEY_Q) )
       done=true;
 
     if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
       thetrack->load();
+      if(flagL) {
+        dumpNode(smgr->getRootSceneNode());
+        flagL=false;
+      } 
+    } else {
+      flagL=true;
     }
 
     if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
       thetrack->unload();
+      if(flagU) {
+        dumpNode(smgr->getRootSceneNode());
+        flagU=false;
+      }
+      
+    } else {
+      flagU=true;
     }
 
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       vehicle->load();
-      vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+      vehicle->use(IVehicle::USE_GRAPHICS /*| IVehicle::USE_PHYSICS*/);
       vehicle->setPosition(thetrack->getStartPosition());
+      smgr->getRootSceneNode()->addChild(vehicle);
+      if(flagC)  {
+        dumpNode(smgr->getRootSceneNode());
+        flagC=false;
+      }
+    } else {
+      flagC=true;
     }
+
 
     if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
-      vehicle->unload();
+      //vehicle->unload();
+      vehicle->remove();
+      if(flagD) {
+        flagD=false;
+        dumpNode(smgr->getRootSceneNode());
+      }
+    } else {
+      flagD=true;
     }
-
   }
 
 }

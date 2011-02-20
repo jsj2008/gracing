@@ -236,15 +236,17 @@ void Vehicle::initGraphics()
   GM_LOG("- chassis %d nodes\n",n);
   // actually build nodes
   for(i=0; i<n; ++i) {
-    node=smgr->addAnimatedMeshSceneNode(m_chassis[i],this);
+    node=smgr->addAnimatedMeshSceneNode(m_chassis[i],this,0xcafe);
     m_irrNodes.push_back(node);
   }
 
+#if 0
   for(i=0; i<4; ++i) {
     node=smgr->addAnimatedMeshSceneNode(m_wheels[i],this);
     GM_LOG("pushing %p,%p\n",node,m_wheels[i]);
     m_irrNodes.push_back(node);
   }
+#endif
 
   m_using|=USE_GRAPHICS;
 }

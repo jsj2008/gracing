@@ -47,6 +47,7 @@ class Track
                                                    m_lights;
     irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
                                                    m_sceneNodes;
+    irr::scene::ICameraSceneNode *                 m_camera;
 
     CameraDataManager *                            m_cammgr;
 
