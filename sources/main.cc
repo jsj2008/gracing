@@ -38,19 +38,36 @@ using namespace gui;
 static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
 {
   int tot=1;
+  char spacer[128]="                                        ";
   if(level==0) 
     GM_LOG("------------------------------\n");
   if(node == 0) {
     GM_LOG("No node!!\n");
     return 0;
   }
-  GM_LOG("[%03d] Node at %p of type %c%c%c%c, id: %04X\n",level,
+  if(level<32) {
+    spacer[level]=0;
+    GM_LOG("%s",spacer);
+    spacer[level]=' ';
+  }
+
+  irr::core::vector3df pos;
+  irr::core::vector3df absPos;
+
+  absPos=node->getAbsolutePosition();
+  pos=node->getPosition();
+
+  GM_LOG("[%03d] Node '%s' @%p of type %c%c%c%c, id: %04X, pos: %f,%f,%f"
+      ", abs pos: %f,%f,%f\n",level,
+      node->getName(),
       node,
       (node->getType())&0xff,
       (node->getType()>>8)&0xff,
       (node->getType()>>16)&0xff,
       (node->getType()>>24)&0xff,
-      node->getID());
+      node->getID(),
+      pos.X,pos.Y,pos.Z,
+      absPos.X,absPos.Y,absPos.Z );
 
   const core::list<irr::scene::ISceneNode*>&  list=node->getChildren();
 
@@ -174,7 +191,7 @@ int main(int argc, char ** av)
   std::string vehpath;
 
 
-  resmanager->getVehicleCompletePath("car_ab.zip",vehpath);
+  resmanager->getVehicleCompletePath("squared.zip",vehpath);
 
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
@@ -263,6 +280,10 @@ int main(int argc, char ** av)
       if(flagC)  {
         dumpNode(smgr->getRootSceneNode());
         flagC=false;
+        GM_LOG("%f,%f,%f\n",
+            thetrack->getStartPosition().X,
+            thetrack->getStartPosition().Y,
+            thetrack->getStartPosition().Z);
       }
     } else {
       flagC=true;

@@ -104,21 +104,23 @@ class Util
     int n;
     c[0]=c[1]=c[2]=0.f;
 
-    for(n=0, ptr=wordBuffer; *str && n<3;  str++, ptr++) {
+    for(n=0, ptr=wordBuffer; *str && n<3;  str++) {
       if( *str && *str != ',') {
         *ptr=*str;
+        ptr++;
       } else {
         *ptr=0;
+        GM_LOG("risuka: '%s'\n",wordBuffer);
         c[n]=irr::core::fast_atof(wordBuffer);
         n++;
-        ptr=wordBuffer-1;
+        ptr=wordBuffer;
       }
     }
     if(n<3) {
       *ptr=0;
+      GM_LOG("risuka: '%s'\n",wordBuffer);
       c[n]=irr::core::fast_atof(wordBuffer);
     }
-
     vec.X=c[0];
     vec.Y=c[1];
     vec.Z=c[2];

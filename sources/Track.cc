@@ -175,7 +175,7 @@ void Track::load()
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
                 irr::scene::IAnimatedMeshSceneNode* node=0;
-                node=smgr->addAnimatedMeshSceneNode( mesh,0,0xf1ca );
+                node=smgr->addAnimatedMeshSceneNode( mesh,0,0xBADD );
                 if(!node) {
                   GM_LOG("cannot load mesh\n");
                 } else {
@@ -197,7 +197,7 @@ void Track::load()
                 if(m_camera)
                   m_camera->drop();
                 m_cammgr=new CameraDataManager(rfile);
-                m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xf1ca);
+                m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xBADD);
                 irr::core::vector3df p,r;
                 m_cammgr->getPositionAndRotation(p,r);
                 m_camera->setPosition(p);
@@ -315,7 +315,7 @@ void Track::loadLights( irr::io::IReadFile * file ,
 
 
   irr::scene::ILightSceneNode* light = 
-    smgr->addLightSceneNode( 0, position, diffuseColor, radius,0xf1ca);
+    smgr->addLightSceneNode( 0, position, diffuseColor, radius,0xBADD);
 
   //light->setLightType(irr::video::ELT_DIRECTIONAL);
   //light->setRotation( irr::core::vector3df(180, 45, 45) );

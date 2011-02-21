@@ -69,6 +69,7 @@ copy_files:
 	cp $(resources_dir)/arrow-car.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/test-1.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/test-2.zip $(tgt_vehicles_dir)
+	cp $(resources_dir)/squared.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/font.png $(tgt_res_dir)
 	cp demo $(tgt_appl_dir)/
 

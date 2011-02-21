@@ -274,9 +274,8 @@ void Vehicle::load()
 {
   if(m_loaded)
     return;
-  irr::u32 cnt=m_filesystem->getFileArchiveCount();
 
-  GM_LOG("@@@ %d\n",cnt);
+  irr::u32 cnt=m_filesystem->getFileArchiveCount();
 
   bool res=m_filesystem->addFileArchive(m_sourceName);
 
@@ -396,9 +395,8 @@ void Vehicle::load()
             case ot_wfr_position:
               {
                 int widx=nodeStack[nodeStackPtr]-ot_first_position;
-                irr::core::vector3df pos;
                 assert(widx>-1 && widx<4);
-                Util::parseVector(xmlReader->getNodeName(),m_wheelPositions[i]);
+                Util::parseVector(xmlReader->getNodeName(),m_wheelPositions[widx]);
                 GM_LOG("Position of '%s' is '%s' -> %2.3f,%2.3f,%2.3f\n",
                     wheel_names[widx],
                     xmlReader->getNodeName(),
@@ -509,16 +507,12 @@ void Vehicle::load()
 
   manifestFile->drop();
 
-  GM_LOG("2 @@@ %d\n",m_filesystem->getFileArchiveCount());
   m_filesystem->removeFileArchive(archiveIndex);
-  GM_LOG("3 @@@ %d\n",m_filesystem->getFileArchiveCount());
 
   xmlReader->drop();
 
   // TODO: check presence of all parts
   m_loaded=true;
-
-  //
 }
 
 
