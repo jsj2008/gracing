@@ -65,6 +65,7 @@ copy_files:
 	mkdir -p $(tgt_tracks_dir)
 	cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
 	cp $(resources_dir)/track-1.zip $(tgt_tracks_dir)
+	cp $(resources_dir)/plane.zip $(tgt_tracks_dir)
 	cp $(resources_dir)/car_ab.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/arrow-car.zip $(tgt_vehicles_dir)
 	cp $(resources_dir)/test-1.zip $(tgt_vehicles_dir)

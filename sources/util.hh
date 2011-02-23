@@ -110,7 +110,6 @@ class Util
         ptr++;
       } else {
         *ptr=0;
-        GM_LOG("risuka: '%s'\n",wordBuffer);
         c[n]=irr::core::fast_atof(wordBuffer);
         n++;
         ptr=wordBuffer;
@@ -118,12 +117,12 @@ class Util
     }
     if(n<3) {
       *ptr=0;
-      GM_LOG("risuka: '%s'\n",wordBuffer);
       c[n]=irr::core::fast_atof(wordBuffer);
     }
     vec.X=c[0];
     vec.Y=c[1];
     vec.Z=c[2];
+    GM_LOG("suooka: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
   }
 
 	static inline double parseFloat(const char * str)

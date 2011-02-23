@@ -40,25 +40,32 @@ class CompoundSceneNode : public irr::scene::ISceneNode
 		virtual void addChild(ISceneNode* child)
     {
       if(child && child!=this) {
-        // m_boundingBox.addInternalBox(child->getBoundingBox());
         m_mustUpdateBoundingBox=true;
       }
+      GM_LOG("\n\nrisuka\n\n");
       irr::scene::ISceneNode::addChild(child);
-    }
 
-#if 0
-    void getCompoundBoundingBox(irr::core::aabbox3d<float> & boundingBox)
-    {
-      irr::scene::ISceneNodeList::ConstIterator it = Children.begin();
-      for (; it != Children.end(); ++it) 
-        boundingBox.addInternalBox((*it)->getBoundingBox());
     }
-#endif
 
     virtual const irr::core::aabbox3d<float> & getBoundingBox() const
     {
       return m_boundingBox;
     }
+
+    void recalculateBoundingBox() 
+    {
+      int cnt=0;
+      m_boundingBox.reset(0.,0.,0.);
+      irr::scene::ISceneNodeList::ConstIterator it = Children.begin();
+      GM_LOG("\n\nsuka\n\n");
+      for (; it != Children.end(); ++it) {
+        GM_LOG(" [%d] compound scene node subpart:  min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",cnt++,
+            (*it)->getBoundingBox().MinEdge.X,(*it)->getBoundingBox().MinEdge.Y,(*it)->getBoundingBox().MinEdge.Z,
+            (*it)->getBoundingBox().MaxEdge.X,(*it)->getBoundingBox().MaxEdge.Y,(*it)->getBoundingBox().MaxEdge.Z);
+        m_boundingBox.addInternalBox((*it)->getBoundingBox());
+      }
+    }
+    
 
     void dummy() { int a; a=3.; }
   private:

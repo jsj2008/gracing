@@ -79,10 +79,6 @@ btRigidBody * PhyWorld::createRigidBody(
 	if (isDynamic)
 		shape->calculateLocalInertia(mass,localInertia);
 
-	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-
-#define USE_MOTIONSTATE 1
-#ifdef USE_MOTIONSTATE
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
@@ -90,10 +86,6 @@ btRigidBody * PhyWorld::createRigidBody(
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
 
-#else
-	btRigidBody* body = new btRigidBody(mass,0,shape,localInertia);	
-	body->setWorldTransform(startTransform);
-#endif//
 
 	addRigidBody(body);
 
@@ -259,6 +251,14 @@ void PhyWorld::step()
       btQuaternion quaternion;
       body->getMotionState()->getWorldTransform(trans);
       quaternion=trans.getRotation();
+//#define SUPER_TRACE 1
+#ifdef SUPER_TRACE
+      GM_LOG("%X %f,%f,%f\n",
+            m_binds[j]->irrNode->getID(),
+            float(trans.getOrigin().getX()),
+            float(trans.getOrigin().getY()),
+            float(trans.getOrigin().getZ()));
+#endif
       m_binds[j]->irrNode->setPosition(
           core::vector3df(
             float(trans.getOrigin().getX()),

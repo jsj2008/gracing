@@ -206,17 +206,18 @@ int main(int argc, char ** av)
 		guienv->getSkin()->setFont(font);
   guienv->addStaticText(L"**********************************\n"
       "Press:\n"
-      "'esc' : exit\n"
-      "'l' : load track\n'u' : unload track\n"
-      "'c' : load car\n'd' : unload car\n",
+      "'esc' : to quit\n"
+      "'l' : to load track\n'u' : to unload track\n"
+      "'c' : to load car\n'd' : to unload car\n"
+      "**********************************\n",
       core::rect<s32>(60,15,600,400));
-
 
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"track-1.zip");
+  thetrack=new Track(device,world,"plane.zip");
+  //thetrack=new Track(device,world,"car_ab.zip");
 
   bool done=false;
 
@@ -274,7 +275,7 @@ int main(int argc, char ** av)
 
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       vehicle->load();
-      vehicle->use(IVehicle::USE_GRAPHICS /*| IVehicle::USE_PHYSICS*/);
+      vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
       vehicle->setPosition(thetrack->getStartPosition());
       smgr->getRootSceneNode()->addChild(vehicle);
       if(flagC)  {

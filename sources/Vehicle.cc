@@ -150,17 +150,23 @@ void Vehicle::initPhysics()
 
   m_vehicleShape = new btCompoundShape();
 
-  m_chassisShape = new btBoxShape(btVector3(1.f,0.5f,2.f));
+  const irr::core::aabbox3d<float> & bb=getBoundingBox();
+
+  GM_LOG(" - VEHICLE BOUNDING bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
+      bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
+      bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
+
+  m_chassisShape = new btBoxShape(btVector3(0.2f,0.2f,.2f));
 
   btTransform localTrans;
   localTrans.setIdentity();
 
   m_vehicleShape->addChildShape(localTrans,m_chassisShape);
 
-  btTransform tr;
+  btTransform tr(btTransform::getIdentity());
 	tr.setOrigin(btVector3(0,0.f,0));
 
-  m_carBody=m_world->createRigidBody(this,800,tr,m_vehicleShape);
+  m_carBody=m_world->createRigidBody(this, glob_chassisDefaultMass, tr,m_vehicleShape);
 
   for(int i=0; i<4; i++) {
     m_wheelShapes[i] = 
@@ -240,14 +246,13 @@ void Vehicle::initGraphics()
     m_irrNodes.push_back(node);
   }
 
-#if 0
   for(i=0; i<4; ++i) {
-    node=smgr->addAnimatedMeshSceneNode(m_wheels[i],this);
+    node=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcafe);
     GM_LOG("pushing %p,%p\n",node,m_wheels[i]);
     m_irrNodes.push_back(node);
   }
-#endif
-
+  recalculateBoundingBox();
+  
   m_using|=USE_GRAPHICS;
 }
 
@@ -400,9 +405,9 @@ void Vehicle::load()
                 GM_LOG("Position of '%s' is '%s' -> %2.3f,%2.3f,%2.3f\n",
                     wheel_names[widx],
                     xmlReader->getNodeName(),
-                    m_wheelPositions[i].X,
-                    m_wheelPositions[i].Y,
-                    m_wheelPositions[i].Z);
+                    m_wheelPositions[widx].X,
+                    m_wheelPositions[widx].Y,
+                    m_wheelPositions[widx].Z);
               }
               break;
 
@@ -513,6 +518,7 @@ void Vehicle::load()
 
   // TODO: check presence of all parts
   m_loaded=true;
+
 }
 
 
