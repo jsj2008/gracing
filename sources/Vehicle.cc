@@ -521,6 +521,28 @@ void Vehicle::load()
 
 }
 
+void Vehicle::reset(const irr::core::vector3d<float>&pos)
+{
+  //m_world->setBodyPosition(this,pos.X,pos.Y,pos.Z);
+  ISceneNode::setPosition(pos);
+
+  // reset position
+  btTransform trans=btTransform::getIdentity();
+  trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
+  m_carBody->setCenterOfMassTransform(trans);
+
+
+  // reset velocity
+	m_carBody->setLinearVelocity(btVector3(0,0,0));
+	m_carBody->setAngularVelocity(btVector3(0,0,0));
+
+  // reset collosion
+  m_world->getBroadphase()->getOverlappingPairCache()->
+   cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
+       //getDynamicsWorld()->getDispatcher()); 
+  
+}
+
 
 void Vehicle::unload()
 {

@@ -41,6 +41,10 @@ class Vehicle : public IVehicle
 
     virtual void unuse(unsigned int useFlags);
 
+//    void setPosition(const irr::core::vector3d<float>&);
+
+    void reset(const irr::core::vector3d<float>& position);
+
   private:
     
     void initPhysics();

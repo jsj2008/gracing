@@ -241,6 +241,36 @@ btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
   return body;
 }
 
+void PhyWorld::setBodyPosition( irr::scene::ISceneNode * node,
+   float X,float Y, float Z ) 
+{
+  int j;
+  for (j=m_binds.size()-1; j>=0 ;j--) {
+    if(m_binds[j]->irrNode==node) 
+      break;
+  }
+
+  if(j>=0) {
+    btTransform trans=btTransform::getIdentity();
+    trans.setOrigin(btVector3(X,Y,Z));
+    m_binds[j]->body->setCenterOfMassTransform(trans);
+  }
+
+}
+
+void PhyWorld::resetBodyDynamics(irr::scene::ISceneNode * node)
+{
+  int j;
+  for (j=m_binds.size()-1; j>=0 ;j--) {
+    if(m_binds[j]->irrNode==node) 
+      break;
+  }
+  if(j>=0) {
+    m_binds[j]->body->setLinearVelocity(btVector3(0,0,0));
+    m_binds[j]->body->setAngularVelocity(btVector3(0,0,0));
+  }
+}
+
 void PhyWorld::step()
 {
   stepSimulation(m_frameRate,m_frameSubsteps);
@@ -251,13 +281,19 @@ void PhyWorld::step()
       btQuaternion quaternion;
       body->getMotionState()->getWorldTransform(trans);
       quaternion=trans.getRotation();
-//#define SUPER_TRACE 1
+#define SUPER_TRACE 0
 #ifdef SUPER_TRACE
-      GM_LOG("%X %f,%f,%f\n",
+      if(m_binds[j]->irrNode->getID()==0xbadd)
+        continue;
+      GM_LOG("id %X - physics %f,%f,%f  ",
             m_binds[j]->irrNode->getID(),
             float(trans.getOrigin().getX()),
             float(trans.getOrigin().getY()),
             float(trans.getOrigin().getZ()));
+      GM_LOG("graphics %f,%f,%f\n",
+            m_binds[j]->irrNode->getPosition().X,
+            m_binds[j]->irrNode->getPosition().Y,
+            m_binds[j]->irrNode->getPosition().Z);
 #endif
       m_binds[j]->irrNode->setPosition(
           core::vector3df(

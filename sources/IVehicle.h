@@ -41,6 +41,7 @@ class IVehicle : public CompoundSceneNode
 
   virtual void unuse(unsigned int useFlags)=0;
 
+
   // adding more later...
 };
 #endif

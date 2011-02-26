@@ -36,6 +36,9 @@ class PhyWorld : public btDiscreteDynamicsWorld
       irr::scene::ISceneNode * node,
       float mass, const btTransform& startTransform, btCollisionShape* shape);
 
+   void setBodyPosition(irr::scene::ISceneNode * node, float X,float Y, float Z);
+
+   void resetBodyDynamics(irr::scene::ISceneNode * node);
 
     void clearAll();
 

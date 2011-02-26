@@ -276,7 +276,13 @@ int main(int argc, char ** av)
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       vehicle->load();
       vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-      vehicle->setPosition(thetrack->getStartPosition());
+      vehicle->reset(thetrack->getStartPosition());
+
+      GM_LOG("stting vehicle position %f,%f,%f\n",
+        thetrack->getStartPosition().X,
+        thetrack->getStartPosition().Y,
+        thetrack->getStartPosition().Z);
+
       smgr->getRootSceneNode()->addChild(vehicle);
       if(flagC)  {
         dumpNode(smgr->getRootSceneNode());
