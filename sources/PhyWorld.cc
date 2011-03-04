@@ -68,7 +68,8 @@ PhyWorld::PhyWorld(
 
 btRigidBody * PhyWorld::createRigidBody(
     irr::scene::ISceneNode * node,
-    float mass, const btTransform& startTransform, btCollisionShape* shape)
+    float mass, const btTransform& startTransform, 
+    btCollisionShape* shape)
 {
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 
@@ -166,15 +167,17 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
       irr2bt(v2,btv2);
       irr2bt(v3,btv3);
       trimesh->addTriangle(btv1,btv2,btv3);
-#if 0
-      GM_LOG(" [%02d] %d<%3.2f,%3.2f,%3.2f>, %d<%3.2f,%3.2f,%3.2f>, %d<%3.2f,%3.2f,%3.2f>\n",
+      GM_LOG(" [%02d] %d<%3.3f,%3.3f,%3.3f>, %d<%3.3f,%3.3f,%3.3f>, %d<%3.3f,%3.3f,%3.3f>\n",
           j/3,
           indices[j],v1.X,v1.Y,v1.Z,
           indices[j+1],v2.X,v2.Y,v2.Z,
           indices[j+2],v3.X,v3.Y,v3.Z);
-#endif
     }
   }
+
+
+  GM_LOG("Created a bt trimesh with %d triangles\n",
+      trimesh->getNumTriangles());
 
   btScalar mass(0.);
   btVector3 localInertia(0,0,0);
@@ -271,30 +274,33 @@ void PhyWorld::resetBodyDynamics(irr::scene::ISceneNode * node)
   }
 }
 
+void PhyWorld::dumpBodyPositions()
+{
+  btTransform trans;
+  for (int i=m_binds.size()-1; i>=0; i--) {
+    btRigidBody* body = m_binds[i]->body;
+    body->getMotionState()->getWorldTransform(trans);
+
+    GM_LOG("body: %d position: %f,%f,%f\n",i,
+            float(trans.getOrigin().getX()),
+            float(trans.getOrigin().getY()),
+            float(trans.getOrigin().getZ()));
+  }
+}
+
 void PhyWorld::step()
 {
   stepSimulation(m_frameRate,m_frameSubsteps);
+#if 0
   for (int j=m_binds.size()-1; j>=0 ;j--) {
     btRigidBody* body = m_binds[j]->body;
     if (body && body->getMotionState()) {
+      if(m_binds[j]->irrNode->getID()==0xbadd)
+        continue;
       btTransform trans;
       btQuaternion quaternion;
       body->getMotionState()->getWorldTransform(trans);
       quaternion=trans.getRotation();
-#define SUPER_TRACE 0
-#ifdef SUPER_TRACE
-      if(m_binds[j]->irrNode->getID()==0xbadd)
-        continue;
-      GM_LOG("id %X - physics %f,%f,%f  ",
-            m_binds[j]->irrNode->getID(),
-            float(trans.getOrigin().getX()),
-            float(trans.getOrigin().getY()),
-            float(trans.getOrigin().getZ()));
-      GM_LOG("graphics %f,%f,%f\n",
-            m_binds[j]->irrNode->getPosition().X,
-            m_binds[j]->irrNode->getPosition().Y,
-            m_binds[j]->irrNode->getPosition().Z);
-#endif
       m_binds[j]->irrNode->setPosition(
           core::vector3df(
             float(trans.getOrigin().getX()),
@@ -302,4 +308,5 @@ void PhyWorld::step()
             float(trans.getOrigin().getZ())));
     }
   }
+#endif
 }

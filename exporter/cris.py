@@ -21,7 +21,7 @@ LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 
 # EXPORT configuration
-EXP_APPLY_OBJ_TRANSFORM=1
+EXP_APPLY_OBJ_TRANSFORM=0
 
 EPSILON=0.0001
 
@@ -68,6 +68,7 @@ WIDX_REAR_LEFT=2
 WIDX_REAR_RIGHT=3
 
 WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
+
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -328,7 +329,7 @@ class export_OT_track(bpy.types.Operator):
   def getTrackInfo(self, elements,es):
     for e in es:
       if e.name == 'track.start':
-        val="%f,%f,%f"%( e.location[0], e.location[1], e.location[2])
+        val="%f,%f,%f"%( e.location[0], e.location[2], e.location[1])
         elements.append([ 'track_start_pos', val, 1])
         val="%f,%f,%f"%( e.rotation_euler[0], e.rotation_euler[1], e.rotation_euler[2])
         elements.append([ 'track_start_rot', val, 1])
@@ -421,6 +422,8 @@ class export_OT_vehicle(bpy.types.Operator):
    [ "suspensionDamping", 2.3 ],\
    [ "suspensionCompression", 4.4 ],\
    [ "rollInfluence", 0.1 ],\
+   [ "wheelFriction",  1000. ],\
+   [ "suspensionRestLength",  0.6 ]\
   ]
   
   filepath = bpy.props.StringProperty(
@@ -453,10 +456,10 @@ class export_OT_vehicle(bpy.types.Operator):
       RaiseError("Wheel is not 'squared'")
 
     self.wheel_radius[idx]=dimX / 2.;
-    self.wheel_width[idx]=dimY / 2.;
+    self.wheel_width[idx]=dimY;
     self.wheel_position[idx][0]=ob.location[0]
-    self.wheel_position[idx][1]=ob.location[1]
-    self.wheel_position[idx][2]=ob.location[2]
+    self.wheel_position[idx][1]=ob.location[2]
+    self.wheel_position[idx][2]=ob.location[1]
 
 
   def execute(self, context):
@@ -554,6 +557,7 @@ class export_OT_vehicle(bpy.types.Operator):
     xmlElements=[ ]
     for e in elements:
       xmlElements.append(e)
+
 
     #### add wheels data to xml elements
     for i in range(0,4):

@@ -41,9 +41,18 @@ class Vehicle : public IVehicle
 
     virtual void unuse(unsigned int useFlags);
 
-//    void setPosition(const irr::core::vector3d<float>&);
-
     void reset(const irr::core::vector3d<float>& position);
+
+    virtual void throttleUp();
+    virtual void throttleDown();
+    virtual void throttleSet(double value);
+
+    virtual void steerLeft();
+    virtual void steerRight();
+
+    virtual void step();
+
+    virtual const void dumpDebugInfo();
 
   private:
     
@@ -53,16 +62,20 @@ class Vehicle : public IVehicle
     void initGraphics();
 
 
-    float m_gVehicleSteering;
+    float m_vehicleSteering;
     float m_steeringIncrement;
     float m_steeringClamp;
-    float m_wheelRadius;
-    float m_wheelWidth;
+    float m_throttle;
+    float m_throttleIncrement;
+    
+   
     float m_wheelFriction;
     float m_suspensionStiffness;
     float m_suspensionDamping;
     float m_suspensionCompression;
     float m_rollInfluence;
+    float m_suspensionRestLength;
+
 
     
     const char * m_sourceName;
@@ -94,13 +107,26 @@ class Vehicle : public IVehicle
       return index==W_FRONT_RIGHT || index==W_FRONT_LEFT;
     }
 
+    inline bool isLeftWheel(int index) 
+    { 
+      return index==W_FRONT_LEFT || index==W_REAR_LEFT;
+    }
+
+    void updateWheelsFromPhysics();
+    void updateWheelsFromPhysics(int i);
+
     // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   
                          m_chassis;
     irr::scene::IAnimatedMesh* 
                          m_wheels[4];
-    irr::core::array<irr::scene::ISceneNode *> 
-                         m_irrNodes;
+    //irr::core::array<irr::scene::ISceneNode *> 
+    //                     m_irrNodes;
+
+    irr::scene::ISceneNode * m_chassisNode;
+
+    //irr::core::array<irr::scene::ISceneNode *> 
+    irr::scene::ISceneNode * m_wheelsNodes[4];
 
     double m_wheelRadiuses[4];
     double m_wheelWidths[4];
@@ -115,6 +141,7 @@ class Vehicle : public IVehicle
 
 		btVehicleRaycaster *  m_vehicleRayCaster;
 		btRaycastVehicle *    m_raycastVehicle;
+
     
 };
 

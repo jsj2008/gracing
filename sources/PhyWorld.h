@@ -27,24 +27,27 @@ class PhyWorld : public btDiscreteDynamicsWorld
     static PhyWorld * buildMe();
 
     btRigidBody * addDynamicSphere(irr::scene::ISceneNode * node, 
-      float px,float py, float pz,
-      float radius, float mass);
+        float px,float py, float pz,
+        float radius, float mass);
 
     btRigidBody * addStaticMesh(irr::scene::ISceneNode * meshNode);
-    
+
     btRigidBody * createRigidBody(
-      irr::scene::ISceneNode * node,
-      float mass, const btTransform& startTransform, btCollisionShape* shape);
+        irr::scene::ISceneNode * node,
+        float mass, const btTransform& startTransform, btCollisionShape* shape);
 
-   void setBodyPosition(irr::scene::ISceneNode * node, float X,float Y, float Z);
+    void setBodyPosition(irr::scene::ISceneNode * node, float X,float Y, float Z);
 
-   void resetBodyDynamics(irr::scene::ISceneNode * node);
+    void resetBodyDynamics(irr::scene::ISceneNode * node);
 
     void clearAll();
 
     void step();
 
     ~PhyWorld();
+
+    // debug stuff
+    void dumpBodyPositions();
   private:
     PhyWorld(
         btBroadphaseInterface               *broadPhase,
@@ -75,7 +78,7 @@ class PhyWorld : public btDiscreteDynamicsWorld
     CFG_PARAM_D(m_frameSubsteps);
     CFG_PARAM_V3(m_gravity);
     CFG_PARAM_D(m_defaultContactProcessingThreshold);
-    
+
 };
 
 #endif

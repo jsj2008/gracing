@@ -35,6 +35,7 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+
 static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
 {
   int tot=1;
@@ -209,6 +210,7 @@ int main(int argc, char ** av)
       "'esc' : to quit\n"
       "'l' : to load track\n'u' : to unload track\n"
       "'c' : to load car\n'd' : to unload car\n"
+      "'i' : to dump debug info\n"
       "**********************************\n",
       core::rect<s32>(60,15,600,400));
 
@@ -231,17 +233,28 @@ int main(int argc, char ** av)
 
   bool flagC, flagD;
   bool flagL, flagU;
+  bool flagI;
 
   flagL=true;
   flagU=true;
   flagC=true;
   flagD=true;
+  flagI=true;
+
+  btTransform tr=btTransform::getIdentity();
+
+  btQuaternion qu=tr.getRotation();
+  GM_LOG("rest quaternion %f,%f,%f,%f\n",
+      qu.x(),qu.y(),qu.z(),qu.w());
 
   while(device->run() && !done) {
     driver->beginScene(true, true, SColor(255,100,101,140));
 
     smgr->drawAll();
     //currentPhaseHandler->step();
+
+    if(vehicle)
+      vehicle->step();
     world->step();
 
     guienv->drawAll();
@@ -276,12 +289,8 @@ int main(int argc, char ** av)
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       vehicle->load();
       vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-      vehicle->reset(thetrack->getStartPosition());
-
-      GM_LOG("stting vehicle position %f,%f,%f\n",
-        thetrack->getStartPosition().X,
-        thetrack->getStartPosition().Y,
-        thetrack->getStartPosition().Z);
+      //vehicle->reset(thetrack->getStartPosition());
+      vehicle->reset(irr::core::vector3df(0.,5.,0.));
 
       smgr->getRootSceneNode()->addChild(vehicle);
       if(flagC)  {
@@ -295,6 +304,37 @@ int main(int argc, char ** av)
     } else {
       flagC=true;
     }
+
+    if(receiver.IsKeyDown(irr::KEY_UP)) {
+      if(vehicle)
+        vehicle->throttleUp();
+    }
+
+    if(receiver.IsKeyDown(irr::KEY_LEFT)) {
+      if(vehicle)
+        vehicle->steerLeft();
+    }
+
+    if(receiver.IsKeyDown(irr::KEY_RIGHT)) {
+      if(vehicle)
+        vehicle->steerRight();
+    }
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_I)) {
+      if(flagI) {
+        if(vehicle) {
+          GM_LOG("Vehicle position: %f,%f,%f\n",
+              vehicle->getPosition().X,
+              vehicle->getPosition().Y,
+              vehicle->getPosition().Z);
+          dumpNode(smgr->getRootSceneNode());
+          world->dumpBodyPositions();
+          if(vehicle)
+            vehicle->dumpDebugInfo();
+        }
+        flagI=false;
+      } 
+    } else flagI=true;
 
 
     if(receiver.IsKeyDown(irr::KEY_KEY_D)) {

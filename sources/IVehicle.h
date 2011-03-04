@@ -41,6 +41,22 @@ class IVehicle : public CompoundSceneNode
 
   virtual void unuse(unsigned int useFlags)=0;
 
+  virtual void reset(const irr::core::vector3d<float>&pos)=0;
+
+  // step
+  virtual void step()=0;
+
+  // commands
+  virtual void throttleUp()=0;
+  virtual void throttleDown()=0;
+  virtual void throttleSet(double value)=0;
+
+  virtual void steerLeft()=0;
+  virtual void steerRight()=0;
+
+  // debug
+
+  virtual const void dumpDebugInfo()=0;
 
   // adding more later...
 };
