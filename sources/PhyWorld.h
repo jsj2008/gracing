@@ -48,6 +48,11 @@ class PhyWorld : public btDiscreteDynamicsWorld
 
     // debug stuff
     void dumpBodyPositions();
+
+    static inline void btTransformToIrrlichtMatrix(const btTransform& worldTrans, irr::core::matrix4 &matr) 
+    {
+      worldTrans.getOpenGLMatrix(matr.pointer()); 
+    }
   private:
     PhyWorld(
         btBroadphaseInterface               *broadPhase,

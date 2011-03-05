@@ -54,6 +54,9 @@ class IVehicle : public CompoundSceneNode
   virtual void steerLeft()=0;
   virtual void steerRight()=0;
 
+  // phisics
+  virtual void applyTorque(float x, float y, float z)=0;
+
   // debug
 
   virtual const void dumpDebugInfo()=0;

@@ -50,6 +50,8 @@ class Vehicle : public IVehicle
     virtual void steerLeft();
     virtual void steerRight();
 
+    virtual void applyTorque(float x, float y, float z);
+
     virtual void step();
 
     virtual const void dumpDebugInfo();
@@ -62,7 +64,7 @@ class Vehicle : public IVehicle
     void initGraphics();
 
 
-    float m_vehicleSteering;
+    float m_steering;
     float m_steeringIncrement;
     float m_steeringClamp;
     float m_throttle;
@@ -112,6 +114,43 @@ class Vehicle : public IVehicle
       return index==W_FRONT_LEFT || index==W_REAR_LEFT;
     }
 
+    inline void updateWheel(int index)
+    {
+      assert(index>=0 && index<4);
+
+      irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
+
+      assert(wheel);
+
+      //////////////////////////////////////////////////// @@
+      // this part must substituted by the RaycastVehicle
+      // handling of wheels
+      btTransform chassisTrans;
+      m_carBody->getMotionState()->getWorldTransform(chassisTrans);
+
+      btTransform wheelTrans=btTransform::getIdentity();
+      wheelTrans.setOrigin(
+          btVector3(
+          m_wheelInitialPositions[index].X,
+          m_wheelInitialPositions[index].Y,
+          m_wheelInitialPositions[index].Z));
+
+      btQuaternion qt;
+      if(isFrontWheel(index)) {
+        qt.setRotation(btVector3(0.,1.,.0),m_steering);
+        wheelTrans.setRotation(qt);
+      }
+      wheelTrans=chassisTrans*wheelTrans;
+      //////////////////////////////////////////////////
+
+      irr::core::matrix4 matr;
+      PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
+
+      wheel->setRotation(matr.getRotationDegrees());
+      wheel->setPosition(matr.getTranslation());
+
+    }
+
     void updateWheelsFromPhysics();
     void updateWheelsFromPhysics(int i);
 
@@ -120,17 +159,14 @@ class Vehicle : public IVehicle
                          m_chassis;
     irr::scene::IAnimatedMesh* 
                          m_wheels[4];
-    //irr::core::array<irr::scene::ISceneNode *> 
-    //                     m_irrNodes;
 
     irr::scene::ISceneNode * m_chassisNode;
 
-    //irr::core::array<irr::scene::ISceneNode *> 
     irr::scene::ISceneNode * m_wheelsNodes[4];
 
     double m_wheelRadiuses[4];
     double m_wheelWidths[4];
-    irr::core::vector3df m_wheelPositions[4];
+    irr::core::vector3df m_wheelInitialPositions[4];
     
     // physics part of the vehicle (bullet stuff)
     btCompoundShape*      m_vehicleShape;
