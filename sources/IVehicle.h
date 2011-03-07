@@ -43,6 +43,9 @@ class IVehicle : public CompoundSceneNode
 
   virtual void reset(const irr::core::vector3d<float>&pos)=0;
 
+  // querying
+  virtual irr::core::vector3df getChassisPos()=0;
+
   // step
   virtual void step()=0;
 
@@ -58,7 +61,6 @@ class IVehicle : public CompoundSceneNode
   virtual void applyTorque(float x, float y, float z)=0;
 
   // debug
-
   virtual const void dumpDebugInfo()=0;
 
   // adding more later...

@@ -318,7 +318,6 @@ int main(int argc, char ** av)
     if(receiver.IsKeyDown(irr::KEY_RIGHT)) {
       if(vehicle) {
         vehicle->steerRight();
-        vehicle->applyTorque(0.,.01,0.);
       }
     }
 

@@ -38,7 +38,6 @@ VehiclesHandler::VehiclesHandler(
   : IPhaseHandler(device,world)
 {
   enum { buffer_len=1024 };
-  char buffer[buffer_len];
 
   unsigned n_vehicles=sizeof(cars)/sizeof(cars[0]);
   GM_LOG("Loading %d vehcles\n",n_vehicles);

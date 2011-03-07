@@ -36,6 +36,8 @@
   GM_LOG("\n");\
 } while(0)
 
+static void dumpWheelInfo(const btWheelInfo & info);
+
 
 #define MANIFEST_NAME "VEHICLE"
   enum {
@@ -110,7 +112,7 @@ Vehicle::Vehicle(
 
   // accell dynamic info
   m_throttle=0.;
-  m_throttleIncrement=100.;
+  m_throttleIncrement=0.00001;
 
   // steering dynamic info
   m_steering = 0.;
@@ -132,6 +134,7 @@ Vehicle::Vehicle(
   m_chassisShape=0;
 	m_vehicleRayCaster=0;
 	m_raycastVehicle=0;
+  m_carBody=0;
 
   m_using=0;
 
@@ -166,9 +169,9 @@ void Vehicle::initPhysics()
 
   const irr::core::aabbox3d<float> & bb=getBoundingBox();
 
-  GM_LOG(" - VEHICLE BOUNDING bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
-      bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
-      bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
+  //GM_LOG(" - VEHICLE BOUNDING bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
+  //    bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
+  //    bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
 
   float dX= (bb.MaxEdge.X - bb.MinEdge.X)/2.;
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
@@ -188,24 +191,18 @@ void Vehicle::initPhysics()
 
   m_carBody=m_world->createRigidBody(this, glob_chassisDefaultMass, tr,m_vehicleShape);
   
-  //m_raycastVehicle = new btRaycastVehicle(m_tuning,m_carBody,m_vehicleRayCaster);
+  m_raycastVehicle = new btRaycastVehicle(m_tuning,m_carBody,m_vehicleRayCaster);
 
-#if 0
-  int rightIndex = 2;
-  int upIndex = 1;
-  int forwardIndex = 0;
-#endif
 
   // direction of raycast
-  btVector3 wheelDirection(0,-1,0);
+  btVector3 wheelDirection(0.,-1.,0.);
   // wheel rotation axis
-	btVector3 wheelAxleCS(0,0,-1);
+	btVector3 wheelAxleCS(0.,0.,1.);
   
-#if 0
   for(int i=0; i<4; i++) {
-    btVector3 conn(m_wheelPositions[i].X,
-        m_wheelPositions[i].Y,
-        m_wheelPositions[i].Z);
+    btVector3 conn(m_wheelInitialPositions[i].X,
+        m_wheelInitialPositions[i].Y,
+        m_wheelInitialPositions[i].Z);
 
     m_raycastVehicle->addWheel(
         conn,
@@ -215,9 +212,7 @@ void Vehicle::initPhysics()
         m_wheelRadiuses[i],
         m_tuning,
         isFrontWheel(i));
-    if(isFrontWheel(i)) {
-      GM_LOG("front wheel has x: %f,%f\n",m_wheelPositions[i].X,m_suspensionRestLength);
-    }
+
 
     btWheelInfo& wheel = m_raycastVehicle->getWheelInfo(i);
     wheel.m_frictionSlip = m_wheelFriction;
@@ -228,41 +223,31 @@ void Vehicle::initPhysics()
 
     m_raycastVehicle->resetSuspension();
 
- 	  m_raycastVehicle->updateWheelTransform(i,true);
+    dumpWheelInfo(wheel);
 
+ 	  m_raycastVehicle->updateWheelTransform(i,false);
+
+    dumpWheelInfo(wheel);
   }
-#endif
 
   ///never deactivate the vehicle
   m_carBody->setActivationState(DISABLE_DEACTIVATION);
 
-#if 0
   m_world->addVehicle(m_raycastVehicle);
-#endif
 
   //choose coordinate system
-  //m_raycastVehicle->setCoordinateSystem(rightIndex,upIndex,forwardIndex);
+  int rightIndex = 0;
+  int upIndex = 1;
+  int forwardIndex = 2;
+  m_raycastVehicle->setCoordinateSystem(rightIndex,upIndex,forwardIndex);
 
   dumpDebugInfo();
 
+  btMotionState * ms=m_carBody->getMotionState();
+  GM_LOG("initial: %p\n",ms);
+
   m_using|=USE_PHYSICS;
 }
-
-#if 0
-static void btTransformToIrrlichtMatrix(const btTransform& worldTrans, irr::core::matrix4 &matr) 
-{ 
-  worldTrans.getOpenGLMatrix(matr.pointer()); 
-} 
-
-static void btTransformFromIrrlichtMatrix(const irr::core::matrix4& irrmat, btTransform &transform) 
-{ 
-    transform.setIdentity(); 
-
-    transform.setFromOpenGLMatrix(irrmat.pointer()); 
-}
-#endif
-
-
 
 void Vehicle::initGraphics()
 {
@@ -610,6 +595,9 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
 {
   m_chassisNode->setPosition(pos);
 
+  m_steering=0.;
+  m_throttle=0.;
+
 
   // reset position
   btTransform trans=btTransform::getIdentity();
@@ -618,13 +606,18 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
 
 
   // reset velocity
-	m_carBody->setLinearVelocity(btVector3(0,0,0));
-	m_carBody->setAngularVelocity(btVector3(0,0,0));
+  m_carBody->setLinearVelocity(btVector3(0,0,0));
+  m_carBody->setAngularVelocity(btVector3(0,0,0));
 
   // reset collosion
   m_world->getBroadphase()->getOverlappingPairCache()->
-   cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
-  
+    cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
+
+  m_raycastVehicle->resetSuspension();
+  for(int i=0;i<4;i++) {
+    m_raycastVehicle->updateWheelTransform(i,false);
+  }
+
 }
 
 
@@ -661,14 +654,14 @@ void Vehicle::throttleSet(double value)
   m_throttle=value;
 }
 
-void Vehicle::steerLeft()
+void Vehicle::steerRight()
 {
   m_steering += m_steeringIncrement;
   if (	m_steering > m_steeringClamp)
     m_steering = m_steeringClamp;
 }
 
-void Vehicle::steerRight()
+void Vehicle::steerLeft()
 {
   m_steering -= m_steeringIncrement;
   if (	m_steering < -m_steeringClamp)
@@ -680,15 +673,18 @@ void Vehicle::step()
   if(m_carBody==0)
     return;
 	btTransform trans;
-  m_carBody->getMotionState()->getWorldTransform(trans);
+  btMotionState * ms;
+  assert(m_carBody);
+  ms=m_carBody->getMotionState();
+  assert(ms);
 
-#if 0
-  m_chassisNode->setPosition(
-          irr::core::vector3df(
-            float(trans.getOrigin().getX()),
-            float(trans.getOrigin().getY()),
-            float(trans.getOrigin().getZ())));
-#endif
+  {
+    static int o=0;
+    if(o++<10)
+      GM_LOG("--->%p\n",ms);
+  }
+  
+  ms->getWorldTransform(trans);
 
   irr::core::matrix4 matr;
   PhyWorld::btTransformToIrrlichtMatrix(trans, matr);
@@ -697,89 +693,52 @@ void Vehicle::step()
   m_chassisNode->setRotation(matr.getRotationDegrees());
 
   for(int i=0; i<4; i++) {
-    updateWheel(i);
-  }
-
-#if 0
-  for(int i=0; i<4; i++) {
     if(isFrontWheel(i)) {
-      m_raycastVehicle->setSteeringValue(m_vehicleSteering,i);
+      m_raycastVehicle->setSteeringValue(m_steering,i);
     } else {
       m_raycastVehicle->applyEngineForce(m_throttle,i);
-		  m_raycastVehicle->setBrake(0.f,i);
+      m_raycastVehicle->setBrake(0.f,i);
     }
+    m_raycastVehicle->updateWheelTransform(i,false);
+    updateWheel(i);
 
-		m_raycastVehicle->updateWheelTransform(i,true);
-
-    updateWheelsFromPhysics(i);
+    btWheelInfo & info=m_raycastVehicle->getWheelInfo(i);
+    assert(info.m_raycastInfo.m_isInContact==false);
   }
-#endif
 }
 
 static void dumpWheelInfo(const btWheelInfo & info)
 {
-  GM_LOG("---------------------------\n");
-/*
-  GM_LOG("Contact normals  : %f,%f,%f\n",
-      info.m_raycastInfo.m_contactNormalWS.getX(),
-      info.m_raycastInfo.m_contactNormalWS.getY(),
-      info.m_raycastInfo.m_contactNormalWS.getZ());
-  GM_LOG("Contact points   : %f,%f,%f\n",
-      info.m_raycastInfo.m_contactPointWS.getX(),
-      info.m_raycastInfo.m_contactPointWS.getY(),
-      info.m_raycastInfo.m_contactPointWS.getZ());
- */
-
-  GM_LOG("Contact points   : %f,%f,%f\n",
-      info.m_raycastInfo.m_wheelAxleWS.getX(),
-      info.m_raycastInfo.m_wheelAxleWS.getY(),
-      info.m_raycastInfo.m_wheelAxleWS.getZ());
-
-  GM_LOG("Wheel direction : %f,%f,%f\n",
-      info.m_wheelDirectionCS.getX(),
-      info.m_wheelDirectionCS.getY(),
-      info.m_wheelDirectionCS.getZ());
-
-  GM_LOG("Wheel direction WS : %f,%f,%f\n",
-      info.m_raycastInfo.m_wheelDirectionWS.getX(),
-      info.m_raycastInfo.m_wheelDirectionWS.getY(),
-      info.m_raycastInfo.m_wheelDirectionWS.getZ());
-
-  GM_LOG("Wheel axle : %f,%f,%f\n",
-      info.m_wheelAxleCS.getX(),
-      info.m_wheelAxleCS.getY(),
-      info.m_wheelAxleCS.getZ());
-
-  GM_LOG("Suspension length: %f\n",info.m_raycastInfo.m_suspensionLength);
-  GM_LOG("Is incontact?  %s\n",info.m_raycastInfo.m_isInContact?"yes":"no");
-  //GM_LOG("Hard point: %f,%f,%f\n",
-  //    info.m_raycastInfo.m_hardPointWS.getX(),
-  //    info.m_raycastInfo.m_hardPointWS.getY(),
-  //    info.m_raycastInfo.m_hardPointWS.getZ());
-
-  btTransform tr=info.m_worldTransform;
-  btVector3 o=info.m_worldTransform.getOrigin();
-  GM_LOG("World transform (origin): %f,%f,%f\n",
-      o.getX(),o.getY(),o.getZ());
-
-  GM_LOG("World transform (rotation): %f,%f,%f,%f  ",
-      tr.getRotation().x(),
-      tr.getRotation().y(),
-      tr.getRotation().z(),
-      tr.getRotation().w());
-
-  btQuaternion qu=tr.getRotation();
-
-  GM_LOG("(axis: %f,%f,%f  angle %f)\n",
-      qu.getAxis().x(),
-      qu.getAxis().y(),
-      qu.getAxis().z(),
-      qu.getAngle()*(360.0/SIMD_2_PI));
-
-  GM_LOG("steering: %f\n",info.m_steering);
-  GM_LOG("rotation: %f\n",info.m_rotation);
-  GM_LOG("---------------------------\n");
-
+  GM_LOG(">>>------------------------------------------------------\n");
+  GM_LOG(">>> Suspension length: %f\n",info.m_raycastInfo.m_suspensionLength);
+  GM_LOG(">>> Is incontact?  %s\n",info.m_raycastInfo.m_isInContact?"yes":"no");
+  GM_LOG(">>> Hard point: %f,%f,%f\n",
+      info.m_raycastInfo.m_hardPointWS.getX(),
+      info.m_raycastInfo.m_hardPointWS.getY(),
+      info.m_raycastInfo.m_hardPointWS.getZ());
+  GM_LOG(">>> steering: %f\n",info.m_steering);
+  GM_LOG(">>> rotation: %f\n",info.m_rotation);
+  GM_LOG(">>>max travel  %f\n", info.m_maxSuspensionTravelCm);
+  GM_LOG(">>>susp stiff  %f\n", info.m_suspensionStiffness);
+  GM_LOG(">>>rest legnth %f\n", info.m_suspensionRestLength1);
+  GM_LOG(">>>radius %f\n", info.m_wheelsRadius);
+  GM_LOG(">>>direction %f,%f,%f\n", 
+      info.m_wheelDirectionCS.x(),
+      info.m_wheelDirectionCS.y(),
+      info.m_wheelDirectionCS.z());
+  GM_LOG(">>>direction ws %f,%f,%f\n", 
+      info.m_raycastInfo.m_wheelDirectionWS.x(),
+      info.m_raycastInfo.m_wheelDirectionWS.y(),
+      info.m_raycastInfo.m_wheelDirectionWS.z());
+  GM_LOG(">>>axle %f,%f,%f\n", 
+      info.m_wheelAxleCS.x(),
+      info.m_wheelAxleCS.y(),
+      info.m_wheelAxleCS.z());
+  GM_LOG(">>>axle ws %f,%f,%f\n", 
+      info.m_raycastInfo.m_wheelAxleWS.x(),
+      info.m_raycastInfo.m_wheelAxleWS.y(),
+      info.m_raycastInfo.m_wheelAxleWS.z());
+  GM_LOG(">>>------------------------------------------------------\n");
 }
 
 const void Vehicle::dumpDebugInfo()
@@ -803,5 +762,12 @@ void Vehicle::applyTorque(float x, float y, float z)
 {
   m_carBody->applyTorque(btVector3(x,y,z));
 }
+
+irr::core::vector3df Vehicle::getChassisPos()
+{
+  return m_chassisNode->getPosition();
+}
+  
+  
 
 

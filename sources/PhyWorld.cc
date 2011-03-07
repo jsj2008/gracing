@@ -80,13 +80,13 @@ btRigidBody * PhyWorld::createRigidBody(
 	if (isDynamic)
 		shape->calculateLocalInertia(mass,localInertia);
 
+
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
 
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
-
 
 	addRigidBody(body);
 

@@ -41,6 +41,8 @@ class Vehicle : public IVehicle
 
     virtual void unuse(unsigned int useFlags);
 
+    virtual irr::core::vector3df getChassisPos();
+
     void reset(const irr::core::vector3d<float>& position);
 
     virtual void throttleUp();
@@ -122,6 +124,7 @@ class Vehicle : public IVehicle
 
       assert(wheel);
 
+#if 0
       //////////////////////////////////////////////////// @@
       // this part must substituted by the RaycastVehicle
       // handling of wheels
@@ -142,17 +145,17 @@ class Vehicle : public IVehicle
       }
       wheelTrans=chassisTrans*wheelTrans;
       //////////////////////////////////////////////////
+#else
+      btTransform wheelTrans=m_raycastVehicle->getWheelTransformWS(index);
 
       irr::core::matrix4 matr;
       PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
       wheel->setRotation(matr.getRotationDegrees());
       wheel->setPosition(matr.getTranslation());
+#endif
 
     }
-
-    void updateWheelsFromPhysics();
-    void updateWheelsFromPhysics(int i);
 
     // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   
