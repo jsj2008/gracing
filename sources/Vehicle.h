@@ -21,7 +21,7 @@
 #include "PhyWorld.h"
 #include "IVehicle.h"
 
-class Vehicle : public IVehicle
+class Vehicle : public IVehicle, public btActionInterface
 {
   public:
     Vehicle(
@@ -45,18 +45,23 @@ class Vehicle : public IVehicle
 
     void reset(const irr::core::vector3d<float>& position);
 
+    // from IVehicle
     virtual void throttleUp();
     virtual void throttleDown();
     virtual void throttleSet(double value);
-
+    virtual void brake();
     virtual void steerLeft();
     virtual void steerRight();
-
     virtual void applyTorque(float x, float y, float z);
-
     virtual void step();
 
-    virtual const void dumpDebugInfo();
+    // deprecated ?!?
+    virtual void dumpDebugInfo() { };
+
+    // from btActionInterface
+    virtual void updateAction(btCollisionWorld* world, btScalar deltaTime);
+    virtual void debugDraw(btIDebugDraw*);
+
 
   private:
     
@@ -71,6 +76,7 @@ class Vehicle : public IVehicle
     float m_steeringClamp;
     float m_throttle;
     float m_throttleIncrement;
+    float m_brake;
     
    
     float m_wheelFriction;
@@ -80,7 +86,22 @@ class Vehicle : public IVehicle
     float m_rollInfluence;
     float m_suspensionRestLength;
 
+    struct WheelData 
+    {
+      btVector3 hardPointCS;
+      btVector3 hardPointWS;
+      btVector3 directionWS;
+      btVector3 axleWS;
+      btVector3 contactPointWS;
+      btScalar  suspensionLength;
 
+
+      btVector3 position;
+      btScalar  radius;
+      bool      isInContact;
+    };
+
+    WheelData m_wheelsData[4];
     
     const char * m_sourceName;
 
@@ -122,40 +143,22 @@ class Vehicle : public IVehicle
 
       irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
 
+
+      if(!wheel)
+        return;
       assert(wheel);
 
-#if 0
-      //////////////////////////////////////////////////// @@
-      // this part must substituted by the RaycastVehicle
-      // handling of wheels
-      btTransform chassisTrans;
-      m_carBody->getMotionState()->getWorldTransform(chassisTrans);
-
       btTransform wheelTrans=btTransform::getIdentity();
-      wheelTrans.setOrigin(
-          btVector3(
-          m_wheelInitialPositions[index].X,
-          m_wheelInitialPositions[index].Y,
-          m_wheelInitialPositions[index].Z));
-
-      btQuaternion qt;
-      if(isFrontWheel(index)) {
-        qt.setRotation(btVector3(0.,1.,.0),m_steering);
-        wheelTrans.setRotation(qt);
-      }
-      wheelTrans=chassisTrans*wheelTrans;
-      //////////////////////////////////////////////////
-#else
-      btTransform wheelTrans=m_raycastVehicle->getWheelTransformWS(index);
+      wheelTrans.setOrigin(m_wheelsData[index].hardPointWS);
 
       irr::core::matrix4 matr;
       PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
-      wheel->setRotation(matr.getRotationDegrees());
+      //wheel->setRotation(matr.getRotationDegrees());
       wheel->setPosition(matr.getTranslation());
-#endif
-
     }
+
+    btScalar raycast(WheelData&);
 
     // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   
@@ -172,16 +175,12 @@ class Vehicle : public IVehicle
     irr::core::vector3df m_wheelInitialPositions[4];
     
     // physics part of the vehicle (bullet stuff)
-    btCompoundShape*      m_vehicleShape;
     btCollisionShape*     m_chassisShape;
     btCollisionShape*     m_wheelShapes[4];
 
     btRigidBody *         m_carBody;
+    btVehicleRaycaster *  m_raycaster;
 
-		btVehicleRaycaster *  m_vehicleRayCaster;
-		btRaycastVehicle *    m_raycastVehicle;
-
-    
 };
 
 #endif

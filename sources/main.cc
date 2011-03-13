@@ -23,10 +23,8 @@
 #include "PhyWorld.h"
 #include "gmlog.h"
 #include "Vehicle.h"
-
-#if 0
-#include "VehiclesHandler.h"
-#endif
+#include "VehicleCameraAnimator.h"
+#include "IrrDebugDrawer.h"
 
 using namespace irr;
 using namespace core;
@@ -188,17 +186,29 @@ int main(int argc, char ** av)
   IVideoDriver* driver = device->getVideoDriver();
   IGUIEnvironment* guienv = device->getGUIEnvironment();
   PhyWorld * world = PhyWorld::buildMe();
+  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
+  IrrDebugDrawer * debugDrawer= new IrrDebugDrawer(driver);
+
+  world->setDebugDrawer(debugDrawer);
+  debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawAabb);
+
+  smgr->addExternalMeshLoader(mloader);
+
+  Track * thetrack;
+  thetrack=new Track(device,world,"plane.zip");
+  thetrack->load();
 
   std::string vehpath;
-
-
   resmanager->getVehicleCompletePath("squared.zip",vehpath);
-
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
         world,
         vehpath.c_str(),0xcafe);
+  vehicle->load();
+  vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+  //vehicle->reset(thetrack->getStartPosition());
+  vehicle->reset(irr::core::vector3df(0.,5.,0.));
 
 
   std::string fontPath = resmanager->getResourcePath() + "/font.png";
@@ -214,26 +224,24 @@ int main(int argc, char ** av)
       "**********************************\n",
       core::rect<s32>(60,15,600,400));
 
-  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
-  smgr->addExternalMeshLoader(mloader);
 
-  Track * thetrack;
-  thetrack=new Track(device,world,"plane.zip");
-  //thetrack=new Track(device,world,"car_ab.zip");
+  irr::scene::ICameraSceneNode * camera;
+  camera = smgr->addCameraSceneNode();
 
-  bool done=false;
+  VehicleCameraAnimator * camanim=new
+      VehicleCameraAnimator(vehicle);
+
+  camera->addAnimator(camanim);
 
   irr::scene::ILightSceneNode *light;
-
   light = smgr->addLightSceneNode(0, 
       irr::core::vector3df(10.f,40.f,-5.f),
       irr::video::SColorf(0.2f, 0.2f, 0.2f), 90.f,0xbeda);
 
-  dumpNode(smgr->getRootSceneNode());
-
   bool flagC, flagD;
   bool flagL, flagU;
   bool flagI;
+  bool done=false;
 
   flagL=true;
   flagU=true;
@@ -241,11 +249,14 @@ int main(int argc, char ** av)
   flagD=true;
   flagI=true;
 
-  btTransform tr=btTransform::getIdentity();
 
-  btQuaternion qu=tr.getRotation();
-  GM_LOG("rest quaternion %f,%f,%f,%f\n",
-      qu.x(),qu.y(),qu.z(),qu.w());
+  ///////////
+  btCollisionShape * x_shape= new btBoxShape(btVector3(1.,1.,1.));
+  btTransform tr=btTransform::getIdentity();
+  tr.setOrigin(btVector3(0.,2.,5.));
+  btRigidBody * x_body;
+  x_body=world->createRigidBody(0, 1., tr,x_shape);
+  ///////////
 
   while(device->run() && !done) {
     driver->beginScene(true, true, SColor(255,100,101,140));
@@ -258,6 +269,7 @@ int main(int argc, char ** av)
     world->step();
 
     guienv->drawAll();
+    world->debugDrawWorld();
 
     driver->endScene();
 
@@ -310,6 +322,11 @@ int main(int argc, char ** av)
         vehicle->throttleUp();
     }
 
+    if(receiver.IsKeyDown(irr::KEY_DOWN)) {
+      if(vehicle)
+        vehicle->brake();
+    }
+
     if(receiver.IsKeyDown(irr::KEY_LEFT)) {
       if(vehicle)
         vehicle->steerLeft();
@@ -349,6 +366,5 @@ int main(int argc, char ** av)
       flagD=true;
     }
   }
-
 }
 

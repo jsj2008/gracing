@@ -144,7 +144,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         GM_LOG(" - vertices: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
           Util::readVertex(file,vec);
-          //GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
+          GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
           vertexBuffer.push_back(vec);
         }
         break;
@@ -211,7 +211,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
     if ( Materials[m]->Meshbuffer->getIndexCount() > 0 ) {
       Materials[m]->Meshbuffer->recalculateBoundingBox();
       if (Materials[m]->RecalculateNormals) {
-        GM_LOG(" - recalculating normals\n");
         SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer,false);
       }
       assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);

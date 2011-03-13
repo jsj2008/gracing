@@ -53,6 +53,8 @@ class IVehicle : public CompoundSceneNode
   virtual void throttleUp()=0;
   virtual void throttleDown()=0;
   virtual void throttleSet(double value)=0;
+  virtual void brake()=0;
+  
 
   virtual void steerLeft()=0;
   virtual void steerRight()=0;
@@ -61,7 +63,7 @@ class IVehicle : public CompoundSceneNode
   virtual void applyTorque(float x, float y, float z)=0;
 
   // debug
-  virtual const void dumpDebugInfo()=0;
+  virtual void dumpDebugInfo()=0;
 
   // adding more later...
 };

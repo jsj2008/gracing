@@ -48,13 +48,15 @@ objs=$(subst .cc,.o,$(sources))
 all: $(target) copy_files
 
 $(target): $(objs)
-	$(cplusplus) -o $(target) $(ldflags)  $(objs)
+	@echo "Linking $(target)"
+	@$(cplusplus) -o $(target) $(ldflags)  $(objs)
 
 tags:
 	$(ctags) $(sources) *.h *.hh
 
 .cc.o: 
-	$(cplusplus) -c $< $(ccflags)
+	@echo "Compiling $<"
+	@$(cplusplus) -c $< $(ccflags)
 
 copy_files:
 	rm -rf $(tgt_dir)

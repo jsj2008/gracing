@@ -197,12 +197,12 @@ void Track::load()
                 if(m_camera)
                   m_camera->drop();
                 m_cammgr=new CameraDataManager(rfile);
-                m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xBADD);
+                //m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xBADD);
                 irr::core::vector3df p,r;
-                m_cammgr->getPositionAndRotation(p,r);
-                m_camera->setPosition(p);
-                m_camera->setRotation(r);
-                m_camera->grab();
+                //m_cammgr->getPositionAndRotation(p,r);
+                //m_camera->setPosition(p);
+                //m_camera->setRotation(r);
+                //m_camera->grab();
                 rfile->drop();
                 
               } else {

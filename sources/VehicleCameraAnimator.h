@@ -28,8 +28,8 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
     virtual void 	animateNode (irr::scene::ISceneNode *node, irr::u32 timeMs);
 
     // Creates a clone of this animator. 
-    //virtual irr::scene::ISceneNodeAnimator * createClone(irr::sceneISceneNode *node, 
-    //    irr::scene::ISceneManager *newManager=0);
+    virtual irr::scene::ISceneNodeAnimator * createClone(irr::scene::ISceneNode *node, 
+        irr::scene::ISceneManager *newManager=0);
 
     // Returns type of the scene node animator. 
     virtual irr::scene::ESCENE_NODE_ANIMATOR_TYPE getType () const
@@ -47,6 +47,9 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
     //virtual bool 	OnEvent (const SEvent &event);
   private:
     IVehicle * m_vehicle;
+
+    irr::core::vector3df m_cameraPos;
+    float                m_cameraDistance;
 
 };
 
