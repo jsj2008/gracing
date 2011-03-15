@@ -85,6 +85,10 @@ class Vehicle : public IVehicle, public btActionInterface
     float m_suspensionCompression;
     float m_rollInfluence;
     float m_suspensionRestLength;
+    float m_maxSuspensionTravelCm;
+    float m_maxSuspensionForce;
+	  float m_wheelsDampingCompression;
+	  float m_wheelsDampingRelaxation;
 
     struct WheelData 
     {
@@ -93,7 +97,12 @@ class Vehicle : public IVehicle, public btActionInterface
       btVector3 directionWS;
       btVector3 axleWS;
       btVector3 contactPointWS;
+      btVector3 contactNormalWS;
       btScalar  suspensionLength;
+			btScalar  suspensionRelativeVelocity;
+			btScalar  clippedInvContactDotSuspension;
+			btScalar  suspensionForce;
+
 
 
       btVector3 position;

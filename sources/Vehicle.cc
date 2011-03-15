@@ -36,9 +36,6 @@
   GM_LOG("\n");\
 } while(0)
 
-//static void dumpWheelInfo(const btWheelInfo & info);
-
-
 #define MANIFEST_NAME "VEHICLE"
   enum {
     ot_none,
@@ -77,7 +74,7 @@
   };
 
 
-CFG_PARAM_D(glob_chassisDefaultMass)=.001;
+CFG_PARAM_D(glob_chassisDefaultMass)=1.;
 
 
 //CFG_PARAM_D(glob_gVehicleSteering)=0.f;
@@ -125,6 +122,10 @@ Vehicle::Vehicle(
   m_suspensionCompression = glob_suspensionCompression;
   m_rollInfluence = glob_rollInfluence;
   m_suspensionRestLength= glob_suspensionRestLength;
+	m_wheelsDampingCompression= .90;
+	m_wheelsDampingRelaxation=.83;
+	m_maxSuspensionTravelCm=500.;
+  m_maxSuspensionForce=6000.;
 
   for(int i=0; i<W_NUM_OF_WHEELS; i++)  {
     m_wheels[i]=0;
@@ -683,13 +684,72 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
   }
   // 2- TODO: update speed km/h
 
-  // 3- simulate sospensions
+  // 3- simulate suspensions
 	for (int i=0;i<4;i++)
 	{
 		btScalar depth; 
     WheelData & wheel=m_wheelsData[i];
 		depth = raycast(wheel);
 	}
+
+  for(int i=0; i<4; i++) 
+  {
+    WheelData & wheel=m_wheelsData[i];
+    if ( wheel.isInContact ) {
+      btScalar force;
+      { // spring
+        btScalar	susp_length	= m_suspensionRestLength;
+        btScalar	current_length = wheel.suspensionLength;
+
+        btScalar length_diff = (susp_length - current_length);
+
+        force = m_suspensionStiffness
+          * length_diff * wheel.clippedInvContactDotSuspension;
+
+        if(force>.001) {
+          GM_LOG("force: %f, legnth diff: %f, clippedInv: %f\n",
+              force ,  length_diff , wheel.clippedInvContactDotSuspension);
+        }
+      }
+      { // damping
+        btScalar projected_rel_vel = wheel.suspensionRelativeVelocity;
+        btScalar susp_damping;
+        if ( projected_rel_vel < btScalar(0.0) )
+          susp_damping = m_wheelsDampingCompression;
+        else
+          susp_damping = m_wheelsDampingRelaxation;
+        force -= susp_damping * projected_rel_vel;
+        if(force>.001) {
+          GM_LOG("rel vel: %f, susp_damping: %f\n",
+              projected_rel_vel,susp_damping);
+        }
+
+      }
+      wheel.suspensionForce = force;
+
+    } else {
+      wheel.suspensionForce = btScalar(0.0);
+    }
+
+  }
+
+	for (int i=0;i<4;i++)
+	{
+		//apply suspension force
+		WheelData& wheel = m_wheelsData[i];
+		
+		btScalar suspensionForce = wheel.suspensionForce;
+		
+		if (suspensionForce > m_maxSuspensionForce)
+		{
+			suspensionForce = m_maxSuspensionForce;
+		}
+		btVector3 impulse = wheel.contactNormalWS * suspensionForce * deltaTime;
+		btVector3 relpos = wheel.contactPointWS - m_carBody->getCenterOfMassPosition();
+		
+		m_carBody->applyImpulse(impulse, relpos);
+	}
+
   // 4- update friction
   // 5- update wheels rotation
 }
@@ -708,18 +768,63 @@ btScalar Vehicle::raycast(WheelData & wheel)
 
 	btVehicleRaycaster::btVehicleRaycasterResult	rayResults;
 
+	btScalar param = btScalar(0.);
 
 	void* object = m_raycaster->castRay(source,target,rayResults);
 
   if(object) {
+    wheel.isInContact=true;
+
+		param = rayResults.m_distFraction;
+		depth = raylen * rayResults.m_distFraction;
+
+		wheel.contactNormalWS = rayResults.m_hitNormalInWorld;
+
+		btScalar hitDistance = param*raylen;
+		wheel.suspensionLength = hitDistance - wheel.radius;
+
+		btScalar minSuspensionLength = m_suspensionRestLength - m_maxSuspensionTravelCm*btScalar(0.01);
+		btScalar maxSuspensionLength = m_suspensionRestLength + m_maxSuspensionTravelCm*btScalar(0.01);
+		if (wheel.suspensionLength < minSuspensionLength)
+		{
+			wheel.suspensionLength = minSuspensionLength;
+		}
+		if (wheel.suspensionLength > maxSuspensionLength)
+		{
+			wheel.suspensionLength = maxSuspensionLength;
+		}
+
+		wheel.contactPointWS = rayResults.m_hitPointInWorld;
+
+		btScalar denominator= wheel.contactNormalWS.dot( wheel.directionWS );
+
+		btVector3 chassis_velocity_at_contactPoint;
+		btVector3 relpos = wheel.contactPointWS-m_carBody->getCenterOfMassPosition();
+
+		chassis_velocity_at_contactPoint = m_carBody->getVelocityInLocalPoint(relpos);
+
+		btScalar projVel = wheel.contactNormalWS.dot( chassis_velocity_at_contactPoint );
+
+		if ( denominator >= btScalar(-0.1))
+		{
+			wheel.suspensionRelativeVelocity = btScalar(0.0);
+			wheel.clippedInvContactDotSuspension = btScalar(1.0) / btScalar(0.1);
+		}
+		else
+		{
+			btScalar inv = btScalar(-1.) / denominator;
+			wheel.suspensionRelativeVelocity = projVel * inv;
+			wheel.clippedInvContactDotSuspension = inv;
+		}
   } else {
-    static int o=0;
-    GM_LOG("%d not in contact!!\n",o++);
+    wheel.isInContact=false;
+		wheel.suspensionLength = m_suspensionRestLength;
+		wheel.suspensionRelativeVelocity = btScalar(0.0);
+		wheel.contactNormalWS = - wheel.directionWS;
+		wheel.clippedInvContactDotSuspension = btScalar(1.0);
   }
 
-
   return depth;
-
 }
 
 void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
