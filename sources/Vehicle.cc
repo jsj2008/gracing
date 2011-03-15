@@ -82,13 +82,16 @@ CFG_PARAM_D(glob_steeringIncrement)=0.004f;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
-
 CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
 CFG_PARAM_D(glob_suspensionStiffness)=20.f;
 CFG_PARAM_D(glob_suspensionDamping)=2.3f;
 CFG_PARAM_D(glob_suspensionCompression)=4.4f;
 CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
 CFG_PARAM_D(glob_suspensionRestLength)=.6;
+CFG_PARAM_D(glob_wheelsDampingCompression)= .90;
+CFG_PARAM_D(glob_wheelsDampingRelaxation)=.83;
+CFG_PARAM_D(glob_maxSuspensionTravelCm)=500.;
+CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -122,10 +125,10 @@ Vehicle::Vehicle(
   m_suspensionCompression = glob_suspensionCompression;
   m_rollInfluence = glob_rollInfluence;
   m_suspensionRestLength= glob_suspensionRestLength;
-	m_wheelsDampingCompression= .90;
-	m_wheelsDampingRelaxation=.83;
-	m_maxSuspensionTravelCm=500.;
-  m_maxSuspensionForce=6000.;
+  m_wheelsDampingCompression=glob_wheelsDampingCompression;
+  m_wheelsDampingRelaxation=glob_wheelsDampingRelaxation;
+  m_maxSuspensionTravelCm=glob_maxSuspensionTravelCm;
+  m_maxSuspensionForce=glob_maxSuspensionForce;
 
   for(int i=0; i<W_NUM_OF_WHEELS; i++)  {
     m_wheels[i]=0;
