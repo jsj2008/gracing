@@ -70,6 +70,7 @@ class Vehicle : public IVehicle, public btActionInterface
     void deinitGraphics();
     void initGraphics();
 
+    void updateFriction();
 
     float m_steering;
     float m_steeringIncrement;
@@ -89,21 +90,28 @@ class Vehicle : public IVehicle, public btActionInterface
     float m_maxSuspensionForce;
 	  float m_wheelsDampingCompression;
 	  float m_wheelsDampingRelaxation;
+		btAlignedObjectArray<btVector3>	m_forwardWS;
+		btAlignedObjectArray<btVector3>	m_axle;
+		btAlignedObjectArray<btScalar>	m_forwardImpulse;
+		btAlignedObjectArray<btScalar>	m_sideImpulse;
 
     struct WheelData 
     {
-      btVector3 hardPointCS;
-      btVector3 hardPointWS;
-      btVector3 directionWS;
-      btVector3 axleWS;
-      btVector3 contactPointWS;
-      btVector3 contactNormalWS;
-      btScalar  suspensionLength;
-			btScalar  suspensionRelativeVelocity;
-			btScalar  clippedInvContactDotSuspension;
-			btScalar  suspensionForce;
+      btVector3     hardPointCS;
+      btVector3     hardPointWS;
+      btVector3     directionWS;
+      btVector3     axleWS;
+      btVector3     contactPointWS;
+      btVector3     contactNormalWS;
+      btTransform   worldTransform;
+      btScalar      suspensionLength;
+			btScalar      suspensionRelativeVelocity;
+			btScalar      clippedInvContactDotSuspension;
+			btScalar      suspensionForce;
+      btRigidBody * collidingObject;
 
-
+      btScalar      steering;
+      btScalar      rotation;
 
       btVector3 position;
       btScalar  radius;
@@ -152,22 +160,25 @@ class Vehicle : public IVehicle, public btActionInterface
 
       irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
 
-
       if(!wheel)
         return;
       assert(wheel);
 
+#if 0
       btTransform wheelTrans=btTransform::getIdentity();
       wheelTrans.setOrigin(m_wheelsData[index].hardPointWS);
+#else
+      btTransform & wheelTrans=m_wheelsData[index].worldTransform;
+#endif
 
       irr::core::matrix4 matr;
       PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
-      //wheel->setRotation(matr.getRotationDegrees());
+      wheel->setRotation(matr.getRotationDegrees());
       wheel->setPosition(matr.getTranslation());
     }
 
-    btScalar raycast(WheelData&);
+    btScalar raycast(WheelData&,int);
 
     // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   
