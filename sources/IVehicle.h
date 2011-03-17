@@ -46,9 +46,6 @@ class IVehicle : public CompoundSceneNode
   // querying
   virtual irr::core::vector3df getChassisPos()=0;
 
-  // step
-  virtual void step()=0;
-
   // commands
   virtual void throttleUp()=0;
   virtual void throttleDown()=0;

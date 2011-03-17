@@ -53,13 +53,9 @@ class CompoundSceneNode : public irr::scene::ISceneNode
 
     void recalculateBoundingBox() 
     {
-      int cnt=0;
       m_boundingBox.reset(0.,0.,0.);
       irr::scene::ISceneNodeList::ConstIterator it = Children.begin();
       for (; it != Children.end(); ++it) {
-        GM_LOG(" [%d] compound scene node subpart:  min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",cnt++,
-            (*it)->getBoundingBox().MinEdge.X,(*it)->getBoundingBox().MinEdge.Y,(*it)->getBoundingBox().MinEdge.Z,
-            (*it)->getBoundingBox().MaxEdge.X,(*it)->getBoundingBox().MaxEdge.Y,(*it)->getBoundingBox().MaxEdge.Z);
         m_boundingBox.addInternalBox((*it)->getBoundingBox());
       }
     }

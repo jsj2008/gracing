@@ -55,7 +55,6 @@ PhyWorld::PhyWorld(
   btDefaultCollisionConfiguration     *collisionConfiguration)
   : btDiscreteDynamicsWorld(dispatcher, broadPhase, solver, collisionConfiguration)
 {
-  GM_LOG("new dymaics world\n");
   CFG_INIT_D(m_frameRate,1.f/240.f);
   CFG_INIT_D(m_frameSubsteps,1);
   CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
@@ -70,7 +69,8 @@ btRigidBody * PhyWorld::createRigidBody(
     irr::scene::ISceneNode * node,
     float mass, 
     const btTransform& startTransform, 
-    btCollisionShape* shape)
+    btCollisionShape* shape,
+    btMotionState* motionState)
 {
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 
@@ -81,10 +81,10 @@ btRigidBody * PhyWorld::createRigidBody(
 	if (isDynamic)
 		shape->calculateLocalInertia(mass,localInertia);
 
+  if(motionState==0) 
+    motionState=new btDefaultMotionState(startTransform);
 
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-
-	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,myMotionState,shape,localInertia);
+	btRigidBody::btRigidBodyConstructionInfo cInfo(mass,motionState,shape,localInertia);
 
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
@@ -151,8 +151,6 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
   meshNode->grab();
 
-  GM_LOG("adding mesh: %d buffers\n",n_buffers);
-
   btVector3 btv1,btv2,btv3;
   btTriangleMesh *  trimesh=new btTriangleMesh();
 
@@ -161,7 +159,6 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
     n_vertices=mb->getIndexCount();
     n_triangles=n_vertices/3;
     indices=mb->getIndices();
-    GM_LOG("buffer %d: %d vertices, %d faces\n",i,n_vertices,n_triangles);
     for(unsigned int j=0; j<n_vertices; j+=3) {
       core::vector3df & v1=mb->getPosition(indices[j]);
       core::vector3df & v2=mb->getPosition(indices[j+1]);
@@ -170,17 +167,9 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
       irr2bt(v2,btv2);
       irr2bt(v3,btv3);
       trimesh->addTriangle(btv1,btv2,btv3);
-      GM_LOG(" [%02d] %d<%3.3f,%3.3f,%3.3f>, %d<%3.3f,%3.3f,%3.3f>, %d<%3.3f,%3.3f,%3.3f>\n",
-          j/3,
-          indices[j],v1.X,v1.Y,v1.Z,
-          indices[j+1],v2.X,v2.Y,v2.Z,
-          indices[j+2],v3.X,v3.Y,v3.Z);
     }
   }
 
-
-  GM_LOG("Created a bt trimesh with %d triangles\n",
-      trimesh->getNumTriangles());
 
   btScalar mass(0.);
   btVector3 localInertia(0,0,0);
@@ -203,7 +192,6 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
 void PhyWorld::clearAll()
 {
-  GM_LOG("Clearing all %d binds\n",m_binds.size());
 
   for(unsigned int i=0; i<m_binds.size(); i++) {
     removeRigidBody(m_binds[i]->body);
@@ -284,10 +272,6 @@ void PhyWorld::dumpBodyPositions()
     btRigidBody* body = m_binds[i]->body;
     body->getMotionState()->getWorldTransform(trans);
 
-    GM_LOG("body: %d position: %f,%f,%f\n",i,
-            float(trans.getOrigin().getX()),
-            float(trans.getOrigin().getY()),
-            float(trans.getOrigin().getZ()));
   }
 }
 

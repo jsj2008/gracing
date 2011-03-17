@@ -262,10 +262,7 @@ int main(int argc, char ** av)
     driver->beginScene(true, true, SColor(255,100,101,140));
 
     smgr->drawAll();
-    //currentPhaseHandler->step();
 
-    if(vehicle)
-      vehicle->step();
     world->step();
 
     guienv->drawAll();
@@ -299,13 +296,15 @@ int main(int argc, char ** av)
     }
 
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
-      vehicle->load();
-      vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-      //vehicle->reset(thetrack->getStartPosition());
-      vehicle->reset(irr::core::vector3df(0.,5.,0.));
-
-      smgr->getRootSceneNode()->addChild(vehicle);
       if(flagC)  {
+        vehicle->load();
+        vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+        //vehicle->reset(thetrack->getStartPosition());
+        vehicle->reset(irr::core::vector3df(0.,5.,0.));
+
+        smgr->getRootSceneNode()->addChild(vehicle);
+
+        vehicle->applyTorque(1.,1000.,0.);
         dumpNode(smgr->getRootSceneNode());
         flagC=false;
         GM_LOG("%f,%f,%f\n",

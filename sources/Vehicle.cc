@@ -130,6 +130,8 @@ Vehicle::Vehicle(
   m_maxSuspensionTravelCm=glob_maxSuspensionTravelCm;
   m_maxSuspensionForce=glob_maxSuspensionForce;
 
+  m_chassisWorldTrans=btTransform::getIdentity();
+
   for(int i=0; i<W_NUM_OF_WHEELS; i++)  {
     m_wheels[i]=0;
     m_wheelShapes[i]=0;
@@ -169,11 +171,6 @@ void Vehicle::initPhysics()
 
   const irr::core::aabbox3d<float> & bb=m_chassisNode->getBoundingBox();
 
-  GM_LOG(" - VEHICLE BOUNDING bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
-      bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
-      bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
-
-  //float dX= (bb.MaxEdge.X - bb.MinEdge.X)/2.;
   float dX= (bb.MaxEdge.X - bb.MinEdge.X)/2.;
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
   float dZ= (bb.MaxEdge.Z - bb.MinEdge.Z)/2.;
@@ -184,7 +181,7 @@ void Vehicle::initPhysics()
   btTransform localTrans(btTransform::getIdentity());
 
   btTransform tr(btTransform::getIdentity());
-  m_carBody=m_world->createRigidBody(0, glob_chassisDefaultMass, tr,m_chassisShape);
+  m_carBody=m_world->createRigidBody(0, glob_chassisDefaultMass, tr,m_chassisShape, this);
 
   for(int i=0; i<4; i++) {
     m_wheelsData[i].hardPointCS=btVector3(
@@ -194,7 +191,6 @@ void Vehicle::initPhysics()
 
     m_wheelsData[i].radius=m_wheelRadiuses[i];
     m_wheelsData[i].suspensionLength=m_suspensionRestLength;
-    m_wheelsData[i].steering=0.;
     m_wheelsData[i].rotation=0.;
   }
   
@@ -223,25 +219,16 @@ void Vehicle::initGraphics()
     m_device->getSceneManager();
 
 
-  GM_LOG("creating vehicle scene nodes:\n");
-
   m_chassisNode=new CompoundSceneNode(this,smgr,0x51ca);
 
   n=m_chassis.size();
-  GM_LOG("- chassis %d nodes\n",n);
   // actually build nodes
   for(i=0; i<n; ++i) {
     node=smgr->addAnimatedMeshSceneNode(m_chassis[i],m_chassisNode,0xcafe);
-    GM_LOG(" [%d] creating scene node subpart:  min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",i,
-      node->getBoundingBox().MinEdge.X,node->getBoundingBox().MinEdge.Y,node->getBoundingBox().MinEdge.Z,
-      node->getBoundingBox().MaxEdge.X,node->getBoundingBox().MaxEdge.Y,node->getBoundingBox().MaxEdge.Z);
   }
 
   ((CompoundSceneNode*)m_chassisNode)->recalculateBoundingBox();
   // calculate bounding box only for chassis !!
-  GM_LOG(" [%d] sukka scene node subpart:  min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",i,
-    m_chassisNode->getBoundingBox().MinEdge.X,m_chassisNode->getBoundingBox().MinEdge.Y,m_chassisNode->getBoundingBox().MinEdge.Z,
-    m_chassisNode->getBoundingBox().MaxEdge.X,m_chassisNode->getBoundingBox().MaxEdge.Y,m_chassisNode->getBoundingBox().MaxEdge.Z);
 
   for(i=0; i<4; ++i) {
     m_wheelsNodes[i]=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcaf0);
@@ -266,7 +253,6 @@ void Vehicle::deinitGraphics()
   }
   m_irrNodes.clear();
 #endif
-  GM_LOG("done done\n");
   m_using &= ~USE_GRAPHICS;
 }
 
@@ -307,12 +293,14 @@ void Vehicle::load()
 
   int ot;
   int nodeStack[MAX_DEPTH];
+#if 0
   const char * wheel_names[4]={
     "rear left",
     "rear right",
     "front left",
     "front right"
   };
+#endif
 
   irr::io::EXML_NODE nodeType;
   irr::scene::IAnimatedMesh* mesh;
@@ -391,8 +379,6 @@ void Vehicle::load()
       if(inElement) {
         switch(nodeStack[nodeStackPtr]) {
           case ot_chassis:
-            GM_LOG("loading chassis part from '%s'\n",
-                xmlReader->getNodeName());
             mesh=smgr->getMesh(xmlReader->getNodeName());
             WARNING_IF(mesh==0," - cannot load file '%s'\n",
                 xmlReader->getNodeName());
@@ -403,27 +389,21 @@ void Vehicle::load()
             break;
           case ot_wheelFriction:
             m_wheelFriction=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_wheelFriction=%f\n", m_wheelFriction);
             break;
           case ot_suspensionStiffness:
             m_suspensionStiffness=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_suspensionStiffness=%f\n", m_suspensionStiffness);
             break;
           case ot_suspensionDamping:
             m_suspensionDamping=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_suspensionDamping=%f\n", m_suspensionDamping);
             break;
           case ot_suspensionCompression:
             m_suspensionCompression=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_suspensionCompression=%f\n", m_suspensionCompression);
             break;
           case ot_rollInfluence:
             m_rollInfluence=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_rollInfluence=%f\n", m_rollInfluence);
             break;
           case ot_suspensionRestLength:
             m_suspensionRestLength=Util::parseFloat(xmlReader->getNodeName());
-            GM_LOG("m_suspensionRestLength=%f\n", m_suspensionRestLength);
             break;
 
           case ot_wrl_position:
@@ -434,12 +414,6 @@ void Vehicle::load()
               int widx=nodeStack[nodeStackPtr]-ot_first_position;
               assert(widx>-1 && widx<4);
               Util::parseVector(xmlReader->getNodeName(),m_wheelInitialPositions[widx]);
-              GM_LOG("Position of '%s' is '%s' -> %2.3f,%2.3f,%2.3f\n",
-                  wheel_names[widx],
-                  xmlReader->getNodeName(),
-                  m_wheelInitialPositions[widx].X,
-                  m_wheelInitialPositions[widx].Y,
-                  m_wheelInitialPositions[widx].Z);
             }
             break;
 
@@ -452,10 +426,6 @@ void Vehicle::load()
               assert(widx>-1 && widx<4);
               double width=Util::parseFloat(xmlReader->getNodeName());
               m_wheelWidths[widx]=width;
-
-              GM_LOG("Width of '%s' is '%s'\n",
-                  wheel_names[widx],
-                  xmlReader->getNodeName());
             }
             break;
 
@@ -468,15 +438,10 @@ void Vehicle::load()
               assert(widx>-1 && widx<4);
               double radius=Util::parseFloat(xmlReader->getNodeName());
               m_wheelRadiuses[widx]=radius;
-              GM_LOG("Radius of '%s' is '%s'\n",
-                  wheel_names[widx],
-                  xmlReader->getNodeName());
             }
             break;
 
           case ot_wfl:
-            GM_LOG("loading front left wheel part from '%s'\n",
-                xmlReader->getNodeName());
             if(m_wheels[W_FRONT_LEFT]) {
               WARNING("Double definizion of wheel: front left");
               break;
@@ -491,8 +456,6 @@ void Vehicle::load()
             break;
 
           case ot_wfr:
-            GM_LOG("loading front right wheel part from '%s'\n",
-                xmlReader->getNodeName());
             mesh=smgr->getMesh(xmlReader->getNodeName());
             WARNING_IF(mesh==0," - cannot load file '%s'\n",
                 xmlReader->getNodeName());
@@ -507,8 +470,6 @@ void Vehicle::load()
             break;
 
           case ot_wrl:
-            GM_LOG("loading rear left wheel part from '%s'\n",
-                xmlReader->getNodeName());
             mesh=smgr->getMesh(xmlReader->getNodeName());
             WARNING_IF(mesh==0," - cannot load file '%s'\n",
                 xmlReader->getNodeName());
@@ -523,8 +484,6 @@ void Vehicle::load()
             break;
 
           case ot_wrr:
-            GM_LOG("loading rear right wheel part from '%s'\n",
-                xmlReader->getNodeName());
             mesh=smgr->getMesh(xmlReader->getNodeName());
             WARNING_IF(mesh==0," - cannot load file '%s'\n",
                 xmlReader->getNodeName());
@@ -643,7 +602,6 @@ void Vehicle::step()
   assert(m_carBody);
   ms=m_carBody->getMotionState();
   assert(ms);
-
   
   ms->getWorldTransform(trans);
 
@@ -676,34 +634,37 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     wheel.isInContact=false;
     btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
 
-    wheel.hardPointWS = chassisTrans( wheel.hardPointCS );
-    wheel.directionWS = chassisTrans.getBasis() *  btVector3(0.,-1.,0.);
-    wheel.axleWS = chassisTrans.getBasis() * btVector3(0.,0.,1.);
+    wheel.hardPointWS = chassisTrans * wheel.hardPointCS; ///chassisTrans( wheel.hardPointCS );
+    wheel.directionWS = chassisTrans.getBasis() * btVector3(0.,-1.,0.);
+    wheel.axleWS = chassisTrans.getBasis() *  btVector3(0.,0.,1.);
 
     //
-#if 0 
 	  btVector3 up = -wheel.directionWS;
 	  const btVector3& right = wheel.axleWS;
     btVector3 fwd = up.cross(right);
-    btScalar steering = wheel.steering;
+    btScalar steering = btScalar(0.);
+    if(isFrontWheel(i))
+      steering=m_steering;
 
-    btQuaternion steeringOrn(up,steering);//wheel.m_steering);
+    btQuaternion steeringOrn(up,steering);
     btMatrix3x3 steeringMat(steeringOrn);
 
     btQuaternion rotatingOrn(right,-wheel.rotation);
     btMatrix3x3 rotatingMat(rotatingOrn);
 
+#if 0
     btMatrix3x3 basis2(
         right[0],fwd[0],up[0],
         right[1],fwd[1],up[1],
         right[2],fwd[2],up[2]
         );
+#endif
 
     wheel.worldTransform.setBasis(steeringMat * rotatingMat /** basis2*/);
-#endif
-    wheel.worldTransform=btTransform::getIdentity();
     wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
   }
+
+  return;
   // 2- TODO: update speed km/h
 
   // 3- simulate suspensions
@@ -792,13 +753,13 @@ void Vehicle::updateFriction()
 
   for (int i=0;i<4;i++) {
 
-#if 0
     WheelData& wheel = m_wheelsData[i];
     class btRigidBody* groundObject = (class btRigidBody*) wheel.collidingObject;
 
     if (groundObject) {
+#if 0
 
-      const btTransform& wheelTrans = getWheelTransformWS( i );
+      const btTransform& wheelTrans = wheel.worldTransform;
 
       btMatrix3x3 wheelBasis0 = wheelTrans.getBasis();
       m_axle[i] = btVector3(	
@@ -820,9 +781,9 @@ void Vehicle::updateFriction()
           btScalar(0.), m_axle[i],m_sideImpulse[i],timeStep);
 
       m_sideImpulse[i] *= sideFrictionStiffness2;
+#endif
 
     }
-#endif
   }
 
 }
@@ -901,22 +862,6 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 		wheel.contactNormalWS = - wheel.directionWS;
 		wheel.clippedInvContactDotSuspension = btScalar(1.0);
   }
-  if(wnumber==0) {
-    static int oo=0;
-    static float save=0.;
-    oo++;
-    if(save != wheel.suspensionLength && oo<200) {
-      save = wheel.suspensionLength;
-      GM_LOG("[%d,%d] suspension legnth %f, in contact? %s %f,%f,%f tgt: %f,%f,%f\n",oo,wnumber,save,
-          wheel.isInContact?"yes":"no",
-	        wheel.directionWS.getX(),
-	        wheel.directionWS.getY(),
-	        wheel.directionWS.getZ(),
-          target.getX(),
-          target.getY(),
-          target.getZ());
-    }
-  }
 
   return depth;
 }
@@ -935,6 +880,20 @@ void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
 		debugDrawer->drawLine(point1,point2,color);
   }
 }
+
+void 	Vehicle::getWorldTransform (btTransform &worldTrans) const
+{
+   worldTrans=m_chassisWorldTrans;
+}
+
+void 	Vehicle::setWorldTransform (const btTransform &worldTrans)
+{
+   m_chassisWorldTrans=worldTrans;
+   step();
+}
+
+
+void 	setWorldTransform (const btTransform &worldTrans);
 
 #if 0
 btScalar btRaycastVehicle::rayCast(btWheelInfo& wheel)

@@ -62,14 +62,12 @@ void Track::load()
   
   bool res=m_filesystem->addFileArchive(mypath);
 
-  GM_LOG(" %d sukinae %d\n",__LINE__,cnt);
 
   if(!res) {
     GM_LOG("cannot load: '%s'\n",mypath.c_str());
     return ;
   }
 
-  GM_LOG("laoding index '%u' from '%s'\n",cnt,m_filename.c_str());
 
   m_archiveIndex=cnt;
 
@@ -86,7 +84,6 @@ void Track::load()
 
   manifestIndex=fileList->findFile(MANIFEST_NAME);
 
-  //GM_LOG("uno %d\n",manifestIndex);
   
   if(manifestIndex<0) {
     GM_LOG("Not a valid track file\n");
@@ -158,7 +155,6 @@ void Track::load()
               break;
 
             case ot_lamp:
-              GM_LOG("Loading lights: %s\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
@@ -169,7 +165,6 @@ void Track::load()
               }
               break;
             case ot_mesh:
-              GM_LOG("Loading mesh: %s\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
@@ -188,7 +183,6 @@ void Track::load()
               }
               break;
             case ot_camera:
-              GM_LOG("Loading camera data from: '%s'\n",xmlReader->getNodeName());
               irr::io::IReadFile * rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
@@ -214,12 +208,8 @@ void Track::load()
         }
       break;
       case irr::io::EXN_COMMENT:
-        GM_LOG("%d Comment '%s'\n",i,
-            xmlReader->getNodeName());
       break;
       case irr::io::EXN_CDATA:
-        GM_LOG("%d Cdata '%s'\n",i,
-            xmlReader->getNodeName());
       break;
       case irr::io::EXN_UNKNOWN:
         GM_LOG("%d Unknown '%s'\n",i,
@@ -274,11 +264,9 @@ void Track::unload()
 
 Track::~Track()
 {
-  GM_LOG("Track destruct\n");
   unload();
   //m_filesystem->drop();
   //m_device->drop();
-  GM_LOG("Track destruct done\n");
 }
 
 
@@ -286,7 +274,6 @@ void Track::loadLights( irr::io::IReadFile * file ,
   irr::scene::ISceneManager* smgr )
 {
   irr::u16 mark;
-  int cnt=0;
   double pos[3],dif[3],spe[3],radius;
 
   smgr->setAmbientLight(
@@ -299,13 +286,6 @@ void Track::loadLights( irr::io::IReadFile * file ,
   Util::readTriple(file,spe);
   radius=Util::readDouble(file);
 
-  cnt++;
-
-  GM_LOG(" - %02d light\n   - position %f,%f,%f\n   - diffuse %f,%f,%f\n   - specular: %f,%f,%f\n   - radius: %f\n",
-      cnt,
-      pos[0], pos[1], pos[2],
-      dif[0], dif[1], dif[2],
-      spe[0], spe[1], spe[2],radius);
 
   irr::core::vector3df position = irr::core::vector3df(pos[0], pos[1], pos[2]);
   irr::video::SColorf specularColor = 

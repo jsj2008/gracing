@@ -82,8 +82,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   core::array<core::vector3df> normalsBuffer;
   core::array<core::vector2df> textureCoordBuffer;
 
-  GM_LOG("Materials size: %d\n",Materials.size());
-
   SObjMtl * currMtl = new SObjMtl();
   Materials.push_back(currMtl);
 
@@ -113,7 +111,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
           delete matName;
         matName=Util::readString(file);
         matChanged=true;
-        GM_LOG(" - using material: '%s'\n",matName);
         break;
 
       case Util::MARK_MATERIAL:
@@ -136,22 +133,18 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setRed(ka[0]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
-        GM_LOG(" - material: '%s' (flags: %X)\n",name,flags);
         break;
 
       case Util::MARK_VERTICES:
         n_vertices=Util::readInt(file);
-        GM_LOG(" - vertices: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
           Util::readVertex(file,vec);
-          GM_LOG("Vertex: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
           vertexBuffer.push_back(vec);
         }
         break;
 
       case Util::MARK_FACES_ONLY:
         n_faces=Util::readInt(file);
-        GM_LOG(" - faces: %d\n",n_faces);
         if(matChanged) {
           SObjMtl * mtl = findMtl(matName);
           if(mtl)  {
@@ -198,7 +191,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         }
         break;
       default:
-        //GM_LOG("Unknow mark '%X', abort loading\n",mark);
         done=true;
         break;
     }
@@ -215,7 +207,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
       }
       assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
       irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
-      logMaterial(mat);
       mesh->addMeshBuffer( Materials[m]->Meshbuffer );
     }
   }
@@ -236,10 +227,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   const irr::core::aabbox3d<float> & bb=
       animMesh->getBoundingBox();
-
-  GM_LOG(" - bounding box: min %2.3f,%2.3f,%2.3f, max: %2.3f,%2.3f.%2.3f\n",
-      bb.MinEdge.X,bb.MinEdge.Y,bb.MinEdge.Z,
-      bb.MaxEdge.X,bb.MaxEdge.Y,bb.MaxEdge.Z);
 
   return animMesh;
 }

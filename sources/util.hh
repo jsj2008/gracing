@@ -122,7 +122,6 @@ class Util
     vec.X=c[0];
     vec.Y=c[1];
     vec.Z=c[2];
-    GM_LOG("suooka: %f,%f,%f\n",vec.X,vec.Y,vec.Z);
   }
 
 	static inline double parseFloat(const char * str)

@@ -21,7 +21,7 @@
 #include "PhyWorld.h"
 #include "IVehicle.h"
 
-class Vehicle : public IVehicle, public btActionInterface
+class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 {
   public:
     Vehicle(
@@ -53,7 +53,6 @@ class Vehicle : public IVehicle, public btActionInterface
     virtual void steerLeft();
     virtual void steerRight();
     virtual void applyTorque(float x, float y, float z);
-    virtual void step();
 
     // deprecated ?!?
     virtual void dumpDebugInfo() { };
@@ -62,8 +61,35 @@ class Vehicle : public IVehicle, public btActionInterface
     virtual void updateAction(btCollisionWorld* world, btScalar deltaTime);
     virtual void debugDraw(btIDebugDraw*);
 
+    // from btMotionState
+    virtual void 	getWorldTransform (btTransform &worldTrans) const;
+    virtual void 	setWorldTransform (const btTransform &worldTrans);
+    
 
   private:
+    // private types
+    struct WheelData 
+    {
+      btVector3     hardPointCS;
+      btVector3     hardPointWS;
+      btVector3     directionWS;
+      btVector3     axleWS;
+      btVector3     contactPointWS;
+      btVector3     contactNormalWS;
+      btTransform   worldTransform;
+      btScalar      suspensionLength;
+			btScalar      suspensionRelativeVelocity;
+			btScalar      clippedInvContactDotSuspension;
+			btScalar      suspensionForce;
+      btRigidBody * collidingObject;
+
+      //btScalar      steering;
+      btScalar      rotation;
+
+      btVector3 position;
+      btScalar  radius;
+      bool      isInContact;
+    };
     
     void initPhysics();
     void deinitPhysics();
@@ -71,6 +97,41 @@ class Vehicle : public IVehicle, public btActionInterface
     void initGraphics();
 
     void updateFriction();
+    void step();
+
+    inline bool isFrontWheel(int index) 
+    { 
+      return index==W_FRONT_RIGHT || index==W_FRONT_LEFT;
+    }
+
+    inline bool isLeftWheel(int index) 
+    { 
+      return index==W_FRONT_LEFT || index==W_REAR_LEFT;
+    }
+
+    inline void updateWheel(int index)
+    {
+      assert(index>=0 && index<4);
+
+      irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
+
+      assert(wheel);
+
+      btTransform & wheelTrans=m_wheelsData[index].worldTransform;
+
+      irr::core::matrix4 matr;
+      PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
+
+      wheel->setRotation(matr.getRotationDegrees());
+      wheel->setPosition(matr.getTranslation());
+    }
+
+    btScalar raycast(WheelData&,int);
+
+
+    // private member variables
+
+    btTransform  m_chassisWorldTrans;
 
     float m_steering;
     float m_steeringIncrement;
@@ -95,28 +156,6 @@ class Vehicle : public IVehicle, public btActionInterface
 		btAlignedObjectArray<btScalar>	m_forwardImpulse;
 		btAlignedObjectArray<btScalar>	m_sideImpulse;
 
-    struct WheelData 
-    {
-      btVector3     hardPointCS;
-      btVector3     hardPointWS;
-      btVector3     directionWS;
-      btVector3     axleWS;
-      btVector3     contactPointWS;
-      btVector3     contactNormalWS;
-      btTransform   worldTransform;
-      btScalar      suspensionLength;
-			btScalar      suspensionRelativeVelocity;
-			btScalar      clippedInvContactDotSuspension;
-			btScalar      suspensionForce;
-      btRigidBody * collidingObject;
-
-      btScalar      steering;
-      btScalar      rotation;
-
-      btVector3 position;
-      btScalar  radius;
-      bool      isInContact;
-    };
 
     WheelData m_wheelsData[4];
     
@@ -143,42 +182,6 @@ class Vehicle : public IVehicle, public btActionInterface
 
       W_NUM_OF_WHEELS
     };
-
-    inline bool isFrontWheel(int index) 
-    { 
-      return index==W_FRONT_RIGHT || index==W_FRONT_LEFT;
-    }
-
-    inline bool isLeftWheel(int index) 
-    { 
-      return index==W_FRONT_LEFT || index==W_REAR_LEFT;
-    }
-
-    inline void updateWheel(int index)
-    {
-      assert(index>=0 && index<4);
-
-      irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
-
-      if(!wheel)
-        return;
-      assert(wheel);
-
-#if 0
-      btTransform wheelTrans=btTransform::getIdentity();
-      wheelTrans.setOrigin(m_wheelsData[index].hardPointWS);
-#else
-      btTransform & wheelTrans=m_wheelsData[index].worldTransform;
-#endif
-
-      irr::core::matrix4 matr;
-      PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
-
-      wheel->setRotation(matr.getRotationDegrees());
-      wheel->setPosition(matr.getTranslation());
-    }
-
-    btScalar raycast(WheelData&,int);
 
     // graphics part of the vehicle (irrlicht stuff)
     irr::core::array<irr::scene::IAnimatedMesh*>   

@@ -34,7 +34,9 @@ class PhyWorld : public btDiscreteDynamicsWorld
 
     btRigidBody * createRigidBody(
         irr::scene::ISceneNode * node,
-        float mass, const btTransform& startTransform, btCollisionShape* shape);
+        float mass, const btTransform& startTransform, 
+        btCollisionShape* shape,
+        btMotionState * motionState=0);
 
     void setBodyPosition(irr::scene::ISceneNode * node, float X,float Y, float Z);
 
