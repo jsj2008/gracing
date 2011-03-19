@@ -228,7 +228,6 @@ void Vehicle::initGraphics()
   }
 
   ((CompoundSceneNode*)m_chassisNode)->recalculateBoundingBox();
-  // calculate bounding box only for chassis !!
 
   for(i=0; i<4; ++i) {
     m_wheelsNodes[i]=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcaf0);
@@ -530,6 +529,8 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
   m_carBody->setLinearVelocity(btVector3(0,0,0));
   m_carBody->setAngularVelocity(btVector3(0,0,0));
 
+  // TODO: reset wheels
+
   // reset collosion
   m_world->getBroadphase()->getOverlappingPairCache()->
     cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
@@ -659,12 +660,13 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         right[2],fwd[2],up[2]
         );
 #endif
+    wheel.worldTransform=btTransform::getIdentity();
+    //wheel.worldTransform.setRotation(btQuaternion(btVector3(0.,1.,0.),M_PI/2));
 
-    wheel.worldTransform.setBasis(steeringMat * rotatingMat /** basis2*/);
+    //wheel.worldTransform.setBasis(steeringMat * rotatingMat /** basis2*/);
     wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
   }
 
-  return;
   // 2- TODO: update speed km/h
 
   // 3- simulate suspensions
@@ -892,47 +894,24 @@ void 	Vehicle::setWorldTransform (const btTransform &worldTrans)
    step();
 }
 
-
-void 	setWorldTransform (const btTransform &worldTrans);
-
-#if 0
-btScalar btRaycastVehicle::rayCast(btWheelInfo& wheel)
+void Vehicle::updateWheel(int index)
 {
-	updateWheelTransformsWS( wheel,false);
+  assert(index>=0 && index<4);
 
-	
-	btScalar depth = -1;
-	
-	btScalar raylen = wheel.getSuspensionRestLength()+wheel.m_wheelsRadius;
+  irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
 
-	btVector3 rayvector = wheel.m_raycastInfo.m_wheelDirectionWS * (raylen);
-	const btVector3& source = wheel.m_raycastInfo.m_hardPointWS;
-	wheel.m_raycastInfo.m_contactPointWS = source + rayvector;
-	const btVector3& target = wheel.m_raycastInfo.m_contactPointWS;
+  assert(wheel);
 
-	btScalar param = btScalar(0.);
-	
-	btVehicleRaycaster::btVehicleRaycasterResult	rayResults;
+  btTransform & wheelTrans=m_wheelsData[index].worldTransform;
+  //btTransform wheelTrans=btTransform::getIdentity();
 
-	btAssert(m_vehicleRaycaster);
+  irr::core::matrix4 matr;
+  PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
-	void* object = m_vehicleRaycaster->castRay(source,target,rayResults);
-
-	wheel.m_raycastInfo.m_groundObject = 0;
-
-	if (object)
-	{
-		param = rayResults.m_distFraction;
-		depth = raylen * rayResults.m_distFraction;
-
-
-  }
-
-
+  //wheel->setRotation(matr.getRotationDegrees());
+  wheel->setPosition(matr.getTranslation());
+  static float r=0.;
+  //r+=.5;
+  wheel->setRotation(irr::core::vector3df(0.,r,0.));
 }
-#endif
-
-  
-  
-
 

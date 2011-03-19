@@ -109,22 +109,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
       return index==W_FRONT_LEFT || index==W_REAR_LEFT;
     }
 
-    inline void updateWheel(int index)
-    {
-      assert(index>=0 && index<4);
-
-      irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
-
-      assert(wheel);
-
-      btTransform & wheelTrans=m_wheelsData[index].worldTransform;
-
-      irr::core::matrix4 matr;
-      PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
-
-      wheel->setRotation(matr.getRotationDegrees());
-      wheel->setPosition(matr.getTranslation());
-    }
+    inline void updateWheel(int index);
 
     btScalar raycast(WheelData&,int);
 

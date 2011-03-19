@@ -57,7 +57,7 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
   pos=node->getPosition();
 
   GM_LOG("[%03d] Node '%s' @%p of type %c%c%c%c, id: %04X, pos: %f,%f,%f"
-      ", abs pos: %f,%f,%f\n",level,
+      ", abs pos: %f,%f,%f, rotation: %f,%f,%f\n",level,
       node->getName(),
       node,
       (node->getType())&0xff,
@@ -66,7 +66,10 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
       (node->getType()>>24)&0xff,
       node->getID(),
       pos.X,pos.Y,pos.Z,
-      absPos.X,absPos.Y,absPos.Z );
+      absPos.X,absPos.Y,absPos.Z,
+       node->getRotation().X, 
+       node->getRotation().Y,
+       node->getRotation().Z);
 
   const core::list<irr::scene::ISceneNode*>&  list=node->getChildren();
 
@@ -207,8 +210,9 @@ int main(int argc, char ** av)
         vehpath.c_str(),0xcafe);
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-  //vehicle->reset(thetrack->getStartPosition());
-  vehicle->reset(irr::core::vector3df(0.,5.,0.));
+  vehicle->reset(thetrack->getStartPosition());
+  //vehicle->reset(irr::core::vector3df(0.,5.,0.));
+  smgr->getRootSceneNode()->addChild(vehicle);
 
 
   std::string fontPath = resmanager->getResourcePath() + "/font.png";
@@ -219,7 +223,7 @@ int main(int argc, char ** av)
       "Press:\n"
       "'esc' : to quit\n"
       "'l' : to load track\n'u' : to unload track\n"
-      "'c' : to load car\n'd' : to unload car\n"
+      "'c' : to load car\n'd' : apply torque to car around y axis\n"
       "'i' : to dump debug info\n"
       "**********************************\n",
       core::rect<s32>(60,15,600,400));
@@ -297,20 +301,8 @@ int main(int argc, char ** av)
 
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       if(flagC)  {
-        vehicle->load();
-        vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-        //vehicle->reset(thetrack->getStartPosition());
-        vehicle->reset(irr::core::vector3df(0.,5.,0.));
-
-        smgr->getRootSceneNode()->addChild(vehicle);
-
-        vehicle->applyTorque(1.,1000.,0.);
-        dumpNode(smgr->getRootSceneNode());
+        vehicle->reset(thetrack->getStartPosition());
         flagC=false;
-        GM_LOG("%f,%f,%f\n",
-            thetrack->getStartPosition().X,
-            thetrack->getStartPosition().Y,
-            thetrack->getStartPosition().Z);
       }
     } else {
       flagC=true;
@@ -355,11 +347,10 @@ int main(int argc, char ** av)
 
 
     if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
-      //vehicle->unload();
-      vehicle->remove();
       if(flagD) {
+        vehicle->applyTorque(1000.,1000.,0.);
+        GM_LOG("sssssssss\n");
         flagD=false;
-        dumpNode(smgr->getRootSceneNode());
       }
     } else {
       flagD=true;

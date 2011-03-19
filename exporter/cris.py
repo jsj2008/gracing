@@ -95,6 +95,7 @@ def binWrite_int(fp,value):
 def binWrite_pointVect(fp,point):
   #TODO: use a transform matrix
   #v=struct.pack("ddd",point[0],point[2],-point[1])
+  log("%f,%f,%f\n"%(point[0],point[2],point[1]))
   v=struct.pack("ddd",point[0],point[2],point[1])
   fp.write(v)
 
