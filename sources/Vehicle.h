@@ -82,6 +82,9 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 			btScalar      clippedInvContactDotSuspension;
 			btScalar      suspensionForce;
       btRigidBody * collidingObject;
+			btScalar      wheelsSuspensionForce;
+      btScalar      frictionSlip;
+      btScalar      skidInfo;
 
       //btScalar      steering;
       btScalar      rotation;
@@ -96,7 +99,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     void deinitGraphics();
     void initGraphics();
 
-    void updateFriction();
+    void updateFriction(btScalar);
     void step();
 
     inline bool isFrontWheel(int index) 

@@ -16,8 +16,13 @@ bt_home=/Users/gianni/MyLibraries/bullet-2.77
 bt_build_home=/Users/gianni/MyLibraries/bullet-build
 bt_inc_dir=-I$(bt_home)/src
 bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
-#bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
+
+
+# gui paths and libraries
+gui_home=/Users/gianni/MyLibraries/CEGUI-0.7.5
+gui_inc_dir=$(gui_home)/cegui/include
+gui_lib_dir=
 
 
 log_enabled=-DLOG_ENABLED

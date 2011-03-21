@@ -26,6 +26,9 @@
 #include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
 
+
+//#include <cegui.h>
+
 using namespace irr;
 using namespace core;
 using namespace scene;
@@ -117,6 +120,19 @@ class MyEventReceiver : public IEventReceiver
     // We use this array to store the current state of each key
     bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
+
+
+/////////// GUI temp code
+
+#if 0
+void initGUI()
+{
+  CEGUI::IrrlichtRenderer* myRenderer = 
+    new CEGUI::IrrlichtRenderer( myIrrlichtDevice, true );
+}
+#endif
+
+/////////// GUI temp code
 
 
 #ifdef __WIN32__

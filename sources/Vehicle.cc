@@ -95,6 +95,62 @@ CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
 
 /////////////////////////////////////////////////////////////////////////
 
+struct WheelContactPoint
+{
+	btRigidBody* m_body0;
+	btRigidBody* m_body1;
+	btVector3	m_frictionPositionWorld;
+	btVector3	m_frictionDirectionWorld;
+	btScalar	m_jacDiagABInv;
+	btScalar	m_maxImpulse;
+
+
+	WheelContactPoint(btRigidBody* body0,btRigidBody* body1,const btVector3& frictionPosWorld,const btVector3& frictionDirectionWorld, btScalar maxImpulse)
+		:m_body0(body0),
+		m_body1(body1),
+		m_frictionPositionWorld(frictionPosWorld),
+		m_frictionDirectionWorld(frictionDirectionWorld),
+		m_maxImpulse(maxImpulse)
+	{
+		btScalar denom0 = body0->computeImpulseDenominator(frictionPosWorld,frictionDirectionWorld);
+		btScalar denom1 = body1->computeImpulseDenominator(frictionPosWorld,frictionDirectionWorld);
+		btScalar	relaxation = 1.f;
+		m_jacDiagABInv = relaxation/(denom0+denom1);
+	}
+};
+
+btRigidBody& getFixedBody()
+{
+	static btRigidBody s_fixed(0, 0,0);
+    s_fixed.setMassProps(btScalar(0.),btVector3(btScalar(0.),btScalar(0.),btScalar(0.)));
+	return s_fixed;
+}
+
+btScalar calcRollingFriction(WheelContactPoint& contactPoint)
+{
+
+	btScalar j1=0.f;
+
+	const btVector3& contactPosWorld = contactPoint.m_frictionPositionWorld;
+
+	btVector3 rel_pos1 = contactPosWorld - contactPoint.m_body0->getCenterOfMassPosition(); 
+	btVector3 rel_pos2 = contactPosWorld - contactPoint.m_body1->getCenterOfMassPosition();
+	
+	btScalar maxImpulse  = contactPoint.m_maxImpulse;
+	
+	btVector3 vel1 = contactPoint.m_body0->getVelocityInLocalPoint(rel_pos1);
+	btVector3 vel2 = contactPoint.m_body1->getVelocityInLocalPoint(rel_pos2);
+	btVector3 vel = vel1 - vel2;
+
+	btScalar vrel = contactPoint.m_frictionDirectionWorld.dot(vel);
+
+	// calculate j that moves us to zero relative velocity
+	j1 = -vrel * contactPoint.m_jacDiagABInv;
+	btSetMin(j1, maxImpulse);
+	btSetMax(j1, -maxImpulse);
+
+	return j1;
+}
 Vehicle::Vehicle(
     irr::scene::ISceneNode * parent,
     irr::IrrlichtDevice * device, 
@@ -112,7 +168,7 @@ Vehicle::Vehicle(
 
   // accell dynamic info
   m_throttle=0.;
-  m_throttleIncrement=0.00001;
+  m_throttleIncrement=0.010;
 
   // steering dynamic info
   m_steering = 0.;
@@ -521,9 +577,9 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
 
   // reset position
   btTransform trans=btTransform::getIdentity();
+  trans.setRotation(btQuaternion(btVector3(0.,1.,0.),M_PI/2.));
   trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
   m_carBody->setCenterOfMassTransform(trans);
-
 
   // reset velocity
   m_carBody->setLinearVelocity(btVector3(0,0,0));
@@ -636,6 +692,8 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
 
     wheel.hardPointWS = chassisTrans * wheel.hardPointCS; ///chassisTrans( wheel.hardPointCS );
+    //wheel.directionWS = chassisTrans * btVector3(0.,-1,0.); //chassisTrans.getBasis() * btVector3(0.,-1.,0.);
+    //wheel.axleWS = chassisTrans * btVector3(0.,-1.,0.); //chassisTrans.getBasis() *  btVector3(0.,0.,1.);
     wheel.directionWS = chassisTrans.getBasis() * btVector3(0.,-1.,0.);
     wheel.axleWS = chassisTrans.getBasis() *  btVector3(0.,0.,1.);
 
@@ -653,17 +711,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     btQuaternion rotatingOrn(right,-wheel.rotation);
     btMatrix3x3 rotatingMat(rotatingOrn);
 
-#if 0
-    btMatrix3x3 basis2(
-        right[0],fwd[0],up[0],
-        right[1],fwd[1],up[1],
-        right[2],fwd[2],up[2]
-        );
-#endif
-    wheel.worldTransform=btTransform::getIdentity();
-    //wheel.worldTransform.setRotation(btQuaternion(btVector3(0.,1.,0.),M_PI/2));
-
-    //wheel.worldTransform.setBasis(steeringMat * rotatingMat /** basis2*/);
+    wheel.worldTransform.setBasis(steeringMat * rotatingMat * chassisTrans.getBasis());
     wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
   }
 
@@ -726,12 +774,12 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
   }
 
   // 4- update friction
-  updateFriction();
+  updateFriction(deltaTime);
   // 5- update wheels rotation
 }
 
 
-void Vehicle::updateFriction() 
+void Vehicle::updateFriction(btScalar timeStep) 
 {
   m_forwardWS.resize(4);
   m_axle.resize(4);
@@ -741,7 +789,6 @@ void Vehicle::updateFriction()
   int numWheelsOnGround = 0;
 
 
-  //collapse all those loops into one!
   for (int i=0;i<4;i++)
   {
     WheelData& wheel = m_wheelsData[i];
@@ -753,23 +800,23 @@ void Vehicle::updateFriction()
   }
 
 
+  // calc side impulse
   for (int i=0;i<4;i++) {
 
     WheelData& wheel = m_wheelsData[i];
     class btRigidBody* groundObject = (class btRigidBody*) wheel.collidingObject;
 
     if (groundObject) {
-#if 0
 
       const btTransform& wheelTrans = wheel.worldTransform;
 
       btMatrix3x3 wheelBasis0 = wheelTrans.getBasis();
       m_axle[i] = btVector3(	
-          wheelBasis0[0][m_indexRightAxis],
-          wheelBasis0[1][m_indexRightAxis],
-          wheelBasis0[2][m_indexRightAxis]);
+          wheelBasis0[0][2],
+          wheelBasis0[1][2],
+          wheelBasis0[2][2]);
 
-      const btVector3& surfNormalWS = wheelInfo.m_raycastInfo.m_contactNormalWS;
+      const btVector3& surfNormalWS = wheel.contactNormalWS;
       btScalar proj = m_axle[i].dot(surfNormalWS);
       m_axle[i] -= surfNormalWS * proj;
       m_axle[i] = m_axle[i].normalize();
@@ -778,16 +825,101 @@ void Vehicle::updateFriction()
       m_forwardWS[i].normalize();
 
 
-      resolveSingleBilateral(*m_chassisBody, wheelInfo.m_raycastInfo.m_contactPointWS,
-          *groundObject, wheelInfo.m_raycastInfo.m_contactPointWS,
+      resolveSingleBilateral(*m_carBody, wheel.contactPointWS,
+          *groundObject, wheel.contactPointWS,
           btScalar(0.), m_axle[i],m_sideImpulse[i],timeStep);
 
-      m_sideImpulse[i] *= sideFrictionStiffness2;
-#endif
+      //m_sideImpulse[i] *= sideFrictionStiffness2;
 
     }
   }
 
+  // calc forward impulse
+  btScalar sideFactor = btScalar(1.);
+  btScalar fwdFactor = 0.5;
+  bool sliding = false;
+  for (int wheelIdx =0;wheelIdx <4;wheelIdx++) {
+    WheelData& wheel = m_wheelsData[wheelIdx];
+    class btRigidBody* groundObject = (class btRigidBody*) wheel.collidingObject;
+
+    btScalar	rollingFriction = 0.f;
+
+    if (groundObject) {
+      if (m_throttle != 0.f) {
+        rollingFriction = m_throttle* timeStep;
+      } else {
+        btScalar defaultRollingFrictionImpulse = 0.f;
+        btScalar maxImpulse = m_brake ? m_brake : defaultRollingFrictionImpulse;
+        WheelContactPoint contactPt(m_carBody,groundObject,wheel.contactPointWS,m_forwardWS[wheelIdx],maxImpulse);
+        rollingFriction = calcRollingFriction(contactPt);
+      }
+    }
+
+    //switch between active rolling (throttle), braking and non-active rolling friction (no throttle/break)
+
+    m_forwardImpulse[wheelIdx] = btScalar(0.);
+    m_wheelsData[wheelIdx].skidInfo= btScalar(1.);
+
+    if (groundObject)
+    {
+      m_wheelsData[wheelIdx].skidInfo= btScalar(1.);
+
+      btScalar maximp = wheel.wheelsSuspensionForce * timeStep * wheel.frictionSlip;
+      btScalar maximpSide = maximp;
+
+      btScalar maximpSquared = maximp * maximpSide;
+
+
+      m_forwardImpulse[wheelIdx] = rollingFriction;//wheelInfo.m_engineForce* timeStep;
+
+      btScalar x = (m_forwardImpulse[wheelIdx] ) * fwdFactor;
+      btScalar y = (m_sideImpulse[wheelIdx] ) * sideFactor;
+
+      btScalar impulseSquared = (x*x + y*y);
+
+      if (impulseSquared > maximpSquared) {
+        sliding = true;
+
+        btScalar factor = maximp / btSqrt(impulseSquared);
+
+        m_wheelsData[wheelIdx].skidInfo *= factor;
+      }
+    } 
+  }
+  if (sliding)  {
+    for (int wheel = 0;wheel < 4; wheel++) 
+      if (m_sideImpulse[wheel] != btScalar(0.)) 
+        if (m_wheelsData[wheel].skidInfo< btScalar(1.)) {
+          m_forwardImpulse[wheel] *=	m_wheelsData[wheel].skidInfo;
+          m_sideImpulse[wheel] *= m_wheelsData[wheel].skidInfo;
+        }
+  }
+
+  for (int wheel = 0;wheel<4 ; wheel++) {
+    WheelData& wheelInfo = m_wheelsData[wheel];
+
+    btVector3 rel_pos = wheelInfo.contactPointWS - 
+      m_carBody->getCenterOfMassPosition();
+
+    if (m_forwardImpulse[wheel] != btScalar(0.)) {
+      m_carBody->applyImpulse(m_forwardWS[wheel]*(m_forwardImpulse[wheel]),rel_pos);
+    }
+    if (m_sideImpulse[wheel] != btScalar(0.)) {
+      class btRigidBody* groundObject = (class btRigidBody*) m_wheelsData[wheel].collidingObject;
+
+      btVector3 rel_pos2 = wheelInfo.contactPointWS - 
+        groundObject->getCenterOfMassPosition();
+
+
+      btVector3 sideImp = m_axle[wheel] * m_sideImpulse[wheel];
+
+      //rel_pos[1] *= wheelInfo.rollInfluence;
+      m_carBody->applyImpulse(sideImp,rel_pos);
+
+      //apply friction impulse on the ground
+      //groundObject->applyImpulse(-sideImp,rel_pos2);
+    }
+  }
 }
 
 btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
@@ -811,7 +943,8 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 
   if(object) {
 
-    wheel.collidingObject=m_carBody; // TODO: dont understand this!!
+    wheel.collidingObject=m_carBody; //&getFixedBody();
+    //wheel.collidingObject=(btRigidBody*)object; 
 
     wheel.isInContact=true;
 
@@ -870,17 +1003,37 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 
 void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
 {
-  btVector3 color(0,0,0);
+  btVector3 color(1.,1.,1.);
   for(int i=0; i<4; i++) {
     WheelData & wheel=m_wheelsData[i];
 
-		btVector3 & point1 = wheel.hardPointWS;
-    btVector3  point2 = point1 + wheel.axleWS * .5;
+		btVector3  point1 = wheel.hardPointWS;
+    btVector3  point2;
+
+    if(isLeftWheel(i)) {
+      point2 = point1 + wheel.axleWS * 5.;
+    } else {
+      point2 = point1 - wheel.axleWS * 5.;
+    }
 		debugDrawer->drawLine(point1,point2,color);
 
-    point2 = point1 + wheel.directionWS * 2.;
+    point2 = point1 + wheel.directionWS * 5.;
+    point1 -= wheel.directionWS * 5.;
 		debugDrawer->drawLine(point1,point2,color);
   }
+
+#if 0
+  for(int i=0; i<4; i++) {
+    if(i<m_forwardWS.size()) {
+      btVector3 & v=m_forwardWS[i];
+      btVector3 p1,p2;
+      p1=m_wheelsData[i].contactPointWS;
+      p2=p1 + v*2.;
+      debugDrawer->drawLine(p1,p2,color);
+    }
+  }
+#endif
+
 }
 
 void 	Vehicle::getWorldTransform (btTransform &worldTrans) const
@@ -908,10 +1061,7 @@ void Vehicle::updateWheel(int index)
   irr::core::matrix4 matr;
   PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
-  //wheel->setRotation(matr.getRotationDegrees());
+  wheel->setRotation(matr.getRotationDegrees());
   wheel->setPosition(matr.getTranslation());
-  static float r=0.;
-  //r+=.5;
-  wheel->setRotation(irr::core::vector3df(0.,r,0.));
 }
 
