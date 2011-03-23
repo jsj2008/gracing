@@ -21,7 +21,7 @@
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {
   m_vehicle=vehicle;
-  m_cameraPos=irr::core::vector3df(10,2,10);
+  m_cameraPos=irr::core::vector3df(10,5,10);
   m_cameraDistance=1.;
 }
 

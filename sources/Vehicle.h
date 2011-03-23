@@ -64,6 +64,15 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     // from btMotionState
     virtual void 	getWorldTransform (btTransform &worldTrans) const;
     virtual void 	setWorldTransform (const btTransform &worldTrans);
+
+    typedef enum {
+      db_raycastDirection=1,
+      db_wheelsAxle=2,
+      db_forwardImpulse=4,
+      db_sideImpulse=8,
+    };
+
+    void setDebugDrawFlags(unsigned flags);
     
 
   private:
@@ -82,11 +91,9 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 			btScalar      clippedInvContactDotSuspension;
 			btScalar      suspensionForce;
       btRigidBody * collidingObject;
-			btScalar      wheelsSuspensionForce;
       btScalar      frictionSlip;
       btScalar      skidInfo;
 
-      //btScalar      steering;
       btScalar      rotation;
 
       btVector3 position;
@@ -191,6 +198,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     btRigidBody *         m_carBody;
     btVehicleRaycaster *  m_raycaster;
+
+    unsigned              m_debugDrawFlags;
 
 };
 

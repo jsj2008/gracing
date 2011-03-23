@@ -224,6 +224,9 @@ int main(int argc, char ** av)
         device,
         world,
         vehpath.c_str(),0xcafe);
+
+  vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse);
+
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
   vehicle->reset(thetrack->getStartPosition());
