@@ -20,6 +20,13 @@ LOG_ON_STDOUT=0
 LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 
+# ENABLE 'BOUNDING BOX ADJUST'
+# i.e. apply translation to exported meshes
+#      so that the chassis is centered on origin
+#
+# set to 0 the following to disable it it
+ENABLE_BBA=0
+
 # EXPORT configuration
 EXP_APPLY_OBJ_TRANSFORM=0
 
@@ -69,6 +76,43 @@ WIDX_REAR_RIGHT=3
 
 WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
 
+class BBound:
+  def __init__(self):
+    self.minX = 0.
+    self.maxX = 0.
+    self.minY = 0.
+    self.maxY = 0.
+    self.minZ = 0.
+    self.maxZ = 0.
+
+  def update(self,point):
+    if point[0] < self.minX:
+      self.minX=point[0]
+
+    if point[0] > self.maxX:
+      self.maxX=point[0]
+
+    if point[1] > self.maxY:
+      self.maxY=point[1]
+
+    if point[1] < self.minY:
+      self.minY=point[1]
+
+    if point[2] > self.maxZ:
+      self.maxZ=point[2]
+
+    if point[2] < self.minZ:
+      self.minZ=point[2]
+
+  def getOffsets(self):
+    point=[ 0., 0., 0. ]
+    point[0]=(self.minX + self.maxX) / 2.0;
+    point[1]=(self.minY + self.maxY) / 2.0;
+    point[2]=(self.minZ + self.maxZ) / 2.0;
+    return point
+
+      
+
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -92,10 +136,9 @@ def binWrite_int(fp,value):
   v=struct.pack("i",value)
   fp.write(v)
 
+
 def binWrite_pointVect(fp,point):
-  #TODO: use a transform matrix
-  #v=struct.pack("ddd",point[0],point[2],-point[1])
-  log("%f,%f,%f\n"%(point[0],point[2],point[1]))
+  #log("%f,%f,%f\n"%(point[0],point[2],point[1]))
   v=struct.pack("ddd",point[0],point[2],point[1])
   fp.write(v)
 
@@ -155,7 +198,14 @@ def applyTransform(v,matrix):
     nv[c] = nv[c] + matrix[3][c]
   return nv
 
-def exportMesh(fp, ob):
+def applyTranslation(v,translation):
+  nv=[0., 0., 0.]
+  nv[0] = v[0] + translation[0]
+  nv[1] = v[1] + translation[1]
+  nv[2] = v[2] + translation[2]
+  return nv
+
+def exportMesh(fp, ob, translation=None):
   materials=ob.data.materials
   faces=ob.data.faces
   vertices=ob.data.vertices
@@ -173,6 +223,8 @@ def exportMesh(fp, ob):
   for v in vertices:
     if EXP_APPLY_OBJ_TRANSFORM == 1:
       co=applyTransform(v.co,transform)
+    elif ENABLE_BBA and translation != None:
+      co=applyTranslation(v.co,translation)
     else:
       co=v.co
     binWrite_pointVect(fp,co)
@@ -260,11 +312,11 @@ def exportLamp(fp,ob):
     log("skipping export lamp '%s', type: '%s'\n"%\
       (ob.name,lamp.type))
 
-def exportObject(tmp_dir_name,obj):
+def exportObject(tmp_dir_name,obj,translation=None):
   if obj.type == 'MESH':
     filename=tmp_dir_name+"/"+obj.name+".mesh"
     fp = open(filename, 'wb')    
-    ret=exportMesh(fp,obj)
+    ret=exportMesh(fp,obj,translation)
     fp.close()
     if ret:
       return [ 'mesh' , filename ]
@@ -415,6 +467,8 @@ class export_OT_vehicle(bpy.types.Operator):
     [ 1., 0., 0. ]\
   ]
 
+  chassis_bounds=BBound()
+
   vehicle_parm_default=[
    [ "vehicleSteering", 0.0 ],\
    [ "steeringIncrement", 0.04 ],\
@@ -476,6 +530,7 @@ class export_OT_vehicle(bpy.types.Operator):
     wheel_fr_objs=[ ]
     wheel_rl_objs=[ ]
     wheel_rr_objs=[ ]
+
     for ob in bpy.data.objects:
       if ob.name == "wheel.fr":
         self.updateWheelInfo(ob)
@@ -490,10 +545,14 @@ class export_OT_vehicle(bpy.types.Operator):
         self.updateWheelInfo(ob)
         wheel_rl_objs.append(ob)
       elif ob.type == 'MESH':
+        bb=ob.bound_box
+        for v in bb:
+          self.chassis_bounds.update(v)
         chassis_objs.append(ob)
       elif ob.type == "EMPTY" and ob.name == "VehicleData":
         log("getting vehicle data from '%s'\n"%ob.name)
 
+            
     if len(wheel_rl_objs) == 0:
       RaiseError("Wheel rear left is missing")
 
@@ -518,8 +577,9 @@ class export_OT_vehicle(bpy.types.Operator):
     elements=[ ]
 
     log("Exporting chassis\n")
+    offs=self.chassis_bounds.getOffsets()
     for ob in chassis_objs: 
-      el=exportObject(tmpdir,ob)
+      el=exportObject(tmpdir,ob,offs)
       if el != None:
         el[0]="chassis"
         log("%s,%s\n"%(el[0],el[1]))
@@ -529,28 +589,28 @@ class export_OT_vehicle(bpy.types.Operator):
     log("Exporting wheels\n");
     log("  - front left\n")
     for ob in wheel_fl_objs:
-      el=exportObject(tmpdir,ob)
+      el=exportObject(tmpdir,ob,offs)
       if el != None: 
         el[0]="wfl";
         elements.append(el)
 
     log("  - front right\n")
     for ob in wheel_fr_objs:
-      el=exportObject(tmpdir,ob)
+      el=exportObject(tmpdir,ob,offs)
       if el != None: 
         el[0]="wfr";
         elements.append(el)
 
     log("  - rear left\n")
     for ob in wheel_rl_objs:
-      el=exportObject(tmpdir,ob)
+      el=exportObject(tmpdir,ob,offs)
       if el != None: 
         el[0]="wrl";
         elements.append(el)
 
     log("  - rear right\n")
     for ob in wheel_rr_objs:
-      el=exportObject(tmpdir,ob)
+      el=exportObject(tmpdir,ob,offs)
       if el != None: 
         el[0]="wrr";
         elements.append(el)

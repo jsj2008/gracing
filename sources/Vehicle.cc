@@ -287,6 +287,18 @@ void Vehicle::initPhysics()
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
   float dZ= (bb.MaxEdge.Z - bb.MinEdge.Z)/2.;
 
+  if(bb.MaxEdge.X != -bb.MinEdge.X) {
+    GM_LOG("WARNING: chassis not centered on X %f,%f\n",bb.MinEdge.X,bb.MaxEdge.X);
+  }
+
+  if(bb.MaxEdge.Y != -bb.MinEdge.Y) {
+    GM_LOG("WARNING: chassis not centered on Y %f,%f\n",bb.MinEdge.Y,bb.MaxEdge.Y);
+  }
+
+  if(bb.MaxEdge.Z != -bb.MinEdge.Z) {
+    GM_LOG("WARNING: chassis not centered on Z %f,%f\n",bb.MinEdge.Z,bb.MaxEdge.Z);
+  }
+
   // create shapes
   m_chassisShape = new btBoxShape(btVector3(dX,dY,dZ));
 
@@ -637,7 +649,6 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
 
   // reset position
   btTransform trans=btTransform::getIdentity();
-  trans.setRotation(btQuaternion(btVector3(0.,1.,0.),M_PI/2.));
   trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
   m_carBody->setCenterOfMassTransform(trans);
 
@@ -840,6 +851,38 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
   // 4- update friction
   updateFriction(deltaTime);
   // 5- update wheels rotation
+
+	for (int i=0;i<4;i++)
+	{
+		WheelData& wheel = m_wheelsData[i];
+		btVector3 relpos = wheel.hardPointWS - m_carBody->getCenterOfMassPosition();
+		btVector3 vel = m_carBody->getVelocityInLocalPoint( relpos );
+
+		if (wheel.isInContact)
+		{
+			const btTransform&	chassisWorldTransform = m_carBody->getCenterOfMassTransform();
+
+			btVector3 fwd (
+				chassisWorldTransform.getBasis()[0][0],
+				chassisWorldTransform.getBasis()[1][0],
+				chassisWorldTransform.getBasis()[2][0]);
+
+			btScalar proj = fwd.dot(wheel.contactNormalWS);
+			fwd -= wheel.contactNormalWS * proj;
+
+			btScalar proj2 = fwd.dot(vel);
+			
+			wheel.deltaRotation = (proj2 * deltaTime) / (wheel.radius);
+			wheel.rotation += wheel.deltaRotation;
+
+		} else
+		{
+			wheel.rotation += wheel.deltaRotation;
+		}
+		
+		wheel.deltaRotation *= btScalar(0.99);//damping of rotation when not in contact
+
+	}
 }
 
 

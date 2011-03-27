@@ -25,6 +25,7 @@
 #include "Vehicle.h"
 #include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
+#include "DataRecorder.h"
 
 
 //#include <cegui.h>

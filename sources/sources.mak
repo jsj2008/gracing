@@ -4,5 +4,6 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
 				VehiclesHandler.cc \
         ResourceManager.cc\
         VehicleCameraAnimator.cc\
-        IrrDebugDrawer.cc
+        IrrDebugDrawer.cc\
+        DataRecorder.cc
 

@@ -95,6 +95,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
       btScalar      skidInfo;
 
       btScalar      rotation;
+      btScalar      deltaRotation;
 
       btVector3 position;
       btScalar  radius;
