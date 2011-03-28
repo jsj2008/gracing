@@ -219,7 +219,8 @@ int main(int argc, char ** av)
   thetrack->load();
 
   std::string vehpath;
-  resmanager->getVehicleCompletePath("car_ab.zip",vehpath);
+  //resmanager->getVehicleCompletePath("car_ab.zip",vehpath);
+  resmanager->getVehicleCompletePath("squared.zip",vehpath);
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,

@@ -25,7 +25,7 @@ LOG_FILENAME="/tmp/log.txt"
 #      so that the chassis is centered on origin
 #
 # set to 0 the following to disable it it
-ENABLE_BBA=0
+ENABLE_BBA=1
 
 # EXPORT configuration
 EXP_APPLY_OBJ_TRANSFORM=0
@@ -106,9 +106,9 @@ class BBound:
 
   def getOffsets(self):
     point=[ 0., 0., 0. ]
-    point[0]=(self.minX + self.maxX) / 2.0;
-    point[1]=(self.minY + self.maxY) / 2.0;
-    point[2]=(self.minZ + self.maxZ) / 2.0;
+    point[0]=-(self.minX + self.maxX) / 2.0;
+    point[1]=-(self.minY + self.maxY) / 2.0;
+    point[2]=-(self.minZ + self.maxZ) / 2.0;
     return point
 
       
@@ -516,6 +516,12 @@ class export_OT_vehicle(bpy.types.Operator):
     self.wheel_position[idx][1]=ob.location[2]
     self.wheel_position[idx][2]=ob.location[1]
 
+    if ENABLE_BBA:
+      offs=self.chassis_bounds.getOffsets()
+      self.wheel_position[idx][0]=self.wheel_position[idx][0]+offs[0]
+      self.wheel_position[idx][1]=self.wheel_position[idx][1]+33. #offs[2]
+      self.wheel_position[idx][2]=self.wheel_position[idx][2]+offs[1]
+
 
   def execute(self, context):
 
@@ -533,16 +539,16 @@ class export_OT_vehicle(bpy.types.Operator):
 
     for ob in bpy.data.objects:
       if ob.name == "wheel.fr":
-        self.updateWheelInfo(ob)
+#        self.updateWheelInfo(ob)
         wheel_fr_objs.append(ob)
       elif ob.name == "wheel.fl":
-        self.updateWheelInfo(ob)
+#self.updateWheelInfo(ob)
         wheel_fl_objs.append(ob)
       elif ob.name == "wheel.rr":
-        self.updateWheelInfo(ob)
+#        self.updateWheelInfo(ob)
         wheel_rr_objs.append(ob)
       elif ob.name == "wheel.rl":
-        self.updateWheelInfo(ob)
+#        self.updateWheelInfo(ob)
         wheel_rl_objs.append(ob)
       elif ob.type == 'MESH':
         bb=ob.bound_box
@@ -564,6 +570,19 @@ class export_OT_vehicle(bpy.types.Operator):
 
     if len(wheel_fl_objs) == 0:
       RaiseError("Wheel front left is missing")
+
+    for ob in wheel_fr_objs:
+      self.updateWheelInfo(ob)
+
+    for ob in wheel_fl_objs:
+      self.updateWheelInfo(ob)
+
+    for ob in wheel_rr_objs:
+      self.updateWheelInfo(ob)
+
+    for ob in wheel_rl_objs:
+      self.updateWheelInfo(ob)
+
     
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
