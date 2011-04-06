@@ -21,26 +21,69 @@
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {
   m_vehicle=vehicle;
-  m_cameraPos=irr::core::vector3df(10,5,10);
-  m_cameraDistance=1.;
+  m_camType=0;
+
+  // type 0 init
+  m_type0_parms.phi=0.;
+  m_type0_parms.distance=5.;
+  m_type0_parms.height=0.;
+
+  type0_updateDerivate();
 }
 
 void 	VehicleCameraAnimator::animateNode (irr::scene::ISceneNode *node, irr::u32 timeMs)
 {
   assert(node->getType() == irr::scene::ESNT_CAMERA);
 
-  irr::scene::ICameraSceneNode * cam=(irr::scene::ICameraSceneNode*)node;
-
-  irr::core::vector3df pos=m_vehicle->getChassisPos();
-
-  cam->setTarget(pos);
-
-  pos+=m_cameraPos*m_cameraDistance;
-  cam->setPosition(pos);
+  switch(m_camType) 
+  {
+    case 0:
+    default:
+      irr::scene::ICameraSceneNode * cam=(irr::scene::ICameraSceneNode*)node;
+      irr::core::vector3df pos=m_vehicle->getChassisPos();
+      cam->setTarget(pos);
+      pos+=m_type0_parms.pos*m_type0_parms.distance;
+      cam->setPosition(pos);
+      break;
+  }
 }
 
 irr::scene::ISceneNodeAnimator * VehicleCameraAnimator::createClone(irr::scene::ISceneNode *node, 
         irr::scene::ISceneManager *newManager)
 {
   return 0;
+} 
+
+void VehicleCameraAnimator::moveXY(float dx, float dy)
+{
+  switch(m_camType)
+  {
+    case 0:
+    default:
+      type0_moveXY(dx,dy);
+      break;
+  }
+}
+
+void VehicleCameraAnimator::type0_moveXY(float dx, float dy)
+{
+  m_type0_parms.phi+=dx;
+  m_type0_parms.height+=dy;
+
+  if(m_type0_parms.phi<=0.)
+    m_type0_parms.phi=2.*M_PI;
+  else if(m_type0_parms.phi>=2.*M_PI)
+    m_type0_parms.phi=0.;
+
+  type0_updateDerivate();
+}
+
+void VehicleCameraAnimator::type0_updateDerivate()
+{
+  double sphi=sin(m_type0_parms.phi);
+  double cphi=cos(m_type0_parms.phi);
+   
+  m_type0_parms.pos.X=m_type0_parms.distance * sphi;
+  m_type0_parms.pos.Y=m_type0_parms.height;
+  m_type0_parms.pos.Z=m_type0_parms.distance * cphi;
 }

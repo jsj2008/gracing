@@ -17,6 +17,7 @@ resource_dir=None
 vehicles=[
   "squared.zip",
   "car_ab.zip",
+  "car_ab_new.zip",
   "arrow-car.zip",
   "test-1.zip",
   "test-2.zip"

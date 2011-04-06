@@ -43,13 +43,29 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
     // Returns true if this animator receives events. 
     virtual bool 	isEventReceiverEnabled () const { return false; };
 
+
+    // move the camera
+    void moveXY(float dx, float dy);
+
     // Event receiver, override this function for camera controlling animators. 
     //virtual bool 	OnEvent (const SEvent &event);
   private:
+
+    void type0_moveXY(float dx, float y);
+    void type0_updateDerivate();
+
     IVehicle * m_vehicle;
 
-    irr::core::vector3df m_cameraPos;
-    float                m_cameraDistance;
+    int        m_camType;
+
+    struct {
+      float                distance;
+      float                phi;
+      float                height;
+
+      // derivate
+      irr::core::vector3df pos;
+    } m_type0_parms;
 
 };
 

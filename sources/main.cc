@@ -37,6 +37,7 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+#define CAMERA_STEP 0.001
 
 static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
 {
@@ -219,8 +220,7 @@ int main(int argc, char ** av)
   thetrack->load();
 
   std::string vehpath;
-  //resmanager->getVehicleCompletePath("car_ab.zip",vehpath);
-  resmanager->getVehicleCompletePath("squared.zip",vehpath);
+  resmanager->getVehicleCompletePath("car_ab_new.zip",vehpath);
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -333,6 +333,18 @@ int main(int argc, char ** av)
       if(vehicle)
         vehicle->throttleUp();
     }
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_W))
+      camanim->moveXY(0.,CAMERA_STEP);
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_Z)) 
+      camanim->moveXY(0.,-CAMERA_STEP);
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_A))
+      camanim->moveXY(CAMERA_STEP,0.);
+
+    if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
+      camanim->moveXY(-CAMERA_STEP,0.);
 
     if(receiver.IsKeyDown(irr::KEY_DOWN)) {
       if(vehicle)

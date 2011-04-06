@@ -12,8 +12,22 @@ __bpydoc__ = """\
 Crisalide xml exporter
 
 """
-import bpy,os,struct,zipfile,math
+import bpy,os,struct,zipfile,math,time,mathutils
 
+"""
+cris binary file format
+
+- MARK_VERTICES, n_vertices, ...<vertices>...
+
+- MARK_MATERIALS
+
+- MARK_USE_MATERIAL, material_name
+
+- MARK_FACES_ONLY 
+
+
+
+"""
 
 # LOG configuration
 LOG_ON_STDOUT=0
@@ -25,10 +39,11 @@ LOG_FILENAME="/tmp/log.txt"
 #      so that the chassis is centered on origin
 #
 # set to 0 the following to disable it it
-ENABLE_BBA=1
+EXP_ENABLE_BBA=1
 
 # EXPORT configuration
-EXP_APPLY_OBJ_TRANSFORM=0
+EXP_APPLY_OBJ_TRANSFORM=False
+EXP_APPLY_MODIFIERS=False
 
 EPSILON=0.0001
 
@@ -39,7 +54,8 @@ MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
 MARK_MATERIAL=0xf102
 MARK_USE_MATERIAL=0xf103
-MARK_UVCOORD=0xf104
+MARK_UVCOORDS=0xf104
+MARK_FACES_AND_UV=0xf105
 
 # light types
 LAMP_TYPE_POINT=0
@@ -67,6 +83,11 @@ MATERIA_FLAGS_LIST=[
   { 'name': 'EMF_ANTI_ALIASING',      'value': 0x4000, "default": False },
   { 'name': 'EMF_COLOR_MASK',         'value': 0x8000, "default": False },
   { 'name': 'EMF_COLOR_MATERIAL',     'value': 0x10000, "default": False }
+]
+
+WORLD_PROPERTIES=[
+  { 'name': 'gravity', 'default': [ 0., -10., 0.] },
+  { 'name': 'skydome', 'default': "" }
 ]
 
 WIDX_FRONT_LEFT=0
@@ -113,6 +134,13 @@ class BBound:
 
       
 
+def fixName(name):
+  if name is None:
+    return 'None'
+  else:
+    return name.replace(' ', '_')
+
+
 
 def log(str):
   if LOG_ON_STDOUT==1:
@@ -138,8 +166,11 @@ def binWrite_int(fp,value):
 
 
 def binWrite_pointVect(fp,point):
-  #log("%f,%f,%f\n"%(point[0],point[2],point[1]))
   v=struct.pack("ddd",point[0],point[2],point[1])
+  fp.write(v)
+
+def binWrite_pointUV(fp,point):
+  v=struct.pack("dd",point[0],point[1])
   fp.write(v)
 
 def binWrite_color(fp,color):
@@ -190,6 +221,251 @@ def getMaterialFlagsWord(mat):
       word = word | v["value"]
   return word
 
+#def write_file(fp, objects, scene,
+def exportMesh(fp, ob, scene,translation=None,
+          EXPORT_EDGES=False,
+          EXPORT_NORMALS_HQ=False,
+          EXPORT_UV=False,
+          EXPORT_COPY_IMAGES=False,
+          EXPORT_APPLY_MODIFIERS=True,
+          EXPORT_ROTX90=True,
+          EXPORT_BLEN_OBS=True,
+          EXPORT_CURVE_AS_NURBS=True):
+    '''
+    Basic write function. The context and options must be already set
+    This can be accessed externaly
+    eg.
+    write( 'c:\\test\\foobar.obj', Blender.Object.GetSelected() ) # Using default options.
+    '''
+
+    # XXX
+    import math
+
+    objects=[ ob ]
+
+    def veckey2d(v):
+        return round(v[0], 6), round(v[1], 6)
+
+    log('------------------------ start\n')
+
+    #fp = open(filepath, "wb")
+
+    # Initialize totals, these are updated each object
+    totverts = totuvco = totno = 1
+
+    face_vert_index = 1
+
+    globalNormals = {}
+
+    # A Dict of Materials
+    # (material.name, image.name):matname_imagename # matname_imagename has gaps removed.
+    mtl_dict = {}
+
+    # Get all meshes
+    for ob_main in objects:
+
+        # ignore dupli children
+        if ob_main.parent and ob_main.parent.dupli_type != 'NONE':
+            # XXX
+            log(ob_main.name, 'is a dupli child - ignoring')
+            continue
+
+        obs = []
+        if ob_main.dupli_type != 'NONE':
+            # XXX
+            log('creating dupli_list on', ob_main.name)
+            ob_main.create_dupli_list(scene)
+
+            obs = [(dob.object, dob.matrix) for dob in ob_main.dupli_list]
+
+            # XXX debug print
+            log(ob_main.name, 'has', len(obs), 'dupli children')
+        else:
+            obs = [(ob_main, ob_main.matrix_world)]
+
+        for ob, ob_mat in obs:
+
+            if ob.type != 'MESH':
+                continue
+
+            me = ob.create_mesh(scene, EXPORT_APPLY_MODIFIERS, 'PREVIEW')
+
+            if EXPORT_UV:
+                faceuv = len(me.uv_textures) > 0
+                if faceuv:
+                    uv_layer = me.uv_textures.active.data[:]
+            else:
+                faceuv = False
+
+            me_verts = me.vertices[:]
+
+            # Make our own list so it can be sorted to reduce context switching
+            face_index_pairs = [ (face, index) for index, face in enumerate(me.faces)]
+            # faces = [ f for f in me.faces ]
+
+            if EXPORT_EDGES:
+                edges = me.edges
+            else:
+                edges = []
+
+            if not (len(face_index_pairs)+len(edges)+len(me.vertices)): # Make sure there is somthing to write
+
+                # clean up
+                bpy.data.meshes.remove(me)
+
+                continue # dont bother with this mesh.
+
+            materials = me.materials
+
+            materialNames = []
+            materialItems = [m for m in materials]
+            if materials:
+                for mat in materials:
+                    if mat:
+                        materialNames.append(mat.name)
+                    else:
+                        materialNames.append(None)
+
+            # Possible there null materials, will mess up indicies
+            # but at least it will export, wait until Blender gets fixed.
+            materialNames.extend((16-len(materialNames)) * [None])
+            materialItems.extend((16-len(materialItems)) * [None])
+
+            # Sort by Material, then images
+            # so we dont over context switch in the obj file.
+            if faceuv:
+                face_index_pairs.sort(key=lambda a: (a[0].material_index, hash(uv_layer[a[1]].image), a[0].use_smooth))
+            elif len(materials) > 1:
+                face_index_pairs.sort(key = lambda a: (a[0].material_index, a[0].use_smooth))
+            else:
+                # no materials
+                face_index_pairs.sort(key = lambda a: a[0].use_smooth)
+
+            # Set the default mat to no material and no image.
+            contextMat = (0, 0) # Can never be this, so we will label a new material teh first chance we get.
+            contextSmooth = None # Will either be true or false,  set bad to force initialization switch.
+
+            if EXPORT_BLEN_OBS:
+                name1 = ob.name
+                name2 = ob.data.name
+                if name1 == name2:
+                    obnamestring = fixName(name1)
+                else:
+                    obnamestring = '%s_%s' % (fixName(name1), fixName(name2))
+
+                log('exporting object %s\n' % obnamestring) # Write Object name
+
+
+            # export vertices
+            binWrite_mark(fp,MARK_VERTICES)
+            binWrite_int(fp,len(me_verts))
+            for v in me_verts:
+              if EXP_ENABLE_BBA and translation != None:
+                co=applyTranslation(v.co,translation)
+              else:
+                co=v.co
+              binWrite_pointVect(fp,co)
+
+            # prepare UV coordinates
+            if faceuv:
+                uv_face_mapping = [[0,0,0,0] for i in range(len(face_index_pairs))] # a bit of a waste for tri's :/
+                uv_cords = [ ]
+
+                uv_dict = {} # could use a set() here
+                uv_layer = me.uv_textures.active.data
+
+                for f, f_index in face_index_pairs:
+                    for uv_index, uv in enumerate(uv_layer[f_index].uv):
+                        uvkey = veckey2d(uv)
+                        try:
+                            uv_face_mapping[f_index][uv_index] = uv_dict[uvkey]
+                        except:
+                            uv_face_mapping[f_index][uv_index] = uv_dict[uvkey] = len(uv_dict)
+                            uv_cords.append(uv)
+                uv_unique_count = len(uv_dict)
+                binWrite_mark(fp,MARK_UVCOORDS)
+                binWrite_int(fp,uv_unique_count)
+
+                for uv in uv_cords:
+                  binWrite_pointUV(fp,uv)
+
+
+            # NORMAL, Smooth/Non smoothed.
+            if not faceuv:
+                f_image = None
+
+            matImgFaces={}
+
+            for f, f_index in face_index_pairs:
+              f_mat = min(f.material_index, len(materialNames)-1)
+              if faceuv:
+                tface = uv_layer[f_index]
+                f_image = tface.image
+              if faceuv and f_image: # Object is always true.
+                key = materialNames[f_mat],  f_image.name
+              else:
+                key = materialNames[f_mat],  None # No image, use None instead.
+              
+              try:
+                matImgFaces[key].append(f)
+              except:
+                matImgFaces[key]=[ f ]
+
+            for mat in materialItems:
+              if mat != None:
+                exportMaterial(fp,mat)
+
+
+            for matName, imageName in matImgFaces:
+              faces=matImgFaces[(matName,imageName)]
+              n_faces=len(faces)
+              binWrite_mark(fp,MARK_USE_MATERIAL)
+              binWrite_string(fp,matName)
+
+              if faceuv:  
+                binWrite_mark(fp,MARK_FACES_AND_UV)
+              else:
+                binWrite_mark(fp,MARK_FACES_ONLY)
+              binWrite_int(fp,n_faces)
+              log("Mat: '%s', img: '%s' has %d faces\n"%(matName,imageName,n_faces))
+              for f in faces:
+                f_smooth= f.use_smooth
+                f_mat = min(f.material_index, len(materialNames)-1)
+                f_index = f.index
+                log("  face %d - "%f_index)
+                f_v_orig = [(vi, me_verts[v_idx]) for vi, v_idx in enumerate(f.vertices)]
+                f_v_iter = (f_v_orig, )
+                for f_v in f_v_iter:
+                  binWrite_int(fp,len(f_v))
+                  if faceuv:
+                    for vi, v in f_v:
+                      binWrite_int(fp,v.index + totverts - 1)
+                      binWrite_int(fp,totuvco + uv_face_mapping[f_index][vi]) 
+                      log( ' %d/%d' % (\
+                        v.index + totverts,\
+                        totuvco + uv_face_mapping[f_index][vi])) # vert, uv
+                    face_vert_index += len(f_v)
+                  else: # No UV's
+                    for vi, v in f_v:
+                      binWrite_int(fp,v.index + totverts - 1)
+                      log( ' %d' % (v.index + totverts) )
+                log("\n")       
+
+            log("---------------- done\n")
+
+            totverts += len(me_verts)
+            if faceuv:
+                totuvco += uv_unique_count
+
+            # clean up
+            bpy.data.meshes.remove(me)
+
+        if ob_main.dupli_type != 'NONE':
+            ob_main.free_dupli_list()
+
+    return True
+
+
 def applyTransform(v,matrix):
   nv=[0., 0., 0.]
   for c in range(0,3):
@@ -205,16 +481,17 @@ def applyTranslation(v,translation):
   nv[2] = v[2] + translation[2]
   return nv
 
-def exportMesh(fp, ob, translation=None):
-  materials=ob.data.materials
-  faces=ob.data.faces
-  vertices=ob.data.vertices
+def exportMesh_org(fp, ob, scene,translation=None):
+  me=ob.data
+  materials=me.materials
+  faces=me.faces
+  vertices=me.vertices
+  transform=ob.matrix_world
 
   if len(materials)==0:
     log("Discarding object '%s' coz have no material set\n"%ob.name);
     return False
 
-  transform=ob.matrix_world
 
   # export vertices
   binWrite_mark(fp,MARK_VERTICES)
@@ -223,7 +500,7 @@ def exportMesh(fp, ob, translation=None):
   for v in vertices:
     if EXP_APPLY_OBJ_TRANSFORM == 1:
       co=applyTransform(v.co,transform)
-    elif ENABLE_BBA and translation != None:
+    elif EXP_ENABLE_BBA and translation != None:
       co=applyTranslation(v.co,translation)
     else:
       co=v.co
@@ -246,7 +523,6 @@ def exportMesh(fp, ob, translation=None):
       if face.material_index!=mat_idx:
         continue
       n_faces=n_faces+1
-    log("material: '%s'\n"%materials[mat_idx].name)
     binWrite_mark(fp,MARK_USE_MATERIAL)
     binWrite_string(fp,materials[mat_idx].name)
     binWrite_mark(fp,MARK_FACES_ONLY)
@@ -254,13 +530,9 @@ def exportMesh(fp, ob, translation=None):
     for face in faces:
       if face.material_index!=mat_idx:
         continue
-      #log("face:")
       binWrite_int(fp,len(face.vertices))
       for v_idx in face.vertices:
-        #log("%d "%v_idx)
         binWrite_int(fp,v_idx)
-        #log("\n")
-    log("done with material '%s'\n"%materials[mat_idx].name);
   return True
 
 def exportMaterial(fp,ma):
@@ -312,11 +584,11 @@ def exportLamp(fp,ob):
     log("skipping export lamp '%s', type: '%s'\n"%\
       (ob.name,lamp.type))
 
-def exportObject(tmp_dir_name,obj,translation=None):
+def exportObject(tmp_dir_name,context,obj,translation=None):
   if obj.type == 'MESH':
     filename=tmp_dir_name+"/"+obj.name+".mesh"
     fp = open(filename, 'wb')    
-    ret=exportMesh(fp,obj,translation)
+    ret=exportMesh(fp,obj,context.scene,translation)
     fp.close()
     if ret:
       return [ 'mesh' , filename ]
@@ -380,14 +652,26 @@ class export_OT_track(bpy.types.Operator):
     default = 0.1, min = 0.001, max = 1000.0)
 
   def getTrackInfo(self, elements,es):
+    self.getWorldProperties(elements)
     for e in es:
       if e.name == 'track.start':
         val="%f,%f,%f"%( e.location[0], e.location[2], e.location[1])
         elements.append([ 'track_start_pos', val, 1])
         val="%f,%f,%f"%( e.rotation_euler[0], e.rotation_euler[1], e.rotation_euler[2])
         elements.append([ 'track_start_rot', val, 1])
-       
 
+  def getWorldProperties(self,elements):
+    for p in WORLD_PROPERTIES:
+      name=p["name"]
+      value=p["default"]
+      if type(value) == type([]):
+        svalue="%f,%f,%f"%( value[0], value[2], value[1])
+      elif type(value) == type(""):
+        svalue=value
+      else:
+        svalue="unknowwn"
+      elements.append([ name, svalue, 1])
+      
 
   def execute(self, context):
     filepath=self.properties.filepath
@@ -401,9 +685,9 @@ class export_OT_track(bpy.types.Operator):
       os.mkdir(tmpdir)
     else:
       if os.path.isdir(tmpdir):
-        log("presente directory\n")
+        pass
       else:
-        RaiseError("herrorororor!")
+        RaiseError("horrorororor!")
     log("Exporing track (dir %s): %s\n"%(dirname,filepath))
     elements=[]
 
@@ -411,7 +695,7 @@ class export_OT_track(bpy.types.Operator):
       if ob.type == "EMPTY":
         empties.append(ob)
         continue
-      name=exportObject(tmpdir,ob)
+      name=exportObject(tmpdir,context,ob)
       if name != None:
         log("%s,%s\n"%(name[0],name[1]))
         elements.append(name)
@@ -516,10 +800,10 @@ class export_OT_vehicle(bpy.types.Operator):
     self.wheel_position[idx][1]=ob.location[2]
     self.wheel_position[idx][2]=ob.location[1]
 
-    if ENABLE_BBA:
+    if EXP_ENABLE_BBA:
       offs=self.chassis_bounds.getOffsets()
       self.wheel_position[idx][0]=self.wheel_position[idx][0]+offs[0]
-      self.wheel_position[idx][1]=self.wheel_position[idx][1]+33. #offs[2]
+      self.wheel_position[idx][1]=self.wheel_position[idx][1]+offs[2]
       self.wheel_position[idx][2]=self.wheel_position[idx][2]+offs[1]
 
 
@@ -539,16 +823,12 @@ class export_OT_vehicle(bpy.types.Operator):
 
     for ob in bpy.data.objects:
       if ob.name == "wheel.fr":
-#        self.updateWheelInfo(ob)
         wheel_fr_objs.append(ob)
       elif ob.name == "wheel.fl":
-#self.updateWheelInfo(ob)
         wheel_fl_objs.append(ob)
       elif ob.name == "wheel.rr":
-#        self.updateWheelInfo(ob)
         wheel_rr_objs.append(ob)
       elif ob.name == "wheel.rl":
-#        self.updateWheelInfo(ob)
         wheel_rl_objs.append(ob)
       elif ob.type == 'MESH':
         bb=ob.bound_box
@@ -583,7 +863,6 @@ class export_OT_vehicle(bpy.types.Operator):
     for ob in wheel_rl_objs:
       self.updateWheelInfo(ob)
 
-    
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
     else:
@@ -598,7 +877,7 @@ class export_OT_vehicle(bpy.types.Operator):
     log("Exporting chassis\n")
     offs=self.chassis_bounds.getOffsets()
     for ob in chassis_objs: 
-      el=exportObject(tmpdir,ob,offs)
+      el=exportObject(tmpdir,context,ob,offs)
       if el != None:
         el[0]="chassis"
         log("%s,%s\n"%(el[0],el[1]))
@@ -608,28 +887,28 @@ class export_OT_vehicle(bpy.types.Operator):
     log("Exporting wheels\n");
     log("  - front left\n")
     for ob in wheel_fl_objs:
-      el=exportObject(tmpdir,ob,offs)
+      el=exportObject(tmpdir,context,ob)
       if el != None: 
         el[0]="wfl";
         elements.append(el)
 
     log("  - front right\n")
     for ob in wheel_fr_objs:
-      el=exportObject(tmpdir,ob,offs)
+      el=exportObject(tmpdir,context,ob)
       if el != None: 
         el[0]="wfr";
         elements.append(el)
 
     log("  - rear left\n")
     for ob in wheel_rl_objs:
-      el=exportObject(tmpdir,ob,offs)
+      el=exportObject(tmpdir,context,ob)
       if el != None: 
         el[0]="wrl";
         elements.append(el)
 
     log("  - rear right\n")
     for ob in wheel_rr_objs:
-      el=exportObject(tmpdir,ob,offs)
+      el=exportObject(tmpdir,context,ob)
       if el != None: 
         el[0]="wrr";
         elements.append(el)
