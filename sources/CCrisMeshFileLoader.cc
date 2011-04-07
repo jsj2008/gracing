@@ -91,6 +91,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   u16 mark;
   bool done=false;
   core::vector3df vec;
+  core::vector2df vec2d;
   video::S3DVertex v;
   int n_vertices,n_faces;
   char * name;
@@ -144,6 +145,18 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         }
         break;
 
+      case Util::MARK_UV_COORD:
+        n_vertices=Util::readInt(file);
+        GM_LOG("uv coords: %d\n",n_vertices);
+        for(int vi=0; vi<n_vertices; vi++) {
+          Util::readVertex2d(file,vec2d);
+          textureCoordBuffer.push_back(vec2d);
+          GM_LOG("  [%d] %.6f, %.6f\n",vi+1,vec2d.X,vec2d.Y);
+        }
+        break;
+
+
+      case Util::MARK_FACES_AND_UV:
       case Util::MARK_FACES_ONLY:
         n_faces=Util::readInt(file);
         if(matChanged) {
@@ -161,12 +174,25 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         for(int f=0; f<n_faces; f++) {
           n_vertices=Util::readInt(file);
           for(int vi=0; vi<n_vertices; vi++) {
-            int nn=Util::readInt(file);
+            int nn;
+            int uvn;
+
+            nn=Util::readInt(file);
+
+            if(mark == Util::MARK_FACES_AND_UV) 
+              uvn=Util::readInt(file);
+            else
+              uvn=-1;
 
             if(currMtl) 
               v.Color = currMtl->Meshbuffer->Material.DiffuseColor;
             v.Pos = vertexBuffer[nn];
-            v.TCoords.set(0.0f,0.0f);
+            if(uvn==-1) 
+              v.TCoords.set(0.0f,0.0f);
+            else {
+              v.TCoords = textureCoordBuffer[uvn];
+              GM_LOG("[%d] texures: %f,%f\n",uvn,v.TCoords.X,v.TCoords.Y);
+            }
             v.Normal.set(0.0f,0.0f,0.0f);
             currMtl->RecalculateNormals=true;
             int vertLocation;
@@ -207,7 +233,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         SceneManager->getMeshManipulator()->recalculateNormals(Materials[m]->Meshbuffer,false);
       }
       assert(Materials[m]->Meshbuffer->Material.MaterialType != video::EMT_PARALLAX_MAP_SOLID);
-      irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
+      //irr::video::SMaterial & mat=Materials[m]->Meshbuffer->getMaterial();
       mesh->addMeshBuffer( Materials[m]->Meshbuffer );
     }
   }
@@ -225,9 +251,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
   cleanUp();
   mesh->drop();
-
-  const irr::core::aabbox3d<float> & bb=
-      animMesh->getBoundingBox();
 
   return animMesh;
 }

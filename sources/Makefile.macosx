@@ -4,12 +4,14 @@ copier=./copier.py
 irr_home=/Users/gianni/MyLibraries/irrlicht-1.7.2
 irr_inc_dir=-I $(irr_home)/include/ -D_IRR_STATIC_LIB_ -DBASE_DIR="\"Resources/\""
 #-arch i386 
-irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -lIrrlicht  -LGL \
+irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -lIrrlicht  \
 						-L/usr/X11R6/lib -lXxf86vm -lXext -lX11 \
 						-dylib_file \
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:\
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib 
 #-arch i386 
+
+#-LGL \
 irr_libs=-lIrrlicht
 
 # bullet paths and libraries

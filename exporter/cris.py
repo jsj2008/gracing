@@ -12,7 +12,7 @@ __bpydoc__ = """\
 Crisalide xml exporter
 
 """
-import bpy,os,struct,zipfile,math,time,mathutils
+import bpy,os,struct,zipfile,math,time,mathutils,shutil
 
 """
 cris binary file format
@@ -24,9 +24,6 @@ cris binary file format
 - MARK_USE_MATERIAL, material_name
 
 - MARK_FACES_ONLY 
-
-
-
 """
 
 # LOG configuration
@@ -132,6 +129,20 @@ class BBound:
     point[2]=-(self.minZ + self.maxZ) / 2.0;
     return point
 
+
+def copy_image(image,dest_dir):
+  fn = bpy.path.abspath(image.filepath)
+  fn = os.path.normpath(fn)
+  fn_strip = os.path.basename(fn)
+
+  rel = fn_strip
+  fn_abs_dest = os.path.join(dest_dir, fn_strip)
+  if not os.path.exists(fn_abs_dest):
+    log("Copying '%s' to '%s'\n"%(fn, fn_abs_dest))
+    shutil.copy(fn, fn_abs_dest)
+
+  return rel
+    
       
 
 def fixName(name):
@@ -223,9 +234,11 @@ def getMaterialFlagsWord(mat):
 
 #def write_file(fp, objects, scene,
 def exportMesh(fp, ob, scene,translation=None,
+          dest_dir=None,
+          addElements=None,
           EXPORT_EDGES=False,
           EXPORT_NORMALS_HQ=False,
-          EXPORT_UV=False,
+          EXPORT_UV=True,
           EXPORT_COPY_IMAGES=False,
           EXPORT_APPLY_MODIFIERS=True,
           EXPORT_ROTX90=True,
@@ -413,7 +426,7 @@ def exportMesh(fp, ob, scene,translation=None,
 
             for mat in materialItems:
               if mat != None:
-                exportMaterial(fp,mat)
+                exportMaterial(fp,mat,dest_dir)
 
 
             for matName, imageName in matImgFaces:
@@ -481,61 +494,7 @@ def applyTranslation(v,translation):
   nv[2] = v[2] + translation[2]
   return nv
 
-def exportMesh_org(fp, ob, scene,translation=None):
-  me=ob.data
-  materials=me.materials
-  faces=me.faces
-  vertices=me.vertices
-  transform=ob.matrix_world
-
-  if len(materials)==0:
-    log("Discarding object '%s' coz have no material set\n"%ob.name);
-    return False
-
-
-  # export vertices
-  binWrite_mark(fp,MARK_VERTICES)
-  binWrite_int(fp,len(vertices))
-  log("vertices: %d\n"%len(vertices))
-  for v in vertices:
-    if EXP_APPLY_OBJ_TRANSFORM == 1:
-      co=applyTransform(v.co,transform)
-    elif EXP_ENABLE_BBA and translation != None:
-      co=applyTranslation(v.co,translation)
-    else:
-      co=v.co
-    binWrite_pointVect(fp,co)
-
-  used_material={}
-  for face in faces:
-    name=materials[face.material_index].name
-    if not name in used_material:
-      used_material[name]=face.material_index
-
-  for key in used_material:
-    idx=used_material[key]
-    exportMaterial(fp,materials[idx])
-
-  # export faces
-  for mat_idx in range(len(materials)):
-    n_faces=0
-    for face in faces:
-      if face.material_index!=mat_idx:
-        continue
-      n_faces=n_faces+1
-    binWrite_mark(fp,MARK_USE_MATERIAL)
-    binWrite_string(fp,materials[mat_idx].name)
-    binWrite_mark(fp,MARK_FACES_ONLY)
-    binWrite_int(fp,n_faces)
-    for face in faces:
-      if face.material_index!=mat_idx:
-        continue
-      binWrite_int(fp,len(face.vertices))
-      for v_idx in face.vertices:
-        binWrite_int(fp,v_idx)
-  return True
-
-def exportMaterial(fp,ma):
+def exportMaterial(fp,ma,dest_dir):
   alpha=ma.alpha
   specular=ma.specular_color
   diffuse=ma.diffuse_color
@@ -551,6 +510,19 @@ def exportMaterial(fp,ma):
   binWrite_color(fp,diffuse)
   binWrite_color(fp,diffuse)
   binWrite_color(fp,specular)
+
+
+  for mtex in ma.texture_slots:
+    if mtex and mtex.texture.type == 'IMAGE' and dest_dir != None:
+      try:
+        log("copying image '%s'\n"%mtex.texture.image)
+        filepath = copy_image(mtex.texture.image,dest_dir)
+#file.write('map_Kd %s\n' % repr(filepath)[1:-1]) # Diffuse mapping image
+        break
+      except:
+        log("hwat??\n")
+        # Texture has no image though its an image type, best ignore.
+        pass
 
 def exportCameras(tmp_dir_name):
   objects=bpy.data.objects
@@ -584,11 +556,11 @@ def exportLamp(fp,ob):
     log("skipping export lamp '%s', type: '%s'\n"%\
       (ob.name,lamp.type))
 
-def exportObject(tmp_dir_name,context,obj,translation=None):
+def exportObject(tmp_dir_name,context,obj,translation=None,addElements=None):
   if obj.type == 'MESH':
     filename=tmp_dir_name+"/"+obj.name+".mesh"
     fp = open(filename, 'wb')    
-    ret=exportMesh(fp,obj,context.scene,translation)
+    ret=exportMesh(fp,obj,context.scene,translation,tmp_dir_name,addElements)
     fp.close()
     if ret:
       return [ 'mesh' , filename ]
@@ -695,9 +667,9 @@ class export_OT_track(bpy.types.Operator):
       if ob.type == "EMPTY":
         empties.append(ob)
         continue
-      name=exportObject(tmpdir,context,ob)
+      addElements=[ ]
+      name=exportObject(tmpdir,context,ob,addElements)
       if name != None:
-        log("%s,%s\n"%(name[0],name[1]))
         elements.append(name)
 
     ns=exportCameras(tmpdir)
@@ -725,7 +697,8 @@ class export_OT_track(bpy.types.Operator):
       fname=name[1]
       os.remove(fname)
       log("removing '%s'\n"%fname)
-    os.removedirs(tmpdir)
+    #os.removedirs(tmpdir)
+    shutil.rmtree(tmpdir)
     log("removing '%s'\n"%tmpdir)
 
     return {'FINISHED'}
@@ -877,7 +850,8 @@ class export_OT_vehicle(bpy.types.Operator):
     log("Exporting chassis\n")
     offs=self.chassis_bounds.getOffsets()
     for ob in chassis_objs: 
-      el=exportObject(tmpdir,context,ob,offs)
+      addElements=[ ]
+      el=exportObject(tmpdir,context,ob,offs,addElements)
       if el != None:
         el[0]="chassis"
         log("%s,%s\n"%(el[0],el[1]))
@@ -887,28 +861,28 @@ class export_OT_vehicle(bpy.types.Operator):
     log("Exporting wheels\n");
     log("  - front left\n")
     for ob in wheel_fl_objs:
-      el=exportObject(tmpdir,context,ob)
+      el=exportObject(tmpdir,context,ob,None,addElements)
       if el != None: 
         el[0]="wfl";
         elements.append(el)
 
     log("  - front right\n")
     for ob in wheel_fr_objs:
-      el=exportObject(tmpdir,context,ob)
+      el=exportObject(tmpdir,context,ob,None,addElements)
       if el != None: 
         el[0]="wfr";
         elements.append(el)
 
     log("  - rear left\n")
     for ob in wheel_rl_objs:
-      el=exportObject(tmpdir,context,ob)
+      el=exportObject(tmpdir,context,ob,None,addElements)
       if el != None: 
         el[0]="wrl";
         elements.append(el)
 
     log("  - rear right\n")
     for ob in wheel_rr_objs:
-      el=exportObject(tmpdir,context,ob)
+      el=exportObject(tmpdir,context,ob,None,addElements)
       if el != None: 
         el[0]="wrr";
         elements.append(el)
