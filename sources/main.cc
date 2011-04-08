@@ -216,11 +216,11 @@ int main(int argc, char ** av)
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"plane_uv.zip");
+  thetrack=new Track(device,world,"devtrack.zip");
   thetrack->load();
 
   std::string vehpath;
-  resmanager->getVehicleCompletePath("car_ab_new.zip",vehpath);
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,

@@ -262,8 +262,6 @@ def exportMesh(fp, ob, scene,translation=None,
 
     log('------------------------ start\n')
 
-    #fp = open(filepath, "wb")
-
     # Initialize totals, these are updated each object
     totverts = totuvco = totno = 1
 
@@ -517,7 +515,7 @@ def exportMaterial(fp,ma,dest_dir,addElements):
       try:
         filepath = copy_image(mtex.texture.image,dest_dir)
         addElements.append([ "image", filepath])
-        imageName=filepath
+        imageName=os.path.basename(filepath)
         break
       except:
         log("hwat??\n")

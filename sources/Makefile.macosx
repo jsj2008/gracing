@@ -1,4 +1,5 @@
 copier=./copier.py
+blender=/Applications/blender-2.56a-beta-OSX-10.5-x86_64/blender.app/Contents/MacOS/blender
 
 # irrlicht paths and libraries
 irr_home=/Users/gianni/MyLibraries/irrlicht-1.7.2
@@ -44,6 +45,9 @@ tgt_res_dir=$(tgt_dir)/Contents/Resources
 tgt_vehicles_dir=$(tgt_res_dir)/Vehicles
 tgt_tracks_dir=$(tgt_res_dir)/Tracks
 
+src_vehicles_dir=$(resources_dir)/vehicles
+src_tracks_dir=$(resources_dir)/tracks
+
 ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)\
 				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
 				-DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
@@ -70,21 +74,12 @@ copy_files:
 	@$(copier) --rm  $(tgt_dir)
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp demo $(tgt_appl_dir)/
-	@$(copier) --cp $(resources_dir)/font.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
-	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(resources_dir)  
-	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(resources_dir)
+	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
+	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(src_tracks_dir)
     
 
-#rm -rf $(tgt_dir)
-#cp $(resources_dir)/track-1.zip $(tgt_tracks_dir)
-#cp $(resources_dir)/plane.zip $(tgt_tracks_dir)
-
-#	mkdir -p $(tgt_dir)
-#	mkdir -p $(tgt_appl_dir)
-#	mkdir -p $(tgt_res_dir)
-#	mkdir -p $(tgt_vehicles_dir)
-#	mkdir -p $(tgt_tracks_dir)
 
 clean:
 	rm -f *.o
@@ -93,6 +88,9 @@ clean:
 
 depend:
 	makedepend  -- $(ccflags) -- $(sources) -f depend.mak
+
+testb:
+	$(blender) -h
   
 include depend.mak
 

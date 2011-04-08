@@ -124,7 +124,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         if(imageName)
           delete imageName;
         imageName=Util::readString(file);
-        GM_LOG("Read sttring: '%s'\n",imageName);
         currMtl=new SObjMtl;
         currMtl->Name=name;
         Materials.push_back(currMtl);
@@ -140,6 +139,11 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
+        if(imageName[0]) {
+          GM_LOG("Read sttring: '%s'\n",imageName);
+          node1->setMaterialTexture( 0, videodriver->getTexture("data/opengl.png") );
+          currMtl->Meshbuffer->Material.setTexture(0, videodriver->getTexture(imageName));
+        }
         break;
 
       case Util::MARK_VERTICES:
@@ -152,11 +156,9 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
 
       case Util::MARK_UV_COORD:
         n_vertices=Util::readInt(file);
-        GM_LOG("uv coords: %d\n",n_vertices);
         for(int vi=0; vi<n_vertices; vi++) {
           Util::readVertex2d(file,vec2d);
           textureCoordBuffer.push_back(vec2d);
-          GM_LOG("  [%d] %.6f, %.6f\n",vi+1,vec2d.X,vec2d.Y);
         }
         break;
 
@@ -196,7 +198,6 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
               v.TCoords.set(0.0f,0.0f);
             else {
               v.TCoords = textureCoordBuffer[uvn];
-              GM_LOG("[%d] texures: %f,%f\n",uvn,v.TCoords.X,v.TCoords.Y);
             }
             v.Normal.set(0.0f,0.0f,0.0f);
             currMtl->RecalculateNormals=true;

@@ -15,12 +15,12 @@ action=ACTION_PRINT_HELP
 target_dir=None
 resource_dir=None
 vehicles=[
-  "squared.zip",
-  "car_ab.zip",
-  ]
+  "squared",
+  "sprinter",
+]
 
 tracks=[
-  "plane.zip",
+  "devtrack",
 ]
 
 paths=[
@@ -37,8 +37,9 @@ def error(message):
 
 def copy_list(list,src_dir,tgt_dir):
   for f  in list:
-    print(" - copying '%s'"%f)
-    src=src_dir+"/"+f
+    if type(f) == type(""): # is a string
+      print(" - copying '%s'"%f)
+      src=src_dir+"/"+f+"/"+f+".zip"
     try:
       shutil.copy(src,tgt_dir)
     except IOError, err:

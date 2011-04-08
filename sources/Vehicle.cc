@@ -517,8 +517,6 @@ void Vehicle::load()
           case ot_suspensionStiffness:
             m_suspensionStiffness=Util::parseFloat(xmlReader->getNodeName());
             m_suspensionStiffness=20.;
-            GM_LOG("stiffness: %f\n",
-            m_suspensionStiffness);
             break;
           case ot_suspensionDamping:
             m_suspensionDamping=Util::parseFloat(xmlReader->getNodeName());
