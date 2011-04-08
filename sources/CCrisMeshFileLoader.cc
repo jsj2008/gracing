@@ -141,8 +141,8 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
         if(imageName[0]) {
           GM_LOG("Read sttring: '%s'\n",imageName);
-          node1->setMaterialTexture( 0, videodriver->getTexture("data/opengl.png") );
-          currMtl->Meshbuffer->Material.setTexture(0, videodriver->getTexture(imageName));
+          //node1->setMaterialTexture( 0, videodriver->getTexture("data/opengl.png") );
+          //currMtl->Meshbuffer->Material.setTexture(0, videodriver->getTexture(imageName));
         }
         break;
 
