@@ -140,8 +140,9 @@ def copy_image(image,dest_dir):
   if not os.path.exists(fn_abs_dest):
     log("Copying '%s' to '%s'\n"%(fn, fn_abs_dest))
     shutil.copy(fn, fn_abs_dest)
+    log("done\n");
 
-  return rel
+  return fn_abs_dest
     
       
 
@@ -426,8 +427,7 @@ def exportMesh(fp, ob, scene,translation=None,
 
             for mat in materialItems:
               if mat != None:
-                exportMaterial(fp,mat,dest_dir)
-
+                exportMaterial(fp,mat,dest_dir,addElements)
 
             for matName, imageName in matImgFaces:
               faces=matImgFaces[(matName,imageName)]
@@ -494,7 +494,7 @@ def applyTranslation(v,translation):
   nv[2] = v[2] + translation[2]
   return nv
 
-def exportMaterial(fp,ma,dest_dir):
+def exportMaterial(fp,ma,dest_dir,addElements):
   alpha=ma.alpha
   specular=ma.specular_color
   diffuse=ma.diffuse_color
@@ -511,18 +511,20 @@ def exportMaterial(fp,ma,dest_dir):
   binWrite_color(fp,diffuse)
   binWrite_color(fp,specular)
 
-
+  imageName=""
   for mtex in ma.texture_slots:
     if mtex and mtex.texture.type == 'IMAGE' and dest_dir != None:
       try:
-        log("copying image '%s'\n"%mtex.texture.image)
         filepath = copy_image(mtex.texture.image,dest_dir)
-#file.write('map_Kd %s\n' % repr(filepath)[1:-1]) # Diffuse mapping image
+        addElements.append([ "image", filepath])
+        imageName=filepath
         break
       except:
         log("hwat??\n")
         # Texture has no image though its an image type, best ignore.
         pass
+  binWrite_string(fp,imageName)
+
 
 def exportCameras(tmp_dir_name):
   objects=bpy.data.objects
@@ -668,9 +670,12 @@ class export_OT_track(bpy.types.Operator):
         empties.append(ob)
         continue
       addElements=[ ]
-      name=exportObject(tmpdir,context,ob,addElements)
+      name=exportObject(tmpdir,context,ob,None,addElements)
       if name != None:
         elements.append(name)
+        for el in addElements:
+          elements.append(el)
+   
 
     ns=exportCameras(tmpdir)
     for n in ns:
@@ -697,8 +702,8 @@ class export_OT_track(bpy.types.Operator):
       fname=name[1]
       os.remove(fname)
       log("removing '%s'\n"%fname)
-    #os.removedirs(tmpdir)
-    shutil.rmtree(tmpdir)
+    os.removedirs(tmpdir)
+    #shutil.rmtree(tmpdir)
     log("removing '%s'\n"%tmpdir)
 
     return {'FINISHED'}

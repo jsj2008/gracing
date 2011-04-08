@@ -17,15 +17,10 @@ resource_dir=None
 vehicles=[
   "squared.zip",
   "car_ab.zip",
-  "arrow-car.zip",
-  "test-1.zip",
-  "test-2.zip"
   ]
 
 tracks=[
-  "track-1.zip",
   "plane.zip",
-  "plane_uv.zip"
 ]
 
 paths=[

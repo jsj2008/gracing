@@ -96,6 +96,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
   int n_vertices,n_faces;
   char * name;
   char * matName=0;
+  char * imageName=0;
   bool matChanged=false;
   double ka[3];
   double kd[3];
@@ -120,6 +121,10 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         Util::readTriple(file,ka);
         Util::readTriple(file,kd);
         Util::readTriple(file,ks);
+        if(imageName)
+          delete imageName;
+        imageName=Util::readString(file);
+        GM_LOG("Read sttring: '%s'\n",imageName);
         currMtl=new SObjMtl;
         currMtl->Name=name;
         Materials.push_back(currMtl);
