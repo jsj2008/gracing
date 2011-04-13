@@ -216,7 +216,7 @@ int main(int argc, char ** av)
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"devtrack.zip");
+  thetrack=new Track(device,world,"track-1.zip");
   thetrack->load();
 
   std::string vehpath;

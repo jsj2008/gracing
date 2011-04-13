@@ -38,6 +38,7 @@ using namespace irr;
 static const u32 WORD_BUFFER_LENGTH = 512;
 
 /////////////////////////////////////////////////////////////////
+#if 0
 static void logMaterial(irr::video::SMaterial & mat) {
   GM_LOG(
     " - material: diffuse (%d,%d,%d),"
@@ -51,7 +52,7 @@ static void logMaterial(irr::video::SMaterial & mat) {
       mat.SpecularColor.getRed(), mat.SpecularColor.getGreen(), mat.SpecularColor.getBlue(),
       mat.Shininess);
 }
-
+#endif
 /////////////////////////////////////////////////////////////////
 
 CCrisMeshFileLoader::CCrisMeshFileLoader(scene::ISceneManager* smgr, io::IFileSystem* fs)
@@ -140,9 +141,21 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
         if(imageName[0]) {
-          GM_LOG("Read sttring: '%s'\n",imageName);
-          //node1->setMaterialTexture( 0, videodriver->getTexture("data/opengl.png") );
-          //currMtl->Meshbuffer->Material.setTexture(0, videodriver->getTexture(imageName));
+          video::ITexture * texture = 0;
+          GM_LOG("Loading texture: '%s'\n",imageName);
+          if (FileSystem->existFile(imageName)) {
+            texture = SceneManager->getVideoDriver()->getTexture(imageName);
+            if(texture) {
+              currMtl->Meshbuffer->Material.setTexture(0, texture);
+              currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
+              currMtl->Meshbuffer->Material.DiffuseColor.set(
+                currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
+            } else {
+              GM_LOG("  --> cannot load texture\n");
+            }
+          } else {
+              GM_LOG("  --> cannot find texture\n");
+          }
         }
         break;
 

@@ -21,6 +21,7 @@ vehicles=[
 
 tracks=[
   "devtrack",
+  "track-1",
 ]
 
 paths=[

@@ -993,6 +993,7 @@ void Vehicle::updateFriction(btScalar timeStep)
       }
     } 
   }
+  sliding=false;
   if (sliding)  {
     for (int wheel = 0;wheel < 4; wheel++) 
       if (m_sideImpulse[wheel] != btScalar(0.)) 
