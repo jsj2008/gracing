@@ -136,6 +136,7 @@ void initGUI()
 
 /////////// GUI temp code
 
+CFG_PARAM_BOOL(glob_enableDebug)=false;
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -185,6 +186,8 @@ int main(int argc, char ** av)
 {
 #endif
 
+  CFG_INIT_BOOL(glob_enableDebug,false);
+ 
   GM_LOG("--------- starting gracing\n");
  
   ResourceManager * resmanager=ResourceManager::getInstance();
@@ -208,10 +211,13 @@ int main(int argc, char ** av)
   IGUIEnvironment* guienv = device->getGUIEnvironment();
   PhyWorld * world = PhyWorld::buildMe();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
-  IrrDebugDrawer * debugDrawer= new IrrDebugDrawer(driver);
 
-  world->setDebugDrawer(debugDrawer);
-  debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawAabb);
+  IrrDebugDrawer * debugDrawer= 0;
+  if(glob_enableDebug) {
+    debugDrawer= new IrrDebugDrawer(driver);
+    world->setDebugDrawer(debugDrawer);
+    debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawAabb);
+  }
 
   smgr->addExternalMeshLoader(mloader);
 
@@ -405,5 +411,6 @@ int main(int argc, char ** av)
       flagD=true;
     }
   }
+  delete debugDrawer;
 }
 

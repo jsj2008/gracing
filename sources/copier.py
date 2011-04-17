@@ -58,16 +58,25 @@ def extract_cfg_definition(filename, list):
   lines=file.readlines()
   p_d = re.compile("CFG_PARAM_D\((.*)\)=([^;]*);.*");
   p_v3 = re.compile("CFG_PARAM_V3\((.*)\)=([^;]*);.*");
-  for line in lines:
-    m=p_d.match(line)
-    if m and len(m.groups()) == 2:
-      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
-      list.append([ m.group(1), m.group(2) ])
+  p_bool = re.compile("CFG_PARAM_BOOL\((.*)\)=([^;]*);.*");
 
-    m=p_v3.match(line)
-    if m and len(m.groups()) == 2:
-      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
-      list.append([ m.group(1), m.group(2) ])
+  res=[ p_d, p_v3, p_bool ]
+  for line in lines:
+    for r in res:
+      m=r.match(line)
+      if m and len(m.groups()) == 2:
+        print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
+        list.append([ m.group(1), m.group(2) ])
+
+#    m=p_d.match(line)
+#    if m and len(m.groups()) == 2:
+#      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
+#      list.append([ m.group(1), m.group(2) ])
+#
+#    m=p_v3.match(line)
+#    if m and len(m.groups()) == 2:
+#      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
+#      list.append([ m.group(1), m.group(2) ])
   file.close()
 
 def build_tree():
