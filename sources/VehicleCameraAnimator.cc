@@ -17,6 +17,11 @@
 #include <assert.h>
 #include "gmlog.h"
 #include "VehicleCameraAnimator.h"
+#include "config.h"
+
+CFG_PARAM_D(glob_type0cam_phi)=0.f;
+CFG_PARAM_D(glob_type0cam_distance)=5.f;
+CFG_PARAM_D(glob_type0cam_height)=5.f;
 
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {
@@ -24,9 +29,9 @@ VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
   m_camType=0;
 
   // type 0 init
-  m_type0_parms.phi=0.;
-  m_type0_parms.distance=5.;
-  m_type0_parms.height=0.;
+  m_type0_parms.phi=glob_type0cam_phi;
+  m_type0_parms.distance=glob_type0cam_distance;
+  m_type0_parms.height=glob_type0cam_height;
 
   type0_updateDerivate();
 }

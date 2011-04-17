@@ -136,6 +136,7 @@ class Util
 		return irr::core::fast_atof(str);
 	}
 
+
 };
 
 #endif

@@ -18,6 +18,7 @@
 #include <string>
 
 #include "ResourceManager.h"
+#include "XmlNode.h"
 #include "gmlog.h"
 
 
@@ -64,6 +65,8 @@ irr::io::path ResourceManager::createAbsoluteFilename(const std::string & fileNa
 
 ResourceManager::ResourceManager() 
 {
+
+  GM_LOG("helo 1\n");
 #ifdef __APPLE__
   char buffer[1024];
   getcwd(buffer,1024);
@@ -85,7 +88,22 @@ ResourceManager::ResourceManager()
 
   m_device->grab();
 
+  std::string configFilename;
+  getConfigCompletePath("config.xml",configFilename);
+  loadConfig(configFilename);
+
   GM_LOG("root dir: '%s'\n",m_rootDir.c_str());
+}
+
+void ResourceManager::loadConfig(const std::string & filename)
+{
+  XmlNode * root=new XmlNode(filename,this);
+
+  if(!root)
+    return;
+
+  delete root;
+  
 }
 
 void ResourceManager::getTrackCompletePath(const char * trackName, std::string & path)
@@ -96,6 +114,11 @@ void ResourceManager::getTrackCompletePath(const char * trackName, std::string &
 void ResourceManager::getVehicleCompletePath(const char * vehicleName, std::string & path)
 {    
   path=m_vehicleDir + std::string(vehicleName);
+}
+
+void ResourceManager::getConfigCompletePath(const char * filename, std::string & path)
+{
+  path=m_rootDir + std::string(filename);
 }
 
 void ResourceManager::setDevice(irr::IrrlichtDevice *device)

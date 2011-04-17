@@ -78,12 +78,12 @@ CFG_PARAM_D(glob_chassisDefaultMass)=1.;
 
 
 //CFG_PARAM_D(glob_gVehicleSteering)=0.f;
-CFG_PARAM_D(glob_steeringIncrement)=0.004f;
+CFG_PARAM_D(glob_steeringIncrement)=0.002f;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
 CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
-CFG_PARAM_D(glob_suspensionStiffness)=20.f;
+CFG_PARAM_D(glob_suspensionStiffness)=2.f; // 20
 CFG_PARAM_D(glob_suspensionDamping)=2.3f;
 CFG_PARAM_D(glob_suspensionCompression)=4.4f;
 CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
@@ -224,7 +224,7 @@ Vehicle::Vehicle(
 
   // accell dynamic info
   m_throttle=0.;
-  m_throttleIncrement=0.010;
+  m_throttleIncrement=0.01;
 
   // steering dynamic info
   m_steering = 0.;
@@ -643,6 +643,7 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
 
   m_steering=0.;
   m_throttle=0.;
+  m_throttling=0;
 
 
   // reset position
@@ -689,18 +690,24 @@ void Vehicle::brake()
 
 void Vehicle::throttleUp()
 {
+#if 0
   m_brake=0.;
   m_throttle+=m_throttleIncrement;
   if(m_throttle>.5)
     m_throttle=.5;
+#endif
+   m_throttling=1;
 }
 
 void Vehicle::throttleDown()
 {
+#if 0
   m_brake=0.;
   m_throttle-=m_throttleIncrement;
   if(m_throttle<0.)
     m_throttle=0.;
+#endif
+  m_throttling=-1;
 }
 
 void Vehicle::throttleSet(double value)
@@ -756,6 +763,41 @@ irr::core::vector3df Vehicle::getChassisPos()
 
 void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 {
+
+  if(m_throttling>0) {
+    GM_LOG("%f\n",m_throttle);
+    m_brake=0.;
+    m_throttle+=m_throttleIncrement;
+    if(m_throttle>.5)
+      m_throttle=.5;
+  } else if(m_throttling<0) {
+    GM_LOG("%f\n",m_throttle);
+    m_brake=0.;
+    m_throttle-=m_throttleIncrement;
+
+    if(m_throttle<-.5)  {
+      m_throttle=-.5;
+    }
+#if 0
+    if((m_throttle<0.01) &&
+       (m_throttle>-0.01)) {
+      m_brake=1.;
+      m_throttle=0.;
+    }
+#endif
+  } else {
+    if(m_throttle>0.) {
+      GM_LOG("%f\n",m_throttle);
+      m_throttle-=m_throttleIncrement;
+      if(m_throttle < 0.) {
+        m_brake=.1;
+        m_throttle=0.;
+      }
+    }
+  }
+  m_throttling=0;
+
+
   // steps:
   // 1- update wheel wolrd space transforn transform
   for(int i=0; i<4; i++) {

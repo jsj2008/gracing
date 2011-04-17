@@ -71,10 +71,15 @@ tags:
 	@$(cplusplus) -c $< $(ccflags)
 
 copy_files:
+	@$(copier) --cfg $(sources)
 	@$(copier) --rm  $(tgt_dir)
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp demo $(tgt_appl_dir)/
+	@$(copier) --cp config.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/title_font.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/title_font_2.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/title_font.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
 	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
 	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(src_tracks_dir)

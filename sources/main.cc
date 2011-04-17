@@ -216,11 +216,11 @@ int main(int argc, char ** av)
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"track-1.zip");
+  thetrack=new Track(device,world,"devtrack.zip");
   thetrack->load();
 
   std::string vehpath;
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  resmanager->getVehicleCompletePath("bluest.zip",vehpath);
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -236,10 +236,21 @@ int main(int argc, char ** av)
   smgr->getRootSceneNode()->addChild(vehicle);
 
 
-  std::string fontPath = resmanager->getResourcePath() + "/font.png";
-	gui::IGUIFont* font = guienv->getFont(fontPath.c_str());
-	if (font)
-		guienv->getSkin()->setFont(font);
+  //std::string fontPath = resmanager->getResourcePath() + "/font.png";
+  std::string fontPath = resmanager->getResourcePath() + "/title_font.xml";
+	gui::IGUIFont* font_big = guienv->getFont(fontPath.c_str());
+	if (font_big) {
+		guienv->getSkin()->setFont(font_big);
+  }
+  irr::gui::IGUIStaticText * text=guienv->addStaticText(L"gracing",
+      core::rect<s32>(0,0,700,120));
+  text->
+    enableOverrideColor(true);
+  text=guienv->addStaticText(L"demo",
+      core::rect<s32>(0,130,700,250));
+  text->
+    enableOverrideColor(true);
+#if 0
   guienv->addStaticText(L"**********************************\n"
       "Press:\n"
       "'esc' : to quit\n"
@@ -248,6 +259,7 @@ int main(int argc, char ** av)
       "'i' : to dump debug info\n"
       "**********************************\n",
       core::rect<s32>(60,15,600,400));
+#endif
 
 
   irr::scene::ICameraSceneNode * camera;
@@ -323,6 +335,10 @@ int main(int argc, char ** av)
     if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
       if(flagC)  {
         vehicle->reset(thetrack->getStartPosition());
+        GM_LOG("start position: %f,%f,%f\n",
+          thetrack->getStartPosition().X,
+          thetrack->getStartPosition().Y,
+          thetrack->getStartPosition().Z);
         flagC=false;
       }
     } else {
@@ -348,7 +364,7 @@ int main(int argc, char ** av)
 
     if(receiver.IsKeyDown(irr::KEY_DOWN)) {
       if(vehicle)
-        vehicle->brake();
+        vehicle->throttleDown();
     }
 
     if(receiver.IsKeyDown(irr::KEY_LEFT)) {

@@ -135,6 +135,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     float m_throttle;
     float m_throttleIncrement;
     float m_brake;
+
+    char  m_throttling;
     
    
     float m_wheelFriction;

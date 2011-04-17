@@ -1,5 +1,5 @@
 #!/opt/local/bin/python
-import sys,getopt,shutil,os
+import sys,getopt,shutil,os,re
 
 ACTION_NONE=0
 ACTION_COPY_VEHICLES=1
@@ -8,6 +8,7 @@ ACTION_COPY_TRACKS=3
 ACTION_BUILD_TREE=4
 ACTION_COPY_FILE=5
 ACTION_REMOVE_DIR=6
+ACTION_EXTRACT_CFG=7
 
 ########## options
 globargs=[]
@@ -17,6 +18,7 @@ resource_dir=None
 vehicles=[
   "squared",
   "sprinter",
+  "bluest",
 ]
 
 tracks=[
@@ -47,6 +49,26 @@ def copy_list(list,src_dir,tgt_dir):
       print("   cannot copy: '%s'"%err)
     except OSError, err:
       print("   cannot copy: '%s'"%err)
+
+def extract_cfg_definition(filename, list):
+  try:
+    file=open(filename)
+  except:
+    error("Cannot open '%s'"%filename)
+  lines=file.readlines()
+  p_d = re.compile("CFG_PARAM_D\((.*)\)=([^;]*);.*");
+  p_v3 = re.compile("CFG_PARAM_V3\((.*)\)=([^;]*);.*");
+  for line in lines:
+    m=p_d.match(line)
+    if m and len(m.groups()) == 2:
+      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
+      list.append([ m.group(1), m.group(2) ])
+
+    m=p_v3.match(line)
+    if m and len(m.groups()) == 2:
+      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
+      list.append([ m.group(1), m.group(2) ])
+  file.close()
 
 def build_tree():
   print("Building application tree")
@@ -93,6 +115,22 @@ def copy_tracks():
 
   copy_list(tracks,resource_dir,target_dir)
 
+
+def extract_configuration():
+  global globargs
+  print("Extracting cfg directives from sources")
+  list=[ ]
+  for f in globargs:
+   print("  - extracting cfg from '%s'"%f)
+   extract_cfg_definition(f, list)
+  
+  f=open("config.xml","w")
+  f.write("<config>\n")
+  for el in list:
+    f.write("  <%s>%s</%s>\n"%(el[0],el[1],el[0]))
+  f.write("</config>\n")
+  f.close()
+
 def remove_dir():
   global globargs
   if len(globargs) != 1:
@@ -127,12 +165,12 @@ def parse_command_line():
   global resource_dir
   global globargs
   try:                                
-    opts, globargs = getopt.getopt(sys.argv[1:], "", ["help", "tgtdir=", "resdir=", "cpv", "cpt", "mkt", "cp", "rmd"]) 
+    opts, globargs = getopt.getopt(sys.argv[1:], "", ["help", "tgtdir=", "resdir=", "cpv", "cpt", "mkt", "cp", "rmd", "cfg"]) 
   except getopt.GetoptError,err: 
     error(err)                          
   for opt,arg in opts:
     if opt == "--cpv":
-      action=ACTION_COPY_VEHICLES
+     action=ACTION_COPY_VEHICLES
     if opt == "--cpt":
       action=ACTION_COPY_TRACKS
     if opt == "--mkt":
@@ -141,6 +179,8 @@ def parse_command_line():
       action=ACTION_COPY_FILE
     if opt == "--rmd":
       action=ACTION_REMOVE_DIR
+    if opt == "--cfg":
+      action=ACTION_EXTRACT_CFG
     elif opt == "--tgtdir":
       target_dir=arg
     elif opt == "--resdir":
@@ -160,6 +200,8 @@ elif action == ACTION_COPY_FILE:
   copy_file()
 elif action == ACTION_REMOVE_DIR:
   remove_dir()
+elif action == ACTION_EXTRACT_CFG:
+  extract_configuration()
 elif action == ACTION_PRINT_HELP:
   usage()
 	

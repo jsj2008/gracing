@@ -15,6 +15,8 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#ifndef RESOURCEMANAGER_H
+#define RESOURCEMANAGER_H
 #include <string>
 #include <stdlib.h>
 #include <irrlicht.h>
@@ -39,12 +41,21 @@ class ResourceManager
 
     void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
+    void getConfigCompletePath(const char * filename, std::string & path);
 
     inline const std::string & getResourcePath() { return m_rootDir; }
+
+
+    inline irr::io::IXMLReader * createXMLReader(const std::string & filename)
+    {
+      return m_fileSystem->createXMLReader(filename.c_str());
+    }
 
   private:
     static ResourceManager * s_instance;
     ResourceManager();
+
+    void loadConfig(const std::string & filename);
 
 
     irr::IrrlichtDevice * m_device;
@@ -56,3 +67,4 @@ class ResourceManager
 
 };
 
+#endif
