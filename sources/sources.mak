@@ -6,5 +6,5 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         VehicleCameraAnimator.cc\
         IrrDebugDrawer.cc\
         DataRecorder.cc \
-        XmlNode.cc
+        XmlNode.cc 
 

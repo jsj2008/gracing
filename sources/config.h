@@ -26,4 +26,12 @@
 #define CFG_PARAM_BOOL(p)         bool p
 #define CFG_INIT_BOOL(p,v)          p=v
 
+class ResourceManager;
+
+class ConfigInit 
+{
+  public:
+  static void initGlobVariables(ResourceManager *);
+};
+
 #endif

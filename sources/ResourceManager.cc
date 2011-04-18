@@ -19,6 +19,7 @@
 
 #include "ResourceManager.h"
 #include "XmlNode.h"
+#include "config.h"
 #include "gmlog.h"
 
 
@@ -101,6 +102,8 @@ void ResourceManager::loadConfig(const std::string & filename)
 
   if(!root)
     return;
+
+  ConfigInit::initGlobVariables(this);
 
   delete root;
   

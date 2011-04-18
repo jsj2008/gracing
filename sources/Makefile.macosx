@@ -54,14 +54,20 @@ ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)\
 				
 ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
+
+sources+=config.cc
 objs=$(subst .cc,.o,$(sources))
 
+all: genconf $(target) copy_files
 
-all: $(target) copy_files
-
-$(target): $(objs)
+$(target): $(objs) 
 	@echo "Linking $(target)"
 	@$(cplusplus) -o $(target) $(ldflags)  $(objs)
+
+
+genconf:
+	@echo "Generating config.cc and config.xml"
+	@$(copier) --cfg $(sources)
 
 tags:
 	$(ctags) $(sources) *.h *.hh
@@ -71,7 +77,6 @@ tags:
 	@$(cplusplus) -c $< $(ccflags)
 
 copy_files:
-	@$(copier) --cfg $(sources)
 	@$(copier) --rm  $(tgt_dir)
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp demo $(tgt_appl_dir)/
@@ -99,4 +104,4 @@ testb:
   
 include depend.mak
 
-.PHONY: copy_files all clean depend tags
+.PHONY: copy_files all clean depend tags genconf

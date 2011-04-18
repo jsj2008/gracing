@@ -67,16 +67,6 @@ def extract_cfg_definition(filename, list):
       if m and len(m.groups()) == 2:
         print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
         list.append([ m.group(1), m.group(2) ])
-
-#    m=p_d.match(line)
-#    if m and len(m.groups()) == 2:
-#      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
-#      list.append([ m.group(1), m.group(2) ])
-#
-#    m=p_v3.match(line)
-#    if m and len(m.groups()) == 2:
-#      print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
-#      list.append([ m.group(1), m.group(2) ])
   file.close()
 
 def build_tree():
@@ -138,6 +128,14 @@ def extract_configuration():
   for el in list:
     f.write("  <%s>%s</%s>\n"%(el[0],el[1],el[0]))
   f.write("</config>\n")
+  f.close()
+
+  f=open("config.cc","w")
+
+  f.write("#include \"ResourceManager.h\"\n")
+  f.write("void ConfigInit::initGlobVariables(ResourceManager * resman)\n{\n")
+  f.write("}\n");
+
   f.close()
 
 def remove_dir():
