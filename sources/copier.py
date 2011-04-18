@@ -60,13 +60,17 @@ def extract_cfg_definition(filename, list):
   p_v3 = re.compile("CFG_PARAM_V3\((.*)\)=([^;]*);.*");
   p_bool = re.compile("CFG_PARAM_BOOL\((.*)\)=([^;]*);.*");
 
-  res=[ p_d, p_v3, p_bool ]
+  res=[ [ p_d, "double" ] , 
+        [ p_v3, "v3" ] ,
+        [ p_bool, "bool" ] ]
   for line in lines:
-    for r in res:
+    for c in res:
+      r=c[0]
+      t=c[1]
       m=r.match(line)
       if m and len(m.groups()) == 2:
         print("    found '%s' = '%s'"%(m.group(1),m.group(2)))
-        list.append([ m.group(1), m.group(2) ])
+        list.append([ m.group(1), m.group(2), t ])
   file.close()
 
 def build_tree():
@@ -117,12 +121,14 @@ def copy_tracks():
 
 def extract_configuration():
   global globargs
-  print("Extracting cfg directives from sources")
+  print("Extracting cfg directives from sources ")
   list=[ ]
   for f in globargs:
    print("  - extracting cfg from '%s'"%f)
-   extract_cfg_definition(f, list)
+   if f != "config.cc":
+     extract_cfg_definition(f, list)
   
+  print("Creating config.xml")
   f=open("config.xml","w")
   f.write("<config>\n")
   for el in list:
@@ -130,10 +136,22 @@ def extract_configuration():
   f.write("</config>\n")
   f.close()
 
+  print("Creating config.cc")
   f=open("config.cc","w")
-
   f.write("#include \"ResourceManager.h\"\n")
+  f.write("#include \"config.h\"\n")
+  for el in list:
+    if el[2] == 'double':
+      f.write("extern double %s;\n"%(el[0]))
+    elif el[2] == 'bool':
+      f.write("extern bool %s;\n"%(el[0]))
+    elif el[2] == 'v3':
+      f.write("extern double %s[3];\n"%(el[0]))
   f.write("void ConfigInit::initGlobVariables(ResourceManager * resman)\n{\n")
+  for el in list:
+    f.write("  if(!resman->cfgGet(\"%s\",%s)) {\n"%(el[0],el[0]));
+    f.write("    %s=%s;\n"%(el[0],el[1]));
+    f.write("  }\n");
   f.write("}\n");
 
   f.close()

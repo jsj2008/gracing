@@ -35,6 +35,7 @@ class XmlNode
     const void getChildren(const std::string &s, std::vector<XmlNode*>& out) const;
     const XmlNode * getChild(const std::string &s) const;
     const std::string &getName() const {return m_name; }
+    const std::string &getText() const {return m_text; }
 
     // get value as string
     int get(const std::string &attribute, std::string *value) const;
@@ -50,6 +51,7 @@ class XmlNode
 
     void readXML(irr::io::IXMLReader * xml);
     std::string m_name;
+    std::string m_text;
     std::map<std::string, irr::core::stringw> m_attributes;
     std::vector<XmlNode *> m_nodes;
 };

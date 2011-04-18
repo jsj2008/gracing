@@ -20,6 +20,7 @@
 #include "ResourceManager.h"
 #include "XmlNode.h"
 #include "config.h"
+#include "util.hh"
 #include "gmlog.h"
 
 
@@ -92,21 +93,17 @@ ResourceManager::ResourceManager()
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
   loadConfig(configFilename);
-
-  GM_LOG("root dir: '%s'\n",m_rootDir.c_str());
 }
 
 void ResourceManager::loadConfig(const std::string & filename)
 {
-  XmlNode * root=new XmlNode(filename,this);
+  m_configRoot=new XmlNode(filename,this);
 
-  if(!root)
+  if(!m_configRoot)
     return;
 
-  ConfigInit::initGlobVariables(this);
+  //ConfigInit::initGlobVariables(this);
 
-  delete root;
-  
 }
 
 void ResourceManager::getTrackCompletePath(const char * trackName, std::string & path)
@@ -134,5 +131,57 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
+}
+
+bool ResourceManager::cfgGet(const char * name, bool & value)
+{
+  GM_LOG("Getting var name '%s'\n",name);
+  if(!m_configRoot)
+    return false;
+
+  const XmlNode * node=m_configRoot->getChild(name);
+
+  if(!node) 
+    return false;
+
+  std::string text=node->getText();
+
+  value=false;
+  if(text == "yes" ||
+     text != "0")
+    value=true;
+  return true;
+}
+
+bool ResourceManager::cfgGet(const char * name, double & value)
+{
+  if(!m_configRoot)
+    return false;
+
+  const XmlNode * node=m_configRoot->getChild(name);
+
+  if(!node) 
+    return false;
+
+  std::string text=node->getText();
+
+  value=Util::parseFloat(text.c_str());
+  return true;
+}
+
+bool ResourceManager::cfgGet(const char * name, double value[3])
+{
+  if(!m_configRoot)
+    return false;
+
+  const XmlNode * node=m_configRoot->getChild(name);
+
+  if(!node) 
+    return false;
+
+  std::string text=node->getText();
+
+  Util::parseVector(text.c_str(),value);
+  return true;
 }
     

@@ -82,7 +82,9 @@ void XmlNode::readXML(io::IXMLReader *xml)
         break;
       case io::EXN_UNKNOWN:            break;
       case io::EXN_COMMENT:            break;
-      case io::EXN_TEXT:               break;
+      case io::EXN_TEXT:               
+        m_text=(const char*)xml->getNodeName();
+      break;
       default:                         break;
     }   // switch
   }   // while
@@ -123,6 +125,7 @@ int XmlNode::get(const std::string &attribute, std::string *value) const
   return 1;
 }
 
+#if 0
 int XmlNode::get(const std::string &attribute, core::vector2df *value) const
 {
     std::string s = "";
@@ -149,4 +152,5 @@ int XmlNode::get(const std::string &attribute, core::vector3df *value) const
 #endif
     return 1;
 }   // get(vector3df)
+#endif
 

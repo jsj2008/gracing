@@ -55,19 +55,19 @@ ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)\
 ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
 
-sources+=config.cc
 objs=$(subst .cc,.o,$(sources))
 
 all: genconf $(target) copy_files
 
 $(target): $(objs) 
 	@echo "Linking $(target)"
-	@$(cplusplus) -o $(target) $(ldflags)  $(objs)
+	@$(cplusplus) -o $(target) $(ldflags)  $(objs) config.o
 
 
 genconf:
-	@echo "Generating config.cc and config.xml"
 	@$(copier) --cfg $(sources)
+	@echo "Compiling generated config.cc"
+	@$(cplusplus) -c config.cc $(ccflags)
 
 tags:
 	$(ctags) $(sources) *.h *.hh

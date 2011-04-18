@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <irrlicht.h>
 
+#if 0
 #ifndef VEHICLES_DIR
 #error Please define VEHICLES_DIR preprocessor macro
 #endif
@@ -28,6 +29,9 @@
 #ifndef TRACKS_DIR
 #error Please define TRACKS_DIR preprocessor macro
 #endif
+#endif
+
+class XmlNode;
 
 class ResourceManager 
 {
@@ -42,6 +46,12 @@ class ResourceManager
     void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
+
+
+    /* config access */
+    bool cfgGet(const char * name, bool & value);
+    bool cfgGet(const char * name, double & value);
+    bool cfgGet(const char * name, double value[3]);
 
     inline const std::string & getResourcePath() { return m_rootDir; }
 
@@ -64,6 +74,8 @@ class ResourceManager
     std::string m_rootDir;
     std::string m_trackDir;
     std::string m_vehicleDir;
+
+    XmlNode *   m_configRoot;
 
 };
 
