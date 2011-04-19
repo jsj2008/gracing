@@ -140,6 +140,7 @@ def extract_configuration():
   f=open("config.cc","w")
   f.write("#include \"ResourceManager.h\"\n")
   f.write("#include \"config.h\"\n")
+  f.write("#include \"gmlog.h\"\n")
   for el in list:
     if el[2] == 'double':
       f.write("extern double %s;\n"%(el[0]))
@@ -150,6 +151,7 @@ def extract_configuration():
   f.write("void ConfigInit::initGlobVariables(ResourceManager * resman)\n{\n")
   for el in list:
     f.write("  if(!resman->cfgGet(\"%s\",%s)) {\n"%(el[0],el[0]));
+    f.write("    GM_LOG(\"returning for '%s' value '%s'\\n\");\n"%(el[0],el[1]))
     f.write("    %s=%s;\n"%(el[0],el[1]));
     f.write("  }\n");
   f.write("}\n");

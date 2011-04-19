@@ -102,8 +102,7 @@ void ResourceManager::loadConfig(const std::string & filename)
   if(!m_configRoot)
     return;
 
-  //ConfigInit::initGlobVariables(this);
-
+  ConfigInit::initGlobVariables(this);
 }
 
 void ResourceManager::getTrackCompletePath(const char * trackName, std::string & path)
@@ -146,10 +145,14 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
 
   std::string text=node->getText();
 
+
   value=false;
+  GM_LOG("for '%s' returing '%s'\n",name,value?"yes":"no");
   if(text == "yes" ||
-     text != "0")
+     text == "true")
     value=true;
+
+  GM_LOG("for '%s' returing '%s'\n",name,value?"yes":"no");
   return true;
 }
 
@@ -166,6 +169,7 @@ bool ResourceManager::cfgGet(const char * name, double & value)
   std::string text=node->getText();
 
   value=Util::parseFloat(text.c_str());
+  GM_LOG("Returing for '%s' value '%f' %s\n",name,value,text.c_str());
   return true;
 }
 
