@@ -79,6 +79,7 @@ CFG_PARAM_D(glob_chassisDefaultMass)=1.;
 
 //CFG_PARAM_D(glob_gVehicleSteering)=0.f;
 CFG_PARAM_D(glob_steeringIncrement)=0.002f;
+CFG_PARAM_D(glob_throttleIncrement)=0.01;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
@@ -219,12 +220,14 @@ Vehicle::Vehicle(
   m_world=world;
   m_filesystem=device->getFileSystem();
   m_sourceName=strdup(source);
+  m_speedometer=0;
   m_loaded=false;
 
 
   // accell dynamic info
   m_throttle=0.;
-  m_throttleIncrement=0.01;
+//m_throttleIncrement=0.01;
+  m_throttleIncrement=glob_throttleIncrement;
 
   // steering dynamic info
   m_steering = 0.;
@@ -778,13 +781,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     if(m_throttle<-.5)  {
       m_throttle=-.5;
     }
-#if 0
-    if((m_throttle<0.01) &&
-       (m_throttle>-0.01)) {
-      m_brake=1.;
-      m_throttle=0.;
-    }
-#endif
   } else {
     if(m_throttle>0.) {
       GM_LOG("%f\n",m_throttle);
@@ -793,6 +789,13 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         m_brake=.1;
         m_throttle=0.;
       }
+    } else if(m_throttle<0.) {
+      m_throttle+=m_throttleIncrement;
+      if(m_throttle > 0.) {
+        m_brake=.1;
+        m_throttle=0.;
+      }
+
     }
   }
   m_throttling=0;
@@ -830,7 +833,14 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
   }
 
-  // 2- TODO: update speed km/h
+  // 2- update speed km/h
+  if(m_speedometer) 
+  {
+     m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
+  }
+  double p;
+  //p=btScalar(3.6) * m_carBody->getLinearVelocity().length();
+  
 
   // 3- simulate suspensions
   for (int i=0;i<4;i++)
@@ -1240,5 +1250,10 @@ void Vehicle::updateWheel(int index)
 
   wheel->setRotation(matr.getRotationDegrees());
   wheel->setPosition(matr.getTranslation());
+}
+
+void Vehicle::setSpeedOMeter(INumberOutput * speedometer)
+{
+  m_speedometer=speedometer;
 }
 

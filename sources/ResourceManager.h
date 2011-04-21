@@ -56,9 +56,9 @@ class ResourceManager
     inline const std::string & getResourcePath() { return m_rootDir; }
 
 
-    inline irr::io::IXMLReader * createXMLReader(const std::string & filename)
+    inline irr::io::IXMLReaderUTF8 * createXMLReaderUTF8(const std::string & filename)
     {
-      return m_fileSystem->createXMLReader(filename.c_str());
+      return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
 
   private:

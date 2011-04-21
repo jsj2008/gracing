@@ -81,6 +81,8 @@ copy_files:
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp demo $(tgt_appl_dir)/
 	@$(copier) --cp config.xml $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/digits.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/digits.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/title_font.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/title_font_2.png $(tgt_res_dir)

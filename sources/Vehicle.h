@@ -75,7 +75,14 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     void setDebugDrawFlags(unsigned flags);
     
 
+    virtual void setSpeedOMeter(INumberOutput * speedometer);
+
   private:
+
+    // in/out data
+    INumberOutput * m_speedometer;
+
+
     // private types
     struct WheelData 
     {

@@ -104,7 +104,7 @@ def copy_vehicles():
   if resource_dir == None:
     error("Please define a resource dir (-resdir=...)")
 
-  print("Coying vehicles to %s"%target_dir)
+  print("Copying vehicles to %s"%target_dir)
   copy_list(vehicles,resource_dir,target_dir)
 
 def copy_tracks():
@@ -114,7 +114,7 @@ def copy_tracks():
   if resource_dir == None:
     error("please define a resource dir (-resdir=...)")
 
-  print("Coying tracks to %s"%target_dir)
+  print("Copying tracks to %s"%target_dir)
 
   copy_list(tracks,resource_dir,target_dir)
 

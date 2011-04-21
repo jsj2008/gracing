@@ -5,7 +5,7 @@
 
 using namespace irr;
 
-XmlNode::XmlNode(io::IXMLReader *xml)
+XmlNode::XmlNode(io::IXMLReaderUTF8 *xml)
 {
     while(xml->getNodeType()!=io::EXN_ELEMENT && xml->read());
     readXML(xml);
@@ -17,7 +17,7 @@ XmlNode::XmlNode(const std::string &filename, ResourceManager * resmanager)
   if(resmanager==0) 
     resmanager=ResourceManager::getInstance();
 
-  io::IXMLReader * xml=resmanager->createXMLReader(filename);
+  io::IXMLReaderUTF8 * xml=resmanager->createXMLReaderUTF8(filename);
 
   if(!xml) {
     GM_LOG("Cannot load file %s\n",filename.c_str());
@@ -52,7 +52,7 @@ XmlNode::XmlNode(const std::string &filename, ResourceManager * resmanager)
   xml->drop();
 }   // XMLNode
 
-void XmlNode::readXML(io::IXMLReader *xml)
+void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
 {
   m_name = std::string(core::stringc(xml->getNodeName()).c_str());
   m_text = "";

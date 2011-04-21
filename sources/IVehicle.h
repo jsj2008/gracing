@@ -18,6 +18,8 @@
 #define IVEHICLE_H
 
 #include "CompoundSceneNode.h"
+#include "INumberOutput.h"
+
 // !!! interface for a vehicle !!!
 class IVehicle : public CompoundSceneNode
 {
@@ -61,6 +63,9 @@ class IVehicle : public CompoundSceneNode
 
   // debug
   virtual void dumpDebugInfo()=0;
+
+  // the speedometer
+  virtual void setSpeedOMeter(INumberOutput * speedometer)=0;
 
   // adding more later...
 };

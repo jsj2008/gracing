@@ -26,6 +26,7 @@
 #include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
 #include "DataRecorder.h"
+#include "GUISpeedometer.h"
 
 
 //#include <cegui.h>
@@ -226,7 +227,7 @@ int main(int argc, char ** av)
   thetrack->load();
 
   std::string vehpath;
-  resmanager->getVehicleCompletePath("bluest.zip",vehpath);
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   Vehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -234,6 +235,10 @@ int main(int argc, char ** av)
         vehpath.c_str(),0xcafe);
 
   vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse);
+
+  GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
+      core::rect<s32>(0,0,700,120));
+  vehicle->setSpeedOMeter(smeter);
 
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
@@ -248,6 +253,7 @@ int main(int argc, char ** av)
 	if (font_big) {
 		guienv->getSkin()->setFont(font_big);
   }
+#if 0
   irr::gui::IGUIStaticText * text=guienv->addStaticText(L"gracing",
       core::rect<s32>(0,0,700,120));
   text->
@@ -256,15 +262,6 @@ int main(int argc, char ** av)
       core::rect<s32>(0,130,700,250));
   text->
     enableOverrideColor(true);
-#if 0
-  guienv->addStaticText(L"**********************************\n"
-      "Press:\n"
-      "'esc' : to quit\n"
-      "'l' : to load track\n'u' : to unload track\n"
-      "'c' : to load car\n'd' : apply torque to car around y axis\n"
-      "'i' : to dump debug info\n"
-      "**********************************\n",
-      core::rect<s32>(60,15,600,400));
 #endif
 
 

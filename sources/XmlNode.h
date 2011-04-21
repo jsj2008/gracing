@@ -28,7 +28,7 @@ class XmlNode
 {
   public:
     XmlNode(const std::string & filename, ResourceManager * resmanager=0);
-    XmlNode(irr::io::IXMLReader *xml);
+    XmlNode(irr::io::IXMLReaderUTF8 *xml);
 
     ~XmlNode();
 
@@ -49,7 +49,7 @@ class XmlNode
 
   private:
 
-    void readXML(irr::io::IXMLReader * xml);
+    void readXML(irr::io::IXMLReaderUTF8 * xml);
     std::string m_name;
     std::string m_text;
     std::map<std::string, irr::core::stringw> m_attributes;
