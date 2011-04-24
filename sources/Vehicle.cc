@@ -183,7 +183,7 @@ btRigidBody& getFixedBody()
 	return s_fixed;
 }
 
-btScalar calcRollingFriction(WheelContactPoint& contactPoint)
+static btScalar calcRollingFriction(WheelContactPoint& contactPoint)
 {
 
 	btScalar j1=0.f;
@@ -208,6 +208,7 @@ btScalar calcRollingFriction(WheelContactPoint& contactPoint)
 
 	return j1;
 }
+
 Vehicle::Vehicle(
     irr::scene::ISceneNode * parent,
     irr::IrrlichtDevice * device, 
@@ -693,23 +694,11 @@ void Vehicle::brake()
 
 void Vehicle::throttleUp()
 {
-#if 0
-  m_brake=0.;
-  m_throttle+=m_throttleIncrement;
-  if(m_throttle>.5)
-    m_throttle=.5;
-#endif
    m_throttling=1;
 }
 
 void Vehicle::throttleDown()
 {
-#if 0
-  m_brake=0.;
-  m_throttle-=m_throttleIncrement;
-  if(m_throttle<0.)
-    m_throttle=0.;
-#endif
   m_throttling=-1;
 }
 
@@ -766,15 +755,12 @@ irr::core::vector3df Vehicle::getChassisPos()
 
 void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 {
-
   if(m_throttling>0) {
-    GM_LOG("%f\n",m_throttle);
     m_brake=0.;
     m_throttle+=m_throttleIncrement;
     if(m_throttle>.5)
       m_throttle=.5;
   } else if(m_throttling<0) {
-    GM_LOG("%f\n",m_throttle);
     m_brake=0.;
     m_throttle-=m_throttleIncrement;
 
@@ -783,7 +769,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     }
   } else {
     if(m_throttle>0.) {
-      GM_LOG("%f\n",m_throttle);
       m_throttle-=m_throttleIncrement;
       if(m_throttle < 0.) {
         m_brake=.1;
@@ -795,7 +780,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         m_brake=.1;
         m_throttle=0.;
       }
-
     }
   }
   m_throttling=0;
@@ -809,13 +793,10 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     wheel.isInContact=false;
     btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
 
-    wheel.hardPointWS = chassisTrans * wheel.hardPointCS; ///chassisTrans( wheel.hardPointCS );
-    //wheel.directionWS = chassisTrans * btVector3(0.,-1,0.); //chassisTrans.getBasis() * btVector3(0.,-1.,0.);
-    //wheel.axleWS = chassisTrans * btVector3(0.,-1.,0.); //chassisTrans.getBasis() *  btVector3(0.,0.,1.);
+    wheel.hardPointWS = chassisTrans * wheel.hardPointCS; 
     wheel.directionWS = chassisTrans.getBasis() * btVector3(0.,-1.,0.);
     wheel.axleWS = chassisTrans.getBasis() *  btVector3(0.,0.,1.);
 
-    //
 	  btVector3 up = -wheel.directionWS;
 	  const btVector3& right = wheel.axleWS;
     btVector3 fwd = up.cross(right);
@@ -838,8 +819,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
   {
      m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
   }
-  double p;
-  //p=btScalar(3.6) * m_carBody->getLinearVelocity().length();
   
 
   // 3- simulate suspensions

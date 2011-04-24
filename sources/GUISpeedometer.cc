@@ -33,6 +33,12 @@ GUISpeedometer::GUISpeedometer(bool border,
   if(!m_font) {
     GM_LOG("Cannot load font '%s'\n",fontPath.c_str());
   }
+
+  GM_LOG("Absolute position: %d,%d %d,%d\n",
+      AbsoluteRect.LowerRightCorner.X,
+      AbsoluteRect.LowerRightCorner.Y,
+      AbsoluteRect.UpperLeftCorner.X,
+      AbsoluteRect.UpperLeftCorner.Y);
 }
 
 void GUISpeedometer::draw() 
@@ -57,7 +63,7 @@ void GUISpeedometer::draw()
     char b[32];
     irr::core::rect<irr::s32> frameRect(AbsoluteRect);
 
-    snprintf(b,32,"0123",3.); //rint(getValue()));
+    snprintf(b,32,"%3.0f",rint(getValue()));
 
     font->draw(b, frameRect,
         skin->getColor(irr::gui::EGDC_BUTTON_TEXT),true, true, &AbsoluteClippingRect);
