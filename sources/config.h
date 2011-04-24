@@ -26,6 +26,9 @@
 #define CFG_PARAM_BOOL(p)         bool p
 #define CFG_INIT_BOOL(p,v)          p=v
 
+#define CFG_PARAM_UINT(p)           unsigned p
+#define CFG_INIT_INT(p,v)          p=v
+
 class ResourceManager;
 
 class ConfigInit 

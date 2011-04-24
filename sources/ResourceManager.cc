@@ -27,6 +27,10 @@
 #ifdef __APPLE__
 #  include <CoreFoundation/CoreFoundation.h>
 
+
+CFG_PARAM_UINT(glob_screenWidth)=800;
+CFG_PARAM_UINT(glob_screenHeight)=600;
+
 static bool macGetBundlePath(std::string& data_dir)
 {
     // the following code will enable STK to find its data when placed in 
@@ -68,7 +72,6 @@ irr::io::path ResourceManager::createAbsoluteFilename(const std::string & fileNa
 ResourceManager::ResourceManager() 
 {
 
-  GM_LOG("helo 1\n");
 #ifdef __APPLE__
   char buffer[1024];
   getcwd(buffer,1024);
@@ -90,9 +93,15 @@ ResourceManager::ResourceManager()
 
   m_device->grab();
 
+
+
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
   loadConfig(configFilename);
+
+  ///////////////////////////////////////
+  m_screenWidth=glob_screenWidth;
+  m_screenHeight=glob_screenHeight;
 }
 
 void ResourceManager::loadConfig(const std::string & filename)
@@ -153,6 +162,22 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
     value=true;
 
   GM_LOG("for '%s' returing '%s'\n",name,value?"yes":"no");
+  return true;
+}
+
+bool ResourceManager::cfgGet(const char * name, unsigned & value)
+{
+  if(!m_configRoot)
+    return false;
+
+  const XmlNode * node=m_configRoot->getChild(name);
+
+  if(!node) 
+    return false;
+
+  std::string text=node->getText();
+
+  value=Util::parseUnsigned(text.c_str());
   return true;
 }
 

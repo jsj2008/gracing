@@ -147,6 +147,11 @@ class Util
 		return irr::core::fast_atof(str);
 	}
 
+	static inline unsigned parseUnsigned(const char * str)
+	{
+		return atoi(str);
+	}
+
 
 };
 

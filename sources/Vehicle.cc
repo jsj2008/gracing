@@ -1008,7 +1008,6 @@ void Vehicle::updateFriction(btScalar timeStep)
 
       // qui ok GM_LOG("%d-->%f\n",wheelIdx,m_forwardImpulse[wheelIdx]);
 
-
       btScalar x = (m_forwardImpulse[wheelIdx] ) * fwdFactor;
       btScalar y = (m_sideImpulse[wheelIdx] ) * sideFactor;
 

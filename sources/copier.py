@@ -59,10 +59,12 @@ def extract_cfg_definition(filename, list):
   p_d = re.compile("CFG_PARAM_D\((.*)\)=([^;]*);.*");
   p_v3 = re.compile("CFG_PARAM_V3\((.*)\)=([^;]*);.*");
   p_bool = re.compile("CFG_PARAM_BOOL\((.*)\)=([^;]*);.*");
+  p_uint = re.compile("CFG_PARAM_UINT\((.*)\)=([^;]*);.*");
 
   res=[ [ p_d, "double" ] , 
         [ p_v3, "v3" ] ,
-        [ p_bool, "bool" ] ]
+        [ p_bool, "bool" ] ,
+        [ p_uint, "unsigned" ] ]
   for line in lines:
     for c in res:
       r=c[0]
@@ -148,6 +150,9 @@ def extract_configuration():
       f.write("extern bool %s;\n"%(el[0]))
     elif el[2] == 'v3':
       f.write("extern double %s[3];\n"%(el[0]))
+    elif el[2] == 'unsigned':
+      f.write("extern unsigned %s;\n"%(el[0]))
+
   f.write("void ConfigInit::initGlobVariables(ResourceManager * resman)\n{\n")
   for el in list:
     f.write("  if(!resman->cfgGet(\"%s\",%s)) {\n"%(el[0],el[0]));

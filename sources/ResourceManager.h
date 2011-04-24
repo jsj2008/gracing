@@ -52,6 +52,7 @@ class ResourceManager
     bool cfgGet(const char * name, bool & value);
     bool cfgGet(const char * name, double & value);
     bool cfgGet(const char * name, double value[3]);
+    bool cfgGet(const char * name, unsigned & value);
 
     inline const std::string & getResourcePath() { return m_rootDir; }
 
@@ -60,6 +61,9 @@ class ResourceManager
     {
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
+
+    inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
+    inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
 
   private:
     static ResourceManager * s_instance;
@@ -77,6 +81,8 @@ class ResourceManager
 
     XmlNode *   m_configRoot;
 
+    unsigned m_screenHeight;
+    unsigned m_screenWidth;
 };
 
 #endif

@@ -196,8 +196,17 @@ int main(int argc, char ** av)
   MyEventReceiver receiver;
 
   video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
+
+  u32 screenWidth;
+  u32 screenHeight;
+
+  resmanager->getScreenHeight(screenHeight);
+  resmanager->getScreenWidth(screenWidth);
+
+  GM_LOG("Dimensione: %d,%d\n",screenWidth,screenHeight);
+
   IrrlichtDevice *device =
-    createDevice( driverType, dimension2d<u32>(800, 600), 16,
+    createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 16,
         false, false, false, &receiver);
 
   resmanager->setDevice(device);
