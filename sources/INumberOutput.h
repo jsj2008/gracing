@@ -28,6 +28,7 @@ class INumberOutput
       m_loBounded=loBounded;
       m_hiBound=hiBound;
       m_loBound=loBound;
+      m_valuesIndex=0;
     };
 
     virtual double setValue(double v)
@@ -38,7 +39,13 @@ class INumberOutput
       if(m_loBounded && v< m_loBound)
         v=m_loBound;
 
-      m_value=v;
+      m_values[m_valuesIndex]=v;
+      m_valuesIndex++;
+      m_valuesIndex%=4;
+
+      m_value=
+        (m_values[0]+m_values[1]+
+        m_values[2]+m_values[3])/4.;
 
       return m_value;
     }
@@ -52,6 +59,8 @@ class INumberOutput
     bool   m_hiBounded, m_loBounded;
     double m_hiBound, m_loBound;
     double m_value;
+    double m_values[4];
+    int    m_valuesIndex;
 
 };
 

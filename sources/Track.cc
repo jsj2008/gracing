@@ -165,12 +165,14 @@ void Track::load()
               }
               break;
             case ot_mesh:
+              GM_LOG("loading mesh '%s'\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
-                irr::scene::IAnimatedMeshSceneNode* node=0;
-                node=smgr->addAnimatedMeshSceneNode( mesh,0,0xBADD );
+                irr::scene::IMeshSceneNode* node=0;
+                //node=smgr->addAnimatedMeshSceneNode( mesh,0,0xBADD );
+                node=smgr->addOctreeSceneNode( mesh,0,0xBADD );
                 if(!node) {
                   GM_LOG("cannot load mesh\n");
                 } else {
@@ -277,7 +279,7 @@ void Track::loadLights( irr::io::IReadFile * file ,
   double pos[3],dif[3],spe[3],radius;
 
   smgr->setAmbientLight(
-      irr::video::SColorf(.6,.6,.6));
+      irr::video::SColorf(.8,.8,.8));
 
   mark=Util::readMark(file);
 

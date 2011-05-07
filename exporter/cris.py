@@ -428,6 +428,8 @@ def exportMesh(fp, ob, scene,translation=None,
                 exportMaterial(fp,mat,dest_dir,addElements)
 
             for matName, imageName in matImgFaces:
+              if matName == None:
+                continue
               faces=matImgFaces[(matName,imageName)]
               n_faces=len(faces)
               binWrite_mark(fp,MARK_USE_MATERIAL)
@@ -438,12 +440,12 @@ def exportMesh(fp, ob, scene,translation=None,
               else:
                 binWrite_mark(fp,MARK_FACES_ONLY)
               binWrite_int(fp,n_faces)
-              log("Mat: '%s', img: '%s' has %d faces\n"%(matName,imageName,n_faces))
+#              log("Mat: '%s', img: '%s' has %d faces\n"%(matName,imageName,n_faces))
               for f in faces:
                 f_smooth= f.use_smooth
                 f_mat = min(f.material_index, len(materialNames)-1)
                 f_index = f.index
-                log("  face %d - "%f_index)
+#log("  face %d - "%f_index)
                 f_v_orig = [(vi, me_verts[v_idx]) for vi, v_idx in enumerate(f.vertices)]
                 f_v_iter = (f_v_orig, )
                 for f_v in f_v_iter:
@@ -452,17 +454,17 @@ def exportMesh(fp, ob, scene,translation=None,
                     for vi, v in f_v:
                       binWrite_int(fp,v.index + totverts - 1)
                       binWrite_int(fp,totuvco + uv_face_mapping[f_index][vi]) 
-                      log( ' %d/%d' % (\
-                        v.index + totverts,\
-                        totuvco + uv_face_mapping[f_index][vi])) # vert, uv
+#                      log( ' %d/%d' % (\
+#                        v.index + totverts,\
+#                        totuvco + uv_face_mapping[f_index][vi])) # vert, uv
                     face_vert_index += len(f_v)
                   else: # No UV's
                     for vi, v in f_v:
                       binWrite_int(fp,v.index + totverts - 1)
-                      log( ' %d' % (v.index + totverts) )
-                log("\n")       
+#log( ' %d' % (v.index + totverts) )
+#                log("\n")       
 
-            log("---------------- done\n")
+#            log("---------------- done\n")
 
             totverts += len(me_verts)
             if faceuv:

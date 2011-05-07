@@ -232,7 +232,7 @@ int main(int argc, char ** av)
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"devtrack.zip");
+  thetrack=new Track(device,world,"farm.zip");
   thetrack->load();
 
   std::string vehpath;
@@ -246,7 +246,7 @@ int main(int argc, char ** av)
   vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse);
 
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
-      core::rect<s32>(0,0,700,120));
+      core::rect<s32>(0,0,200,100));
   vehicle->setSpeedOMeter(smeter);
 
   vehicle->load();
@@ -291,6 +291,7 @@ int main(int argc, char ** av)
   bool flagL, flagU;
   bool flagI;
   bool done=false;
+  int lastFPS=-1;
 
   flagL=true;
   flagU=true;
@@ -300,121 +301,133 @@ int main(int argc, char ** av)
 
 
   ///////////
+#if 0
   btCollisionShape * x_shape= new btBoxShape(btVector3(1.,1.,1.));
   btTransform tr=btTransform::getIdentity();
   tr.setOrigin(btVector3(0.,2.,5.));
   btRigidBody * x_body;
   x_body=world->createRigidBody(0, 1., tr,x_shape);
+#endif
   ///////////
 
   while(device->run() && !done) {
-    driver->beginScene(true, true, SColor(255,100,101,140));
+    if(device->isWindowActive()) {
 
-    smgr->drawAll();
+      driver->beginScene(true, true, SColor(255,100,101,140));
+      smgr->drawAll();
+      world->step();
+      guienv->drawAll();
+      world->debugDrawWorld();
+      driver->endScene();
 
-    world->step();
+      /* temp keyboard handling part */
+      if(receiver.IsKeyDown(irr::KEY_ESCAPE) || 
+          receiver.IsKeyDown(irr::KEY_KEY_Q) )
+        done=true;
 
-    guienv->drawAll();
-    world->debugDrawWorld();
-
-    driver->endScene();
-
-    if(receiver.IsKeyDown(irr::KEY_ESCAPE) || 
-       receiver.IsKeyDown(irr::KEY_KEY_Q) )
-      done=true;
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
-      thetrack->load();
-      if(flagL) {
-        dumpNode(smgr->getRootSceneNode());
-        flagL=false;
-      } 
-    } else {
-      flagL=true;
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
-      thetrack->unload();
-      if(flagU) {
-        dumpNode(smgr->getRootSceneNode());
-        flagU=false;
-      }
-      
-    } else {
-      flagU=true;
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
-      if(flagC)  {
-        vehicle->reset(thetrack->getStartPosition());
-        GM_LOG("start position: %f,%f,%f\n",
-          thetrack->getStartPosition().X,
-          thetrack->getStartPosition().Y,
-          thetrack->getStartPosition().Z);
-        flagC=false;
-      }
-    } else {
-      flagC=true;
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_UP)) {
-      if(vehicle)
-        vehicle->throttleUp();
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_W))
-      camanim->moveXY(0.,CAMERA_STEP);
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_Z)) 
-      camanim->moveXY(0.,-CAMERA_STEP);
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_A))
-      camanim->moveXY(CAMERA_STEP,0.);
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
-      camanim->moveXY(-CAMERA_STEP,0.);
-
-    if(receiver.IsKeyDown(irr::KEY_DOWN)) {
-      if(vehicle)
-        vehicle->throttleDown();
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_LEFT)) {
-      if(vehicle)
-        vehicle->steerLeft();
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_RIGHT)) {
-      if(vehicle) {
-        vehicle->steerRight();
-      }
-    }
-
-    if(receiver.IsKeyDown(irr::KEY_KEY_I)) {
-      if(flagI) {
-        if(vehicle) {
-          GM_LOG("Vehicle position: %f,%f,%f\n",
-              vehicle->getPosition().X,
-              vehicle->getPosition().Y,
-              vehicle->getPosition().Z);
+      if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
+        thetrack->load();
+        if(flagL) {
           dumpNode(smgr->getRootSceneNode());
-          world->dumpBodyPositions();
-          if(vehicle)
-            vehicle->dumpDebugInfo();
+          flagL=false;
+        } 
+      } else {
+        flagL=true;
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
+        thetrack->unload();
+        if(flagU) {
+          dumpNode(smgr->getRootSceneNode());
+          flagU=false;
         }
-        flagI=false;
-      } 
-    } else flagI=true;
+      } else {
+        flagU=true;
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
+        if(flagC)  {
+          vehicle->reset(thetrack->getStartPosition());
+          GM_LOG("start position: %f,%f,%f\n",
+              thetrack->getStartPosition().X,
+              thetrack->getStartPosition().Y,
+              thetrack->getStartPosition().Z);
+          flagC=false;
+        }
+      } else {
+        flagC=true;
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_UP)) {
+        if(vehicle)
+          vehicle->throttleUp();
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_W))
+        camanim->moveXY(0.,CAMERA_STEP);
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_Z)) 
+        camanim->moveXY(0.,-CAMERA_STEP);
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_A))
+        camanim->moveXY(CAMERA_STEP,0.);
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
+        camanim->moveXY(-CAMERA_STEP,0.);
+
+      if(receiver.IsKeyDown(irr::KEY_DOWN)) {
+        if(vehicle)
+          vehicle->throttleDown();
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_LEFT)) {
+        if(vehicle)
+          vehicle->steerLeft();
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_RIGHT)) {
+        if(vehicle) {
+          vehicle->steerRight();
+        }
+      }
+
+      if(receiver.IsKeyDown(irr::KEY_KEY_I)) {
+        if(flagI) {
+          if(vehicle) {
+            GM_LOG("Vehicle position: %f,%f,%f\n",
+                vehicle->getPosition().X,
+                vehicle->getPosition().Y,
+                vehicle->getPosition().Z);
+            dumpNode(smgr->getRootSceneNode());
+            world->dumpBodyPositions();
+            if(vehicle)
+              vehicle->dumpDebugInfo();
+          }
+          flagI=false;
+        } 
+      } else flagI=true;
 
 
-    if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
-      if(flagD) {
-        vehicle->applyTorque(1000.,1000.,0.);
-        GM_LOG("sssssssss\n");
-        flagD=false;
+      if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
+        if(flagD) {
+          vehicle->applyTorque(1000.,1000.,0.);
+          GM_LOG("sssssssss\n");
+          flagD=false;
+        }
+      } else {
+        flagD=true;
+      }
+
+      if (driver->getFPS() != lastFPS)
+      {
+        lastFPS = driver->getFPS();
+        core::stringw tmp = L"Irrlicht SplitScreen-Example (FPS: ";
+        tmp += lastFPS;
+        tmp += ")";
+        device->setWindowCaption(tmp.c_str());
       }
     } else {
-      flagD=true;
+      device->yield();
     }
   }
   delete debugDrawer;

@@ -59,14 +59,25 @@ void GUISpeedometer::draw()
   else
     font=skin->getFont();
 
+
+  //if (Background)
+  {
+  }
+
+
   if(font) {
     char b[32];
     irr::core::rect<irr::s32> frameRect(AbsoluteRect);
 
+    irr::video::IVideoDriver* driver = Environment->getVideoDriver();
+    irr::video::SColor BGColor = skin->getColor(irr::gui::EGDC_3D_FACE);
+    driver->draw2DRectangle(BGColor, frameRect, &AbsoluteClippingRect);
+
     snprintf(b,32,"%3.0f",rint(getValue()));
 
-    font->draw(b, frameRect,
-        skin->getColor(irr::gui::EGDC_BUTTON_TEXT),true, true, &AbsoluteClippingRect);
+    irr::video::SColor FGColor(255,255,255,255);
+    font->draw(b, frameRect,FGColor,true, true, &AbsoluteClippingRect);
+        //skin->getColor(irr::gui::EGDC_BUTTON_TEXT)
   }
       
   

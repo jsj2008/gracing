@@ -140,9 +140,11 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
+        currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_LIGHTING,false);
+
         if(imageName[0]) {
           video::ITexture * texture = 0;
-          GM_LOG("Loading texture: '%s'\n",imageName);
+          GM_LOG("Loading texture: '%s' on material %p\n",imageName,currMtl);
           if (FileSystem->existFile(imageName)) {
             texture = SceneManager->getVideoDriver()->getTexture(imageName);
             if(texture) {
@@ -150,6 +152,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
               currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
               currMtl->Meshbuffer->Material.DiffuseColor.set(
                 currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
+              GM_LOG("Loaded texture\n");
             } else {
               GM_LOG("  --> cannot load texture\n");
             }
@@ -171,6 +174,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         n_vertices=Util::readInt(file);
         for(int vi=0; vi<n_vertices; vi++) {
           Util::readVertex2d(file,vec2d);
+          //GM_LOG("Texture coords: %f,%f\n",vec2d.X,vec2d.Y);
           textureCoordBuffer.push_back(vec2d);
         }
         break;

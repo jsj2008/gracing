@@ -23,7 +23,8 @@ class GUISpeedometer : public  INumberOutput, irr::gui::IGUIElement
 {
   public:
   GUISpeedometer(bool border, irr::gui::IGUIEnvironment* environment,
-		irr::gui::IGUIElement* parent, irr::s32 id, const irr::core::rect<irr::s32>& rectangle);
+		irr::gui::IGUIElement* parent, irr::s32 id, 
+    const irr::core::rect<irr::s32>& rectangle);
 
   void draw();
 

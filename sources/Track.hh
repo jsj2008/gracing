@@ -45,7 +45,8 @@ class Track
     // resources loaded
     irr::core::array<irr::scene::ILightSceneNode*>   
                                                    m_lights;
-    irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
+    //irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
+    irr::core::array<irr::scene::IMeshSceneNode*>   
                                                    m_sceneNodes;
     irr::scene::ICameraSceneNode *                 m_camera;
 

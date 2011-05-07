@@ -123,17 +123,23 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
   mat *= mat_scale;
 
   assert(meshNode->getType()==scene::ESNT_MESH || 
-      meshNode->getType()==scene::ESNT_ANIMATED_MESH);
+      meshNode->getType()==scene::ESNT_ANIMATED_MESH ||
+      meshNode->getType()==scene::ESNT_OCTREE);
 
   scene::IMesh * mesh;
 
   switch(meshNode->getType()) {
     case scene::ESNT_MESH:
+    case scene::ESNT_OCTREE:
       mesh=((scene::IMeshSceneNode*)meshNode)->getMesh();
       break;
     case scene::ESNT_ANIMATED_MESH:
       mesh=((scene::IAnimatedMeshSceneNode*)meshNode)->getMesh();
       break;
+#if 0
+      mesh=((scene::IOctreeSceneNode*)meshNode)->getMesh();
+      break;
+#endif
     default:
       assert(0);
       break;

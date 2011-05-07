@@ -56,7 +56,6 @@ void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
 {
   m_name = std::string(core::stringc(xml->getNodeName()).c_str());
   m_text = "";
-  GM_LOG("loading element '%s'\n",m_name.c_str());
 
   for(unsigned int i=0; i<xml->getAttributeCount(); i++)
   {
@@ -85,7 +84,6 @@ void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
       case io::EXN_COMMENT:            break;
       case io::EXN_TEXT:               
         m_text=xml->getNodeName();
-        GM_LOG("  with value: '%s'\n",m_text.c_str());
       break;
       default:                         break;
     }   // switch

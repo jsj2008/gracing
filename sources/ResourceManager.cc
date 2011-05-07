@@ -28,8 +28,8 @@
 #  include <CoreFoundation/CoreFoundation.h>
 
 
-CFG_PARAM_UINT(glob_screenWidth)=800;
-CFG_PARAM_UINT(glob_screenHeight)=600;
+CFG_PARAM_UINT(glob_screenWidth)=1024;
+CFG_PARAM_UINT(glob_screenHeight)=768;
 
 static bool macGetBundlePath(std::string& data_dir)
 {
@@ -156,12 +156,10 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
 
 
   value=false;
-  GM_LOG("for '%s' returing '%s'\n",name,value?"yes":"no");
   if(text == "yes" ||
      text == "true")
     value=true;
 
-  GM_LOG("for '%s' returing '%s'\n",name,value?"yes":"no");
   return true;
 }
 
@@ -194,7 +192,6 @@ bool ResourceManager::cfgGet(const char * name, double & value)
   std::string text=node->getText();
 
   value=Util::parseFloat(text.c_str());
-  GM_LOG("Returing for '%s' value '%f' %s\n",name,value,text.c_str());
   return true;
 }
 
