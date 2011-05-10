@@ -40,7 +40,7 @@ EPSILON=0.0001
 
 
 
-EXPORT_XML_MESH=True
+EXPORT_XML_MESH=False
 
 # markers 
 MARK_VERTICES=0xf100
@@ -286,6 +286,9 @@ class XmlNode:
   def setText(self,text):
     self.x_text=text
 
+  def getName(self):
+    return self.x_name
+
   def export(self):
     for child in self.x_children:
       child.export()
@@ -378,9 +381,21 @@ class XmlMeshNode(XmlNode):
   
   def getRecurse(self):
     return False
+
+  def getMeshFileName(self):
+    return self.x_ofilename
  
   def cleanup(self):
+    try:
+      os.remove(self.x_ofilename)
+    except:
+      pass
+    try:
+      os.remove(self.x_ofilename+".xml")
+    except:
+      pass
     XmlNode.cleanup(self)
+
 
   def exportBinary(self,filename):
     vertices=self.getChild("vertices")
@@ -404,7 +419,7 @@ class XmlMeshNode(XmlNode):
       binWrite_mark(fp,MARK_UVCOORDS)
       binWrite_int(fp,uvcoords.getChildrenNumber())
 
-      for uv in uv_cords.getChildrenList():
+      for node in uvcoords.getChildrenList():
         uv=[ float(node.getProp("U")) , float(node.getProp("V")) ]
         binWrite_pointUV(fp,uv)
 
@@ -686,6 +701,17 @@ def createMaterialNode(material, image):
 
   return matNode
   
+def createZipFile(root,xmlfile,path):
+  zf=zipfile.ZipFile(path,"w")
+  for node in root.getChildrenList():
+    if isinstance(node,XmlMeshNode):
+      fn=node.getMeshFileName()
+      print("adding %s"%fn)
+      p=os.path.basename(fn)
+      zf.write(fn,p)
+
+  zf.write(xmlfile,os.path.basename(xmlfile))
+  zf.close()
 
 class export_OT_track(bpy.types.Operator):
   
@@ -695,7 +721,14 @@ class export_OT_track(bpy.types.Operator):
   filename_ext = ".zip"
   filter_glob = StringProperty(default="*.zip", options={'HIDDEN'})
 
+  filepath = bpy.props.StringProperty(
+    name="File Path", 
+    description="File path used for exporting the crisalide file", 
+    maxlen= 1024, default= "")
+
   def execute(self, context):
+    filepath=self.properties.filepath
+    print("filepath: %s"%filepath)
     tmpdir = "/tmp/tmp"
 
     #########################
@@ -778,17 +811,20 @@ class export_OT_track(bpy.types.Operator):
 
     root.export()
 
-    root.cleanup()
+    createZipFile(root,xmlname,filepath)
+
+    #root.cleanup()
+    #os.remove(xmlname)
 
     return {'FINISHED'}
 
-#def invoke(self, context, event):
-#context.window_manager.fileselect_add(self)
-#return {'RUNNING_MODAL'}
+  def invoke(self, context, event):
+      context.window_manager.fileselect_add(self)
+      return {'RUNNING_MODAL'}
 
 def menu_func_track_export(self, context):
+    print("registering")
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter (*.zip)")
-
 
 def register():
     bpy.types.INFO_MT_file_export.append(menu_func_track_export)
