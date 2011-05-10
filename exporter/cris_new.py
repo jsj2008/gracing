@@ -239,22 +239,25 @@ class XmlNode:
     self.x_text=text
 
   def export(self):
-    pass
+    for child in self.x_children:
+      child.export()
 
   def cleanup(self):
-    for child in self.children:
+    for child in self.x_children:
       child.cleanup()
 
   def getRecurse(self):
     return True
 
-  def writeSubTree(self,outFile):
+  def writeSubTree(self,outFile,forceRecurse=False):
     outFile.write("<%s"%(self.x_name))
     if len(self.x_props.keys()):
       for prop in self.x_props:
         outFile.write(" %s=\"%s\""%(prop,self.x_props[prop]))
+
+    mustRecurse=self.getRecurse() or forceRecurse
     
-    if (self.getRecurse() and len(self.x_children)) or self.x_text!="":
+    if (mustRecurse and len(self.x_children)) or self.x_text!="":
       outFile.write(">");
       if len(self.x_children) > 0:
         outFile.write("\n")
@@ -269,7 +272,7 @@ class XmlNode:
 class XmlMeshNode(XmlNode):
   def __init__(self,ob,mesh,materials,dest_dir):
     XmlNode.__init__(self,"mesh")
-    ofilename=dest_dir+"/"+ob.name+".mesh"
+    self.x_ofilename=dest_dir+"/"+ob.name+".mesh"
 
     tri_list = extract_triangles(mesh)
 
@@ -292,24 +295,111 @@ class XmlMeshNode(XmlNode):
       node=createMaterialNode(mat_and_image[0], mat_and_image[1])
       self.addChild(node)
 
+    idx=0
     for v in vert_array:
       node=XmlNode("vertex")
+      node.setProp("index",idx)
+      idx=idx+1
       node.setText("%f,%f,%f"%(v[0],v[1],v[2]))
       self.addChild(node)
 
     if uv_array:
+      idx=0
       for uvc in uv_array:
         node=XmlNode("uvcord")
+        node.setProp("index",idx)
+        idx=idx+1
         node.setText("%f,%f"%(uvc[0],uvc[1]))
         self.addChild(node)
+
+    node=self.produceFacesChildren(tri_list, mesh)
+    self.addChild(node)
   
   def getRecurse(self):
     return False
  
   def cleanup(self):
-    XmlNode.cleanup()
+    XmlNode.cleanup(self)
 
+  def export(self):
+    f=open(self.x_ofilename,"w")
+    self.writeSubTree(f,True)
+    f.close()
 
+  def produceFacesChildren(self, tri_list, mesh):
+    root=XmlNode("faces")
+    faces_list=[ ]
+    materials = mesh.materials
+    if not materials:
+      mat = None
+    if len(mesh.uv_textures):
+      unique_mats={}
+      for i, tri in enumerate(tri_list):
+        faces_list.append(tri.vertex_index)
+        if materials:
+          mat = materials[tri.mat]
+          if mat: mat=mat.name
+
+        img = tri.image
+
+        try:
+          context_mat_face_array = unique_mats[mat, img][1]
+        except:
+          if mat: name_str = mat
+          else: name_str = "None"
+          if img: name_str += img
+
+          context_mat_face_array = [ ]
+          unique_mats[mat, img] = name_str, context_mat_face_array
+
+        context_mat_face_array.append(i)
+        
+      for mat_name, mat_faces in unique_mats.values():
+        mnode=XmlNode("use_material")
+        mnode.setProp("name",mat_name)
+        for ff in mat_faces:
+          node=XmlNode("face")
+          tri=faces_list[ff]
+          node.setText("%d,%d,%d"%(tri[0],
+            tri[1],
+            tri[2]))
+          mnode.addChild(node)
+        root.addChild(mnode)
+
+    else:
+      obj_material_faces=[]
+      obj_material_names=[]
+
+      for m in materials:
+        if m:
+          obj_material_names.append(m.name)
+          obj_material_faces.append([])
+       
+      n_materials=len(obj_material_names)
+
+      for i,tri in enumerate(tri_list):
+        faces_list.append(tri.vertex_index)
+        if (tri.mat < n_materials):
+          obj_material_faces[tri.mat].append(i)
+
+      for  i in range(n_materials):
+        findex=obj_material_faces[i]
+        mnode=XmlNode("use_material")
+        mnode.setProp("name",obj_material_names[i])
+        root.addChild(mnode)
+
+        faces=obj_material_faces[i]
+        for ff in faces:
+          node=XmlNode("face")
+          tri=faces_list[ff]
+          node.setText("%d,%d,%d"%(tri[0],
+            tri[1],
+            tri[2]))
+          mnode.addChild(node)
+
+    return root
+
+    
 
 class tri_wrapper(object):
     '''Class representing a triangle.
@@ -430,71 +520,6 @@ def remove_face_uv(verts, tri_list):
 
     return vert_array, uv_array, tri_list
 
-def make_faces_chunk(tri_list, mesh, materialDict):
-
-    materials = mesh.materials
-    if not materials:
-        mat = None
-
-    face_list = [ ]
-
-    if len(mesh.uv_textures):
-        unique_mats = {}
-        for i,tri in enumerate(tri_list):
-            face_list.append(tri.vertex_index)
-
-            if materials:
-                mat = materials[tri.mat]
-                if mat: mat = mat.name
-
-            img = tri.image
-
-            try:
-                context_mat_face_array = unique_mats[mat, img][1]
-            except:
-                if mat:	name_str = mat
-                else:	name_str = 'None'
-                if img: name_str += img
-
-                context_mat_face_array = [ ]
-                unique_mats[mat, img] = _3ds_string(sane_name(name_str)), context_mat_face_array
-
-
-            context_mat_face_array.add(_3ds_short(i))
-            # obj_material_faces[tri.mat].add(_3ds_short(i))
-
-        face_chunk.add_variable("faces", face_list)
-        for mat_name, mat_faces in unique_mats.values():
-            obj_material_chunk=_3ds_chunk(OBJECT_MATERIAL)
-            obj_material_chunk.add_variable("name", mat_name)
-            obj_material_chunk.add_variable("face_list", mat_faces)
-            face_chunk.add_subchunk(obj_material_chunk)
-
-    else:
-
-        obj_material_faces=[]
-        obj_material_names=[]
-        for m in materials:
-            if m:
-                obj_material_names.append(_3ds_string(sane_name(m.name)))
-                obj_material_faces.append(_3ds_array())
-        n_materials = len(obj_material_names)
-
-        for i,tri in enumerate(tri_list):
-            face_list.add(_3ds_face(tri.vertex_index))
-            if (tri.mat < n_materials):
-                obj_material_faces[tri.mat].add(_3ds_short(i))
-
-        face_chunk.add_variable("faces", face_list)
-        for i in range(n_materials):
-            obj_material_chunk=_3ds_chunk(OBJECT_MATERIAL)
-            obj_material_chunk.add_variable("name", obj_material_names[i])
-            obj_material_chunk.add_variable("face_list", obj_material_faces[i])
-            face_chunk.add_subchunk(obj_material_chunk)
-
-    return face_chunk
-
-
 def createColorNode(name,color):
   node=XmlNode(name)
   node.setText("%f,%f,%f"%(color[0],color[1],color[2]))
@@ -537,47 +562,6 @@ def createMaterialNode(material, image):
 
   return matNode
   
-
-def createMeshNode(ob,mesh,materials,dest_dir):
-  ofilename=dest_dir+"/"+ob.name+".mesh"
-
-  tri_list = extract_triangles(mesh)
-
-  if len(mesh.uv_textures):
-    vert_array, uv_array, tri_list = remove_face_uv(mesh.vertices,tri_list)
-  else:
-    vert_array = [ ]
-    for vert in mesh.vertices:
-      vert_array.append(vert.co)
-    # If the mesh has vertex UVs, create an array of UVs:
-    if len(mesh.sticky):
-      uv_array = [ ]
-      for uv in mesh.sticky:
-        uv_array.append(uv.co)
-    else:
-      # no UV at all:
-      uv_array = None
-
-
-  root=XmlNode("mesh")
-
-  for mat_and_image in materials.values():
-    node=createMaterialNode(mat_and_image[0], mat_and_image[1])
-    root.addChild(node)
-
-  for v in vert_array:
-    node=XmlNode("vertex")
-    node.setText("%f,%f,%f"%(v[0],v[1],v[2]))
-    root.addChild(node)
-
-  if uv_array:
-    for uvc in uv_array:
-      node=XmlNode("uvcord")
-      node.setText("%f,%f"%(uvc[0],uvc[1]))
-      root.addChild(node)
-
-  return root
-
 
 class export_OT_track(bpy.types.Operator):
   
@@ -659,7 +643,6 @@ class export_OT_track(bpy.types.Operator):
             free_derived_objects(ob)
 
     for ob, blender_mesh in mesh_objects:
-#node=createMeshNode(ob,blender_mesh,materialDict,tmpdir)
       node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
       node.setProp("name",ob.name)
       root.addChild(node)
@@ -667,6 +650,8 @@ class export_OT_track(bpy.types.Operator):
     file=open(xmlname,"w")
     root.writeSubTree(file)
     file.close()
+
+    root.export()
 
     root.cleanup()
 
