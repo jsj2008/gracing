@@ -269,6 +269,7 @@ class XmlNode:
     else:
       outFile.write("/>\n")
 
+
 class XmlMeshNode(XmlNode):
   def __init__(self,ob,mesh,materials,dest_dir):
     XmlNode.__init__(self,"mesh")
@@ -643,9 +644,10 @@ class export_OT_track(bpy.types.Operator):
             free_derived_objects(ob)
 
     for ob, blender_mesh in mesh_objects:
-      node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
-      node.setProp("name",ob.name)
-      root.addChild(node)
+      if ob.type=="MESH":
+        node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+        node.setProp("name",ob.name)
+        root.addChild(node)
 
     file=open(xmlname,"w")
     root.writeSubTree(file)
