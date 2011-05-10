@@ -38,6 +38,10 @@ EPSILON=0.0001
 
 #########################################
 
+
+
+EXPORT_XML_MESH=True
+
 # markers 
 MARK_VERTICES=0xf100
 MARK_FACES_ONLY=0xf101
@@ -136,6 +140,14 @@ def copy_image(image,dest_dir):
 
   return fn_abs_dest
     
+def getMaterialFlagsWord(mat):
+  # TODO: get "custom property" from mat to
+  #       set flags: uptonow they are set to default
+  word=0
+  for v in MATERIA_FLAGS_LIST:
+    if v["default"]:
+      word = word | v["value"]
+  return word
       
 
 def fixName(name):
@@ -176,6 +188,14 @@ def binWrite_pointUV(fp,point):
 
 def binWrite_color(fp,color):
   v=struct.pack("ddd",color[0],color[1],color[2])
+  fp.write(v)
+ 
+
+def binWrite_colorNode(fp,color):
+  r=float(color.getProp("R"))
+  g=float(color.getProp("G"))
+  b=float(color.getProp("B"))
+  v=struct.pack("ddd",r,g,b)
   fp.write(v)
 
 def binWrite_string(fp,str):
@@ -226,14 +246,26 @@ class XmlNode:
     self.x_props[pname]=pvalue 
 
   def getProp(self,pname):
-    if pname in self.x_prop:
-      return self.x_prop[pname]
+    if pname in self.x_props:
+      return self.x_props[pname]
     return None
+
+  def getChild(self,childName):
+    for child in self.x_children:
+      if child.x_name == childName:
+        return child
+    return None
+ 
+  def getChildrenNumber(self):
+    return len(self.x_children)
 
   def addChild(self,child):
     if child == None:
       ErrorError()
     self.x_children.append(child)
+
+  def getChildrenList(self):
+    return self.x_children
 
   def setText(self,text):
     self.x_text=text
@@ -292,26 +324,38 @@ class XmlMeshNode(XmlNode):
         # no UV at all:
         uv_array = None
 
+    mats=XmlNode("materials")
+    self.addChild(mats)
     for mat_and_image in materials.values():
       node=createMaterialNode(mat_and_image[0], mat_and_image[1])
-      self.addChild(node)
+      mats.addChild(node)
 
     idx=0
+    vertices=XmlNode("vertices")
+    self.addChild(vertices)
     for v in vert_array:
       node=XmlNode("vertex")
+      #node.setText("%f,%f,%f"%(v[0],v[1],v[2]))
       node.setProp("index",idx)
+      node.setProp("X",v[0])
+      node.setProp("Y",v[1])
+      node.setProp("Z",v[2])
       idx=idx+1
-      node.setText("%f,%f,%f"%(v[0],v[1],v[2]))
-      self.addChild(node)
+      vertices.addChild(node)
 
     if uv_array:
       idx=0
+      uvcoords=XmlNode("uvcoords")
+      self.addChild(uvcoords)
       for uvc in uv_array:
         node=XmlNode("uvcord")
         node.setProp("index",idx)
+        #node.setText("%f,%f"%(uvc[0],uvc[1]))
+        node.setProp("U",uvc[0])
+        node.setProp("V",uvc[1])
+
         idx=idx+1
-        node.setText("%f,%f"%(uvc[0],uvc[1]))
-        self.addChild(node)
+        uvcoords.addChild(node)
 
     node=self.produceFacesChildren(tri_list, mesh)
     self.addChild(node)
@@ -322,10 +366,52 @@ class XmlMeshNode(XmlNode):
   def cleanup(self):
     XmlNode.cleanup(self)
 
+  def exportBinary(self,filename):
+    vertices=self.getChild("vertices")
+    uvcoords=self.getChild("uvcoords")
+    materials=self.getChild("materials")
+    faceGroups=self.getChild("faces")
+    fp=open(filename,"wb")
+
+    # export vertices #
+    binWrite_mark(fp,MARK_VERTICES)
+    binWrite_int(fp,vertices.getChildrenNumber())
+    for node in vertices.getChildrenList():
+      co=[0., 0., 0.]
+      co[0]=float(node.getProp("X"))
+      co[1]=float(node.getProp("Y"))
+      co[2]=float(node.getProp("Z"))
+      binWrite_pointVect(fp,co)
+
+    # export uvcoords #
+    if uvcoords:
+      binWrite_mark(fp,MARK_UVCOORDS)
+      binWrite_int(fp,uvcoords.getChildrenNumber())
+
+      for uv in uv_cords.getChildrenList():
+        uv=[ float(node.getProp("U")) , float(node.getProp("V")) ]
+        binWrite_pointUV(fp,uv)
+
+    # export materials #
+    for mat in materials.getChildrenList():
+      word=getMaterialFlagsWord(mat)
+      binWrite_mark(fp,MARK_MATERIAL)
+
+      binWrite_string(fp,mat.getProp("name"))
+      binWrite_u32(fp,word)
+      binWrite_colorNode(fp,mat.getChild("ambient_color"))
+      binWrite_colorNode(fp,mat.getChild("diffuse_color"))
+      binWrite_colorNode(fp,mat.getChild("specular_color"))
+
+    # export faces #
+    fp.close()
+
   def export(self):
-    f=open(self.x_ofilename,"w")
-    self.writeSubTree(f,True)
-    f.close()
+#self.exportBinary(self.x_ofilename+".mesh")
+    if EXPORT_XML_MESH:
+      f=open(self.x_ofilename,"w")
+      self.writeSubTree(f,True)
+      f.close()
 
   def produceFacesChildren(self, tri_list, mesh):
     root=XmlNode("faces")
@@ -361,9 +447,12 @@ class XmlMeshNode(XmlNode):
         for ff in mat_faces:
           node=XmlNode("face")
           tri=faces_list[ff]
-          node.setText("%d,%d,%d"%(tri[0],
-            tri[1],
-            tri[2]))
+          node.setProp("V0",tri[0])
+          node.setProp("V1",tri[1])
+          node.setProp("V2",tri[2])
+          #node.setText("%d,%d,%d"%(tri[0],
+          #  tri[1],
+          #  tri[2]))
           mnode.addChild(node)
         root.addChild(mnode)
 
@@ -393,6 +482,9 @@ class XmlMeshNode(XmlNode):
         for ff in faces:
           node=XmlNode("face")
           tri=faces_list[ff]
+          node.setProp("V0",tri[0])
+          node.setProp("V1",tri[1])
+          node.setProp("V2",tri[2])
           node.setText("%d,%d,%d"%(tri[0],
             tri[1],
             tri[2]))
@@ -524,6 +616,9 @@ def remove_face_uv(verts, tri_list):
 def createColorNode(name,color):
   node=XmlNode(name)
   node.setText("%f,%f,%f"%(color[0],color[1],color[2]))
+  node.setProp("R",color[0])
+  node.setProp("G",color[1])
+  node.setProp("B",color[2])
   return node
 
 def get_material_images(material):
