@@ -198,6 +198,22 @@ def binWrite_colorNode(fp,color):
   v=struct.pack("ddd",r,g,b)
   fp.write(v)
 
+def binWrite_faceNode(fp,face,writeUV=False):
+  t0=int(face.getProp("V0"))
+  t1=int(face.getProp("V1"))
+  t2=int(face.getProp("V2"))
+  binWrite_int(fp,3)
+  binWrite_int(fp,t0)
+  if writeUV:
+    binWrite_int(fp,t0)
+  binWrite_int(fp,t1)
+  if writeUV:
+    binWrite_int(fp,t1)
+  binWrite_int(fp,t2)
+  if writeUV:
+    binWrite_int(fp,t2)
+
+
 def binWrite_string(fp,str):
   l=len(str)
   fp.write(struct.pack("H",l))
@@ -404,12 +420,24 @@ class XmlMeshNode(XmlNode):
       binWrite_colorNode(fp,mat.getChild("specular_color"))
 
     # export faces #
+    for fgroup in faceGroups.getChildrenList():
+      binWrite_mark(fp,MARK_USE_MATERIAL)
+      binWrite_string(fp,fgroup.getProp("name"))
+
+      if uvcoords != None:
+        binWrite_mark(fp,MARK_FACES_AND_UV)
+      else:
+        binWrite_mark(fp,MARK_FACES_ONLY)
+      binWrite_int(fp,fgroup.getChildrenNumber())
+      for face in fgroup.getChildrenList():
+        binWrite_faceNode(fp,face,uvcoords != None)
+
     fp.close()
 
   def export(self):
-#self.exportBinary(self.x_ofilename+".mesh")
+    self.exportBinary(self.x_ofilename)
     if EXPORT_XML_MESH:
-      f=open(self.x_ofilename,"w")
+      f=open(self.x_ofilename+".xml","w")
       self.writeSubTree(f,True)
       f.close()
 
