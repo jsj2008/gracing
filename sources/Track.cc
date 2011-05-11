@@ -54,6 +54,7 @@ Track::Track(
 
 void Track::load()
 {
+  GM_LOG("loading track\n");
   if(m_loaded) return;
 
   irr::u32 cnt=m_filesystem->getFileArchiveCount();
@@ -130,6 +131,7 @@ void Track::load()
       break;
       case irr::io::EXN_ELEMENT:
         if(strcmp("mesh",xmlReader->getNodeName())==0) {
+          GM_LOG("suka '%s'\n",xmlReader->getNodeName());
           ot=ot_mesh;
         } else if(strcmp("camera",xmlReader->getNodeName())==0) {
           ot=ot_camera;

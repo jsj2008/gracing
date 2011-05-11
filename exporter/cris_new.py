@@ -37,9 +37,6 @@ LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
 #########################################
-
-
-
 EXPORT_XML_MESH=False
 
 # markers 
@@ -126,17 +123,18 @@ class BBound:
     return point
 
 
-def copy_image(image,dest_dir):
-  fn = bpy.path.abspath(image.filepath)
+def copy_image(iname,dest_dir):
+  fn = bpy.path.abspath(iname)
   fn = os.path.normpath(fn)
   fn_strip = os.path.basename(fn)
 
   rel = fn_strip
   fn_abs_dest = os.path.join(dest_dir, fn_strip)
   if not os.path.exists(fn_abs_dest):
-    log("Copying '%s' to '%s'\n"%(fn, fn_abs_dest))
-    shutil.copy(fn, fn_abs_dest)
-    log("done\n");
+    try:
+      shutil.copy(fn, fn_abs_dest)
+    except:
+      pass
 
   return fn_abs_dest
     
@@ -286,6 +284,9 @@ class XmlNode:
   def setText(self,text):
     self.x_text=text
 
+  def getText(self):
+    return self.x_text
+
   def getName(self):
     return self.x_name
 
@@ -310,10 +311,10 @@ class XmlNode:
     
     if (mustRecurse and len(self.x_children)) or self.x_text!="":
       outFile.write(">");
-      if len(self.x_children) > 0:
+      if mustRecurse and len(self.x_children) > 0:
         outFile.write("\n")
-      for child in self.x_children:
-        child.writeSubTree(outFile)
+        for child in self.x_children:
+          child.writeSubTree(outFile)
       if self.x_text != "":
         outFile.write(self.x_text)
       outFile.write("</%s>\n"%(self.x_name))
@@ -324,7 +325,9 @@ class XmlNode:
 class XmlMeshNode(XmlNode):
   def __init__(self,ob,mesh,materials,dest_dir):
     XmlNode.__init__(self,"mesh")
+    self.x_dest_dir=dest_dir
     self.x_ofilename=dest_dir+"/"+ob.name+".mesh"
+    self.setText(os.path.basename(self.x_ofilename))
 
     tri_list = extract_triangles(mesh)
 
@@ -423,7 +426,7 @@ class XmlMeshNode(XmlNode):
         uv=[ float(node.getProp("U")) , float(node.getProp("V")) ]
         binWrite_pointUV(fp,uv)
 
-    # export materials #
+    # export materials and copy image(s) #
     for mat in materials.getChildrenList():
       word=getMaterialFlagsWord(mat)
       binWrite_mark(fp,MARK_MATERIAL)
@@ -433,6 +436,16 @@ class XmlMeshNode(XmlNode):
       binWrite_colorNode(fp,mat.getChild("ambient_color"))
       binWrite_colorNode(fp,mat.getChild("diffuse_color"))
       binWrite_colorNode(fp,mat.getChild("specular_color"))
+
+      # there should only an image !! #
+      iname=""
+      for inode in mat.getChildrenList():
+        if inode.getName() != 'image':
+          continue
+        iname = inode.getText()
+        copy_image(iname,self.x_dest_dir)
+
+      binWrite_string(fp,iname)
 
     # export faces #
     for fgroup in faceGroups.getChildrenList():
@@ -446,7 +459,7 @@ class XmlMeshNode(XmlNode):
       binWrite_int(fp,fgroup.getChildrenNumber())
       for face in fgroup.getChildrenList():
         binWrite_faceNode(fp,face,uvcoords != None)
-
+      
     fp.close()
 
   def export(self):
@@ -700,8 +713,8 @@ def createMaterialNode(material, image):
       matNode.addChild(node)
 
   return matNode
-  
-def createZipFile(root,xmlfile,path):
+
+def createZipFile(root,xmlfile,path,srcdir):
   zf=zipfile.ZipFile(path,"w")
   for node in root.getChildrenList():
     if isinstance(node,XmlMeshNode):
@@ -709,6 +722,14 @@ def createZipFile(root,xmlfile,path):
       print("adding %s"%fn)
       p=os.path.basename(fn)
       zf.write(fn,p)
+      mats=node.getChild("materials")
+      for mat in mats.getChildrenList():
+        for inode in mat.getChildrenList():
+          if inode.getName() != 'image':
+            continue
+          iname = srcdir + "/" + inode.getText()
+          if os.path.exists(iname):
+            zf.write(iname,inode.getText())
 
   zf.write(xmlfile,os.path.basename(xmlfile))
   zf.close()
@@ -732,7 +753,8 @@ class export_OT_track(bpy.types.Operator):
     tmpdir = "/tmp/tmp"
 
     #########################
-    xmlname=tmpdir+"/"+"track.xml"
+    #xmlname=tmpdir+"/"+"track.xml"
+    xmlname=tmpdir+"/"+"TRACK"
 
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
@@ -805,13 +827,26 @@ class export_OT_track(bpy.types.Operator):
         node.setProp("name",ob.name)
         root.addChild(node)
 
+    # gather track information #
+    for ob in bpy.data.objects:
+      if ob.type == "EMPTY" and ob.name == "track.start":
+        val="%f,%f,%f"%( ob.location[0], ob.location[2], ob.location[1])
+        node=XmlNode("track_start_pos")
+        node.setText(val)
+        root.addChild(node)
+
+        val="%f,%f,%f"%( ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
+        node=XmlNode("track_start_rot")
+        node.setText(val)
+        root.addChild(node)
+
     file=open(xmlname,"w")
     root.writeSubTree(file)
     file.close()
 
     root.export()
 
-    createZipFile(root,xmlname,filepath)
+    createZipFile(root,xmlname,filepath,tmpdir)
 
     #root.cleanup()
     #os.remove(xmlname)
