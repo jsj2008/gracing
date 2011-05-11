@@ -130,11 +130,12 @@ def copy_image(iname,dest_dir):
 
   rel = fn_strip
   fn_abs_dest = os.path.join(dest_dir, fn_strip)
+  print("coping image '%s' to '%s'"%(fn,fn_abs_dest))
   if not os.path.exists(fn_abs_dest):
     try:
       shutil.copy(fn, fn_abs_dest)
     except:
-      pass
+      print("  cannot copy image '%s'"%iname)
 
   return fn_abs_dest
     
@@ -714,7 +715,10 @@ def createMaterialNode(material, image):
 
   return matNode
 
+
+inserted_images={ }
 def createZipFile(root,xmlfile,path,srcdir):
+  global inserted_images
   zf=zipfile.ZipFile(path,"w")
   for node in root.getChildrenList():
     if isinstance(node,XmlMeshNode):
@@ -727,9 +731,14 @@ def createZipFile(root,xmlfile,path,srcdir):
         for inode in mat.getChildrenList():
           if inode.getName() != 'image':
             continue
-          iname = srcdir + "/" + inode.getText()
-          if os.path.exists(iname):
-            zf.write(iname,inode.getText())
+          iname = os.path.basename(inode.getText())
+          if iname not in inserted_images.keys():
+            inserted_images[iname]=True
+            iname = srcdir + "/" + iname
+            dname = iname
+            print("adding %s as %s"%(iname,dname))
+            if os.path.exists(iname):
+              zf.write(iname,dname)
 
   zf.write(xmlfile,os.path.basename(xmlfile))
   zf.close()
@@ -748,6 +757,7 @@ class export_OT_track(bpy.types.Operator):
     maxlen= 1024, default= "")
 
   def execute(self, context):
+    global inserted_images
     filepath=self.properties.filepath
     print("filepath: %s"%filepath)
     tmpdir = "/tmp/tmp"
@@ -846,6 +856,7 @@ class export_OT_track(bpy.types.Operator):
 
     root.export()
 
+    inserted_images={ }
     createZipFile(root,xmlname,filepath,tmpdir)
 
     #root.cleanup()
