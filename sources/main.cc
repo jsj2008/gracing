@@ -38,7 +38,7 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-#define CAMERA_STEP 0.001
+#define CAMERA_STEP 0.05
 
 static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
 {
@@ -137,7 +137,7 @@ void initGUI()
 
 /////////// GUI temp code
 
-CFG_PARAM_BOOL(glob_enableDebug)=false;
+CFG_PARAM_BOOL(glob_enableDebug)=true;
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -282,10 +282,12 @@ int main(int argc, char ** av)
 
   camera->addAnimator(camanim);
 
+#if 0
   irr::scene::ILightSceneNode *light;
   light = smgr->addLightSceneNode(0, 
       irr::core::vector3df(10.f,40.f,-5.f),
       irr::video::SColorf(0.2f, 0.2f, 0.2f), 90.f,0xbeda);
+#endif
 
   bool flagC, flagD;
   bool flagL, flagU;

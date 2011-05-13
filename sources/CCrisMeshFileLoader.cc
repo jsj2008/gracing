@@ -139,20 +139,21 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setRed(ka[0]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
+
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
         currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_LIGHTING,false);
 
         if(imageName[0]) {
           video::ITexture * texture = 0;
-          GM_LOG("Loading texture: '%s' on material %p\n",imageName,currMtl);
+          //GM_LOG("Loading texture: '%s' on material %p\n",imageName,currMtl);
           if (FileSystem->existFile(imageName)) {
             texture = SceneManager->getVideoDriver()->getTexture(imageName);
             if(texture) {
               currMtl->Meshbuffer->Material.setTexture(0, texture);
-              currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
-              currMtl->Meshbuffer->Material.DiffuseColor.set(
-                currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
-              GM_LOG("Loaded texture\n");
+              //currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
+              //currMtl->Meshbuffer->Material.DiffuseColor.set(
+              //  currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
+              //GM_LOG("Loaded texture\n");
             } else {
               GM_LOG("  --> cannot load texture\n");
             }

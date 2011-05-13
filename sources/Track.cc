@@ -131,7 +131,6 @@ void Track::load()
       break;
       case irr::io::EXN_ELEMENT:
         if(strcmp("mesh",xmlReader->getNodeName())==0) {
-          GM_LOG("suka '%s'\n",xmlReader->getNodeName());
           ot=ot_mesh;
         } else if(strcmp("camera",xmlReader->getNodeName())==0) {
           ot=ot_camera;
@@ -167,7 +166,6 @@ void Track::load()
               }
               break;
             case ot_mesh:
-              GM_LOG("loading mesh '%s'\n",xmlReader->getNodeName());
               rfile=archive->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
@@ -233,6 +231,8 @@ void Track::load()
 	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
+  smgr->setAmbientLight(
+      irr::video::SColorf(1.0,1.0,1.0));
   m_loaded=true;
 }
 
@@ -263,6 +263,7 @@ void Track::unload()
     m_cammgr=0;
   }
 
+
   m_loaded=false;
 }
 
@@ -279,9 +280,8 @@ void Track::loadLights( irr::io::IReadFile * file ,
 {
   irr::u16 mark;
   double pos[3],dif[3],spe[3],radius;
+  assert(0);
 
-  smgr->setAmbientLight(
-      irr::video::SColorf(.8,.8,.8));
 
   mark=Util::readMark(file);
 
@@ -301,8 +301,8 @@ void Track::loadLights( irr::io::IReadFile * file ,
   irr::scene::ILightSceneNode* light = 
     smgr->addLightSceneNode( 0, position, diffuseColor, radius,0xBADD);
 
-  //light->setLightType(irr::video::ELT_DIRECTIONAL);
-  //light->setRotation( irr::core::vector3df(180, 45, 45) );
+  light->setLightType(irr::video::ELT_DIRECTIONAL);
+  light->setRotation( irr::core::vector3df(180, 45, 45) );
   m_lights.push_back(light);
   light->getLightData().SpecularColor = specularColor;
   light->grab();

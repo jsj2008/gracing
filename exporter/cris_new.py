@@ -37,7 +37,7 @@ LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
 #########################################
-EXPORT_XML_MESH=False
+EXPORT_XML_MESH=True
 
 # markers 
 MARK_VERTICES=0xf100
@@ -264,6 +264,9 @@ class XmlNode:
     if pname in self.x_props:
       return self.x_props[pname]
     return None
+  
+  def forceType(self,type):
+    self.x_name=type
 
   def getChild(self,childName):
     for child in self.x_children:
@@ -400,6 +403,18 @@ class XmlMeshNode(XmlNode):
       pass
     XmlNode.cleanup(self)
 
+  def applyTranslationToVertices(self,trasl):
+    vertices=self.getChild("vertices")
+    print("translation to vertices")
+    print(trasl)
+    for node in vertices.getChildrenList():
+      co=[0., 0., 0.]
+      co[0]=float(node.getProp("X"))+trasl[0]
+      co[1]=float(node.getProp("Y"))+trasl[1]
+      co[2]=float(node.getProp("Z"))+trasl[2]
+      node.setProp("X",co[0])
+      node.setProp("Y",co[1])
+      node.setProp("Z",co[2])
 
   def exportBinary(self,filename):
     vertices=self.getChild("vertices")
@@ -743,43 +758,9 @@ def createZipFile(root,xmlfile,path,srcdir):
   zf.write(xmlfile,os.path.basename(xmlfile))
   zf.close()
 
-class export_OT_track(bpy.types.Operator):
-  
-  bl_idname = "io_export_scene.crisalide_track_exporter"
-  bl_label = "Export crisalide file formats"
-  
-  filename_ext = ".zip"
-  filter_glob = StringProperty(default="*.zip", options={'HIDDEN'})
-
-  filepath = bpy.props.StringProperty(
-    name="File Path", 
-    description="File path used for exporting the crisalide file", 
-    maxlen= 1024, default= "")
-
-  def execute(self, context):
-    global inserted_images
-    filepath=self.properties.filepath
-    print("filepath: %s"%filepath)
-    tmpdir = "/tmp/tmp"
-
-    #########################
-    #xmlname=tmpdir+"/"+"track.xml"
-    xmlname=tmpdir+"/"+"TRACK"
-
-    if not os.path.exists(tmpdir):
-      os.mkdir(tmpdir)
-    else:
-      if os.path.isdir(tmpdir):
-        pass
-      else:
-        RaiseError("horrorororor!")
-
-    root=XmlNode("track")
-    scene = context.scene
-
+def createMaterialDictAndMeshList(scene,applyTransform=True):
     materialDict = {}
     mesh_objects = []
-    scene = context.scene
     for ob in [ob for ob in scene.objects if ob.is_visible(scene)]:
 
       free, derived = create_derived_objects(scene, ob)
@@ -793,7 +774,9 @@ class export_OT_track(bpy.types.Operator):
 
         data = ob_derived.create_mesh(scene, True, 'PREVIEW')
         if data:
-          data.transform(mat)
+          if applyTransform:
+            data.transform(mat)
+
           mesh_objects.append((ob_derived, data))
           mat_ls = data.materials
           mat_ls_len = len(mat_ls)
@@ -830,6 +813,185 @@ class export_OT_track(bpy.types.Operator):
 
         if free:
             free_derived_objects(ob)
+    return materialDict, mesh_objects
+
+class export_OT_vehicle(bpy.types.Operator):
+  bl_idname = "io_export_scene.crisalide_vehicle_exporter"
+  bl_label = "Export crisalide file formats"
+  
+  filename_ext = ".zip"
+  filter_glob = StringProperty(default="*.zip", options={'HIDDEN'})
+
+  filepath = bpy.props.StringProperty(
+    name="File Path", 
+    description="File path used for exporting the crisalide file", 
+    maxlen= 1024, default= "")
+  
+  chassis_bbound =  BBound()
+
+  def getWheelInfo(self,root,prefix,ob):
+    dimX=ob.dimensions[0]
+    dimY=ob.dimensions[1]
+    dimZ=ob.dimensions[2]
+    if (dimX - dimZ) < -EPSILON or (dimX - dimZ) > EPSILON:
+      log("Wheel %s %f,%f\n"%(WHEEL_PREFIX[idx],dimX,dimZ));
+      RaiseError("Wheel is not 'squared'")
+
+    radius=dimX / 2.;
+    name=prefix + "radius"
+    node=XmlNode(name)
+    node.setText("%f"%radius)
+    root.addChild(node)
+
+    width=dimY;
+    name=prefix + "width"
+    node=XmlNode(name)
+    node.setText("%f"%width)
+    root.addChild(node)
+
+    name=prefix + "position"
+    node=XmlNode(name)
+    node.setText("%f,%f,%f"%(ob.location[0], ob.location[2], ob.location[1]))
+    node.setProp("X",ob.location[0])
+    node.setProp("Y",ob.location[2])
+    node.setProp("Z",ob.location[1])
+    root.addChild(node)
+  
+  def invoke(self, context, event):
+    context.window_manager.fileselect_add(self)
+    return {'RUNNING_MODAL'}
+
+  def execute(self, context):
+    global inserted_images
+    filepath=self.properties.filepath
+    print("filepath: %s"%filepath)
+    tmpdir = "/tmp/tmp"
+
+
+    if not os.path.exists(tmpdir):
+      os.mkdir(tmpdir)
+    else:
+      if os.path.isdir(tmpdir):
+        pass
+      else:
+        RaiseError("horrorororor!")
+
+    xmlname=tmpdir+"/"+"VEHICLE"
+
+    root=XmlNode("vehicle")
+
+    materialDict, mesh_objects = createMaterialDictAndMeshList(context.scene,False)
+
+    chassisNodes=[ ]
+    wheels=[ None, None, None, None ]
+
+    for ob, blender_mesh in mesh_objects:
+      if ob.type=="MESH":
+        if ob.name == 'wheel.fr': 
+          wheels[WIDX_FRONT_RIGHT]=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          wheels[WIDX_FRONT_RIGHT].forceType("wfr")
+          wheels[WIDX_FRONT_RIGHT].setProp("name",ob.name)
+          root.addChild(wheels[WIDX_FRONT_RIGHT])
+          self.getWheelInfo(root,"wfr_",ob)
+
+        elif ob.name == 'wheel.fl': 
+          wheels[WIDX_FRONT_LEFT]=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          wheels[WIDX_FRONT_LEFT].forceType("wfl")
+          wheels[WIDX_FRONT_LEFT].setProp("name",ob.name)
+          root.addChild(wheels[WIDX_FRONT_LEFT])
+          self.getWheelInfo(root,"wfl_",ob)
+
+        elif ob.name == 'wheel.rr': 
+          wheels[WIDX_REAR_RIGHT]=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          wheels[WIDX_REAR_RIGHT].forceType("wrr")
+          wheels[WIDX_REAR_RIGHT].setProp("name",ob.name)
+          root.addChild(wheels[WIDX_REAR_RIGHT])
+          self.getWheelInfo(root,"wrr_",ob)
+
+        elif ob.name == 'wheel.rl': 
+          wheels[WIDX_REAR_LEFT]=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          wheels[WIDX_REAR_LEFT].forceType("wrl")
+          wheels[WIDX_REAR_LEFT].setProp("name",ob.name)
+          root.addChild(wheels[WIDX_REAR_LEFT])
+          self.getWheelInfo(root,"wrl_",ob)
+        
+        else:
+          node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          node.forceType("chassis")
+          chassisNodes.append(node)
+          root.addChild(node)
+
+          bb=ob.bound_box
+          for v in bb:
+            self.chassis_bbound.update(v)
+
+    offs=self.chassis_bbound.getOffsets()
+    for n in chassisNodes:
+      n.applyTranslationToVertices(offs)
+      n.export()
+
+    for node_name in [ "wrl_position", "wrr_position", "wfl_position", "wfr_position" ]:
+      node=root.getChild(node_name)
+      X=float(node.getProp("X"))+offs[0]
+      Y=float(node.getProp("Y"))+offs[2]
+      Z=float(node.getProp("Z"))+offs[1]
+      node.setProp("X",X)
+      node.setProp("Y",Y)
+      node.setProp("Z",Z)
+      node.setText("%f,%f,%f"%(X,Y,Z))
+
+
+    for n in wheels:
+      if n != None:
+        n.export()
+    
+    xmlname=tmpdir + "/VEHICLE"
+    f=open(xmlname,"w")
+    root.writeSubTree(f,True)
+    f.close()
+
+    createZipFile(root,xmlname,filepath,tmpdir)
+    
+    return {'FINISHED'}
+
+class export_OT_track(bpy.types.Operator):
+  
+  bl_idname = "io_export_scene.crisalide_track_exporter"
+  bl_label = "Export crisalide file formats"
+  
+  filename_ext = ".zip"
+  filter_glob = StringProperty(default="*.zip", options={'HIDDEN'})
+
+  filepath = bpy.props.StringProperty(
+    name="File Path", 
+    description="File path used for exporting the crisalide file", 
+    maxlen= 1024, default= "")
+
+  def execute(self, context):
+    global inserted_images
+    filepath=self.properties.filepath
+    print("filepath: %s"%filepath)
+    tmpdir = "/tmp/tmp"
+
+    #########################
+    #xmlname=tmpdir+"/"+"track.xml"
+    xmlname=tmpdir+"/"+"TRACK"
+
+    if not os.path.exists(tmpdir):
+      os.mkdir(tmpdir)
+    else:
+      if os.path.isdir(tmpdir):
+        pass
+      else:
+        RaiseError("horrorororor!")
+
+    root=XmlNode("track")
+    scene = context.scene
+
+    materialDict = {}
+    mesh_objects = []
+
+    materials, mesh_objects = createMaterialDictAndMeshList(scene)
 
     for ob, blender_mesh in mesh_objects:
       if ob.type=="MESH":
@@ -865,18 +1027,24 @@ class export_OT_track(bpy.types.Operator):
     return {'FINISHED'}
 
   def invoke(self, context, event):
-      context.window_manager.fileselect_add(self)
-      return {'RUNNING_MODAL'}
+    context.window_manager.fileselect_add(self)
+    return {'RUNNING_MODAL'}
 
 def menu_func_track_export(self, context):
     print("registering")
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter (*.zip)")
 
+def menu_func_vehicle_export(self, context):
+    print("registering")
+    self.layout.operator(export_OT_vehicle.bl_idname, text="Crisalide vehicle exporter (*.zip)")
+
 def register():
     bpy.types.INFO_MT_file_export.append(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.append(menu_func_vehicle_export)
 
 def unregister():
     bpy.types.INFO_MT_file_export.remove(menu_func_track_export)
+    bpy.types.INFO_MT_file_export.remove(menu_func_vehicle_export)
 
 if __name__ == "__main__":
   log("*** crisalide exporter ***\n")

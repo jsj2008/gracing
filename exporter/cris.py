@@ -813,6 +813,7 @@ class export_OT_vehicle(bpy.types.Operator):
         for v in bb:
           self.chassis_bounds.update(v)
         chassis_objs.append(ob)
+        
       elif ob.type == "EMPTY" and ob.name == "VehicleData":
         log("getting vehicle data from '%s'\n"%ob.name)
 

@@ -291,24 +291,30 @@ void Vehicle::initPhysics()
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
   float dZ= (bb.MaxEdge.Z - bb.MinEdge.Z)/2.;
 
+  float overX=(bb.MaxEdge.X + bb.MinEdge.X)/2.;
+  float overY=(bb.MaxEdge.Y + bb.MinEdge.Y)/2.;
+  float overZ=(bb.MaxEdge.Z + bb.MinEdge.Z)/2.;
+
   if(bb.MaxEdge.X != -bb.MinEdge.X) {
     GM_LOG("WARNING: chassis not centered on X %f,%f\n",bb.MinEdge.X,bb.MaxEdge.X);
+    GM_LOG("WARNING: should be translated of %f\n",overX);
   }
 
   if(bb.MaxEdge.Y != -bb.MinEdge.Y) {
     GM_LOG("WARNING: chassis not centered on Y %f,%f\n",bb.MinEdge.Y,bb.MaxEdge.Y);
+    GM_LOG("WARNING: should be translated of %f\n",overY);
   }
 
   if(bb.MaxEdge.Z != -bb.MinEdge.Z) {
     GM_LOG("WARNING: chassis not centered on Z %f,%f\n",bb.MinEdge.Z,bb.MaxEdge.Z);
+    GM_LOG("WARNING: should be translated of %f\n",overZ);
   }
 
   // create shapes
   m_chassisShape = new btBoxShape(btVector3(dX,dY,dZ));
 
-  btTransform localTrans(btTransform::getIdentity());
-
   btTransform tr(btTransform::getIdentity());
+
   m_carBody=m_world->createRigidBody(0, glob_chassisDefaultMass, tr,m_chassisShape, this);
 
   for(int i=0; i<4; i++) {
@@ -660,6 +666,11 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
   m_carBody->setAngularVelocity(btVector3(0,0,0));
 
   // TODO: reset wheels
+  for(int i=0; i<4; i++) {
+    WheelData & wheel=m_wheelsData[i];
+    wheel.rotation=0.;
+    wheel.deltaRotation=0.;
+  }
 
   // reset collosion
   m_world->getBroadphase()->getOverlappingPairCache()->
