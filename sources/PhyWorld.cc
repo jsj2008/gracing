@@ -57,7 +57,7 @@ PhyWorld::PhyWorld(
 {
   CFG_INIT_D(m_frameRate,1.f/240.f);
   CFG_INIT_D(m_frameSubsteps,1);
-  CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
+  CFG_INIT_V3(m_gravity,0.f,0.f,0.f);
   CFG_INIT_D(m_defaultContactProcessingThreshold,BT_LARGE_FLOAT);
 	setGravity(btVector3(
         m_gravity[0],

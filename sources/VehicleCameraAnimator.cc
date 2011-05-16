@@ -20,8 +20,8 @@
 #include "config.h"
 
 CFG_PARAM_D(glob_type0cam_phi)=0.f;
-CFG_PARAM_D(glob_type0cam_distance)=5.f;
-CFG_PARAM_D(glob_type0cam_height)=5.f;
+CFG_PARAM_D(glob_type0cam_distance)=2.f;
+CFG_PARAM_D(glob_type0cam_height)=2.f;
 
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {

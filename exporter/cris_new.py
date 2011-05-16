@@ -36,6 +36,9 @@ LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
+BIG_NUMBER=10000
+NEG_BIG_NUMBER=-BIG_NUMBER
+
 #########################################
 EXPORT_XML_MESH=True
 
@@ -89,12 +92,20 @@ WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
 
 class BBound:
   def __init__(self):
-    self.minX = 0.
-    self.maxX = 0.
-    self.minY = 0.
-    self.maxY = 0.
-    self.minZ = 0.
-    self.maxZ = 0.
+    self.minX = BIG_NUMBER
+    self.maxX = NEG_BIG_NUMBER
+    self.minY = BIG_NUMBER
+    self.maxY = NEG_BIG_NUMBER
+    self.minZ = BIG_NUMBER
+    self.maxZ = NEG_BIG_NUMBER
+
+  def reset(self):
+    self.minX = BIG_NUMBER
+    self.maxX = NEG_BIG_NUMBER
+    self.minY = BIG_NUMBER
+    self.maxY = NEG_BIG_NUMBER
+    self.minZ = BIG_NUMBER
+    self.maxZ = NEG_BIG_NUMBER
 
   def update(self,point):
     if point[0] < self.minX:
@@ -115,12 +126,34 @@ class BBound:
     if point[2] < self.minZ:
       self.minZ=point[2]
 
+  def updateFromAABB(self,aabb):
+    for v in aabb:
+      self.update(v)
+
   def getOffsets(self):
     point=[ 0., 0., 0. ]
     point[0]=-(self.minX + self.maxX) / 2.0;
     point[1]=-(self.minY + self.maxY) / 2.0;
     point[2]=-(self.minZ + self.maxZ) / 2.0;
     return point
+
+  def getCrisOffsets(self):
+    point=[ 0., 0., 0. ]
+    point[0]=-(self.minX + self.maxX) / 2.0;
+    point[1]=-(self.minZ + self.maxZ) / 2.0;
+    point[2]=-(self.minY + self.maxY) / 2.0;
+    return point
+
+
+
+  def logDim(self):
+    minY=self.minY + (self.minZ + self.maxZ) / 2.0
+    maxY=self.maxY + (self.minZ + self.maxZ) / 2.0
+    log("-->%f,%f"%(minY,maxY))
+    log("BBound dim (%f,%f) Y:(%f,%f) Z:(%f,%f)"%(
+          self.minX,self.maxX,
+          self.minZ,self.maxZ,
+          self.minY,self.maxY))
 
 
 def copy_image(iname,dest_dir):
@@ -130,12 +163,11 @@ def copy_image(iname,dest_dir):
 
   rel = fn_strip
   fn_abs_dest = os.path.join(dest_dir, fn_strip)
-  print("coping image '%s' to '%s'"%(fn,fn_abs_dest))
   if not os.path.exists(fn_abs_dest):
     try:
       shutil.copy(fn, fn_abs_dest)
     except:
-      print("  cannot copy image '%s'"%iname)
+      pass
 
   return fn_abs_dest
     
@@ -157,10 +189,12 @@ def fixName(name):
 
 def log(str):
   if LOG_ON_STDOUT==1:
-    print(str,end="")
+#print(str,end="")
+    print(str)
   if LOG_ON_FILE==1:
     f=open(LOG_FILENAME,"a")
     f.write(str)
+    f.write("\n")
     f.close()
 
 def binWrite_mark(fp,value):
@@ -331,6 +365,8 @@ class XmlMeshNode(XmlNode):
     XmlNode.__init__(self,"mesh")
     self.x_dest_dir=dest_dir
     self.x_ofilename=dest_dir+"/"+ob.name+".mesh"
+    self.x_exportXmlMesh = False
+
     self.setText(os.path.basename(self.x_ofilename))
 
     tri_list = extract_triangles(mesh)
@@ -405,16 +441,22 @@ class XmlMeshNode(XmlNode):
 
   def applyTranslationToVertices(self,trasl):
     vertices=self.getChild("vertices")
-    print("translation to vertices")
-    print(trasl)
     for node in vertices.getChildrenList():
       co=[0., 0., 0.]
+      log("from %f,%f,%f"%(
+        float(node.getProp("X")),
+        float(node.getProp("Y")),
+        float(node.getProp("Z"))))
       co[0]=float(node.getProp("X"))+trasl[0]
       co[1]=float(node.getProp("Y"))+trasl[1]
       co[2]=float(node.getProp("Z"))+trasl[2]
       node.setProp("X",co[0])
       node.setProp("Y",co[1])
       node.setProp("Z",co[2])
+      log("to %f,%f,%f\n"%(
+        float(node.getProp("X")),
+        float(node.getProp("Y")),
+        float(node.getProp("Z"))))
 
   def exportBinary(self,filename):
     vertices=self.getChild("vertices")
@@ -477,10 +519,13 @@ class XmlMeshNode(XmlNode):
         binWrite_faceNode(fp,face,uvcoords != None)
       
     fp.close()
+ 
+  def setExportXmlMesh(self,value):
+    self.x_exportXmlMesh=value
 
   def export(self):
     self.exportBinary(self.x_ofilename)
-    if EXPORT_XML_MESH:
+    if self.x_exportXmlMesh:
       f=open(self.x_ofilename+".xml","w")
       self.writeSubTree(f,True)
       f.close()
@@ -738,7 +783,6 @@ def createZipFile(root,xmlfile,path,srcdir):
   for node in root.getChildrenList():
     if isinstance(node,XmlMeshNode):
       fn=node.getMeshFileName()
-      print("adding %s"%fn)
       p=os.path.basename(fn)
       zf.write(fn,p)
       mats=node.getChild("materials")
@@ -751,7 +795,6 @@ def createZipFile(root,xmlfile,path,srcdir):
             inserted_images[iname]=True
             iname = srcdir + "/" + iname
             dname = iname
-            print("adding %s as %s"%(iname,dname))
             if os.path.exists(iname):
               zf.write(iname,dname)
 
@@ -826,6 +869,11 @@ class export_OT_vehicle(bpy.types.Operator):
     name="File Path", 
     description="File path used for exporting the crisalide file", 
     maxlen= 1024, default= "")
+
+  exportXML = bpy.props.BoolProperty(
+    name="Export xml", 
+    description="Export also xml files of the meshes (debug purposes)",
+    default=EXPORT_XML_MESH)
   
   chassis_bbound =  BBound()
 
@@ -864,7 +912,7 @@ class export_OT_vehicle(bpy.types.Operator):
   def execute(self, context):
     global inserted_images
     filepath=self.properties.filepath
-    print("filepath: %s"%filepath)
+    log("filepath: %s"%filepath)
     tmpdir = "/tmp/tmp"
 
 
@@ -884,6 +932,8 @@ class export_OT_vehicle(bpy.types.Operator):
 
     chassisNodes=[ ]
     wheels=[ None, None, None, None ]
+
+    self.chassis_bbound.reset()
 
     for ob, blender_mesh in mesh_objects:
       if ob.type=="MESH":
@@ -916,33 +966,52 @@ class export_OT_vehicle(bpy.types.Operator):
           self.getWheelInfo(root,"wrl_",ob)
         
         else:
-          node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
-          node.forceType("chassis")
-          chassisNodes.append(node)
-          root.addChild(node)
+          if not ob.name.startswith("ignore"):
+            node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+            node.forceType("chassis")
+            chassisNodes.append(node)
+            root.addChild(node)
+            log("updating from mesh '%s'"%ob.name)
+            bb=ob.bound_box
+            self.chassis_bbound.updateFromAABB(bb)
+            for v in bb:
+              self.chassis_bbound.update(v)
+          else:
+            log("Ignoring: %s"%ob.name)
 
-          bb=ob.bound_box
-          for v in bb:
-            self.chassis_bbound.update(v)
 
     offs=self.chassis_bbound.getOffsets()
+    self.chassis_bbound.logDim()
+    log("Applying offset: %f,%f,%f"%(offs[0],offs[1],offs[2]))
     for n in chassisNodes:
+      log("node------start")
       n.applyTranslationToVertices(offs)
+      n.setExportXmlMesh(self.properties.exportXML)
       n.export()
+      log("node------end")
 
     for node_name in [ "wrl_position", "wrr_position", "wfl_position", "wfr_position" ]:
       node=root.getChild(node_name)
+      log("1- Position: %f,%f,%f"%
+        (float(node.getProp("X")),
+        float(node.getProp("Y")),
+        float(node.getProp("Z"))))
       X=float(node.getProp("X"))+offs[0]
-      Y=float(node.getProp("Y"))+offs[2]
-      Z=float(node.getProp("Z"))+offs[1]
+      Y=float(node.getProp("Y"))+offs[1]
+      Z=float(node.getProp("Z"))+offs[2]
       node.setProp("X",X)
       node.setProp("Y",Y)
       node.setProp("Z",Z)
+      log("2- Position: %f,%f,%f"%(
+        float(node.getProp("X")),
+        float(node.getProp("Y")),
+        float(node.getProp("Z"))))
       node.setText("%f,%f,%f"%(X,Y,Z))
 
 
     for n in wheels:
       if n != None:
+        n.setExportXmlMesh(self.properties.exportXML)
         n.export()
     
     xmlname=tmpdir + "/VEHICLE"
@@ -967,10 +1036,17 @@ class export_OT_track(bpy.types.Operator):
     description="File path used for exporting the crisalide file", 
     maxlen= 1024, default= "")
 
+
+  exportXML = bpy.props.BoolProperty(
+    name="Export xml", 
+    description="Export also xml files of the meshes (debug purposes)",
+    default=EXPORT_XML_MESH)
+
+
   def execute(self, context):
     global inserted_images
     filepath=self.properties.filepath
-    print("filepath: %s"%filepath)
+    log("filepath: %s"%filepath)
     tmpdir = "/tmp/tmp"
 
     #########################
@@ -988,14 +1064,12 @@ class export_OT_track(bpy.types.Operator):
     root=XmlNode("track")
     scene = context.scene
 
-    materialDict = {}
-    mesh_objects = []
-
-    materials, mesh_objects = createMaterialDictAndMeshList(scene)
+    materialDict, mesh_objects = createMaterialDictAndMeshList(scene)
 
     for ob, blender_mesh in mesh_objects:
       if ob.type=="MESH":
         node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+        node.setExportXmlMesh(self.properties.exportXML)
         node.setProp("name",ob.name)
         root.addChild(node)
 
@@ -1031,11 +1105,9 @@ class export_OT_track(bpy.types.Operator):
     return {'RUNNING_MODAL'}
 
 def menu_func_track_export(self, context):
-    print("registering")
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter (*.zip)")
 
 def menu_func_vehicle_export(self, context):
-    print("registering")
     self.layout.operator(export_OT_vehicle.bl_idname, text="Crisalide vehicle exporter (*.zip)")
 
 def register():

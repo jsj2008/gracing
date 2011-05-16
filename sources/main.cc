@@ -413,7 +413,6 @@ int main(int argc, char ** av)
       if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
         if(flagD) {
           vehicle->applyTorque(1000.,1000.,0.);
-          GM_LOG("sssssssss\n");
           flagD=false;
         }
       } else {

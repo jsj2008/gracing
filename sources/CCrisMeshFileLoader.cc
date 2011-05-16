@@ -189,7 +189,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
           if(mtl)  {
             currMtl=mtl;
           } else {
-            GM_LOG("Cannot find color\n");
+            GM_LOG("Cannot find material '%s'\n",matName);
           }
           matChanged=false;
         }

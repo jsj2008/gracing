@@ -152,7 +152,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     float m_suspensionCompression;
     float m_rollInfluence;
     float m_suspensionRestLength;
-    float m_maxSuspensionTravelCm;
+    float m_maxSuspensionTravel;
     float m_maxSuspensionForce;
 	  float m_wheelsDampingCompression;
 	  float m_wheelsDampingRelaxation;

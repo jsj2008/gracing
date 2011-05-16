@@ -74,25 +74,27 @@
   };
 
 
-CFG_PARAM_D(glob_chassisDefaultMass)=1.;
 
 
 //CFG_PARAM_D(glob_gVehicleSteering)=0.f;
+CFG_PARAM_D(glob_chassisDefaultMass)=.5;
 CFG_PARAM_D(glob_steeringIncrement)=0.002f;
 CFG_PARAM_D(glob_throttleIncrement)=0.5;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
 CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
-CFG_PARAM_D(glob_suspensionStiffness)=2.f; // 20
-CFG_PARAM_D(glob_suspensionDamping)=2.3f;
 CFG_PARAM_D(glob_suspensionCompression)=4.4f;
 CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
-CFG_PARAM_D(glob_suspensionRestLength)=.6;
-CFG_PARAM_D(glob_wheelsDampingCompression)= .90;
-CFG_PARAM_D(glob_wheelsDampingRelaxation)=.83;
-CFG_PARAM_D(glob_maxSuspensionTravelCm)=500.;
+CFG_PARAM_D(glob_suspensionRestLength)=.1; //.6;
+
+CFG_PARAM_D(glob_suspensionStiffness)=20.;
+CFG_PARAM_D(glob_suspensionDamping)=2.3f;
+CFG_PARAM_D(glob_maxSuspensionTravel)=.0; //.2;
 CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
+CFG_PARAM_D(glob_wheelsDampingCompression)=4.4;
+CFG_PARAM_D(glob_wheelsDampingRelaxation)=20.; //.83;
+CFG_PARAM_D(glob_frictionSlip)=.5;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -243,7 +245,7 @@ Vehicle::Vehicle(
   m_suspensionRestLength= glob_suspensionRestLength;
   m_wheelsDampingCompression=glob_wheelsDampingCompression;
   m_wheelsDampingRelaxation=glob_wheelsDampingRelaxation;
-  m_maxSuspensionTravelCm=glob_maxSuspensionTravelCm;
+  m_maxSuspensionTravel=glob_maxSuspensionTravel;
   m_maxSuspensionForce=glob_maxSuspensionForce;
 
   m_chassisWorldTrans=btTransform::getIdentity();
@@ -287,6 +289,19 @@ void Vehicle::initPhysics()
 
   const irr::core::aabbox3d<float> & bb=m_chassisNode->getBoundingBox();
 
+  GM_LOG("X range: %f -> %f (dim: %f)\n",
+    bb.MaxEdge.X , bb.MinEdge.X,
+    bb.MaxEdge.X - bb.MinEdge.X);
+
+  GM_LOG("Y range: %f -> %f (dim: %f)\n",
+    bb.MaxEdge.Y , bb.MinEdge.Y,
+    bb.MaxEdge.Y - bb.MinEdge.Y);
+
+  GM_LOG("Z range: %f -> %f (dim: %f)\n",
+    bb.MaxEdge.Z , bb.MinEdge.Z,
+    bb.MaxEdge.Z - bb.MinEdge.Z);
+
+
   float dX= (bb.MaxEdge.X - bb.MinEdge.X)/2.;
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
   float dZ= (bb.MaxEdge.Z - bb.MinEdge.Z)/2.;
@@ -323,10 +338,15 @@ void Vehicle::initPhysics()
                   m_wheelInitialPositions[i].Y,
                   m_wheelInitialPositions[i].Z);
 
+    GM_LOG("Wheel %d position %f,%f,%f\n",i,
+                  m_wheelInitialPositions[i].X,
+                  m_wheelInitialPositions[i].Y,
+                  m_wheelInitialPositions[i].Z);
+
     m_wheelsData[i].radius=m_wheelRadiuses[i];
     m_wheelsData[i].suspensionLength=m_suspensionRestLength;
     m_wheelsData[i].rotation=0.;
-    m_wheelsData[i].frictionSlip=.5;
+    m_wheelsData[i].frictionSlip=glob_frictionSlip;
   }
   
   m_carBody->setActivationState(DISABLE_DEACTIVATION);
@@ -513,6 +533,7 @@ void Vehicle::load()
       if(inElement) {
         switch(nodeStack[nodeStackPtr]) {
           case ot_chassis:
+            GM_LOG("loading '%s'\n",xmlReader->getNodeName());
             mesh=smgr->getMesh(xmlReader->getNodeName());
             WARNING_IF(mesh==0," - cannot load file '%s'\n",
                 xmlReader->getNodeName());
@@ -526,7 +547,6 @@ void Vehicle::load()
             break;
           case ot_suspensionStiffness:
             m_suspensionStiffness=Util::parseFloat(xmlReader->getNodeName());
-            m_suspensionStiffness=20.;
             break;
           case ot_suspensionDamping:
             m_suspensionDamping=Util::parseFloat(xmlReader->getNodeName());
@@ -863,7 +883,12 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
           susp_damping = m_wheelsDampingRelaxation;
         force -= susp_damping * projected_rel_vel;
       }
-      wheel.suspensionForce = force;
+      // @@@@
+      wheel.suspensionForce = force * glob_chassisDefaultMass;
+      if(wheel.suspensionForce < btScalar(0.)) {
+        wheel.suspensionForce = btScalar(0.);
+      }
+      // @@@@
 
     } else {
       wheel.suspensionForce = btScalar(0.0);
@@ -882,6 +907,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     {
       suspensionForce = m_maxSuspensionForce;
     }
+
     btVector3 impulse = wheel.contactNormalWS * suspensionForce * deltaTime;
     btVector3 relpos = wheel.contactPointWS - m_carBody->getCenterOfMassPosition();
 
@@ -1029,7 +1055,6 @@ void Vehicle::updateFriction(btScalar timeStep)
 
         btScalar factor = maximp / btSqrt(impulseSquared);
 
-
         m_wheelsData[wheelIdx].skidInfo *= factor;
       }
     } 
@@ -1106,7 +1131,6 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 
 	void* object = m_raycaster->castRay(source,target,rayResults);
 
-
   if(object) {
 
     //wheel.collidingObject=m_carBody;
@@ -1123,8 +1147,8 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 		btScalar hitDistance = param*raylen;
 		wheel.suspensionLength = hitDistance - wheel.radius;
 
-		btScalar minSuspensionLength = m_suspensionRestLength - m_maxSuspensionTravelCm*btScalar(0.01);
-		btScalar maxSuspensionLength = m_suspensionRestLength + m_maxSuspensionTravelCm*btScalar(0.01);
+		btScalar minSuspensionLength = m_suspensionRestLength - m_maxSuspensionTravel;
+		btScalar maxSuspensionLength = m_suspensionRestLength + m_maxSuspensionTravel;
 		if (wheel.suspensionLength < minSuspensionLength)
 		{
 			wheel.suspensionLength = minSuspensionLength;
