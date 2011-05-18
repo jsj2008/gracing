@@ -73,10 +73,6 @@
     ot_first_width=ot_wrl_width
   };
 
-
-
-
-//CFG_PARAM_D(glob_gVehicleSteering)=0.f;
 CFG_PARAM_D(glob_chassisDefaultMass)=.5;
 CFG_PARAM_D(glob_steeringIncrement)=0.002f;
 CFG_PARAM_D(glob_throttleIncrement)=0.5;
@@ -90,7 +86,7 @@ CFG_PARAM_D(glob_suspensionRestLength)=.1; //.6;
 
 CFG_PARAM_D(glob_suspensionStiffness)=20.;
 CFG_PARAM_D(glob_suspensionDamping)=2.3f;
-CFG_PARAM_D(glob_maxSuspensionTravel)=.0; //.2;
+CFG_PARAM_D(glob_maxSuspensionTravel)=.1;
 CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
 CFG_PARAM_D(glob_wheelsDampingCompression)=4.4;
 CFG_PARAM_D(glob_wheelsDampingRelaxation)=20.; //.83;
@@ -352,6 +348,13 @@ void Vehicle::initPhysics()
   m_carBody->setActivationState(DISABLE_DEACTIVATION);
   m_world->addAction(this);
   m_raycaster = new btDefaultVehicleRaycaster(m_world);
+
+#if 0
+  for(int i=0; i<4; i++) {
+    updateWheelPhysics(i);
+    updateWheel(i);
+  }
+#endif
 
   m_using|=USE_PHYSICS;
 }
@@ -818,39 +821,12 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 
   // steps:
   // 1- update wheel wolrd space transforn transform
-  for(int i=0; i<4; i++) {
-    WheelData & wheel=m_wheelsData[i];
-
-    wheel.isInContact=false;
-    btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
-
-    wheel.hardPointWS = chassisTrans * wheel.hardPointCS; 
-    wheel.directionWS = chassisTrans.getBasis() * btVector3(0.,-1.,0.);
-    wheel.axleWS = chassisTrans.getBasis() *  btVector3(0.,0.,1.);
-
-	  btVector3 up = -wheel.directionWS;
-	  const btVector3& right = wheel.axleWS;
-    btVector3 fwd = up.cross(right);
-    btScalar steering = btScalar(0.);
-    if(isFrontWheel(i))
-      steering=m_steering;
-
-    btQuaternion steeringOrn(up,steering);
-    btMatrix3x3 steeringMat(steeringOrn);
-
-    btQuaternion rotatingOrn(right,-wheel.rotation);
-    btMatrix3x3 rotatingMat(rotatingOrn);
-
-    wheel.worldTransform.setBasis(steeringMat * rotatingMat * chassisTrans.getBasis());
-    wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
-  }
+  for(int i=0; i<4; i++) 
+    updateWheelPhysics(i);
 
   // 2- update speed km/h
   if(m_speedometer) 
-  {
-     m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
-  }
-  
+    m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
 
   // 3- simulate suspensions
   for (int i=0;i<4;i++)
@@ -913,6 +889,8 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 
     m_carBody->applyImpulse(impulse, relpos);
   }
+
+  return;
 
   // 4- update friction
   updateFriction(deltaTime);
@@ -1118,8 +1096,10 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
   // NB: raycast assume that wheel has been
   // already updated!!
 	btScalar depth = -1.;
-	btScalar raylen = wheel.suspensionLength + wheel.radius + .5;
+	btScalar raylen = wheel.suspensionLength + wheel.radius /*+ .5*/;
+
 	btVector3 rayvector = wheel.directionWS * (raylen);
+
 	const btVector3& source = wheel.hardPointWS;
 
 	wheel.contactPointWS = source + rayvector;
@@ -1133,9 +1113,16 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 
   if(object) {
 
-    //wheel.collidingObject=m_carBody;
+#if 0
+    double dist=
+      (source.getX()-target.getX())*(source.getX()-target.getX())+
+      (source.getY()-target.getY())*(source.getY()-target.getY())+
+      (source.getZ()-target.getZ())*(source.getZ()-target.getZ());
+
+    GM_LOG("wheel %d at %f,%f,%f dist: %f\n",wnumber,source.getX(),source.getY(),source.getZ(),dist);
+#endif
+
     wheel.collidingObject=&getFixedBody();
-    //wheel.collidingObject=(btRigidBody*)object; 
 
     wheel.isInContact=true;
 
@@ -1233,6 +1220,15 @@ void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
       debugDrawer->drawLine(point1,point2,color);
     }
 
+    if(m_debugDrawFlags & db_suspensions) {
+      btScalar raylen = wheel.suspensionLength + wheel.radius;
+      btVector3 rayvector = wheel.directionWS * (raylen);
+      const btVector3& source = wheel.hardPointWS;
+      wheel.contactPointWS = source + rayvector;
+      const btVector3& target = wheel.contactPointWS;
+      debugDrawer->drawLine(source,target,color);
+    }
+
   }
 }
 
@@ -1245,6 +1241,34 @@ void 	Vehicle::setWorldTransform (const btTransform &worldTrans)
 {
    m_chassisWorldTrans=worldTrans;
    step();
+}
+
+void Vehicle::updateWheelPhysics(int index)
+{
+  WheelData & wheel=m_wheelsData[index];
+
+  wheel.isInContact=false;
+  btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+
+  wheel.hardPointWS = chassisTrans * wheel.hardPointCS; 
+  wheel.directionWS = chassisTrans.getBasis() * btVector3(0.,-1.,0.);
+  wheel.axleWS = chassisTrans.getBasis() *  btVector3(0.,0.,1.);
+
+  btVector3 up = -wheel.directionWS;
+  const btVector3& right = wheel.axleWS;
+  btVector3 fwd = up.cross(right);
+  btScalar steering = btScalar(0.);
+  if(isFrontWheel(index))
+    steering=m_steering;
+
+  btQuaternion steeringOrn(up,steering);
+  btMatrix3x3 steeringMat(steeringOrn);
+
+  btQuaternion rotatingOrn(right,-wheel.rotation);
+  btMatrix3x3 rotatingMat(rotatingOrn);
+
+  wheel.worldTransform.setBasis(steeringMat * rotatingMat * chassisTrans.getBasis());
+  wheel.worldTransform.setOrigin( wheel.hardPointWS + wheel.directionWS * wheel.suspensionLength /*m_suspensionRestLength*/);
 }
 
 void Vehicle::updateWheel(int index)

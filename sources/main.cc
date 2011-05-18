@@ -243,7 +243,7 @@ int main(int argc, char ** av)
         world,
         vehpath.c_str(),0xcafe);
 
-  vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse);
+  vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
 
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
       core::rect<s32>(0,0,200,100));

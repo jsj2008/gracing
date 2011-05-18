@@ -874,6 +874,11 @@ class export_OT_vehicle(bpy.types.Operator):
     name="Export xml", 
     description="Export also xml files of the meshes (debug purposes)",
     default=EXPORT_XML_MESH)
+
+  exportEXP = bpy.props.BoolProperty(
+    name="Export exp", 
+    description="Export only object with name starting with 'exp.' (debug purposes",
+    default=False)
   
   chassis_bbound =  BBound()
 
@@ -966,47 +971,55 @@ class export_OT_vehicle(bpy.types.Operator):
           self.getWheelInfo(root,"wrl_",ob)
         
         else:
-          if not ob.name.startswith("ignore"):
-            node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
-            node.forceType("chassis")
-            chassisNodes.append(node)
-            root.addChild(node)
-            log("updating from mesh '%s'"%ob.name)
-            bb=ob.bound_box
-            self.chassis_bbound.updateFromAABB(bb)
-            for v in bb:
-              self.chassis_bbound.update(v)
-          else:
+          if ob.name.startswith("ignore."):
             log("Ignoring: %s"%ob.name)
+            continue
+
+          if self.properties.exportEXP and not ob.name.startswith("exp."):
+            log("Ignoring: %s"%ob.name)
+            continue
+
+          log("exporting: '%s'"%ob.name)
+
+          node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          node.forceType("chassis")
+          chassisNodes.append(node)
+          root.addChild(node)
+          log("updating from mesh '%s'"%ob.name)
+          bb=ob.bound_box
+          self.chassis_bbound.updateFromAABB(bb)
+          for v in bb:
+            self.chassis_bbound.update(v)
 
 
     offs=self.chassis_bbound.getOffsets()
     self.chassis_bbound.logDim()
     log("Applying offset: %f,%f,%f"%(offs[0],offs[1],offs[2]))
     for n in chassisNodes:
-      log("node------start")
       n.applyTranslationToVertices(offs)
       n.setExportXmlMesh(self.properties.exportXML)
       n.export()
-      log("node------end")
 
-    for node_name in [ "wrl_position", "wrr_position", "wfl_position", "wfr_position" ]:
-      node=root.getChild(node_name)
-      log("1- Position: %f,%f,%f"%
-        (float(node.getProp("X")),
-        float(node.getProp("Y")),
-        float(node.getProp("Z"))))
-      X=float(node.getProp("X"))+offs[0]
-      Y=float(node.getProp("Y"))+offs[1]
-      Z=float(node.getProp("Z"))+offs[2]
-      node.setProp("X",X)
-      node.setProp("Y",Y)
-      node.setProp("Z",Z)
-      log("2- Position: %f,%f,%f"%(
-        float(node.getProp("X")),
-        float(node.getProp("Y")),
-        float(node.getProp("Z"))))
-      node.setText("%f,%f,%f"%(X,Y,Z))
+   
+    offs=self.chassis_bbound.getCrisOffsets()
+    if True:
+      for node_name in [ "wrl_position", "wrr_position", "wfl_position", "wfr_position" ]:
+        node=root.getChild(node_name)
+        log("1- Position: %f,%f,%f"%
+          (float(node.getProp("X")),
+          float(node.getProp("Y")),
+          float(node.getProp("Z"))))
+        X=float(node.getProp("X"))+offs[0]
+        Y=float(node.getProp("Y"))+offs[1]
+        Z=float(node.getProp("Z"))+offs[2]
+        node.setProp("X",X)
+        node.setProp("Y",Y)
+        node.setProp("Z",Z)
+        log("2- Position: %f,%f,%f"%(
+          float(node.getProp("X")),
+          float(node.getProp("Y")),
+          float(node.getProp("Z"))))
+        node.setText("%f,%f,%f"%(X,Y,Z))
 
 
     for n in wheels:

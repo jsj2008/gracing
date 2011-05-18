@@ -66,10 +66,11 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual void 	setWorldTransform (const btTransform &worldTrans);
 
     typedef enum {
-      db_raycastDirection=1,
-      db_wheelsAxle=2,
-      db_forwardImpulse=4,
-      db_sideImpulse=8,
+      db_raycastDirection= 0x01,
+      db_wheelsAxle=       0x02,
+      db_forwardImpulse=   0x04,
+      db_sideImpulse=      0x08,
+      db_suspensions=      0x10
     };
 
     void setDebugDrawFlags(unsigned flags);
@@ -128,6 +129,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     }
 
     inline void updateWheel(int index);
+    inline void updateWheelPhysics(int index);
 
     btScalar raycast(WheelData&,int);
 
