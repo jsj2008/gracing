@@ -7,5 +7,5 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         IrrDebugDrawer.cc\
         DataRecorder.cc \
         GUISpeedometer.cc \
-        XmlNode.cc 
+        XmlNode.cc  
 

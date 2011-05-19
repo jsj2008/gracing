@@ -15,6 +15,11 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+
+// TODO: 
+// 1- move 'm_maxSuspensionTravel' from vehicle to wheel (one per wheel!)
+
 #include <string.h>
 #include <assert.h>
 
@@ -73,7 +78,7 @@
     ot_first_width=ot_wrl_width
   };
 
-CFG_PARAM_D(glob_chassisDefaultMass)=.5;
+CFG_PARAM_D(glob_chassisDefaultMass)=.4;
 CFG_PARAM_D(glob_steeringIncrement)=0.002f;
 CFG_PARAM_D(glob_throttleIncrement)=0.5;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
@@ -84,7 +89,7 @@ CFG_PARAM_D(glob_suspensionCompression)=4.4f;
 CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
 CFG_PARAM_D(glob_suspensionRestLength)=.1; //.6;
 
-CFG_PARAM_D(glob_suspensionStiffness)=20.;
+CFG_PARAM_D(glob_suspensionStiffness)=80.;
 CFG_PARAM_D(glob_suspensionDamping)=2.3f;
 CFG_PARAM_D(glob_maxSuspensionTravel)=.1;
 CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
@@ -225,7 +230,6 @@ Vehicle::Vehicle(
 
   // accell dynamic info
   m_throttle=0.;
-//m_throttleIncrement=0.01;
   m_throttleIncrement=glob_throttleIncrement;
 
   // steering dynamic info
@@ -285,19 +289,6 @@ void Vehicle::initPhysics()
 
   const irr::core::aabbox3d<float> & bb=m_chassisNode->getBoundingBox();
 
-  GM_LOG("X range: %f -> %f (dim: %f)\n",
-    bb.MaxEdge.X , bb.MinEdge.X,
-    bb.MaxEdge.X - bb.MinEdge.X);
-
-  GM_LOG("Y range: %f -> %f (dim: %f)\n",
-    bb.MaxEdge.Y , bb.MinEdge.Y,
-    bb.MaxEdge.Y - bb.MinEdge.Y);
-
-  GM_LOG("Z range: %f -> %f (dim: %f)\n",
-    bb.MaxEdge.Z , bb.MinEdge.Z,
-    bb.MaxEdge.Z - bb.MinEdge.Z);
-
-
   float dX= (bb.MaxEdge.X - bb.MinEdge.X)/2.;
   float dY= (bb.MaxEdge.Y - bb.MinEdge.Y)/2.;
   float dZ= (bb.MaxEdge.Z - bb.MinEdge.Z)/2.;
@@ -324,7 +315,24 @@ void Vehicle::initPhysics()
   // create shapes
   m_chassisShape = new btBoxShape(btVector3(dX,dY,dZ));
 
+
+  // calc positio of the center of mass
+  // (X and Z are in the middle of the wheels)
+  btVector3 centerOfMass(0.,0.,0.);
+  for(int i=0; i<4; i++) {
+    centerOfMass += btVector3(
+        m_wheelInitialPositions[i].X,
+        m_wheelInitialPositions[i].Y,
+        m_wheelInitialPositions[i].Z);
+  }
+  centerOfMass /= 4.;
+  centerOfMass.setY(30);
+
+  centerOfMass -= btVector3(10., 0., 0.);
+
   btTransform tr(btTransform::getIdentity());
+  tr.setOrigin(centerOfMass);
+
 
   m_carBody=m_world->createRigidBody(0, glob_chassisDefaultMass, tr,m_chassisShape, this);
 
@@ -820,7 +828,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 
 
   // steps:
-  // 1- update wheel wolrd space transforn transform
+  // 1- update wheel wolrd space transforn 
   for(int i=0; i<4; i++) 
     updateWheelPhysics(i);
 
@@ -836,9 +844,15 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     depth = raycast(wheel,i);
   }
 
+  static float ll=0.;
   for(int i=0; i<4; i++) 
   {
     WheelData & wheel=m_wheelsData[i];
+
+    if(i==0 && ll!=wheel.suspensionLength) {
+      ll=wheel.suspensionLength;
+    }
+
     if ( wheel.isInContact ) {
       btScalar force;
       { // spring
@@ -889,8 +903,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 
     m_carBody->applyImpulse(impulse, relpos);
   }
-
-  return;
 
   // 4- update friction
   updateFriction(deltaTime);
@@ -1096,7 +1108,7 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
   // NB: raycast assume that wheel has been
   // already updated!!
 	btScalar depth = -1.;
-	btScalar raylen = wheel.suspensionLength + wheel.radius /*+ .5*/;
+	btScalar raylen = wheel.suspensionLength + wheel.radius + m_maxSuspensionTravel;
 
 	btVector3 rayvector = wheel.directionWS * (raylen);
 
@@ -1111,16 +1123,16 @@ btScalar Vehicle::raycast(WheelData & wheel, int wnumber)
 
 	void* object = m_raycaster->castRay(source,target,rayResults);
 
-  if(object) {
-
 #if 0
-    double dist=
-      (source.getX()-target.getX())*(source.getX()-target.getX())+
-      (source.getY()-target.getY())*(source.getY()-target.getY())+
-      (source.getZ()-target.getZ())*(source.getZ()-target.getZ());
-
-    GM_LOG("wheel %d at %f,%f,%f dist: %f\n",wnumber,source.getX(),source.getY(),source.getZ(),dist);
+  if(wnumber == 0) {
+    GM_LOG("%s ",object?"    in contact":"not in contact");
+    GM_LOG("contronus binosus: %f,%f,%f  -> ",source.getX(),source.getY(),source.getZ());
+    GM_LOG(" %f,%f,%f\n",target.getX(),target.getY(),target.getZ());
+  }
 #endif
+
+
+  if(object) {
 
     wheel.collidingObject=&getFixedBody();
 
@@ -1187,6 +1199,7 @@ void Vehicle::setDebugDrawFlags(unsigned flags)
 void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
 {
   btVector3 color(1.,1.,1.);
+
   for(int i=0; i<4; i++) {
     WheelData & wheel=m_wheelsData[i];
 
@@ -1220,16 +1233,17 @@ void Vehicle::debugDraw(btIDebugDraw* debugDrawer)
       debugDrawer->drawLine(point1,point2,color);
     }
 
-    if(m_debugDrawFlags & db_suspensions) {
+    if(m_debugDrawFlags & db_suspensions && wheel.isInContact) {
       btScalar raylen = wheel.suspensionLength + wheel.radius;
       btVector3 rayvector = wheel.directionWS * (raylen);
       const btVector3& source = wheel.hardPointWS;
-      wheel.contactPointWS = source + rayvector;
-      const btVector3& target = wheel.contactPointWS;
+      const btVector3& target = source + rayvector; //.contactPointWS;
       debugDrawer->drawLine(source,target,color);
     }
 
+    debugDrawer->drawLine(m_carBody->getCenterOfMassPosition(),wheel.hardPointWS,color);
   }
+
 }
 
 void 	Vehicle::getWorldTransform (btTransform &worldTrans) const
@@ -1276,6 +1290,8 @@ void Vehicle::updateWheel(int index)
   assert(index>=0 && index<4);
 
   irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
+  if(!wheel)
+    return;
 
   assert(wheel);
 

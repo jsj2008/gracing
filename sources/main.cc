@@ -23,6 +23,7 @@
 #include "PhyWorld.h"
 #include "gmlog.h"
 #include "Vehicle.h"
+#include "TestVehicle.h"
 #include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
 #include "DataRecorder.h"
@@ -137,7 +138,7 @@ void initGUI()
 
 /////////// GUI temp code
 
-CFG_PARAM_BOOL(glob_enableDebug)=true;
+CFG_PARAM_BOOL(glob_enableDebug)=false;
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -237,13 +238,19 @@ int main(int argc, char ** av)
 
   std::string vehpath;
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
-  Vehicle * vehicle=new Vehicle(
+#if 0
+  IVehicle * vehicle = new TestVehicle(
+        0, /* smgr->getRootSceneNode(),*/
+        smgr,
+        0xcafe);
+#endif
+  IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
         world,
         vehpath.c_str(),0xcafe);
 
-  vehicle->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
+  ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
 
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
       core::rect<s32>(0,0,200,100));
