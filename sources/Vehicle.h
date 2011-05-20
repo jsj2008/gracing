@@ -139,6 +139,11 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     btTransform  m_chassisWorldTrans;
 
     float m_steering;
+    enum {
+      steeredNone,
+      steeredLeft,
+      steeredRight,
+    } m_steered;
     float m_steeringIncrement;
     float m_steeringClamp;
     float m_throttle;

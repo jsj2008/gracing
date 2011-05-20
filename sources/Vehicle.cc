@@ -78,8 +78,8 @@
     ot_first_width=ot_wrl_width
   };
 
-CFG_PARAM_D(glob_chassisDefaultMass)=.4;
-CFG_PARAM_D(glob_steeringIncrement)=0.002f;
+CFG_PARAM_D(glob_chassisDefaultMass)=.8;
+CFG_PARAM_D(glob_steeringIncrement)=0.02f;
 CFG_PARAM_D(glob_throttleIncrement)=0.5;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
@@ -685,7 +685,7 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
   m_steering=0.;
   m_throttle=0.;
   m_throttling=0;
-
+  m_steered=steeredNone;
 
   // reset position
   btTransform trans=btTransform::getIdentity();
@@ -751,16 +751,22 @@ void Vehicle::throttleSet(double value)
 
 void Vehicle::steerRight()
 {
+#if 0
   m_steering += m_steeringIncrement;
   if (	m_steering > m_steeringClamp)
     m_steering = m_steeringClamp;
+#endif
+  m_steered=steeredRight;
 }
 
 void Vehicle::steerLeft()
 {
+#if 0
   m_steering -= m_steeringIncrement;
   if (	m_steering < -m_steeringClamp)
     m_steering = -m_steeringClamp;
+#endif
+  m_steered=steeredLeft;
 }
 
 void Vehicle::step()
@@ -826,6 +832,27 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
   }
   m_throttling=0;
 
+  // hnalde steering
+  switch(m_steered) {
+    case steeredLeft:
+      m_steering -= m_steeringIncrement;
+      if (	m_steering < -m_steeringClamp)
+        m_steering = -m_steeringClamp;
+      break;
+    case steeredRight:
+      m_steering += m_steeringIncrement;
+      if (	m_steering > m_steeringClamp)
+        m_steering = m_steeringClamp;
+      break;
+    default: // steeredNone
+      if(m_steering > m_steeringIncrement ||
+         m_steering < -m_steeringIncrement )
+        m_steering -= m_steering * .5;
+      else
+        m_steering = 0.;
+      break;
+  };
+  m_steered=steeredNone;
 
   // steps:
   // 1- update wheel wolrd space transforn 
