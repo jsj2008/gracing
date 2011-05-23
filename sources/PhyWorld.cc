@@ -21,7 +21,7 @@
 
 using namespace irr;
 
-CFG_PARAM_D(glob_frameRate)=240.;
+CFG_PARAM_D(glob_frameRate)=80.;
 
 static inline void irr2bt(const core::vector3df & irrVertex,
     btVector3 & btVertex)

@@ -136,6 +136,8 @@ void Track::load()
           ot=ot_camera;
         } else if(strcmp("lamp",xmlReader->getNodeName())==0) {
           ot=ot_lamp;
+        } else if(strcmp("track_start_rot",xmlReader->getNodeName())==0) {
+          ot=ot_start_rot;
         } else if(strcmp("track_start_pos",xmlReader->getNodeName())==0) {
           ot=ot_start_pos;
         } else {
@@ -153,6 +155,10 @@ void Track::load()
           switch(nodeStack[nodeStackPtr]) {
             case ot_start_pos:
               Util::parseVector(xmlReader->getNodeName(), m_startPosition);
+              break;
+
+            case ot_start_rot:
+              m_startRotation=Util::parseFloat(xmlReader->getNodeName());
               break;
 
             case ot_lamp:
@@ -174,7 +180,7 @@ void Track::load()
                 //node=smgr->addAnimatedMeshSceneNode( mesh,0,0xBADD );
                 node=smgr->addOctreeSceneNode( mesh,0,0xBADD );
                 if(!node) {
-                  GM_LOG("cannot load mesh\n");
+                  GM_LOG("cannot load mesh '%s'\n",xmlReader->getNodeName());
                 } else {
                   m_sceneNodes.push_back(node);
                   node->grab();

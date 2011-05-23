@@ -94,6 +94,9 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
   return tot;
 }
 
+bool stepMode=false;
+bool doneStep=false;
+
 class MyEventReceiver : public IEventReceiver
 {
   public:
@@ -103,6 +106,14 @@ class MyEventReceiver : public IEventReceiver
       // Remember whether each key is down or up
       if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
         KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+        if(event.KeyInput.Key == KEY_KEY_P && event.KeyInput.PressedDown)
+          stepMode=!stepMode;
+      }
+
+      if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
+        KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+        if(event.KeyInput.Key == KEY_KEY_O && event.KeyInput.PressedDown)
+          doneStep=false;
       }
 
       return false;
@@ -233,7 +244,7 @@ int main(int argc, char ** av)
   smgr->addExternalMeshLoader(mloader);
 
   Track * thetrack;
-  thetrack=new Track(device,world,"farm.zip");
+  thetrack=new Track(device,world,"devtrack.zip");
   thetrack->load();
 
   std::string vehpath;
@@ -258,8 +269,7 @@ int main(int argc, char ** av)
 
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-  vehicle->reset(thetrack->getStartPosition());
-  //vehicle->reset(irr::core::vector3df(0.,5.,0.));
+  //vehicle->reset(thetrack->getStartPosition());
   smgr->getRootSceneNode()->addChild(vehicle);
 
 
@@ -309,25 +319,40 @@ int main(int argc, char ** av)
   flagI=true;
 
 
-  ///////////
-#if 0
-  btCollisionShape * x_shape= new btBoxShape(btVector3(1.,1.,1.));
-  btTransform tr=btTransform::getIdentity();
-  tr.setOrigin(btVector3(0.,2.,5.));
-  btRigidBody * x_body;
-  x_body=world->createRigidBody(0, 1., tr,x_shape);
-#endif
-  ///////////
+  btVector3 vehicleStartPosition=btVector3(
+              thetrack->getStartPosition().X,
+              vehicle->getStartHeight(
+                thetrack->getStartPosition().X,
+                thetrack->getStartPosition().Z),
+              thetrack->getStartPosition().Z);
+
+  vehicle->reset(
+      irr::core::vector3df(vehicleStartPosition.getX(),
+        vehicleStartPosition.getY(),
+        vehicleStartPosition.getZ()),
+        thetrack->getStartRotation());
+      
+  GM_LOG("-->%f\n",
+        vehicleStartPosition.getZ());
+
+
+  unsigned long startFrameTime;
+  unsigned long endFrameTime;
+  unsigned long frameDuration = 1000 / 80;
 
   while(device->run() && !done) {
     if(device->isWindowActive()) {
 
-      driver->beginScene(true, true, SColor(255,100,101,140));
-      smgr->drawAll();
-      world->step();
-      guienv->drawAll();
-      world->debugDrawWorld();
-      driver->endScene();
+      startFrameTime=device->getTimer()->getRealTime();
+      if(!stepMode || !doneStep) {
+        doneStep=true;
+        driver->beginScene(true, true, SColor(255,100,101,140));
+        smgr->drawAll();
+        world->step();
+        guienv->drawAll();
+        world->debugDrawWorld();
+        driver->endScene();
+      }
 
       /* temp keyboard handling part */
       if(receiver.IsKeyDown(irr::KEY_ESCAPE) || 
@@ -356,7 +381,7 @@ int main(int argc, char ** av)
 
       if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
         if(flagC)  {
-          vehicle->reset(thetrack->getStartPosition());
+          vehicle->reset(thetrack->getStartPosition(),thetrack->getStartRotation());
           GM_LOG("start position: %f,%f,%f\n",
               thetrack->getStartPosition().X,
               thetrack->getStartPosition().Y,
@@ -434,6 +459,15 @@ int main(int argc, char ** av)
         tmp += ")";
         device->setWindowCaption(tmp.c_str());
       }
+
+
+      endFrameTime=device->getTimer()->getRealTime();
+      unsigned long dt = (endFrameTime - startFrameTime);
+      if(dt < frameDuration) {
+        device->sleep(frameDuration - dt);
+      }
+
+
     } else {
       device->yield();
     }

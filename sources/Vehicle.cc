@@ -30,6 +30,8 @@
 #define NOT_A_VALID_VEHICLE_IF_NOT(cond) assert(cond)
 #define NOT_A_VALID_VEHICLE_IF(cond) assert(!(cond))
 
+#define RAD2DEG(v)     (v*(180. / M_PI))
+
 #define WARNING_IF(cond,fmt,...) do {\
   if(cond) {\
     GM_LOG(fmt, ## __VA_ARGS__);\
@@ -678,9 +680,11 @@ void Vehicle::load()
 
 }
 
-void Vehicle::reset(const irr::core::vector3d<float>&pos)
+void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 {
   m_chassisNode->setPosition(pos);
+  //grad = rad * 180 / PI
+  m_chassisNode->setRotation(irr::core::vector3df(0.,RAD2DEG(rotation),0.));
 
   m_steering=0.;
   m_throttle=0.;
@@ -690,6 +694,12 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos)
   // reset position
   btTransform trans=btTransform::getIdentity();
   trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
+
+  // reset rotation
+  btQuaternion rotQuat(btVector3(0.,1.,0.),rotation);
+  btMatrix3x3  rotMat(rotQuat);
+  trans.setBasis(rotMat);
+
   m_carBody->setCenterOfMassTransform(trans);
 
   // reset velocity
@@ -1337,3 +1347,40 @@ void Vehicle::setSpeedOMeter(INumberOutput * speedometer)
   m_speedometer=speedometer;
 }
 
+
+double Vehicle::getStartHeight(float x, float z)
+{
+  double startHeight=20.;
+  double endHeight=-20.;
+  double height[4];
+  double totHeight;
+
+  for(int i; i<4; i++) {
+    WheelData & wheel=m_wheelsData[i];
+
+    btVector3 source = btVector3(x,startHeight,z) + btVector3(
+        m_wheelInitialPositions[i].X,
+        m_wheelInitialPositions[i].Y,
+        m_wheelInitialPositions[i].Z);
+
+
+    btVector3 target = btVector3(x,endHeight,z) + btVector3(
+        m_wheelInitialPositions[i].X,
+        m_wheelInitialPositions[i].Y,
+        m_wheelInitialPositions[i].Z);
+
+    btVehicleRaycaster::btVehicleRaycasterResult	rayResults;
+
+    m_raycaster->castRay(source,target,rayResults);
+    
+    height[i] = endHeight - (startHeight - endHeight) * rayResults.m_distFraction;
+
+    GM_LOG("wheel %d cast ground at %f\n",i,rayResults.m_distFraction);
+
+    height[i] += wheel.radius;
+
+    totHeight += height[i];
+  }
+
+  return totHeight / 4.;
+}

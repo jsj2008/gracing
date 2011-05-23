@@ -140,8 +140,11 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
         currMtl->Meshbuffer->Material.AmbientColor.setGreen(ka[1]*255.0);
         currMtl->Meshbuffer->Material.AmbientColor.setBlue(ka[2]*255.0);
 
-        currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,false);
-        currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_LIGHTING,false);
+        currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_BACK_FACE_CULLING,true);
+        currMtl->Meshbuffer->Material.setFlag(irr::video::EMF_LIGHTING,true);
+        currMtl->Meshbuffer->Material.MaterialType = irr::video::EMT_SOLID;
+        currMtl->Meshbuffer->Material.ColorMaterial=video::ECM_DIFFUSE_AND_AMBIENT;
+        
 
         if(imageName[0]) {
           video::ITexture * texture = 0;
@@ -153,12 +156,12 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
               //currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
               //currMtl->Meshbuffer->Material.DiffuseColor.set(
               //  currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
-              //GM_LOG("Loaded texture\n");
+              GM_LOG("Loaded texture '%s'\n",imageName);
             } else {
-              GM_LOG("  --> cannot load texture\n");
+              GM_LOG("  --> cannot load texture '%s'\n",imageName);
             }
           } else {
-              GM_LOG("  --> cannot find texture\n");
+              GM_LOG("  --> cannot find texture '%s'\n",imageName);
           }
         }
         break;

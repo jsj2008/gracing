@@ -33,6 +33,7 @@ class Track
 
 
     inline const irr::core::vector3df & getStartPosition() { return m_startPosition; }
+    inline const float getStartRotation() { return m_startRotation; }
 
   private:
 
@@ -58,6 +59,7 @@ class Track
     PhyWorld *                                     m_world;
 
     irr::core::vector3df                           m_startPosition;
+    double                                         m_startRotation;
 };
 
 #endif

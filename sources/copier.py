@@ -24,7 +24,11 @@ vehicles=[
 tracks=[
   "devtrack",
   "arena_stadium",
-  "farm"
+  "beach",
+  "mathclass",
+  "tuxtollway",
+  "farm",
+  "canyon"
 ]
 
 paths=[

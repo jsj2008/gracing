@@ -43,7 +43,7 @@ class IVehicle : public CompoundSceneNode
 
   virtual void unuse(unsigned int useFlags)=0;
 
-  virtual void reset(const irr::core::vector3d<float>&pos)=0;
+  virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;
 
   // querying
   virtual irr::core::vector3df getChassisPos()=0;
@@ -60,6 +60,8 @@ class IVehicle : public CompoundSceneNode
 
   // phisics
   virtual void applyTorque(float x, float y, float z)=0;
+
+  virtual double getStartHeight(float x, float y)=0;
 
   // debug
   virtual void dumpDebugInfo()=0;

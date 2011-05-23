@@ -43,7 +43,9 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     virtual irr::core::vector3df getChassisPos();
 
-    void reset(const irr::core::vector3d<float>& position);
+    virtual double getStartHeight(float x, float y);
+
+    void reset(const irr::core::vector3d<float>& position, double rotation);
 
     // from IVehicle
     virtual void throttleUp();

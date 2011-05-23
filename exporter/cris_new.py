@@ -31,8 +31,8 @@ cris binary file format
 """
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
@@ -40,7 +40,7 @@ BIG_NUMBER=10000
 NEG_BIG_NUMBER=-BIG_NUMBER
 
 #########################################
-EXPORT_XML_MESH=True
+EXPORT_XML_MESH=False
 
 # markers 
 MARK_VERTICES=0xf100
@@ -164,10 +164,21 @@ def copy_image(iname,dest_dir):
   rel = fn_strip
   fn_abs_dest = os.path.join(dest_dir, fn_strip)
   if not os.path.exists(fn_abs_dest):
+    log("COPYING '%s' to '%s'"%(fn,fn_abs_dest))
     try:
       shutil.copy(fn, fn_abs_dest)
     except:
-      pass
+      # have mercy on me!
+      # still dont understand how blender handle
+      # image files.
+      log("WARNING: cannot copy image file (src: '%s', dst: '%s')"%(fn,fn_abs_dest))
+      src_name=os.path.basename(fn)
+      log("         trying with base name (src: '%s', dst: '%s'"%(src_name,fn_abs_dest))
+      try:
+        shutil.copy(src_name, fn_abs_dest)
+      except:
+        log("         cannot even copy image file with basename (src: '%s', dst: '%s')"%(src_name,fn_abs_dest))
+        
 
   return fn_abs_dest
     
@@ -289,15 +300,26 @@ class XmlNode:
     self.x_name=name
     self.x_children=[ ]
     self.x_props={ }
+    self.x_defaultProps=None
     self.x_text=""
+    self.x_internalProps={ }
+    self.x_defaultInternalProps=None
 
   def setProp(self,pname,pvalue):
     self.x_props[pname]=pvalue 
 
+  def setInternalProp(self,pname,pvalue):
+    self.x_internalProps[pname]=pvalue
+
+  def getInternalProp(self,pname):
+    if pname in self.x_internalProps:
+      return self.x_internalProps[pname]
+    return self.x_defaultInternalProps
+
   def getProp(self,pname):
     if pname in self.x_props:
       return self.x_props[pname]
-    return None
+    return self.x_defaultProps
   
   def forceType(self,type):
     self.x_name=type
@@ -500,7 +522,7 @@ class XmlMeshNode(XmlNode):
       for inode in mat.getChildrenList():
         if inode.getName() != 'image':
           continue
-        iname = inode.getText()
+        iname = inode.getInternalProp("filepath")
         copy_image(iname,self.x_dest_dir)
 
       binWrite_string(fp,iname)
@@ -770,7 +792,8 @@ def createMaterialNode(material, image):
   if images:
     for image in images:
       node=XmlNode("image")
-      node.setText(image.filepath)
+      node.setText(os.path.basename(image.filepath))
+      node.setInternalProp("filepath",image.filepath)
       matNode.addChild(node)
 
   return matNode
@@ -784,6 +807,7 @@ def createZipFile(root,xmlfile,path,srcdir):
     if isinstance(node,XmlMeshNode):
       fn=node.getMeshFileName()
       p=os.path.basename(fn)
+      log("Zipping '%s' as '%s'"%(fn,p))
       zf.write(fn,p)
       mats=node.getChild("materials")
       for mat in mats.getChildrenList():
@@ -793,18 +817,80 @@ def createZipFile(root,xmlfile,path,srcdir):
           iname = os.path.basename(inode.getText())
           if iname not in inserted_images.keys():
             inserted_images[iname]=True
-            iname = srcdir + "/" + iname
             dname = iname
+            iname = srcdir + "/" + iname
             if os.path.exists(iname):
+              log("Zipping '%s' as '%s'"%(iname,dname))
               zf.write(iname,dname)
+            else:
+              log("skipping image (src: '%s', dst: '%s')"%(iname,dname))
 
+  log("Zipping '%s' as '%s'"%(xmlfile,os.path.basename(xmlfile)))
   zf.write(xmlfile,os.path.basename(xmlfile))
   zf.close()
 
-def createMaterialDictAndMeshList(scene,applyTransform=True):
+def createMaterialDictAndMeshList2(scene,applyTransform=True):
     materialDict = {}
     mesh_objects = []
     for ob in [ob for ob in scene.objects if ob.is_visible(scene)]:
+
+      free, derived = create_derived_objects(scene, ob)
+
+      if derived is None:
+        continue
+    
+      for ob_derived, mat in derived:
+        if ob.type not in ('MESH', 'CURVE', 'SURFACE', 'FONT', 'META'):
+          continue
+
+        data = ob_derived.create_mesh(scene, True, 'PREVIEW')
+        if data:
+          if applyTransform:
+            data.transform(mat)
+
+          mesh_objects.append((ob_derived, data))
+          mat_ls = data.materials
+          mat_ls_len = len(mat_ls)
+
+          # get material/image tuples.
+          if len(data.uv_textures):
+            if not mat_ls:
+              mat = mat_name = None
+
+            for f, uf in zip(data.faces, data.uv_textures.active.data):
+              if mat_ls:
+                mat_index = f.material_index
+                if mat_index >= mat_ls_len:
+                  mat_index = f.mat = 0
+                mat = mat_ls[mat_index]
+                if mat:	mat_name = mat.name
+                else:	mat_name = None
+              # else there already set to none
+
+              img = uf.image
+              if img:	img_name = img.name
+              else:	img_name = None
+
+              materialDict.setdefault((mat_name, img_name), (mat, img) )
+
+          else:
+            for mat in mat_ls:
+              if mat: # material may be None so check its not.
+                materialDict.setdefault((mat.name, None), (mat, None) )
+
+            for f in data.faces:
+              if f.material_index >= mat_ls_len:
+                f.material_index = 0
+
+        if free:
+            free_derived_objects(ob)
+    return materialDict, mesh_objects
+
+def createMaterialDictAndMeshList(scene,object,applyTransform=True):
+    materialDict = {}
+    mesh_objects = []
+
+    for ob in [object]:
 
       free, derived = create_derived_objects(scene, ob)
 
@@ -933,7 +1019,7 @@ class export_OT_vehicle(bpy.types.Operator):
 
     root=XmlNode("vehicle")
 
-    materialDict, mesh_objects = createMaterialDictAndMeshList(context.scene,False)
+    materialDict, mesh_objects = createMaterialDictAndMeshList2(context.scene,False)
 
     chassisNodes=[ ]
     wheels=[ None, None, None, None ]
@@ -1055,6 +1141,11 @@ class export_OT_track(bpy.types.Operator):
     description="Export also xml files of the meshes (debug purposes)",
     default=EXPORT_XML_MESH)
 
+  exportEXP = bpy.props.BoolProperty(
+    name="Export exp", 
+    description="Export only object with name starting with 'exp.' (debug purposes",
+    default=False)
+
 
   def execute(self, context):
     global inserted_images
@@ -1077,14 +1168,29 @@ class export_OT_track(bpy.types.Operator):
     root=XmlNode("track")
     scene = context.scene
 
-    materialDict, mesh_objects = createMaterialDictAndMeshList(scene)
+    for ob in [ ob for ob in scene.objects if ob.is_visible(scene) ]:
+      materialDict, mesh_objects = createMaterialDictAndMeshList(scene,ob)
 
-    for ob, blender_mesh in mesh_objects:
-      if ob.type=="MESH":
-        node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
-        node.setExportXmlMesh(self.properties.exportXML)
-        node.setProp("name",ob.name)
-        root.addChild(node)
+      for ob, blender_mesh in mesh_objects:
+        if ob.type=="MESH":
+          if ob.name.startswith("ignore."):
+            log("Ignoring: %s"%ob.name)
+            continue
+
+          if self.properties.exportEXP and not ob.name.startswith("exp."):
+            log("Ignoring: %s"%ob.name)
+            continue
+
+          if len(materialDict) == 0:
+            log("Ignoring: '%s' (zero materials!)"%ob.name)
+            continue
+
+          log("Exporting: '%s', material #: %d"%(ob.name,len(materialDict)))
+
+          node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          node.setExportXmlMesh(self.properties.exportXML)
+          node.setProp("name",ob.name)
+          root.addChild(node)
 
     # gather track information #
     for ob in bpy.data.objects:
@@ -1094,7 +1200,7 @@ class export_OT_track(bpy.types.Operator):
         node.setText(val)
         root.addChild(node)
 
-        val="%f,%f,%f"%( ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2])
+        val="%f"%(ob.rotation_euler[2])
         node=XmlNode("track_start_rot")
         node.setText(val)
         root.addChild(node)
