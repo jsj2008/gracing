@@ -17,6 +17,8 @@
 
 
 
+extern bool stepMode;
+
 // TODO: 
 // 1- move 'm_maxSuspensionTravel' from vehicle to wheel (one per wheel!)
 
@@ -779,27 +781,6 @@ void Vehicle::steerLeft()
   m_steered=steeredLeft;
 }
 
-void Vehicle::step()
-{
-  if(m_carBody==0)
-    return;
-
-	btTransform trans;
-  btMotionState * ms;
-  assert(m_carBody);
-  ms=m_carBody->getMotionState();
-  assert(ms);
-  
-  ms->getWorldTransform(trans);
-
-  irr::core::matrix4 matr;
-  PhyWorld::btTransformToIrrlichtMatrix(trans, matr);
-
-  m_chassisNode->setPosition(matr.getTranslation());
-  m_chassisNode->setRotation(matr.getRotationDegrees());
-
-  for(int i=0; i<4; i++) updateWheel(i);
-}
 
 void Vehicle::applyTorque(float x, float y, float z)
 {
@@ -976,6 +957,22 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 		wheel.deltaRotation *= btScalar(0.99);//damping of rotation when not in contact
 
 	}
+
+  if(stepMode) {
+    static double ppos=0.;
+    static double ppos_w=0.;
+    btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+    btVector3 pos=chassisTrans.getOrigin();
+    GM_LOG("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+    GM_LOG("vehicle position: %f delta: %f,%f,%f\n",pos.getX(),pos.getX()-ppos,pos.getY(),pos.getZ());
+
+    
+		WheelData& wheel = m_wheelsData[0];
+    GM_LOG("wheel 0: %f,%f\n",wheel.hardPointWS.getX(),wheel.hardPointWS.getX()-ppos_w);
+
+    ppos=pos.getX();
+    ppos_w=wheel.hardPointWS.getX();
+  }
 }
 
 
@@ -1288,10 +1285,45 @@ void 	Vehicle::getWorldTransform (btTransform &worldTrans) const
    worldTrans=m_chassisWorldTrans;
 }
 
-void 	Vehicle::setWorldTransform (const btTransform &worldTrans)
+void Vehicle::setWorldTransform (const btTransform &worldTrans)
 {
    m_chassisWorldTrans=worldTrans;
    step();
+}
+
+void Vehicle::step()
+{
+  if(m_carBody==0)
+    return;
+
+	btTransform trans;
+  assert(m_carBody);
+  
+  //getWorldTransform(trans);
+  trans=m_carBody->getCenterOfMassTransform();
+
+  if(stepMode) {
+    GM_LOG("me transform: %f\n",trans.getOrigin().getX());
+  }
+
+  irr::core::matrix4 matr;
+  PhyWorld::btTransformToIrrlichtMatrix(trans, matr);
+
+  m_chassisNode->setPosition(matr.getTranslation());
+  m_chassisNode->setRotation(matr.getRotationDegrees());
+
+  if(stepMode) {
+
+    btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+
+    static double oo=0.;
+    GM_LOG("irrr vehic: pos: %f, delta: %f, body: %f\n",
+        m_chassisNode->getPosition().X,
+        oo-m_chassisNode->getPosition().X,
+        chassisTrans.getOrigin().getX());
+    oo=m_chassisNode->getPosition().X;
+  }
+  for(int i=0; i<4; i++) updateWheel(i);
 }
 
 void Vehicle::updateWheelPhysics(int index)
@@ -1326,6 +1358,8 @@ void Vehicle::updateWheel(int index)
 {
   assert(index>=0 && index<4);
 
+  static float soccia[4];
+
   irr::scene::ISceneNode * wheel=m_wheelsNodes[index];
   if(!wheel)
     return;
@@ -1338,8 +1372,14 @@ void Vehicle::updateWheel(int index)
   irr::core::matrix4 matr;
   PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);
 
-  wheel->setRotation(matr.getRotationDegrees());
+  if(stepMode && index==0) {
+    GM_LOG("wheel: %d, x: %f, delta: %f\n",index,matr.getTranslation().X,
+        matr.getTranslation().X-soccia[index]);
+    soccia[index]=matr.getTranslation().X;
+    GM_LOG("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+  }
   wheel->setPosition(matr.getTranslation());
+  wheel->setRotation(matr.getRotationDegrees());
 }
 
 void Vehicle::setSpeedOMeter(INumberOutput * speedometer)
