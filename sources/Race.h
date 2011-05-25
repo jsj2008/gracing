@@ -18,6 +18,7 @@
 #define RACE_H
 #include "IPhaseHandler.h"
 #include "IVehicle.h"
+#include "GuiReadySetGo.h"
 
 
 class Race : public  IPhaseHandler
@@ -32,12 +33,13 @@ class Race : public  IPhaseHandler
 
     struct VehicleInfo {
       IVehicle * vehicle;
-
     };
 
 
     struct VehicleInfo vehicles[max_vehicles];
     int         n_vehicles;
+
+    GuiReadySetGo * m_readySetGo;
 
 };
 

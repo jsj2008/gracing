@@ -64,7 +64,6 @@ void GUISpeedometer::draw()
   {
   }
 
-
   if(font) {
     char b[32];
     irr::core::rect<irr::s32> frameRect(AbsoluteRect);

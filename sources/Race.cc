@@ -21,7 +21,8 @@
 Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   : IPhaseHandler(device,world)
 {
-
+  m_readySetGo = new GuiReadySetGo(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
+      irr::core::rect<irr::s32>(0,0,200,100));
 }
 
 void Race::step()
