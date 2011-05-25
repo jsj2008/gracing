@@ -14,32 +14,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#ifndef RACE_H
-#define RACE_H
-#include "IPhaseHandler.h"
-#include "IVehicle.h"
+
+#include "Race.h"
 
 
-class Race : public  IPhaseHandler
+Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
+  : IPhaseHandler(device,world)
 {
-  public:
-    Race(irr::IrrlichtDevice * device, PhyWorld * world);
 
-    virtual void step();
+}
 
-  private:
-    enum { max_vehicles=3 };
+void Race::step()
+{
+  m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+  m_sceneManager->drawAll();
+  m_world->step();
+  m_guiEnv->drawAll();
+  m_world->debugDrawWorld();
+  m_driver->endScene();
+}
 
-    struct VehicleInfo {
-      IVehicle * vehicle;
-
-    };
-
-
-    struct VehicleInfo vehicles[max_vehicles];
-    int         n_vehicles;
-
-};
-
-
-#endif

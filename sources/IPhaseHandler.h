@@ -22,15 +22,17 @@
 #include "PhyWorld.h"
 
 // a game phase handler
-class IPhaseHandler : public irr::IEventReceiver
+class IPhaseHandler /*: public irr::IEventReceiver*/
 {
   public:
     IPhaseHandler(irr::IrrlichtDevice * device,
         PhyWorld * world)
     {
-      m_device=device;
-      m_sceneManager=device->getSceneManager();
-      m_world=world;
+      m_device = device;
+      m_sceneManager = device->getSceneManager();
+      m_world = world;
+      m_driver = device->getVideoDriver();
+      m_guiEnv = device->getGUIEnvironment();
     }
 
     virtual void step()
@@ -39,11 +41,11 @@ class IPhaseHandler : public irr::IEventReceiver
     }
 
   protected:
-    irr::IrrlichtDevice  * m_device;
-    irr::scene::ISceneManager  * 
-      m_sceneManager;
+    irr::IrrlichtDevice  *      m_device;
+    irr::scene::ISceneManager * m_sceneManager;
     irr::gui::IGUIEnvironment * m_guiEnv;
-    PhyWorld * m_world;
+    PhyWorld *                  m_world;
+    irr::video::IVideoDriver*   m_driver;
  
 #if 0
   IGUIEnvironment* guienv = device->getGUIEnvironment();

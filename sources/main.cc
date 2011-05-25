@@ -27,6 +27,8 @@
 #include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
 #include "DataRecorder.h"
+#include "IPhaseHandler.h"
+#include "Race.h"
 #include "GUISpeedometer.h"
 
 
@@ -95,7 +97,7 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
 }
 
 bool stepMode=false;
-bool doneStep=false;
+static bool doneStep=false;
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -135,19 +137,6 @@ class MyEventReceiver : public IEventReceiver
     // We use this array to store the current state of each key
     bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
-
-
-/////////// GUI temp code
-
-#if 0
-void initGUI()
-{
-  CEGUI::IrrlichtRenderer* myRenderer = 
-    new CEGUI::IrrlichtRenderer( myIrrlichtDevice, true );
-}
-#endif
-
-/////////// GUI temp code
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
 
@@ -243,68 +232,42 @@ int main(int argc, char ** av)
 
   smgr->addExternalMeshLoader(mloader);
 
+  // prepare the track
   Track * thetrack;
   thetrack=new Track(device,world,"devtrack.zip");
   thetrack->load();
 
+  // prepare the vehicle
   std::string vehpath;
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
-#if 0
-  IVehicle * vehicle = new TestVehicle(
-        0, /* smgr->getRootSceneNode(),*/
-        smgr,
-        0xcafe);
-#endif
   IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
         world,
         vehpath.c_str(),0xcafe);
-
   ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
-
-  GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
-      core::rect<s32>(0,0,200,100));
-  vehicle->setSpeedOMeter(smeter);
-
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-  //vehicle->reset(thetrack->getStartPosition());
   smgr->getRootSceneNode()->addChild(vehicle);
 
 
-  //std::string fontPath = resmanager->getResourcePath() + "/font.png";
+  // gui
+  GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
+      core::rect<s32>(0,0,200,100));
+  vehicle->setSpeedOMeter(smeter);
   std::string fontPath = resmanager->getResourcePath() + "/title_font.xml";
 	gui::IGUIFont* font_big = guienv->getFont(fontPath.c_str());
 	if (font_big) {
 		guienv->getSkin()->setFont(font_big);
   }
-#if 0
-  irr::gui::IGUIStaticText * text=guienv->addStaticText(L"gracing",
-      core::rect<s32>(0,0,700,120));
-  text->
-    enableOverrideColor(true);
-  text=guienv->addStaticText(L"demo",
-      core::rect<s32>(0,130,700,250));
-  text->
-    enableOverrideColor(true);
-#endif
 
 
+  // camera
   irr::scene::ICameraSceneNode * camera;
   camera = smgr->addCameraSceneNode();
-
   VehicleCameraAnimator * camanim=new
       VehicleCameraAnimator(vehicle);
-
   camera->addAnimator(camanim);
-
-#if 0
-  irr::scene::ILightSceneNode *light;
-  light = smgr->addLightSceneNode(0, 
-      irr::core::vector3df(10.f,40.f,-5.f),
-      irr::video::SColorf(0.2f, 0.2f, 0.2f), 90.f,0xbeda);
-#endif
 
   bool flagC, flagD;
   bool flagL, flagU;
@@ -340,18 +303,26 @@ int main(int argc, char ** av)
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / 80;
 
+
+  IPhaseHandler * currentPhaseHandler;
+
+  currentPhaseHandler = new Race(device,world);
+
   while(device->run() && !done) {
     if(device->isWindowActive()) {
 
       startFrameTime=device->getTimer()->getRealTime();
       if(!stepMode || !doneStep) {
         doneStep=true;
+        currentPhaseHandler->step();
+#if 0
         driver->beginScene(true, true, SColor(255,100,101,140));
         smgr->drawAll();
         world->step();
         guienv->drawAll();
         world->debugDrawWorld();
         driver->endScene();
+#endif
       }
 
       /* temp keyboard handling part */
@@ -454,7 +425,7 @@ int main(int argc, char ** av)
       if (driver->getFPS() != lastFPS)
       {
         lastFPS = driver->getFPS();
-        core::stringw tmp = L"Irrlicht SplitScreen-Example (FPS: ";
+        core::stringw tmp = L"gracing (FPS: ";
         tmp += lastFPS;
         tmp += ")";
         device->setWindowCaption(tmp.c_str());
@@ -475,3 +446,5 @@ int main(int argc, char ** av)
   delete debugDrawer;
 }
 
+#if 0
+#endif
