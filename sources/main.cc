@@ -234,7 +234,7 @@ int main(int argc, char ** av)
 
   // prepare the track
   Track * thetrack;
-  thetrack=new Track(device,world,"devtrack.zip");
+  thetrack=new Track(device,world,"farm.zip");
   thetrack->load();
 
   // prepare the vehicle
