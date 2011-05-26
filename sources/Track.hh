@@ -19,6 +19,7 @@
 #include <string>
 #include <irrlicht.h>
 #include "PhyWorld.h"
+#include "XmlNode.h"
 #include "CameraDataManager.hh"
 
 class Track
@@ -41,6 +42,10 @@ class Track
     void loadLights( irr::io::IReadFile * file ,
         irr::scene::ISceneManager* smgr );
 
+    XmlNode * loadXml(const char *);
+
+    void tmpLoad();
+
     irr::io::IFileSystem *                         m_filesystem;
     irr::u32                                       m_archiveIndex;
 
@@ -61,6 +66,8 @@ class Track
 
     irr::core::vector3df                           m_startPosition;
     double                                         m_startRotation;
+
+    XmlNode *                                      m_rootNode;
 };
 
 #endif

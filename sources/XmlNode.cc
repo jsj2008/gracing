@@ -97,7 +97,7 @@ const void XmlNode::getChildren(const std::string &s, std::vector<XmlNode*>& out
       out.push_back(m_nodes[i]);
     }
   }
-}   // getNode
+}   
 
 
 const XmlNode *XmlNode::getChild(const std::string &s) const
@@ -106,7 +106,13 @@ const XmlNode *XmlNode::getChild(const std::string &s) const
     if(m_nodes[i]->getName()==s) return m_nodes[i];
   }
   return NULL;
-}   // getNode
+}  
+
+const void XmlNode::getChildren(std::vector<XmlNode*>& out) const
+{
+  for(unsigned int i=0; i<m_nodes.size(); i++)
+      out.push_back(m_nodes[i]);
+}
 
 XmlNode::~XmlNode()
 {

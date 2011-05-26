@@ -33,8 +33,7 @@
 Track::Track(
     irr::IrrlichtDevice * device,
     PhyWorld * world,
-    const char * filename
-    )
+    const char * filename)
 {
   m_device=device;
   m_filesystem=device->getFileSystem();
@@ -50,6 +49,49 @@ Track::Track(
   //m_device->grab();
   m_cammgr=0;
   m_camera=0;
+
+  m_rootNode=loadXml(m_filename.c_str());
+}
+
+XmlNode * Track::loadXml(const char * filename)
+{
+  XmlNode * node=0;
+
+  irr::io::path mypath(filename);
+  bool res=m_filesystem->addFileArchive(mypath);
+
+  if(!res) 
+    return 0;
+
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
+
+  node=new XmlNode(xml);
+  assert(node && node->getName() == "track"); // TODO: this must not be an assert!!!
+
+  
+
+
+  res=m_filesystem->removeFileArchive(mypath);
+
+  return node;
+}
+
+void Track::tmpLoad()
+{ 
+  std::vector<XmlNode*> nodes;
+  XmlNode * node;
+
+  m_rootNode->getChildren(nodes);
+
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    node=nodes[i];
+    GM_LOG("Node name: '%s', text: '%s'\n",node->getName().c_str(),node->getText().c_str());
+
+    if(node->getName() == "track_start_pos") {
+    } else if(node->getName == "track_start_rot") {
+    }
+  }
+
 }
 
 void Track::load()
@@ -57,42 +99,13 @@ void Track::load()
   GM_LOG("loading track\n");
   if(m_loaded) return;
 
-  irr::u32 cnt=m_filesystem->getFileArchiveCount();
-
-  irr::io::path mypath(m_filename.c_str());
-  
-  bool res=m_filesystem->addFileArchive(mypath);
-
-
-  if(!res) {
-    GM_LOG("cannot load: '%s'\n",mypath.c_str());
-    return ;
-  }
-
-
-  m_archiveIndex=cnt;
-
-
-  irr::io::IFileArchive* archive=m_filesystem->
-    getFileArchive(m_archiveIndex);
-  if(!archive) {
+  irr::io::path archivepath(m_filename.c_str());
+  bool res=m_filesystem->addFileArchive(archivepath);
+  if(!res)
     throw Exception_cannotLoadFile(m_filename.c_str());
-  }
-
-
-  const irr::io::IFileList * fileList=archive->getFileList();
-  irr::s32 manifestIndex;
-
-  manifestIndex=fileList->findFile(MANIFEST_NAME);
-
-  
-  if(manifestIndex<0) {
-    GM_LOG("Not a valid track file\n");
-    throw Exception_cannotLoadFile(m_filename.c_str());
-  }
 
   irr::io::IReadFile *  manifestFile=
-    archive->createAndOpenFile(manifestIndex);
+    m_filesystem->createAndOpenFile(MANIFEST_NAME);
   
   if(!manifestFile) {
     throw Exception_cannotLoadFile(m_filename.c_str());
@@ -162,7 +175,7 @@ void Track::load()
               break;
 
             case ot_lamp:
-              rfile=archive->
+              rfile=m_filesystem->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 loadLights(rfile,smgr);
@@ -172,7 +185,7 @@ void Track::load()
               }
               break;
             case ot_mesh:
-              rfile=archive->
+              rfile=m_filesystem->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
@@ -191,7 +204,7 @@ void Track::load()
               }
               break;
             case ot_camera:
-              irr::io::IReadFile * rfile=archive->
+              irr::io::IReadFile * rfile=m_filesystem->
                   createAndOpenFile (xmlReader->getNodeName());
               if(rfile) {
                 if(m_cammgr)
@@ -232,14 +245,15 @@ void Track::load()
   }
   //xmlReader->drop();
   manifestFile->drop();
-  archive->drop();
-  m_filesystem->removeFileArchive(m_archiveIndex);
+  m_filesystem->removeFileArchive(MANIFEST_NAME);
 	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
   smgr->setAmbientLight(
       irr::video::SColorf(1.0,1.0,1.0));
   m_loaded=true;
+  //////////////////////////
+  tmpLoad();
 }
 
 void Track::unload()
