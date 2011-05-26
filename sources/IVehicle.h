@@ -48,15 +48,14 @@ class IVehicle : public CompoundSceneNode
   // querying
   virtual irr::core::vector3df getChassisPos()=0;
 
-  // commands
+  // commands (obsoleting?!?!?)
   virtual void throttleUp()=0;
   virtual void throttleDown()=0;
   virtual void throttleSet(double value)=0;
   virtual void brake()=0;
-  
-
   virtual void steerLeft()=0;
   virtual void steerRight()=0;
+  virtual void setEnableControls(bool enable)=0;
 
   // phisics
   virtual void applyTorque(float x, float y, float z)=0;

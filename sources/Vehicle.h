@@ -54,6 +54,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual void brake();
     virtual void steerLeft();
     virtual void steerRight();
+    virtual void setEnableControls(bool enable);
     virtual void applyTorque(float x, float y, float z);
 
     // deprecated ?!?
@@ -140,6 +141,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     btTransform  m_chassisWorldTrans;
 
+    bool  m_controlsEnabled;
     float m_steering;
     enum {
       steeredNone,
@@ -151,6 +153,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     float m_throttle;
     float m_throttleIncrement;
     float m_brake;
+
 
     char  m_throttling;
     

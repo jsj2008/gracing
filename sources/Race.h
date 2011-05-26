@@ -18,7 +18,10 @@
 #define RACE_H
 #include "IPhaseHandler.h"
 #include "IVehicle.h"
+#include "Track.hh"
+
 #include "GuiReadySetGo.h"
+#include "GuiCronometer.h"
 
 
 class Race : public  IPhaseHandler
@@ -28,19 +31,40 @@ class Race : public  IPhaseHandler
 
     virtual void step();
 
+    bool addVehicle(IVehicle * vehicle);
+
+    inline void setTrack(Track * track) { m_track=track; }
+
+    inline void restart() { gotoState(rs_readySetGo); }
+
+    enum {
+      rs_readySetGo,
+      rs_started,
+      rs_paused
+    };
+
   private:
+  
+    bool gotoState(unsigned state);
+
     enum { max_vehicles=3 };
 
     struct VehicleInfo {
       IVehicle * vehicle;
+      irr::core::vector3df startPosition;
+      double         startRotation;
     };
 
+    Track     *  m_track;
 
-    struct VehicleInfo vehicles[max_vehicles];
-    int         n_vehicles;
+
+    struct VehicleInfo m_vehicles[max_vehicles];
+    int                m_nVehicles;
 
     GuiReadySetGo * m_readySetGo;
+    GuiCronometer * m_cronometer;
 
+    unsigned             m_status;
 };
 
 

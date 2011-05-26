@@ -8,6 +8,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         DataRecorder.cc \
         GUISpeedometer.cc \
         GuiReadySetGo.cc \
+        GuiCronometer.cc \
         Race.cc \
         XmlNode.cc  
 

@@ -3,6 +3,8 @@
 from gimpfu import *
 import math
 
+num_col=16
+
 def get_closer_power_of_two(i):
   if i<=2:
     return 2
@@ -29,12 +31,12 @@ def get_closer_power_of_two(i):
 def calc_image_size(char_begin,char_end,fontname, font_size):    
     img_width=0
     img_height=0
-    rows = int( math.ceil((char_end - char_begin) / 5.) )
+    rows = int( math.ceil((char_end - char_begin) / num_col) )
     c=char_begin
     for row in range(0,rows):
       row_width=0
       row_height=0
-      for col in range(0,5):
+      for col in range(0,num_col):
         if c > char_end:
           break
         string= '%c' % c
@@ -53,8 +55,8 @@ def calc_image_size(char_begin,char_end,fontname, font_size):
 
 
 def python_generate_font(font,font_size,filename,color):
-    char_begin = ord('0')
-    char_end = ord('9')+1
+    char_begin = ord('!')
+    char_end = ord('~')+1
     num_chars = char_end - char_begin
 
     if font == "":
@@ -105,7 +107,7 @@ def python_generate_font(font,font_size,filename,color):
 
       elements.append(el)
       
-      if cnt and cnt % 5 == 0:
+      if cnt and cnt % num_col == 0:
         x_pos=0
         y_pos = y_pos + max_height
         max_height = 0

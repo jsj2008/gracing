@@ -16,6 +16,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef TRACK_HH
 #define TRACK_HH
+#include <string>
 #include <irrlicht.h>
 #include "PhyWorld.h"
 #include "CameraDataManager.hh"

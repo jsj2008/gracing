@@ -248,7 +248,6 @@ int main(int argc, char ** av)
   ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-  smgr->getRootSceneNode()->addChild(vehicle);
 
 
   // gui
@@ -282,31 +281,20 @@ int main(int argc, char ** av)
   flagI=true;
 
 
-  btVector3 vehicleStartPosition=btVector3(
-              thetrack->getStartPosition().X,
-              vehicle->getStartHeight(
-                thetrack->getStartPosition().X,
-                thetrack->getStartPosition().Z),
-              thetrack->getStartPosition().Z);
-
-  vehicle->reset(
-      irr::core::vector3df(vehicleStartPosition.getX(),
-        vehicleStartPosition.getY(),
-        vehicleStartPosition.getZ()),
-        thetrack->getStartRotation());
-      
-  GM_LOG("-->%f\n",
-        vehicleStartPosition.getZ());
-
 
   unsigned long startFrameTime;
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / 80;
 
 
-  IPhaseHandler * currentPhaseHandler;
+  Race *          race;
+  race = new Race(device,world);
 
-  currentPhaseHandler = new Race(device,world);
+  race->setTrack(thetrack);
+  race->addVehicle(vehicle);
+
+  IPhaseHandler * currentPhaseHandler;
+  currentPhaseHandler = race;
 
   while(device->run() && !done) {
     if(device->isWindowActive()) {
@@ -352,7 +340,8 @@ int main(int argc, char ** av)
 
       if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
         if(flagC)  {
-          vehicle->reset(thetrack->getStartPosition(),thetrack->getStartRotation());
+          //vehicle->reset(thetrack->getStartPosition(),thetrack->getStartRotation());
+          race->restart();
           GM_LOG("start position: %f,%f,%f\n",
               thetrack->getStartPosition().X,
               thetrack->getStartPosition().Y,

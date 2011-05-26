@@ -139,6 +139,20 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
+
+  ///////////////////////
+  // load resources
+  ///////////////////////
+
+  // system font
+  std::string fontName; 
+  if(!cfgGet("system-font",fontName)) {
+    fontName = "digits.xml";
+  }
+  irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
+  std::string fontPath = getResourcePath() + "/" + fontName;
+  m_font = guienv->getFont(fontPath.c_str());
+  assert(m_font);
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -159,6 +173,23 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
   if(text == "yes" ||
      text == "true")
     value=true;
+
+  return true;
+}
+
+bool ResourceManager::cfgGet(const char * name, std::string & value)
+{
+  if(!m_configRoot)
+    return false;
+
+  const XmlNode * node=m_configRoot->getChild(name);
+
+  if(!node) 
+    return false;
+
+  std::string text=node->getText();
+
+  value=text;
 
   return true;
 }

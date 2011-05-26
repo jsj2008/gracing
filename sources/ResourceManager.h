@@ -47,12 +47,16 @@ class ResourceManager
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
 
+    /* system font */
+    inline irr::gui::IGUIFont *  getSystemFont() { return m_font; }
+
 
     /* config access */
     bool cfgGet(const char * name, bool & value);
     bool cfgGet(const char * name, double & value);
     bool cfgGet(const char * name, double value[3]);
     bool cfgGet(const char * name, unsigned & value);
+    bool cfgGet(const char * name, std::string & value);
 
     inline const std::string & getResourcePath() { return m_rootDir; }
 
@@ -61,6 +65,8 @@ class ResourceManager
     {
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
+
+    
 
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
@@ -83,6 +89,9 @@ class ResourceManager
 
     unsigned m_screenHeight;
     unsigned m_screenWidth;
+
+    // resources
+    irr::gui::IGUIFont *  m_font;
 };
 
 #endif

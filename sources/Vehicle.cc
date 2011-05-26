@@ -228,7 +228,7 @@ Vehicle::Vehicle(
   m_sourceName=strdup(source);
   m_speedometer=0;
   m_loaded=false;
-
+  m_controlsEnabled=true;
 
   // accell dynamic info
   m_throttle=0.;
@@ -792,34 +792,36 @@ irr::core::vector3df Vehicle::getChassisPos()
 
 void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 {
-  if(m_throttling>0) {
-    m_brake=0.;
-    m_throttle+=m_throttleIncrement;
-    if(m_throttle>.5)
-      m_throttle=.5;
-  } else if(m_throttling<0) {
-    m_brake=0.;
-    m_throttle-=m_throttleIncrement;
-
-    if(m_throttle<-.5)  {
-      m_throttle=-.5;
-    }
-  } else {
-    if(m_throttle>0.) {
-      m_throttle-=m_throttleIncrement;
-      if(m_throttle < 0.) {
-        m_brake=.1;
-        m_throttle=0.;
-      }
-    } else if(m_throttle<0.) {
+  if(m_controlsEnabled) {
+    if(m_throttling>0) {
+      m_brake=0.;
       m_throttle+=m_throttleIncrement;
-      if(m_throttle > 0.) {
-        m_brake=.1;
-        m_throttle=0.;
+      if(m_throttle>.5)
+        m_throttle=.5;
+    } else if(m_throttling<0) {
+      m_brake=0.;
+      m_throttle-=m_throttleIncrement;
+
+      if(m_throttle<-.5)  {
+        m_throttle=-.5;
+      }
+    } else {
+      if(m_throttle>0.) {
+        m_throttle-=m_throttleIncrement;
+        if(m_throttle < 0.) {
+          m_brake=.1;
+          m_throttle=0.;
+        }
+      } else if(m_throttle<0.) {
+        m_throttle+=m_throttleIncrement;
+        if(m_throttle > 0.) {
+          m_brake=.1;
+          m_throttle=0.;
+        }
       }
     }
+    m_throttling=0;
   }
-  m_throttling=0;
 
   // hnalde steering
   switch(m_steered) {
@@ -1403,4 +1405,9 @@ double Vehicle::getStartHeight(float x, float z)
   }
 
   return totHeight / 4.;
+}
+
+void Vehicle::setEnableControls(bool enable)
+{
+  m_controlsEnabled=enable;
 }
