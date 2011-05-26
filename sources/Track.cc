@@ -68,33 +68,86 @@ XmlNode * Track::loadXml(const char * filename)
   node=new XmlNode(xml);
   assert(node && node->getName() == "track"); // TODO: this must not be an assert!!!
 
-  
-
-
   res=m_filesystem->removeFileArchive(mypath);
 
   return node;
 }
 
-void Track::tmpLoad()
+void Track::load()
 { 
   std::vector<XmlNode*> nodes;
   XmlNode * node;
 
+  irr::io::path archivepath(m_filename.c_str());
+  bool res=m_filesystem->addFileArchive(archivepath);
+  assert(res);
+
   m_rootNode->getChildren(nodes);
+  irr::scene::ISceneManager* smgr = m_device->getSceneManager();
 
   for(unsigned int i=0; i<nodes.size(); i++) {
     node=nodes[i];
-    GM_LOG("Node name: '%s', text: '%s'\n",node->getName().c_str(),node->getText().c_str());
 
     if(node->getName() == "track_start_pos") {
-    } else if(node->getName == "track_start_rot") {
+      Util::parseVector(node->getText().c_str(), m_startPosition);
+    } else if(node->getName() == "track_start_rot") {
+      m_startRotation=Util::parseFloat(node->getText().c_str());
+    } else if(node->getName() == "mesh") {
+      irr::io::IReadFile * rfile=m_filesystem->
+        createAndOpenFile (node->getText().c_str());
+      if(rfile) {
+        irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
+        irr::scene::IMeshSceneNode* inode=0;
+        inode=smgr->addOctreeSceneNode( mesh,0,0xBADD );
+        if(!inode) {
+          GM_LOG("cannot load mesh '%s'\n",node->getText().c_str());
+        } else {
+          m_sceneNodes.push_back(inode);
+          inode->grab();
+        }
+        rfile->drop();
+      } else {
+        GM_LOG("  cannot find file\n");
+      }
+    } else if(node->getName() == "camera") {
+      irr::io::IReadFile * rfile=m_filesystem->
+        createAndOpenFile (node->getText().c_str());
+      if(rfile) {
+        if(m_cammgr)
+          delete m_cammgr;
+        if(m_camera)
+          m_camera->drop();
+        m_cammgr=new CameraDataManager(rfile);
+        irr::core::vector3df p,r;
+        //m_cammgr->getPositionAndRotation(p,r);
+        //m_camera->setPosition(p);
+        //m_camera->setRotation(r);
+        //m_camera->grab();
+        rfile->drop();
+      }
+    } else if(node->getName() == "lamp") {
+      irr::io::IReadFile * rfile=m_filesystem->
+        createAndOpenFile (node->getText().c_str());
+      if(rfile) {
+        loadLights(rfile,smgr);
+        rfile->drop();
+      } else {
+        GM_LOG("  --> cannot find file\n");
+      }
     }
   }
 
+  m_filesystem->removeFileArchive(archivepath);
+
+	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
+    m_world->addStaticMesh(m_sceneNodes[i]);
+  }
+  smgr->setAmbientLight(
+      irr::video::SColorf(1.0,1.0,1.0));
+  m_loaded=true;
 }
 
-void Track::load()
+void Track::tmpLoad()
 {
   GM_LOG("loading track\n");
   if(m_loaded) return;
@@ -253,7 +306,6 @@ void Track::load()
       irr::video::SColorf(1.0,1.0,1.0));
   m_loaded=true;
   //////////////////////////
-  tmpLoad();
 }
 
 void Track::unload()
