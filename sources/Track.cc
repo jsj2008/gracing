@@ -73,6 +73,26 @@ XmlNode * Track::loadXml(const char * filename)
   return node;
 }
 
+void Track::loadControlPoints(XmlNode * root)
+{
+  std::vector<XmlNode*> nodes;
+  XmlNode * node;
+  double v;
+  btVector3 point;
+
+  root->getChildren(nodes);
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    node=nodes[i];
+    if(node->getName() != "point")
+      continue;
+    node->get("X",v); point.setX(v);
+    node->get("Y",v); point.setY(v);
+    node->get("Z",v); point.setZ(v);
+
+    m_controlPoints.push_back(point);
+  }
+}
 void Track::load()
 { 
   std::vector<XmlNode*> nodes;
@@ -87,8 +107,9 @@ void Track::load()
 
   for(unsigned int i=0; i<nodes.size(); i++) {
     node=nodes[i];
-
-    if(node->getName() == "track_start_pos") {
+    if(node->getName() == "control-points") {
+      loadControlPoints(node);
+    } else if(node->getName() == "track_start_pos") {
       Util::parseVector(node->getText().c_str(), m_startPosition);
     } else if(node->getName() == "track_start_rot") {
       m_startRotation=Util::parseFloat(node->getText().c_str());
@@ -135,6 +156,17 @@ void Track::load()
         GM_LOG("  --> cannot find file\n");
       }
     }
+  }
+
+  const XmlNode * triggers=m_rootNode->getChild("triggers");
+
+  nodes.clear();
+  triggers->getChildren(nodes);
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    btVector3 pos;
+    btVector3 dim;
+    btQuaternion rot;
+    node=nodes[i];
   }
 
   m_filesystem->removeFileArchive(archivepath);

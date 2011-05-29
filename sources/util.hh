@@ -102,6 +102,32 @@ class Util
     vec.Y=readDouble(file);
   }
 
+  static inline void parseQuaternion(const char * str, double c[4])
+  {
+	  const irr::u32 WORD_BUFFER_LENGTH = 256;
+	  char wordBuffer[WORD_BUFFER_LENGTH];
+    //double c[3];
+    char * ptr;
+    int n;
+    c[0]=c[1]=c[2]=c[3]=0.f;
+
+    for(n=0, ptr=wordBuffer; *str && n<3;  str++) {
+      if( *str && *str != ',') {
+        *ptr=*str;
+        ptr++;
+      } else {
+        *ptr=0;
+        c[n]=irr::core::fast_atof(wordBuffer);
+        n++;
+        ptr=wordBuffer;
+      }
+    }
+    if(n<4) {
+      *ptr=0;
+      c[n]=irr::core::fast_atof(wordBuffer);
+    }
+  }
+
   static inline void parseVector(const char * str, double c[3])
   {
 	  const irr::u32 WORD_BUFFER_LENGTH = 256;

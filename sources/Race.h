@@ -46,20 +46,36 @@ class Race : public  IPhaseHandler
   private:
   
     bool gotoState(unsigned state);
+    void updateVehiclesInfo();
 
     enum { max_vehicles=3 };
 
     struct VehicleInfo {
-      IVehicle * vehicle;
+      IVehicle *           vehicle;
+
+      /* start position of this vehicle */
       irr::core::vector3df startPosition;
-      double         startRotation;
+
+      /* start rotation (aroux Y axis) of this vehicle */
+      double               startRotation;
+
+      /* the curret control point                   */
+      /* each vehicle is between two control points */
+      /* this is the first of the two               */
+      unsigned             controlPointIndex;
+
+      /* distatnce to the next control point        */
+      double               ctrlPntDistance;
+
+      /* if true the vehicle is goind in the wrong way */
+      bool                 wrongWay;
     };
 
     Track     *  m_track;
 
 
     struct VehicleInfo m_vehicles[max_vehicles];
-    int                m_nVehicles;
+    unsigned           m_nVehicles;
 
     GuiReadySetGo * m_readySetGo;
     GuiCronometer * m_cronometer;

@@ -131,6 +131,17 @@ int XmlNode::get(const std::string &attribute, std::string *value) const
   return 1;
 }
 
+int XmlNode::get(const std::string &attribute, double & value) const
+{
+  if(m_attributes.size()==0) return 0;
+  std::map<std::string, core::stringw>::const_iterator o;
+  o = m_attributes.find(attribute);
+  if(o==m_attributes.end()) return 0;
+  value=irr::core::fast_atof(core::stringc(o->second).c_str());
+  //*value=core::stringc(o->second).c_str();
+  return 1;
+}
+
 #if 0
 int XmlNode::get(const std::string &attribute, core::vector2df *value) const
 {

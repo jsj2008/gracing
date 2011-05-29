@@ -17,6 +17,82 @@
 
 #include "Race.h"
 
+// !'!'!'!'!unsigned
+static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex, 
+    const std::vector<btVector3> & controlPoints)  
+{ 
+  return (currentIndex+1) % controlPoints.size(); 
+}
+
+static bool evolveVehicleControlPoint(
+    unsigned &                        currentIndex,
+    const    btVector3 &              position,
+    const    std::vector<btVector3> & controlPoints)
+{
+  double   d0,d1; 
+  unsigned i1; 
+
+  assert(currentIndex < controlPoints.size());
+
+  i1=nextIndexVehicleControlPoint(currentIndex,controlPoints);
+
+
+  d0=(controlPoints[currentIndex]-position).length2();
+  d1=(controlPoints[i1]-position).length2();
+
+  if(d0 <= d1) 
+    return false;
+
+  currentIndex = i1;
+
+  return true;
+}
+
+static inline double distanceVehicleControlPoint(
+    unsigned &                        currentIndex,
+    const    btVector3 &              position,
+    const    std::vector<btVector3> & controlPoints)
+{
+  assert(currentIndex < controlPoints.size());
+
+  unsigned i1=nextIndexVehicleControlPoint(currentIndex,controlPoints);
+
+  btVector3 relPos = position - controlPoints[i1];
+
+  double d=(controlPoints[currentIndex] - controlPoints[i1]).dot(relPos);
+
+  return d;
+}
+
+static unsigned initVehicleControlPoint(
+    const btVector3 & position,
+    const std::vector<btVector3> & controlPoints)
+{
+  unsigned iMin;
+  double min,dis;
+
+  if(controlPoints.size() == 0)
+    return 0;
+
+  iMin=0;
+  min=(controlPoints[iMin]-position).length2();
+
+  for(unsigned i=1; i < controlPoints.size(); i++) 
+    if((dis=(controlPoints[i]-position).length2()) < min) {
+      min=dis;
+      iMin=i;
+    }
+
+  return iMin;
+}
+
+static btVector3 vectIrrToBullet(const irr::core::vector3df & irrv)
+{
+  return btVector3(irrv.X, irrv.Y, irrv.Z);
+}
+
+// !'!'!'!'!
+
 
 Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   : IPhaseHandler(device,world)
@@ -35,6 +111,39 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   restart();
 }
 
+void Race::updateVehiclesInfo()
+{
+  const std::vector<btVector3> & controlPoints=m_track->getControlPoints();
+  for(unsigned index=0; index<m_nVehicles; index++) {
+    VehicleInfo & vinfo=m_vehicles[index];
+
+    btVector3 pos=vectIrrToBullet(vinfo.vehicle->getChassisPos());
+
+    if(evolveVehicleControlPoint(vinfo.controlPointIndex,
+          pos,controlPoints)) {
+      GM_LOG("new index: %d\n",vinfo.controlPointIndex);
+    }
+
+    double newDist=
+          distanceVehicleControlPoint(
+              vinfo.controlPointIndex,
+              pos,
+              controlPoints);
+
+    if(newDist > vinfo.ctrlPntDistance) 
+      vinfo.wrongWay=true;
+    else
+      vinfo.wrongWay=false;
+
+    if(vinfo.wrongWay) {
+      static int so=0;
+      GM_LOG("Wrong way %d!!\n",so++);
+    }
+    
+    vinfo.ctrlPntDistance=newDist;
+  }
+}
+
 void Race::step()
 {
   // status handling
@@ -42,11 +151,13 @@ void Race::step()
     case rs_readySetGo:
       if(m_readySetGo->isEnded()) {
         GM_LOG("going into started state\n");
-        assert(gotoState(rs_started));
+        gotoState(rs_started);
       }
       break;
+    case rs_started:
+      updateVehiclesInfo();
+      break;
   }
-
 
   m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
   m_sceneManager->drawAll();
@@ -61,10 +172,20 @@ bool Race::gotoState(unsigned state)
   switch(state) {
     case rs_readySetGo:
       // reset vehicles
-      for(int i=0; i<m_nVehicles; i++)  {
+      for(unsigned i=0; i<m_nVehicles; i++)  {
         m_vehicles[i].vehicle->reset(m_vehicles[i].startPosition,
             m_vehicles[i].startRotation);
         m_vehicles[i].vehicle->setEnableControls(false);
+
+        btVector3 pos=vectIrrToBullet(m_vehicles[i].startPosition);
+        m_vehicles[i].controlPointIndex=
+          initVehicleControlPoint(pos,m_track->getControlPoints());
+        m_vehicles[i].wrongWay=false;
+        m_vehicles[i].ctrlPntDistance=
+          distanceVehicleControlPoint(
+              m_vehicles[i].controlPointIndex,
+              pos,
+              m_track->getControlPoints());
       }
       // reset gui controls
       m_readySetGo->restart();
@@ -74,7 +195,7 @@ bool Race::gotoState(unsigned state)
     case rs_started:
       if(m_status!=rs_readySetGo)
         return false;
-      for(int i=0; i<m_nVehicles; i++) 
+      for(unsigned i=0; i<m_nVehicles; i++) 
         m_vehicles[i].vehicle->setEnableControls(true);
       m_status=rs_started;
       m_cronometer->start();

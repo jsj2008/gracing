@@ -344,10 +344,12 @@ void Vehicle::initPhysics()
                   m_wheelInitialPositions[i].Y,
                   m_wheelInitialPositions[i].Z);
 
+#if 0
     GM_LOG("Wheel %d position %f,%f,%f\n",i,
                   m_wheelInitialPositions[i].X,
                   m_wheelInitialPositions[i].Y,
                   m_wheelInitialPositions[i].Z);
+#endif
 
     m_wheelsData[i].radius=m_wheelRadiuses[i];
     m_wheelsData[i].suspensionLength=m_suspensionRestLength;

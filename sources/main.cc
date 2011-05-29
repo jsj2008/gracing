@@ -296,6 +296,8 @@ int main(int argc, char ** av)
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;
 
+  race->restart();
+
   while(device->run() && !done) {
     if(device->isWindowActive()) {
 

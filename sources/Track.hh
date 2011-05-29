@@ -37,10 +37,14 @@ class Track
     inline const irr::core::vector3df & getStartPosition() { return m_startPosition; }
     inline const float getStartRotation() { return m_startRotation; }
 
+    inline const std::vector<btVector3> & getControlPoints() { return m_controlPoints; }
+
   private:
 
     void loadLights( irr::io::IReadFile * file ,
         irr::scene::ISceneManager* smgr );
+
+    void loadControlPoints(XmlNode * root);
 
     XmlNode * loadXml(const char *);
 
@@ -63,6 +67,8 @@ class Track
     std::string                                    m_filename;
     irr::IrrlichtDevice *                          m_device;
     PhyWorld *                                     m_world;
+
+    std::vector<btVector3>                         m_controlPoints;
 
     irr::core::vector3df                           m_startPosition;
     double                                         m_startRotation;

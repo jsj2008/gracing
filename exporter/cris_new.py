@@ -12,7 +12,7 @@ __bpydoc__ = """\
 Crisalide xml exporter
 
 """
-import bpy,os,struct,zipfile,math,time,mathutils,shutil
+import bpy,os,struct,zipfile,math,time,mathutils,shutil,string
 
 from bpy.props import *
 from io_utils import ExportHelper, ImportHelper
@@ -29,6 +29,12 @@ cris binary file format
 
 - MARK_FACES_ONLY 
 """
+
+# TODO: get "custom property" from mat to
+#       set flags: uptonow they are set to default
+#       in getMaterialFlagsWord
+
+# TODO: change naming convention of the xmlnodes for using "-"
 
 # LOG configuration
 LOG_ON_STDOUT=1
@@ -144,8 +150,6 @@ class BBound:
     point[2]=-(self.minY + self.maxY) / 2.0;
     return point
 
-
-
   def logDim(self):
     minY=self.minY + (self.minZ + self.maxZ) / 2.0
     maxY=self.maxY + (self.minZ + self.maxZ) / 2.0
@@ -169,7 +173,7 @@ def copy_image(iname,dest_dir):
       shutil.copy(fn, fn_abs_dest)
     except:
       # have mercy on me!
-      # still dont understand how blender handle
+      # still dont understand how blender handles
       # image files.
       log("WARNING: cannot copy image file (src: '%s', dst: '%s')"%(fn,fn_abs_dest))
       src_name=os.path.basename(fn)
@@ -183,8 +187,6 @@ def copy_image(iname,dest_dir):
   return fn_abs_dest
     
 def getMaterialFlagsWord(mat):
-  # TODO: get "custom property" from mat to
-  #       set flags: uptonow they are set to default
   word=0
   for v in MATERIA_FLAGS_LIST:
     if v["default"]:
@@ -234,7 +236,6 @@ def binWrite_color(fp,color):
   v=struct.pack("ddd",color[0],color[1],color[2])
   fp.write(v)
  
-
 def binWrite_colorNode(fp,color):
   r=float(color.getProp("R"))
   g=float(color.getProp("G"))
@@ -1146,6 +1147,28 @@ class export_OT_track(bpy.types.Operator):
     description="Export only object with name starting with 'exp.' (debug purposes",
     default=False)
 
+  def handleTrackProfile(self, obj):
+    if obj.type != 'CURVE':
+      return
+
+
+    ctrlPoints=XmlNode("control-points")
+    
+    # TODO: should do more 'type' checking on 
+    #       type of spline !!!
+    #       may should also check the number
+    #       of spline
+    spline=obj.data.splines[0]
+    for bpoint  in spline.bezier_points:
+      co = bpoint.co
+      node=XmlNode("point")
+      node.setProp("X",co[0])
+      node.setProp("Y",co[2])
+      node.setProp("Z",co[1])
+      ctrlPoints.addChild(node)
+
+    return ctrlPoints
+    
 
   def execute(self, context):
     global inserted_images
@@ -1166,9 +1189,29 @@ class export_OT_track(bpy.types.Operator):
         RaiseError("horrorororor!")
 
     root=XmlNode("track")
+    triggers=XmlNode("triggers")
+    root.addChild(triggers)
     scene = context.scene
+    ctrlPoint=None
 
     for ob in [ ob for ob in scene.objects if ob.is_visible(scene) ]:
+      if ob.name.startswith("trig."):
+        triggerType = ob.name.replace("trig.","")
+        position=ob.location
+        dim=ob.dimensions
+        quat=ob.rotation_quaternion
+        node=XmlNode("trigger")
+        node.setProp("type",triggerType)
+        node.setProp("pos","%f,%f,%f"%(dim[0],dim[2],dim[1]))
+        node.setProp("rot","%f,%f,%f,%f"%(quat[0],quat[2],quat[1],quat[3]))
+        node.setProp("halfDim","%f,%f,%f"%(dim[0]/2., dim[2]/2., dim[1]/2.))
+        triggers.addChild(node)
+        continue
+
+      if ob.type == "CURVE" and ob.name == "track.profile":
+        ctrlPoints=self.handleTrackProfile(ob)
+        continue
+
       materialDict, mesh_objects = createMaterialDictAndMeshList(scene,ob)
 
       for ob, blender_mesh in mesh_objects:
@@ -1200,10 +1243,13 @@ class export_OT_track(bpy.types.Operator):
         node.setText(val)
         root.addChild(node)
 
-        val="%f"%(ob.rotation_euler[2])
+        val="%f"%(-1.*ob.rotation_euler[2])
         node=XmlNode("track_start_rot")
         node.setText(val)
         root.addChild(node)
+
+    if ctrlPoints != None:
+      root.addChild(ctrlPoints)
 
     file=open(xmlname,"w")
     root.writeSubTree(file)

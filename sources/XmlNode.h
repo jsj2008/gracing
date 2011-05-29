@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <irrlicht.h>
+#include "btBulletDynamicsCommon.h"
 
 #include "ResourceManager.h"
 
@@ -50,11 +51,17 @@ class XmlNode
     // get value as string
     int get(const std::string &attribute, std::string *value) const;
 
+    // get value as double
+    int get(const std::string &attribute, double & value) const;
+
     // get value as 2d vector
     int get(const std::string &attribute, irr::core::vector2df *value) const;
 
     // get value as 3d vector
     int get(const std::string &attribute, irr::core::vector3df *value) const;
+
+    // get value as a bullet 3d vector
+    int get(const std::string &attribute, btVector3 & value) const;
 
 
   private:
