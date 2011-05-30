@@ -73,6 +73,27 @@ XmlNode * Track::loadXml(const char * filename)
   return node;
 }
 
+void Track::loadTriggers(XmlNode * root)
+{
+  std::vector<XmlNode*> nodes;
+  XmlNode * node;
+  std::string type;
+  btVector3 dim;
+  btVector3 pos;
+  btQuaternion rot;
+
+  root->getChildren(nodes);
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    if(node->getName() != "trigger")
+      continue;
+    node->get("type",type);
+    node->get("halfDim",dim);
+    node->get("pos",pos);
+    node->get("rot",rot);
+  }
+}
+
 void Track::loadControlPoints(XmlNode * root)
 {
   std::vector<XmlNode*> nodes;
@@ -109,6 +130,8 @@ void Track::load()
     node=nodes[i];
     if(node->getName() == "control-points") {
       loadControlPoints(node);
+    } else if(node->getName() == "triggers") {
+      loadTriggers(node);
     } else if(node->getName() == "track_start_pos") {
       Util::parseVector(node->getText().c_str(), m_startPosition);
     } else if(node->getName() == "track_start_rot") {

@@ -121,13 +121,43 @@ XmlNode::~XmlNode()
   m_nodes.clear();
 }
 
-int XmlNode::get(const std::string &attribute, std::string *value) const
+int XmlNode::get(const std::string &attribute, std::string & value) const
 {
   if(m_attributes.size()==0) return 0;
   std::map<std::string, core::stringw>::const_iterator o;
   o = m_attributes.find(attribute);
   if(o==m_attributes.end()) return 0;
-  *value=core::stringc(o->second).c_str();
+  //*value=core::stringc(o->second).c_str();
+  value=core::stringc(o->second).c_str();
+  return 1;
+}
+
+int XmlNode::get(const std::string &attribute, btQuaternion & value) const
+{
+  if(m_attributes.size()==0) return 0;
+  std::map<std::string, core::stringw>::const_iterator o;
+  o = m_attributes.find(attribute);
+  if(o==m_attributes.end()) return 0;
+  double v[4];
+  Util::parseQuaternion(core::stringc(o->second).c_str(),v);
+  value.setX(v[0]);
+  value.setY(v[1]);
+  value.setZ(v[2]);
+  value.setW(v[3]);
+  return 1;
+}
+
+int XmlNode::get(const std::string &attribute, btVector3 & value) const
+{
+  if(m_attributes.size()==0) return 0;
+  std::map<std::string, core::stringw>::const_iterator o;
+  o = m_attributes.find(attribute);
+  if(o==m_attributes.end()) return 0;
+  double v[3];
+  Util::parseVector(core::stringc(o->second).c_str(),v);
+  value.setX(v[0]);
+  value.setY(v[1]);
+  value.setZ(v[2]);
   return 1;
 }
 

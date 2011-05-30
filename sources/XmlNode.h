@@ -49,10 +49,12 @@ class XmlNode
     const std::string &getText() const {return m_text; }
 
     // get value as string
-    int get(const std::string &attribute, std::string *value) const;
+    int get(const std::string &attribute,std::string & value) const;
 
     // get value as double
     int get(const std::string &attribute, double & value) const;
+
+    int get(const std::string &attribute, btQuaternion & value) const;
 
     // get value as 2d vector
     int get(const std::string &attribute, irr::core::vector2df *value) const;

@@ -118,22 +118,29 @@ void Race::updateVehiclesInfo()
     VehicleInfo & vinfo=m_vehicles[index];
 
     btVector3 pos=vectIrrToBullet(vinfo.vehicle->getChassisPos());
+    double newDist;
 
     if(evolveVehicleControlPoint(vinfo.controlPointIndex,
           pos,controlPoints)) {
       GM_LOG("new index: %d\n",vinfo.controlPointIndex);
+      newDist=
+        distanceVehicleControlPoint(
+            vinfo.controlPointIndex,
+            pos,
+            controlPoints);
+    } else {
+
+      newDist=
+        distanceVehicleControlPoint(
+            vinfo.controlPointIndex,
+            pos,
+            controlPoints);
+
+      if(newDist > (vinfo.ctrlPntDistance+0.5))
+        vinfo.wrongWay=true;
+      else
+        vinfo.wrongWay=false;
     }
-
-    double newDist=
-          distanceVehicleControlPoint(
-              vinfo.controlPointIndex,
-              pos,
-              controlPoints);
-
-    if(newDist > vinfo.ctrlPntDistance) 
-      vinfo.wrongWay=true;
-    else
-      vinfo.wrongWay=false;
 
     if(vinfo.wrongWay) {
       static int so=0;

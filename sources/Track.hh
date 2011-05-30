@@ -45,6 +45,7 @@ class Track
         irr::scene::ISceneManager* smgr );
 
     void loadControlPoints(XmlNode * root);
+    void loadTriggers(XmlNode * root);
 
     XmlNode * loadXml(const char *);
 
