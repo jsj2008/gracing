@@ -1197,12 +1197,12 @@ class export_OT_track(bpy.types.Operator):
     for ob in [ ob for ob in scene.objects if ob.is_visible(scene) ]:
       if ob.name.startswith("trig."):
         triggerType = ob.name.replace("trig.","")
-        position=ob.location
+        pos=ob.location
         dim=ob.dimensions
         quat=ob.rotation_quaternion
         node=XmlNode("trigger")
         node.setProp("type",triggerType)
-        node.setProp("pos","%f,%f,%f"%(dim[0],dim[2],dim[1]))
+        node.setProp("pos","%f,%f,%f"%(pos[0],pos[2],pos[1]))
         node.setProp("rot","%f,%f,%f,%f"%(quat[0],quat[2],quat[1],quat[3]))
         node.setProp("halfDim","%f,%f,%f"%(dim[0]/2., dim[2]/2., dim[1]/2.))
         triggers.addChild(node)

@@ -23,11 +23,48 @@
 #include "Util.hh"
 #include "PhyWorld.h"
 #include "ResourceManager.h"
-
+#include "Race.h"
 #ifndef BASE_DIR
 #define BASE_DIR "."
 #endif
 #define MANIFEST_NAME "TRACK"
+
+/* trigger type */
+enum
+{
+  tt_lap
+};
+
+bool cb_ContactAddedCallback(
+    btManifoldPoint& cp,
+    const btCollisionObject* colObj0,
+    int partId0,
+    int index0,
+    const btCollisionObject* colObj1,
+    int partId1,
+    int index1)
+{
+  Track::TriggerInfo * triggerInfo=0;
+
+  if(colObj0->getUserPointer() != 0 && colObj1->getUserPointer()==0) 
+    triggerInfo=(Track::TriggerInfo*)colObj0->getUserPointer();
+  else if(colObj1->getUserPointer() != 0 && colObj0->getUserPointer()==0) 
+    triggerInfo=(Track::TriggerInfo*)colObj1->getUserPointer();
+  assert(triggerInfo);
+
+  switch(triggerInfo->type) 
+  {
+    case tt_lap:
+      if(triggerInfo->race)
+        triggerInfo->race->lapTriggered(triggerInfo->userData);
+      break;
+    default:
+      GM_LOG("un po suka un po no\n");
+      break;
+  }
+
+  return false;
+}
 
 
 Track::Track(
@@ -50,7 +87,11 @@ Track::Track(
   m_cammgr=0;
   m_camera=0;
 
+  memset(&m_triggerLap,0,sizeof(TriggerInfo));
+
   m_rootNode=loadXml(m_filename.c_str());
+
+  gContactAddedCallback=cb_ContactAddedCallback;
 }
 
 XmlNode * Track::loadXml(const char * filename)
@@ -73,6 +114,7 @@ XmlNode * Track::loadXml(const char * filename)
   return node;
 }
 
+
 void Track::loadTriggers(XmlNode * root)
 {
   std::vector<XmlNode*> nodes;
@@ -85,12 +127,44 @@ void Track::loadTriggers(XmlNode * root)
   root->getChildren(nodes);
 
   for(unsigned i=0; i<nodes.size(); i++) {
+    node=nodes[i];
     if(node->getName() != "trigger")
       continue;
     node->get("type",type);
     node->get("halfDim",dim);
     node->get("pos",pos);
     node->get("rot",rot);
+    GM_LOG("Trigger: pos: %f,%f,%f\n",pos.getX(),pos.getY(),pos.getZ());
+    GM_LOG("         dim: %f,%f,%f\n",dim.getX(),dim.getY(),dim.getZ());
+    if(type=="lap") {
+      btCollisionShape* shape = new btBoxShape(dim);
+
+      btTransform startTransform;
+      startTransform.setIdentity();
+
+      btScalar	btMass(0.);
+
+      startTransform.setOrigin(pos);
+      //startTransform.setRotation(rot);
+
+      btVector3 localInertia(0,0,0);
+      btDefaultMotionState* motionState = 
+        new btDefaultMotionState(startTransform);
+      btRigidBody::btRigidBodyConstructionInfo 
+        rbInfo(btMass,motionState,shape,localInertia);
+      btRigidBody* body = new btRigidBody(rbInfo);
+
+      body->setCollisionFlags(body->getCollisionFlags() |
+          btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK |
+          btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
+      // TODO: keep track of this bodies !!!
+      m_world->addRigidBody(body);
+
+      m_triggerLap.self=body;
+      m_triggerLap.type=tt_lap;
+      body->setUserPointer(&m_triggerLap);
+    }
   }
 }
 
@@ -433,5 +507,12 @@ void Track::loadLights( irr::io::IReadFile * file ,
   m_lights.push_back(light);
   light->getLightData().SpecularColor = specularColor;
   light->grab();
+}
 
+void Track::registerLapCallback(Race * race, void * userdata)
+{
+  // TODO: must use a vector of TriggerInfo
+  //       (to support multiple registration)
+  m_triggerLap.race=race;
+  m_triggerLap.userData=userdata;
 }

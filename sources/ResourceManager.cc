@@ -147,7 +147,9 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   // system font
   std::string fontName; 
   if(!cfgGet("system-font",fontName)) {
-    fontName = "digits.xml";
+    //fontName = "transuranium-64.xml"; // "digits.xml";
+    //fontName = "digits.xml";
+    fontName = "braggadocio-64.xml"; // "digits.xml";
   }
   irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
   std::string fontPath = getResourcePath() + "/" + fontName;

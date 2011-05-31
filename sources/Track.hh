@@ -22,6 +22,8 @@
 #include "XmlNode.h"
 #include "CameraDataManager.hh"
 
+class Race;
+
 class Track
 {
   public:
@@ -38,6 +40,9 @@ class Track
     inline const float getStartRotation() { return m_startRotation; }
 
     inline const std::vector<btVector3> & getControlPoints() { return m_controlPoints; }
+
+    // TODO: find a more general form for trigger callback
+    void registerLapCallback(Race * race, void * userdata);
 
   private:
 
@@ -75,6 +80,27 @@ class Track
     double                                         m_startRotation;
 
     XmlNode *                                      m_rootNode;
+
+    friend bool cb_ContactAddedCallback(
+      btManifoldPoint& cp,
+      const btCollisionObject* colObj0,
+      int partId0,
+      int index0,
+      const btCollisionObject* colObj1,
+      int partId1,
+      int index1);
+
+    struct TriggerInfo 
+    {
+      int            type;
+      Race *         race;
+      btRigidBody *  self;
+      void *         userData;
+    };
+
+    /* lap trigger */
+    TriggerInfo                                    m_triggerLap;
+
 };
 
 #endif

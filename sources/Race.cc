@@ -122,7 +122,8 @@ void Race::updateVehiclesInfo()
 
     if(evolveVehicleControlPoint(vinfo.controlPointIndex,
           pos,controlPoints)) {
-      GM_LOG("new index: %d\n",vinfo.controlPointIndex);
+      if(vinfo.controlPointIndex == controlPoints.size()-1) 
+        vinfo.waitingForLapTrigger=true;
       newDist=
         distanceVehicleControlPoint(
             vinfo.controlPointIndex,
@@ -225,7 +226,21 @@ bool Race::addVehicle(IVehicle * vehicle)
   m_vehicles[m_nVehicles].startPosition=m_track->getStartPosition();
   m_vehicles[m_nVehicles].startRotation=m_track->getStartRotation();
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
+  m_vehicles[m_nVehicles].waitingForLapTrigger=false;
+  m_track->registerLapCallback(this, &(m_vehicles[m_nVehicles]));
+
   m_nVehicles++;
 
+
   return true;
+}
+
+
+void Race::lapTriggered(void * userdata)
+{
+  VehicleInfo * vinfo=(VehicleInfo*)userdata;
+  if(vinfo->waitingForLapTrigger) {
+    vinfo->waitingForLapTrigger=false;
+    GM_LOG("A new lap\n");
+  }
 }

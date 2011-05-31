@@ -43,6 +43,9 @@ class Race : public  IPhaseHandler
       rs_paused
     };
 
+    /* callback for lap trigger */
+    void lapTriggered(void * userdata);
+
   private:
   
     bool gotoState(unsigned state);
@@ -69,6 +72,10 @@ class Race : public  IPhaseHandler
 
       /* if true the vehicle is goind in the wrong way */
       bool                 wrongWay;
+
+      /* if true the vehicle is passed on last control */
+      /* point and is waiting for lap end              */
+      bool                 waitingForLapTrigger;
     };
 
     Track     *  m_track;
