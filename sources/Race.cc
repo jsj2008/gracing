@@ -144,8 +144,6 @@ void Race::updateVehiclesInfo()
     }
 
     if(vinfo.wrongWay) {
-      static int so=0;
-      GM_LOG("Wrong way %d!!\n",so++);
     }
     
     vinfo.ctrlPntDistance=newDist;
@@ -227,7 +225,7 @@ bool Race::addVehicle(IVehicle * vehicle)
   m_vehicles[m_nVehicles].startRotation=m_track->getStartRotation();
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
-  m_track->registerLapCallback(this, &(m_vehicles[m_nVehicles]));
+  m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
 
   m_nVehicles++;
 

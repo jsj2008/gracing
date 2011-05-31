@@ -24,15 +24,16 @@
 #include "PhyWorld.h"
 #include "ResourceManager.h"
 #include "Race.h"
-#ifndef BASE_DIR
-#define BASE_DIR "."
-#endif
+
 #define MANIFEST_NAME "TRACK"
 
 /* trigger type */
 enum
 {
-  tt_lap
+  tt_lap=33,
+
+  tt_maxNumber=128
+
 };
 
 bool cb_ContactAddedCallback(
@@ -46,11 +47,18 @@ bool cb_ContactAddedCallback(
 {
   Track::TriggerInfo * triggerInfo=0;
 
-  if(colObj0->getUserPointer() != 0 && colObj1->getUserPointer()==0) 
-    triggerInfo=(Track::TriggerInfo*)colObj0->getUserPointer();
-  else if(colObj1->getUserPointer() != 0 && colObj0->getUserPointer()==0) 
+  if(colObj0->getUserPointer() == (void*)tt_lap && colObj1->getUserPointer()!=0) 
     triggerInfo=(Track::TriggerInfo*)colObj1->getUserPointer();
-  assert(triggerInfo);
+  else if(colObj1->getUserPointer() == (void*)tt_lap && colObj0->getUserPointer()!=0) 
+    triggerInfo=(Track::TriggerInfo*)colObj0->getUserPointer();
+
+
+  if(!triggerInfo) {
+    GM_LOG("fake girost %d,%d\n",
+        colObj0,
+        colObj1);
+    return false;
+  }
 
   switch(triggerInfo->type) 
   {
@@ -86,8 +94,6 @@ Track::Track(
   //m_device->grab();
   m_cammgr=0;
   m_camera=0;
-
-  memset(&m_triggerLap,0,sizeof(TriggerInfo));
 
   m_rootNode=loadXml(m_filename.c_str());
 
@@ -158,12 +164,9 @@ void Track::loadTriggers(XmlNode * root)
           btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK |
           btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-      // TODO: keep track of this bodies !!!
       m_world->addRigidBody(body);
 
-      m_triggerLap.self=body;
-      m_triggerLap.type=tt_lap;
-      body->setUserPointer(&m_triggerLap);
+      body->setUserPointer((void*)tt_lap);
     }
   }
 }
@@ -509,10 +512,17 @@ void Track::loadLights( irr::io::IReadFile * file ,
   light->grab();
 }
 
-void Track::registerLapCallback(Race * race, void * userdata)
+void Track::registerLapCallback(Race * race, IVehicle * vehicle, void * userdata)
 {
   // TODO: must use a vector of TriggerInfo
   //       (to support multiple registration)
-  m_triggerLap.race=race;
-  m_triggerLap.userData=userdata;
+
+  TriggerInfo * triggerInfo=new TriggerInfo;
+  triggerInfo->type=tt_lap;
+  triggerInfo->race=race;
+  triggerInfo->self=vehicle->getRigidBody();
+  vehicle->getRigidBody()->setUserPointer(triggerInfo);
+  triggerInfo->userData=userdata;
+
+  m_triggersLap.push_back(triggerInfo);
 }

@@ -19,6 +19,7 @@
 
 #include "CompoundSceneNode.h"
 #include "INumberOutput.h"
+#include "PhyWorld.h"
 
 // !!! interface for a vehicle !!!
 class IVehicle : public CompoundSceneNode
@@ -34,6 +35,8 @@ class IVehicle : public CompoundSceneNode
   {
     // empty here
   }
+
+  virtual btRigidBody * getRigidBody()=0;
 
   virtual void load()=0;
 

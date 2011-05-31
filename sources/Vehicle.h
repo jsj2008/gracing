@@ -46,6 +46,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual double getStartHeight(float x, float y);
 
     void reset(const irr::core::vector3d<float>& position, double rotation);
+    
 
     // from IVehicle
     virtual void throttleUp();
@@ -56,6 +57,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual void steerRight();
     virtual void setEnableControls(bool enable);
     virtual void applyTorque(float x, float y, float z);
+
+    virtual btRigidBody * getRigidBody();
 
     // deprecated ?!?
     virtual void dumpDebugInfo() { };

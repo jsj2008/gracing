@@ -19,6 +19,7 @@
 #include <string>
 #include <irrlicht.h>
 #include "PhyWorld.h"
+#include "IVehicle.h"
 #include "XmlNode.h"
 #include "CameraDataManager.hh"
 
@@ -42,7 +43,7 @@ class Track
     inline const std::vector<btVector3> & getControlPoints() { return m_controlPoints; }
 
     // TODO: find a more general form for trigger callback
-    void registerLapCallback(Race * race, void * userdata);
+    void registerLapCallback(Race * race, IVehicle * vehicle, void * userdata);
 
   private:
 
@@ -99,7 +100,7 @@ class Track
     };
 
     /* lap trigger */
-    TriggerInfo                                    m_triggerLap;
+    std::vector<TriggerInfo*>                      m_triggersLap;
 
 };
 

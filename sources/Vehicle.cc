@@ -1413,3 +1413,8 @@ void Vehicle::setEnableControls(bool enable)
 {
   m_controlsEnabled=enable;
 }
+
+btRigidBody * Vehicle::getRigidBody()
+{
+  return m_carBody;
+}
