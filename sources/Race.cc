@@ -36,7 +36,6 @@ static bool evolveVehicleControlPoint(
 
   i1=nextIndexVehicleControlPoint(currentIndex,controlPoints);
 
-
   d0=(controlPoints[currentIndex]-position).length2();
   d1=(controlPoints[i1]-position).length2();
 
@@ -117,6 +116,18 @@ void Race::updateVehiclesInfo()
   for(unsigned index=0; index<m_nVehicles; index++) {
     VehicleInfo & vinfo=m_vehicles[index];
 
+    assert(vinfo.controller);
+
+    btVector3 vehicleDirection;
+    btVector3 vehiclePosition;
+
+    vinfo.controller->updateCommands(
+        vehicleDirection,
+        vehiclePosition,
+        0,
+        controlPoints,
+        vinfo.vehicle->getVehicleCommands());
+
     btVector3 pos=vectIrrToBullet(vinfo.vehicle->getChassisPos());
     double newDist;
 
@@ -192,6 +203,7 @@ bool Race::gotoState(unsigned state)
               m_vehicles[i].controlPointIndex,
               pos,
               m_track->getControlPoints());
+        m_vehicles[i].lapNumber=0;
       }
       // reset gui controls
       m_readySetGo->restart();
@@ -211,7 +223,7 @@ bool Race::gotoState(unsigned state)
 }
 
 
-bool Race::addVehicle(IVehicle * vehicle)
+bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
 {
   if(m_nVehicles == max_vehicles)
     return false;
@@ -221,13 +233,20 @@ bool Race::addVehicle(IVehicle * vehicle)
   vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
 
   m_vehicles[m_nVehicles].vehicle=vehicle;
-  m_vehicles[m_nVehicles].startPosition=m_track->getStartPosition();
-  m_vehicles[m_nVehicles].startRotation=m_track->getStartRotation();
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
+  m_vehicles[m_nVehicles].controller=controller;
+
+#if 0
+  m_vehicles[m_nVehicles].startPosition=m_track->getStartPosition();
+  m_vehicles[m_nVehicles].startRotation=m_track->getStartRotation();
+#endif
+
   m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
 
   m_nVehicles++;
+
+  recalcVehicleVehiclesStartPositions();
 
 
   return true;
@@ -239,6 +258,27 @@ void Race::lapTriggered(void * userdata)
   VehicleInfo * vinfo=(VehicleInfo*)userdata;
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
-    GM_LOG("A new lap\n");
+    GM_LOG("Finished lap %d\n",vinfo->lapNumber+1);
+    vinfo->lapNumber++;
+  }
+}
+
+void Race::recalcVehicleVehiclesStartPositions()
+{
+  const double vehicleSpace=3.;
+  double thlen=(m_nVehicles-1)*vehicleSpace*.5;
+  double angle=m_track->getStartRotation();
+
+  for(unsigned i=0; i<m_nVehicles; i++) {
+    double zp= (i * vehicleSpace) - thlen;
+    double xp;
+
+    xp = sin(angle) * zp;
+    zp = cos(angle) * zp;
+
+    m_vehicles[i].startPosition.X = m_track->getStartPosition().X + xp;
+    m_vehicles[i].startPosition.Y = m_track->getStartPosition().Y ;
+    m_vehicles[i].startPosition.Z = m_track->getStartPosition().Z + zp;
+    m_vehicles[i].startRotation=m_track->getStartRotation();
   }
 }

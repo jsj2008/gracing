@@ -53,12 +53,8 @@ bool cb_ContactAddedCallback(
     triggerInfo=(Track::TriggerInfo*)colObj0->getUserPointer();
 
 
-  if(!triggerInfo) {
-    GM_LOG("fake girost %d,%d\n",
-        colObj0,
-        colObj1);
+  if(!triggerInfo) 
     return false;
-  }
 
   switch(triggerInfo->type) 
   {

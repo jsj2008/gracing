@@ -690,8 +690,10 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 
   m_steering=0.;
   m_throttle=0.;
-  m_throttling=0;
-  m_steered=steeredNone;
+
+  m_vehicleCommands.throttling=0.;
+  m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
+
 
   // reset position
   btTransform trans=btTransform::getIdentity();
@@ -740,6 +742,7 @@ void Vehicle::unuse(unsigned int useFlags)
     deinitGraphics();
 }
 
+#if 0
 void Vehicle::brake()
 {
   m_throttle=0;
@@ -760,7 +763,9 @@ void Vehicle::throttleSet(double value)
 {
   m_throttle=value;
 }
+#endif
 
+#if 0
 void Vehicle::steerRight()
 {
 #if 0
@@ -786,6 +791,7 @@ void Vehicle::applyTorque(float x, float y, float z)
 {
   m_carBody->applyTorque(btVector3(x,y,z));
 }
+#endif
 
 irr::core::vector3df Vehicle::getChassisPos()
 {
@@ -795,12 +801,12 @@ irr::core::vector3df Vehicle::getChassisPos()
 void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 {
   if(m_controlsEnabled) {
-    if(m_throttling>0) {
+    if(m_vehicleCommands.throttling > 0.) {
       m_brake=0.;
       m_throttle+=m_throttleIncrement;
       if(m_throttle>.5)
         m_throttle=.5;
-    } else if(m_throttling<0) {
+    } else if(m_vehicleCommands.throttling<0) {
       m_brake=0.;
       m_throttle-=m_throttleIncrement;
 
@@ -822,30 +828,30 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         }
       }
     }
-    m_throttling=0;
-  }
+    m_vehicleCommands.throttling=0;
 
-  // hnalde steering
-  switch(m_steered) {
-    case steeredLeft:
-      m_steering -= m_steeringIncrement;
-      if (	m_steering < -m_steeringClamp)
-        m_steering = -m_steeringClamp;
-      break;
-    case steeredRight:
-      m_steering += m_steeringIncrement;
-      if (	m_steering > m_steeringClamp)
-        m_steering = m_steeringClamp;
-      break;
-    default: // steeredNone
-      if(m_steering > m_steeringIncrement ||
-         m_steering < -m_steeringIncrement )
-        m_steering -= m_steering * .5;
-      else
-        m_steering = 0.;
-      break;
-  };
-  m_steered=steeredNone;
+    // hnalde steering
+    switch(m_vehicleCommands.steering) {
+      case VehicleCommands::steerLeft:
+        m_steering -= m_steeringIncrement;
+        if (	m_steering < -m_steeringClamp)
+          m_steering = -m_steeringClamp;
+        break;
+      case VehicleCommands::steerRite:
+        m_steering += m_steeringIncrement;
+        if (	m_steering > m_steeringClamp)
+          m_steering = m_steeringClamp;
+        break;
+      default: // steeredNone
+        if(m_steering > m_steeringIncrement ||
+            m_steering < -m_steeringIncrement )
+          m_steering -= m_steering * .5;
+        else
+          m_steering = 0.;
+        break;
+    };
+    m_vehicleCommands.steering=VehicleCommands::steerNone;
+  }
 
   // steps:
   // 1- update wheel wolrd space transforn 

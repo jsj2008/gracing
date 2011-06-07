@@ -52,16 +52,27 @@ class IVehicle : public CompoundSceneNode
   virtual irr::core::vector3df getChassisPos()=0;
 
   // commands (obsoleting?!?!?)
+  struct VehicleCommands 
+  {
+    bool     controlsEnabled;
+    double   throttling;
+    enum {
+      steerLeft,
+      steerRite,
+      steerNone
+    }        steering;
+  } m_vehicleCommands;
+  virtual void setEnableControls(bool enable)=0;
+  inline VehicleCommands & getVehicleCommands() { return m_vehicleCommands; }
+
+#if 0
   virtual void throttleUp()=0;
   virtual void throttleDown()=0;
   virtual void throttleSet(double value)=0;
   virtual void brake()=0;
   virtual void steerLeft()=0;
   virtual void steerRight()=0;
-  virtual void setEnableControls(bool enable)=0;
-
-  // phisics
-  virtual void applyTorque(float x, float y, float z)=0;
+#endif
 
   virtual double getStartHeight(float x, float y)=0;
 
@@ -73,4 +84,5 @@ class IVehicle : public CompoundSceneNode
 
   // adding more later...
 };
+
 #endif

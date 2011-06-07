@@ -49,14 +49,17 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     
 
     // from IVehicle
+#if 0
     virtual void throttleUp();
     virtual void throttleDown();
     virtual void throttleSet(double value);
     virtual void brake();
     virtual void steerLeft();
     virtual void steerRight();
+#endif
     virtual void setEnableControls(bool enable);
-    virtual void applyTorque(float x, float y, float z);
+
+    //virtual void applyTorque(float x, float y, float z);
 
     virtual btRigidBody * getRigidBody();
 
@@ -71,7 +74,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual void 	getWorldTransform (btTransform &worldTrans) const;
     virtual void 	setWorldTransform (const btTransform &worldTrans);
 
-    typedef enum {
+    typedef enum { // debug drawing flags
       db_raycastDirection= 0x01,
       db_wheelsAxle=       0x02,
       db_forwardImpulse=   0x04,
@@ -88,7 +91,6 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     // in/out data
     INumberOutput * m_speedometer;
-
 
     // private types
     struct WheelData 
@@ -146,11 +148,13 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     bool  m_controlsEnabled;
     float m_steering;
+#if 0
     enum {
       steeredNone,
       steeredLeft,
       steeredRight,
     } m_steered;
+#endif
     float m_steeringIncrement;
     float m_steeringClamp;
     float m_throttle;
@@ -158,9 +162,6 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     float m_brake;
 
 
-    char  m_throttling;
-    
-   
     float m_wheelFriction;
     float m_suspensionStiffness;
     float m_suspensionDamping;

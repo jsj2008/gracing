@@ -30,9 +30,12 @@
 #include "IPhaseHandler.h"
 #include "Race.h"
 #include "GUISpeedometer.h"
+#include "EventReceiver.h"
 
+// vehicle controllers
+#include "VehicleKeyboardController.h"
+#include "VehicleNullController.h"
 
-//#include <cegui.h>
 
 using namespace irr;
 using namespace core;
@@ -99,44 +102,6 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
 bool stepMode=false;
 static bool doneStep=false;
 
-class MyEventReceiver : public IEventReceiver
-{
-  public:
-    // This is the one method that we have to implement
-    virtual bool OnEvent(const SEvent& event)
-    {
-      // Remember whether each key is down or up
-      if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
-        KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
-        if(event.KeyInput.Key == KEY_KEY_P && event.KeyInput.PressedDown)
-          stepMode=!stepMode;
-      }
-
-      if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
-        KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
-        if(event.KeyInput.Key == KEY_KEY_O && event.KeyInput.PressedDown)
-          doneStep=false;
-      }
-
-      return false;
-    }
-
-    // This is used to check whether a key is being held down
-    virtual bool IsKeyDown(EKEY_CODE keyCode) const
-    {
-      return KeyIsDown[keyCode];
-    }
-
-    MyEventReceiver()
-    {
-      for (u32 i=0; i<KEY_KEY_CODES_COUNT; ++i)
-        KeyIsDown[i] = false;
-    }
-
-  private:
-    // We use this array to store the current state of each key
-    bool KeyIsDown[KEY_KEY_CODES_COUNT];
-};
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
 
@@ -194,7 +159,7 @@ int main(int argc, char ** av)
  
   ResourceManager * resmanager=ResourceManager::getInstance();
 
-  MyEventReceiver receiver;
+  EventReceiver receiver;
 
   video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
 
@@ -250,6 +215,16 @@ int main(int argc, char ** av)
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
 
+  IVehicle * vehicle2 = new Vehicle(
+        0, /* smgr->getRootSceneNode(),*/
+        device,
+        world,
+        vehpath.c_str(),0xcafe);
+  ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
+  vehicle2->load();
+  vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+
+
   // gui
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
       core::rect<s32>(0,0,200,100));
@@ -290,8 +265,11 @@ int main(int argc, char ** av)
   Race *          race;
   race = new Race(device,world);
 
+  IVehicleController * controller= new VehicleKeyboardController(&receiver);
+
   race->setTrack(thetrack);
-  race->addVehicle(vehicle);
+  race->addVehicle(vehicle,controller);
+  race->addVehicle(vehicle2,new VehicleNullController());
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;
@@ -305,14 +283,6 @@ int main(int argc, char ** av)
       if(!stepMode || !doneStep) {
         doneStep=true;
         currentPhaseHandler->step();
-#if 0
-        driver->beginScene(true, true, SColor(255,100,101,140));
-        smgr->drawAll();
-        world->step();
-        guienv->drawAll();
-        world->debugDrawWorld();
-        driver->endScene();
-#endif
       }
 
       /* temp keyboard handling part */
@@ -342,7 +312,6 @@ int main(int argc, char ** av)
 
       if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
         if(flagC)  {
-          //vehicle->reset(thetrack->getStartPosition(),thetrack->getStartRotation());
           race->restart();
           GM_LOG("start position: %f,%f,%f\n",
               thetrack->getStartPosition().X,
@@ -354,10 +323,6 @@ int main(int argc, char ** av)
         flagC=true;
       }
 
-      if(receiver.IsKeyDown(irr::KEY_UP)) {
-        if(vehicle)
-          vehicle->throttleUp();
-      }
 
       if(receiver.IsKeyDown(irr::KEY_KEY_W))
         camanim->moveXY(0.,CAMERA_STEP);
@@ -370,48 +335,6 @@ int main(int argc, char ** av)
 
       if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
         camanim->moveXY(-CAMERA_STEP,0.);
-
-      if(receiver.IsKeyDown(irr::KEY_DOWN)) {
-        if(vehicle)
-          vehicle->throttleDown();
-      }
-
-      if(receiver.IsKeyDown(irr::KEY_LEFT)) {
-        if(vehicle)
-          vehicle->steerLeft();
-      }
-
-      if(receiver.IsKeyDown(irr::KEY_RIGHT)) {
-        if(vehicle) {
-          vehicle->steerRight();
-        }
-      }
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_I)) {
-        if(flagI) {
-          if(vehicle) {
-            GM_LOG("Vehicle position: %f,%f,%f\n",
-                vehicle->getPosition().X,
-                vehicle->getPosition().Y,
-                vehicle->getPosition().Z);
-            dumpNode(smgr->getRootSceneNode());
-            world->dumpBodyPositions();
-            if(vehicle)
-              vehicle->dumpDebugInfo();
-          }
-          flagI=false;
-        } 
-      } else flagI=true;
-
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_D)) {
-        if(flagD) {
-          vehicle->applyTorque(1000.,1000.,0.);
-          flagD=false;
-        }
-      } else {
-        flagD=true;
-      }
 
       if (driver->getFPS() != lastFPS)
       {

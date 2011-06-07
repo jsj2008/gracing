@@ -16,10 +16,14 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef RACE_H
 #define RACE_H
+/* implemented interfaces */
 #include "IPhaseHandler.h"
+/* used interfaces */
 #include "IVehicle.h"
-#include "Track.hh"
+#include "IVehicleController.h"
 
+/* used classes */
+#include "Track.hh"
 #include "GuiReadySetGo.h"
 #include "GuiCronometer.h"
 
@@ -31,7 +35,7 @@ class Race : public  IPhaseHandler
 
     virtual void step();
 
-    bool addVehicle(IVehicle * vehicle);
+    bool addVehicle(IVehicle * vehicle, IVehicleController * controller);
 
     inline void setTrack(Track * track) { m_track=track; }
 
@@ -47,6 +51,8 @@ class Race : public  IPhaseHandler
     void lapTriggered(void * userdata);
 
   private:
+
+    void recalcVehicleVehiclesStartPositions();
   
     bool gotoState(unsigned state);
     void updateVehiclesInfo();
@@ -76,6 +82,14 @@ class Race : public  IPhaseHandler
       /* if true the vehicle is passed on last control */
       /* point and is waiting for lap end              */
       bool                 waitingForLapTrigger;
+
+      /* this is the class responsible to control      */
+      /* this vehicle (throttle, steer,...             */
+      IVehicleController * controller;
+
+
+      /* lap number of this vehicle */
+      unsigned             lapNumber;
     };
 
     Track     *  m_track;

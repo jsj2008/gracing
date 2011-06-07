@@ -48,6 +48,7 @@ class ResourceManager
     void getConfigCompletePath(const char * filename, std::string & path);
 
     /* system font */
+    inline irr::gui::IGUIFont *  getSystemFontSmall() { return m_fontSmall; }
     inline irr::gui::IGUIFont *  getSystemFont() { return m_font; }
 
 
@@ -92,6 +93,7 @@ class ResourceManager
 
     // resources
     irr::gui::IGUIFont *  m_font;
+    irr::gui::IGUIFont *  m_fontSmall;
 };
 
 #endif

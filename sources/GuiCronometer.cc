@@ -26,7 +26,7 @@ GuiCronometer::GuiCronometer(irr::gui::IGUIEnvironment * environment,
   m_started=false;
   m_timer=timer;
 
-  m_font=ResourceManager::getInstance()->getSystemFont();
+  m_font=ResourceManager::getInstance()->getSystemFontSmall();
 }
 
 void GuiCronometer::stop()
