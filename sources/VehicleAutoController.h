@@ -14,19 +14,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#ifndef IVEHICLE_NULL_CONTROLLER_H
-#define IVEHICLE_NULL_CONTROLLER_H
+#ifndef IVEHICLE_AUTO_CONTROLLER_H
+#define IVEHICLE_AUTO_CONTROLLER_H
 #include "IVehicleController.h"
 #include "EventReceiver.h"
 #include <irrlicht.h>
 
-class VehicleNullController : public IVehicleController
+class VehicleAutoController : public IVehicleController
 {
   public: 
-    VehicleNullController()
-    {
-      // does nothing!
-    }
+    VehicleAutoController();
 
     virtual void updateCommands(
         const btVector3 &              vehicleDirection,
@@ -34,10 +31,7 @@ class VehicleNullController : public IVehicleController
         const btVector3 &              vehiclePosition,
         unsigned                       index,
         const std::vector<btVector3> & controlPoints,
-        IVehicle::VehicleCommands &    commands)
-    {
-      // does nothing!
-    }
+        IVehicle::VehicleCommands &    commands);
   private:
 };
 

@@ -42,24 +42,15 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual void unuse(unsigned int useFlags);
 
     virtual irr::core::vector3df getChassisPos();
+    virtual btVector3            getChassisForwardDirection();
+    virtual btVector3            getChassisRightDirection();
 
     virtual double getStartHeight(float x, float y);
 
     void reset(const irr::core::vector3d<float>& position, double rotation);
     
 
-    // from IVehicle
-#if 0
-    virtual void throttleUp();
-    virtual void throttleDown();
-    virtual void throttleSet(double value);
-    virtual void brake();
-    virtual void steerLeft();
-    virtual void steerRight();
-#endif
     virtual void setEnableControls(bool enable);
-
-    //virtual void applyTorque(float x, float y, float z);
 
     virtual btRigidBody * getRigidBody();
 

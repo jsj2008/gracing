@@ -119,33 +119,39 @@ void Race::updateVehiclesInfo()
     assert(vinfo.controller);
 
     btVector3 vehicleDirection;
+    btVector3 vehicleRightDirection;
     btVector3 vehiclePosition;
+
+    vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
+    vehicleRightDirection = vinfo.vehicle->getChassisRightDirection();
+    vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
 
     vinfo.controller->updateCommands(
         vehicleDirection,
+        vehicleRightDirection,
         vehiclePosition,
         0,
         controlPoints,
         vinfo.vehicle->getVehicleCommands());
 
-    btVector3 pos=vectIrrToBullet(vinfo.vehicle->getChassisPos());
     double newDist;
 
     if(evolveVehicleControlPoint(vinfo.controlPointIndex,
-          pos,controlPoints)) {
+          vehiclePosition,controlPoints)) {
       if(vinfo.controlPointIndex == controlPoints.size()-1) 
         vinfo.waitingForLapTrigger=true;
       newDist=
         distanceVehicleControlPoint(
             vinfo.controlPointIndex,
-            pos,
+            vehiclePosition,
             controlPoints);
+      GM_LOG("new index: %d\n",vinfo.controlPointIndex);
     } else {
 
       newDist=
         distanceVehicleControlPoint(
             vinfo.controlPointIndex,
-            pos,
+            vehiclePosition,
             controlPoints);
 
       if(newDist > (vinfo.ctrlPntDistance+0.5))
@@ -237,21 +243,14 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
   m_vehicles[m_nVehicles].controller=controller;
 
-#if 0
-  m_vehicles[m_nVehicles].startPosition=m_track->getStartPosition();
-  m_vehicles[m_nVehicles].startRotation=m_track->getStartRotation();
-#endif
-
   m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
 
   m_nVehicles++;
 
   recalcVehicleVehiclesStartPositions();
 
-
   return true;
 }
-
 
 void Race::lapTriggered(void * userdata)
 {

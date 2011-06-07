@@ -21,7 +21,7 @@
 #include "INumberOutput.h"
 #include "PhyWorld.h"
 
-// !!! interface for a vehicle !!!
+// !!! interface for a vehicle !!! //
 class IVehicle : public CompoundSceneNode
 {
   public:
@@ -38,20 +38,27 @@ class IVehicle : public CompoundSceneNode
 
   virtual btRigidBody * getRigidBody()=0;
 
+  // i'm thinking the following 4 function
+  // will be deprecated
   virtual void load()=0;
-
   virtual void unload()=0;
-
   virtual void use(unsigned int useFlags)=0;
-
   virtual void unuse(unsigned int useFlags)=0;
+  //////////////////////////////////
 
-  virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;
 
-  // querying
+  // position querying //
   virtual irr::core::vector3df getChassisPos()=0;
 
-  // commands (obsoleting?!?!?)
+  virtual btVector3            getChassisForwardDirection()=0;
+  virtual btVector3            getChassisRightDirection()=0;
+
+  virtual double               getStartHeight(float x, float y)=0; // still not working !!
+
+  // position/physics reset //
+  virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;
+
+  // commands //
   struct VehicleCommands 
   {
     bool     controlsEnabled;
@@ -62,27 +69,16 @@ class IVehicle : public CompoundSceneNode
       steerNone
     }        steering;
   } m_vehicleCommands;
-  virtual void setEnableControls(bool enable)=0;
+
+  virtual void             setEnableControls(bool enable)=0;
   inline VehicleCommands & getVehicleCommands() { return m_vehicleCommands; }
 
-#if 0
-  virtual void throttleUp()=0;
-  virtual void throttleDown()=0;
-  virtual void throttleSet(double value)=0;
-  virtual void brake()=0;
-  virtual void steerLeft()=0;
-  virtual void steerRight()=0;
-#endif
-
-  virtual double getStartHeight(float x, float y)=0;
-
-  // debug
+  // debug //
   virtual void dumpDebugInfo()=0;
 
-  // the speedometer
+  // speedometer //
   virtual void setSpeedOMeter(INumberOutput * speedometer)=0;
 
-  // adding more later...
 };
 
 #endif

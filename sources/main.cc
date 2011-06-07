@@ -35,6 +35,7 @@
 // vehicle controllers
 #include "VehicleKeyboardController.h"
 #include "VehicleNullController.h"
+#include "VehicleAutoController.h"
 
 
 using namespace irr;
@@ -268,8 +269,9 @@ int main(int argc, char ** av)
   IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
-  race->addVehicle(vehicle,controller);
-  race->addVehicle(vehicle2,new VehicleNullController());
+  race->addVehicle(vehicle,new VehicleAutoController());
+  //race->addVehicle(vehicle,controller);
+  //race->addVehicle(vehicle2,new VehicleAutoController());
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;

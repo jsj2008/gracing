@@ -344,13 +344,6 @@ void Vehicle::initPhysics()
                   m_wheelInitialPositions[i].Y,
                   m_wheelInitialPositions[i].Z);
 
-#if 0
-    GM_LOG("Wheel %d position %f,%f,%f\n",i,
-                  m_wheelInitialPositions[i].X,
-                  m_wheelInitialPositions[i].Y,
-                  m_wheelInitialPositions[i].Z);
-#endif
-
     m_wheelsData[i].radius=m_wheelRadiuses[i];
     m_wheelsData[i].suspensionLength=m_suspensionRestLength;
     m_wheelsData[i].rotation=0.;
@@ -360,13 +353,6 @@ void Vehicle::initPhysics()
   m_carBody->setActivationState(DISABLE_DEACTIVATION);
   m_world->addAction(this);
   m_raycaster = new btDefaultVehicleRaycaster(m_world);
-
-#if 0
-  for(int i=0; i<4; i++) {
-    updateWheelPhysics(i);
-    updateWheel(i);
-  }
-#endif
 
   m_using|=USE_PHYSICS;
 }
@@ -1423,4 +1409,16 @@ void Vehicle::setEnableControls(bool enable)
 btRigidBody * Vehicle::getRigidBody()
 {
   return m_carBody;
+}
+
+btVector3 Vehicle::getChassisForwardDirection()
+{
+  btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+  return chassisTrans.getBasis() * btVector3(1.,0.,0.);
+}
+
+btVector3 Vehicle::getChassisRightDirection()
+{
+  btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+  return chassisTrans.getBasis() * btVector3(0.,0.,1.);
 }
