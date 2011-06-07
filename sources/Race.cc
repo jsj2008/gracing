@@ -130,7 +130,7 @@ void Race::updateVehiclesInfo()
         vehicleDirection,
         vehicleRightDirection,
         vehiclePosition,
-        0,
+        vinfo.controlPointIndex,
         controlPoints,
         vinfo.vehicle->getVehicleCommands());
 
@@ -145,7 +145,6 @@ void Race::updateVehiclesInfo()
             vinfo.controlPointIndex,
             vehiclePosition,
             controlPoints);
-      GM_LOG("new index: %d\n",vinfo.controlPointIndex);
     } else {
 
       newDist=

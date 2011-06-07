@@ -223,7 +223,7 @@ int main(int argc, char ** av)
         vehpath.c_str(),0xcafe);
   ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle2->load();
-  vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+  //vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
 
   // gui
@@ -256,12 +256,9 @@ int main(int argc, char ** av)
   flagD=true;
   flagI=true;
 
-
-
   unsigned long startFrameTime;
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / 80;
-
 
   Race *          race;
   race = new Race(device,world);

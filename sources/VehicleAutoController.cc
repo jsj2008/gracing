@@ -17,12 +17,14 @@
 
 #include "VehicleAutoController.h"
 
-static const double epsilon=.01;
+static const double epsilon=2.5;  //1.1;
 
 VehicleAutoController::VehicleAutoController()
 {
   // ?!?!
 }
+
+static unsigned oo=55;
 
 void VehicleAutoController::updateCommands(
         const btVector3 &              vehicleDirection,
@@ -34,9 +36,16 @@ void VehicleAutoController::updateCommands(
 {
   unsigned nindex=(index+1) % controlPoints.size(); 
 
-  btVector3 dir = controlPoints[nindex] - controlPoints[index];
+  //btVector3 dir = controlPoints[nindex] - controlPoints[index];
+  btVector3 dir = controlPoints[nindex] - vehiclePosition;
 
   btScalar dot = dir.dot(vehicleRightDirection);
+
+  if(index != oo) {
+    oo=index;
+    GM_LOG("New index: %d, dir: %f,%f,%f, dot: %f\n",
+        index,dir.getX(),dir.getY(),dir.getZ(),dot);
+  }
 
   if(dot > epsilon) 
     commands.steering=IVehicle::VehicleCommands::steerLeft;
