@@ -9,6 +9,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GUISpeedometer.cc \
         GuiReadySetGo.cc \
         GuiCronometer.cc \
+        GuiCommunicator.cc \
         VehicleKeyboardController.cc \
         VehicleAutoController.cc \
         EventReceiver.cc \

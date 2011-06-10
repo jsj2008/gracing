@@ -24,14 +24,17 @@ GUISpeedometer::GUISpeedometer(bool border,
 		irr::gui::IGUIElement* parent, irr::s32 id, const irr::core::rect<irr::s32>& rectangle)
   : IGUIElement(irr::gui::EGUIET_ELEMENT,environment,parent,id,rectangle)
 {
-  ResourceManager * resmanager=ResourceManager::getInstance();
+  //ResourceManager * resmanager=ResourceManager::getInstance();
   m_guiEnv=environment;
 
+#if 0
   std::string fontPath = resmanager->getResourcePath() + "/digits.xml";
   m_font = environment->getFont(fontPath.c_str());
+#endif
+  m_font=ResourceManager::getInstance()->getSystemFontSmall();
 
   if(!m_font) {
-    GM_LOG("Cannot load font '%s'\n",fontPath.c_str());
+    GM_LOG("Cannot load font \n");
   }
 
   GM_LOG("Absolute position: %d,%d %d,%d\n",

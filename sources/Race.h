@@ -22,10 +22,12 @@
 #include "IVehicle.h"
 #include "IVehicleController.h"
 
-/* used classes */
 #include "Track.hh"
+
+/* gui elements */
 #include "GuiReadySetGo.h"
 #include "GuiCronometer.h"
+#include "GuiCommunicator.h"
 
 
 class Race : public  IPhaseHandler
@@ -51,6 +53,8 @@ class Race : public  IPhaseHandler
     void lapTriggered(void * userdata);
 
   private:
+
+    unsigned m_debugFlags;
 
     void recalcVehicleVehiclesStartPositions();
   
@@ -90,6 +94,10 @@ class Race : public  IPhaseHandler
 
       /* lap number of this vehicle */
       unsigned             lapNumber;
+
+      /* frame in which the vehicle has overturn */
+      unsigned             overturnCountDown;
+
     };
 
     Track     *  m_track;
@@ -98,8 +106,9 @@ class Race : public  IPhaseHandler
     struct VehicleInfo m_vehicles[max_vehicles];
     unsigned           m_nVehicles;
 
-    GuiReadySetGo * m_readySetGo;
-    GuiCronometer * m_cronometer;
+    GuiReadySetGo *   m_readySetGo;
+    GuiCronometer *   m_cronometer;
+    GuiCommunicator * m_communicator;
 
     unsigned             m_status;
 };

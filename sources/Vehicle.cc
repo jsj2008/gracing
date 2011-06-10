@@ -16,7 +16,6 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-
 // TODO: 
 // 1- move 'm_maxSuspensionTravel' from vehicle to wheel (one per wheel!)
 
@@ -140,7 +139,6 @@ static void g_resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
   btScalar a;
   a=jacDiagABInv;
 
-
   rel_vel = normal.dot(vel);
 
   //todo: move this into proper structure
@@ -153,7 +151,6 @@ static void g_resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
   btScalar velocityImpulse = -contactDamping * rel_vel * jacDiagABInv;
   impulse = velocityImpulse;
 #endif
-  //GM_LOG("impulse: %f\n",impulse);
 }
 
 
@@ -190,7 +187,6 @@ btRigidBody& getFixedBody()
 
 static btScalar calcRollingFriction(WheelContactPoint& contactPoint)
 {
-
 	btScalar j1=0.f;
 
 	const btVector3& contactPosWorld = contactPoint.m_frictionPositionWorld;
@@ -210,6 +206,7 @@ static btScalar calcRollingFriction(WheelContactPoint& contactPoint)
 	j1 = -vrel * contactPoint.m_jacDiagABInv;
 	btSetMin(j1, maxImpulse);
 	btSetMax(j1, -maxImpulse);
+
 
 	return j1;
 }
@@ -676,6 +673,7 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 
   m_steering=0.;
   m_throttle=0.;
+  m_brake=0.;
 
   m_vehicleCommands.throttling=0.;
   m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
@@ -856,17 +854,12 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     depth = raycast(wheel,i);
   }
 
-  static float ll=0.;
   for(int i=0; i<4; i++) 
   {
     WheelData & wheel=m_wheelsData[i];
 
-    if(i==0 && ll!=wheel.suspensionLength) {
-      ll=wheel.suspensionLength;
-    }
-
     if ( wheel.isInContact ) {
-      btScalar force;
+      btScalar force=0.;
       { // spring
         btScalar	susp_length	= m_suspensionRestLength;
         btScalar	current_length = wheel.suspensionLength;
@@ -918,8 +911,8 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 
   // 4- update friction
   updateFriction(deltaTime);
-  // 5- update wheels rotation
 
+  // 5- update wheels rotation
 	for (int i=0;i<4;i++)
 	{
 		WheelData& wheel = m_wheelsData[i];
@@ -969,7 +962,7 @@ void Vehicle::updateFriction(btScalar timeStep)
   m_forwardImpulse.resize(4);
   m_sideImpulse.resize(4);
 
-  int numWheelsOnGround = 0;
+  m_nWheelTouchGround=0;
 
 
   for (int i=0;i<4;i++)
@@ -977,11 +970,10 @@ void Vehicle::updateFriction(btScalar timeStep)
     WheelData& wheel = m_wheelsData[i];
     class btRigidBody* groundObject = (class btRigidBody*) wheel.collidingObject;
     if (groundObject)
-      numWheelsOnGround++;
+      m_nWheelTouchGround++;
     m_sideImpulse[i] = btScalar(0.);
     m_forwardImpulse[i] = btScalar(0.);
   }
-
 
   // calc side impulse
   for (int i=0;i<4;i++) {
@@ -1052,6 +1044,7 @@ void Vehicle::updateFriction(btScalar timeStep)
       btScalar maximpSquared = maximp * maximpSide;
 
       m_forwardImpulse[wheelIdx] = rollingFriction;//wheelInfo.m_engineForce* timeStep;
+
 
       // qui ok GM_LOG("%d-->%f\n",wheelIdx,m_forwardImpulse[wheelIdx]);
 
@@ -1421,4 +1414,15 @@ btVector3 Vehicle::getChassisRightDirection()
 {
   btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
   return chassisTrans.getBasis() * btVector3(0.,0.,1.);
+}
+
+btVector3 Vehicle::getChassisUpDirection()
+{
+  btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
+  return chassisTrans.getBasis() * btVector3(0.,1.,0.);
+}
+
+bool Vehicle::getIfChassisIsTouchingTheGround()
+{
+  return m_nWheelTouchGround!=0;
 }

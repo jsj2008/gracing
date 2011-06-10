@@ -16,6 +16,9 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Race.h"
+#include "IrrDebugDrawer.h"
+
+extern IrrDebugDrawer * debugDrawer;
 
 // !'!'!'!'!unsigned
 static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex, 
@@ -100,8 +103,26 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
       irr::core::rect<irr::s32>(0,0,200,100));
   assert(m_readySetGo);
 
+  irr::s32 px1,px2,py1,py2;
+  irr::s32 width,height;
+
+  width=400; height=100;
+  px1=1024-width;     py1=0;
+
+  px2=px1+width;
+  py2=py1+height;
+
   m_cronometer = new GuiCronometer(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
-      irr::core::rect<irr::s32>(0,100,400,200),device->getTimer());
+      irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
+      //irr::core::rect<irr::s32>(0,100,400,200),device->getTimer());
+
+  width=1024; height=100;
+  px1=1024-width;     py1=(576-height)/2-50;
+  px2=px1+width;
+  py2=py1+height;
+
+  m_communicator = new GuiCommunicator(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
+      irr::core::rect<irr::s32>(px1,py1,px2,py2));
   assert(m_cronometer);
 
   m_nVehicles=0;
@@ -113,6 +134,21 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 void Race::updateVehiclesInfo()
 {
   const std::vector<btVector3> & controlPoints=m_track->getControlPoints();
+  
+  if(debugDrawer) {
+    btVector3 color(0.,0.,1.);
+    btVector3 color2(0.,1.,0.);
+    for(unsigned i=0; i<controlPoints.size(); i++)
+      if(i%2) 
+      debugDrawer->drawLine(controlPoints[i],
+          controlPoints[nextIndexVehicleControlPoint(i,controlPoints)],
+          color);
+      else
+      debugDrawer->drawLine(controlPoints[i],
+          controlPoints[nextIndexVehicleControlPoint(i,controlPoints)],
+          color2);
+  }
+
   for(unsigned index=0; index<m_nVehicles; index++) {
     VehicleInfo & vinfo=m_vehicles[index];
 
@@ -153,21 +189,63 @@ void Race::updateVehiclesInfo()
             vehiclePosition,
             controlPoints);
 
-      if(newDist > (vinfo.ctrlPntDistance+0.5))
+      if(newDist > (vinfo.ctrlPntDistance+0.5)) {
+        if(!vinfo.wrongWay)
+          m_communicator->show("Wrong way");
         vinfo.wrongWay=true;
-      else
+      } else
         vinfo.wrongWay=false;
     }
 
     if(vinfo.wrongWay) {
     }
-    
+
     vinfo.ctrlPntDistance=newDist;
+
+    // check for overturn
+    if(vinfo.vehicle->getIfChassisIsTouchingTheGround()) {
+      vinfo.overturnCountDown=0;
+    } else {
+      if(vinfo.overturnCountDown) {
+        if(--vinfo.overturnCountDown == 0) {
+          GM_LOG("vehicle overturn!!!!");
+        }
+      } else {
+        vinfo.overturnCountDown=160;
+      }
+    }
+
+    // check to see if the vehicle is on the road
+    unsigned nindex=
+      nextIndexVehicleControlPoint(vinfo.controlPointIndex,controlPoints);
+    btVector3 p1=vehiclePosition - controlPoints[vinfo.controlPointIndex];
+    btVector3 p2=controlPoints[nindex] - controlPoints[vinfo.controlPointIndex];
+
+    //btScalar p1_project_length=p1.dot(p2) /  p2.length();
+    //btVector3 p1_proejct= p2 * (p1_project_length / p2.length());
+    // to previous two line shold be equivalent to the following two
+    btScalar p1_project_length=p1.dot(p2) /  p2.length2();
+    btVector3 p1_project= p2 * p1_project_length ;
+
+    if(debugDrawer) {
+      btVector3 color(0.,0.,1.);
+      btVector3 color2(0.,1.,0.);
+      if(vinfo.controlPointIndex%2)
+        debugDrawer->drawLine(vehiclePosition,
+            controlPoints[vinfo.controlPointIndex] + p1_project,
+            color);
+      else
+        debugDrawer->drawLine(vehiclePosition,
+            controlPoints[vinfo.controlPointIndex] + p1_project,
+            color2);
+    }
+
   }
 }
 
 void Race::step()
 {
+  m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
   // status handling
   switch(m_status) {
     case rs_readySetGo:
@@ -181,13 +259,13 @@ void Race::step()
       break;
   }
 
-  m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
   m_sceneManager->drawAll();
   m_world->step();
   m_guiEnv->drawAll();
   m_world->debugDrawWorld();
   m_driver->endScene();
 }
+
 
 bool Race::gotoState(unsigned state)
 {
@@ -209,6 +287,7 @@ bool Race::gotoState(unsigned state)
               pos,
               m_track->getControlPoints());
         m_vehicles[i].lapNumber=0;
+        m_vehicles[i].overturnCountDown=0;
       }
       // reset gui controls
       m_readySetGo->restart();
@@ -226,7 +305,6 @@ bool Race::gotoState(unsigned state)
 
   return m_status==state;
 }
-
 
 bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
 {
@@ -257,6 +335,7 @@ void Race::lapTriggered(void * userdata)
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
     GM_LOG("Finished lap %d\n",vinfo->lapNumber+1);
+    m_communicator->show("lap %d",vinfo->lapNumber+1);
     vinfo->lapNumber++;
   }
 }
@@ -280,3 +359,4 @@ void Race::recalcVehicleVehiclesStartPositions()
     m_vehicles[i].startRotation=m_track->getStartRotation();
   }
 }
+

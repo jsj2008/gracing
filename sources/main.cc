@@ -47,6 +47,8 @@ using namespace gui;
 
 #define CAMERA_STEP 0.05
 
+IrrDebugDrawer * debugDrawer= 0;
+
 static int dumpNode(irr::scene::ISceneNode * node,int level=0) 
 {
   int tot=1;
@@ -104,7 +106,7 @@ bool stepMode=false;
 static bool doneStep=false;
 
 
-CFG_PARAM_BOOL(glob_enableDebug)=false;
+CFG_PARAM_BOOL(glob_enableDebug)=true;
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -170,16 +172,14 @@ int main(int argc, char ** av)
   resmanager->getScreenHeight(screenHeight);
   resmanager->getScreenWidth(screenWidth);
 
-  GM_LOG("Dimensione: %d,%d\n",screenWidth,screenHeight);
-
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 16,
         false, false, false, &receiver);
+  if (!device)
+    return 1;
 
   resmanager->setDevice(device);
 
-  if (!device)
-    return 1;
 
   device->setWindowCaption(L"gracing - rosco-p");
 
@@ -189,7 +189,6 @@ int main(int argc, char ** av)
   PhyWorld * world = PhyWorld::buildMe();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
-  IrrDebugDrawer * debugDrawer= 0;
   if(glob_enableDebug) {
     debugDrawer= new IrrDebugDrawer(driver);
     world->setDebugDrawer(debugDrawer);
@@ -211,19 +210,34 @@ int main(int argc, char ** av)
         device,
         world,
         vehpath.c_str(),0xcafe);
-  ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
+  if(glob_enableDebug)
+    ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
-
+#if 0
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle2 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
         world,
         vehpath.c_str(),0xcafe);
-  ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
+  if(glob_enableDebug)
+    ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle2->load();
-  //vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+  vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  IVehicle * vehicle3 = new Vehicle(
+        0, /* smgr->getRootSceneNode(),*/
+        device,
+        world,
+        vehpath.c_str(),0xcafe);
+  if(glob_enableDebug)
+    ((Vehicle*)vehicle3)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
+  vehicle3->load();
+  vehicle3->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+#endif
 
 
   // gui
@@ -263,12 +277,13 @@ int main(int argc, char ** av)
   Race *          race;
   race = new Race(device,world);
 
-  IVehicleController * controller= new VehicleKeyboardController(&receiver);
+  //IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
   race->addVehicle(vehicle,new VehicleAutoController());
   //race->addVehicle(vehicle,controller);
   //race->addVehicle(vehicle2,new VehicleAutoController());
+  //race->addVehicle(vehicle3,new VehicleAutoController());
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;
@@ -344,7 +359,6 @@ int main(int argc, char ** av)
         device->setWindowCaption(tmp.c_str());
       }
 
-
       endFrameTime=device->getTimer()->getRealTime();
       unsigned long dt = (endFrameTime - startFrameTime);
       if(dt < frameDuration) {
@@ -356,7 +370,6 @@ int main(int argc, char ** av)
       device->yield();
     }
   }
-  delete debugDrawer;
 }
 
 #if 0

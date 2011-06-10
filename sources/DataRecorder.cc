@@ -43,6 +43,7 @@ int DataRecorder::record_v3(int channel_index, double x, double y, double z)
   }
 
   //channel_v3 * ch=v3_data[hdr->data_index];
+  return 0;
 }
 
 int DataRecorder::addChannel_v3(const std::string name)

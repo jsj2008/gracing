@@ -33,7 +33,6 @@ enum
   tt_lap=33,
 
   tt_maxNumber=128
-
 };
 
 bool cb_ContactAddedCallback(
@@ -63,7 +62,6 @@ bool cb_ContactAddedCallback(
         triggerInfo->race->lapTriggered(triggerInfo->userData);
       break;
     default:
-      GM_LOG("un po suka un po no\n");
       break;
   }
 

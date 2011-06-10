@@ -44,6 +44,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     virtual irr::core::vector3df getChassisPos();
     virtual btVector3            getChassisForwardDirection();
     virtual btVector3            getChassisRightDirection();
+    virtual btVector3            getChassisUpDirection();
+    virtual bool                 getIfChassisIsTouchingTheGround();
 
     virtual double getStartHeight(float x, float y);
 
@@ -170,6 +172,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
 
     WheelData m_wheelsData[4];
+    unsigned  m_nWheelTouchGround;
     
     const char * m_sourceName;
 

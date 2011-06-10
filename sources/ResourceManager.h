@@ -21,16 +21,6 @@
 #include <stdlib.h>
 #include <irrlicht.h>
 
-#if 0
-#ifndef VEHICLES_DIR
-#error Please define VEHICLES_DIR preprocessor macro
-#endif
-
-#ifndef TRACKS_DIR
-#error Please define TRACKS_DIR preprocessor macro
-#endif
-#endif
-
 class XmlNode;
 
 class ResourceManager 
@@ -50,7 +40,6 @@ class ResourceManager
     /* system font */
     inline irr::gui::IGUIFont *  getSystemFontSmall() { return m_fontSmall; }
     inline irr::gui::IGUIFont *  getSystemFont() { return m_font; }
-
 
     /* config access */
     bool cfgGet(const char * name, bool & value);

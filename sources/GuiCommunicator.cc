@@ -14,58 +14,52 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#ifndef GUI_CRONOMETER_H
-#define GUI_CRONOMETER_H
-
+#include <stdarg.h>
+#include "GuiCommunicator.h"
 #include "ResourceManager.h"
-#include "GuiCronometer.h"
+#include "gmlog.h"
 
-GuiCronometer::GuiCronometer(irr::gui::IGUIEnvironment * environment,
+GuiCommunicator::GuiCommunicator(irr::gui::IGUIEnvironment * environment,
       irr::gui::IGUIElement * parent, irr::s32 id,
-      const irr::core::rect<irr::s32> rectangle, irr::ITimer * timer)
+      const irr::core::rect<irr::s32> rectangle)
   : IGUIElement(irr::gui::EGUIET_ELEMENT,environment,parent,id,rectangle)
 {
-  m_started=false;
-  m_timer=timer;
-
-  m_font=ResourceManager::getInstance()->getSystemFontSmall();
+  m_showingMessage=false;
+  m_buffer[0]=0;
+  m_font=ResourceManager::getInstance()->getSystemFont();
 }
 
-void GuiCronometer::stop()
+void GuiCommunicator::unshow()
 {
-  m_started=false;
+  m_showingMessage=false;
 }
 
-void GuiCronometer::start()
+void GuiCommunicator::show(const char * fmt, ...)
 {
-  m_started=true;
-  m_startTime=m_timer->getRealTime();
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(m_buffer, bufferSize, fmt, ap);
+  va_end(ap);
+
+  m_showingMessage=true;
+  m_framesStillToShow=numberOfFrames;
 }
 
-void GuiCronometer::draw()
+void GuiCommunicator::draw()
 {
-  unsigned time;
-  if(m_started) 
-    time=m_timer->getRealTime()-m_startTime;
-  else
-    time=0;
-  
-  unsigned cs,s,m;
+  if(!IsVisible)
+    return;
+  if(!m_showingMessage)
+    return;
 
-  cs=(time / 10);
-  s=cs / 100;
-  m=s / 60;
-  cs=cs % 100;
-  s=s % 60;
-
-  char buffer[64];
-  if(m == 0)
-    snprintf(buffer,64,"%02d''.%02d",s,cs);
-  else
-    snprintf(buffer,64,"%02d' %02d''.%02d",m,s,cs);
+  m_framesStillToShow--;
+  if(m_framesStillToShow == 0)
+  {
+    m_showingMessage=false;
+  }
 
   irr::video::SColor FGColor(255,255,255,255);
   irr::core::rect<irr::s32> frameRect(AbsoluteRect);
-  m_font->draw(buffer, frameRect,FGColor,false, true, &AbsoluteClippingRect);
+  m_font->draw(m_buffer, frameRect,FGColor,true, true, &AbsoluteClippingRect);
+
 }
-#endif

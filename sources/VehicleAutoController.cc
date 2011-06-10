@@ -24,8 +24,6 @@ VehicleAutoController::VehicleAutoController()
   // ?!?!
 }
 
-static unsigned oo=55;
-
 void VehicleAutoController::updateCommands(
         const btVector3 &              vehicleDirection,
         const btVector3 &              vehicleRightDirection,
@@ -40,12 +38,6 @@ void VehicleAutoController::updateCommands(
   btVector3 dir = controlPoints[nindex] - vehiclePosition;
 
   btScalar dot = dir.dot(vehicleRightDirection);
-
-  if(index != oo) {
-    oo=index;
-    GM_LOG("New index: %d, dir: %f,%f,%f, dot: %f\n",
-        index,dir.getX(),dir.getY(),dir.getZ(),dot);
-  }
 
   if(dot > epsilon) 
     commands.steering=IVehicle::VehicleCommands::steerLeft;

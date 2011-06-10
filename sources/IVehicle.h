@@ -52,6 +52,8 @@ class IVehicle : public CompoundSceneNode
 
   virtual btVector3            getChassisForwardDirection()=0;
   virtual btVector3            getChassisRightDirection()=0;
+  virtual btVector3            getChassisUpDirection()=0;
+  virtual bool                 getIfChassisIsTouchingTheGround()=0;
 
   virtual double               getStartHeight(float x, float y)=0; // still not working !!
 
