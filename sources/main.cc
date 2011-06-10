@@ -106,7 +106,7 @@ bool stepMode=false;
 static bool doneStep=false;
 
 
-CFG_PARAM_BOOL(glob_enableDebug)=true;
+CFG_PARAM_BOOL(glob_enableDebug)=false;
 
 #ifdef __WIN32__
 #include <Windows.h>
@@ -204,7 +204,7 @@ int main(int argc, char ** av)
 
   // prepare the vehicle
   std::string vehpath;
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
   IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -246,9 +246,8 @@ int main(int argc, char ** av)
   vehicle->setSpeedOMeter(smeter);
   std::string fontPath = resmanager->getResourcePath() + "/title_font.xml";
 	gui::IGUIFont* font_big = guienv->getFont(fontPath.c_str());
-	if (font_big) {
+	if (font_big) 
 		guienv->getSkin()->setFont(font_big);
-  }
 
 
   // camera
@@ -277,11 +276,11 @@ int main(int argc, char ** av)
   Race *          race;
   race = new Race(device,world);
 
-  //IVehicleController * controller= new VehicleKeyboardController(&receiver);
+  IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
-  race->addVehicle(vehicle,new VehicleAutoController());
-  //race->addVehicle(vehicle,controller);
+  //race->addVehicle(vehicle,new VehicleAutoController());
+  race->addVehicle(vehicle,controller);
   //race->addVehicle(vehicle2,new VehicleAutoController());
   //race->addVehicle(vehicle3,new VehicleAutoController());
 

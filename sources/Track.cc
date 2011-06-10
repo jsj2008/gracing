@@ -269,10 +269,11 @@ void Track::load()
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
   smgr->setAmbientLight(
-      irr::video::SColorf(1.0,1.0,1.0));
+      irr::video::SColorf(1.0,.0,.0));
   m_loaded=true;
 }
 
+#if 0
 void Track::tmpLoad()
 {
   GM_LOG("loading track\n");
@@ -429,10 +430,12 @@ void Track::tmpLoad()
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
   smgr->setAmbientLight(
-      irr::video::SColorf(1.0,1.0,1.0));
+      //irr::video::SColorf(1.0,1.0,1.0));
+      irr::video::SColorf(1.0,0.0,0.));
   m_loaded=true;
   //////////////////////////
 }
+#endif
 
 void Track::unload()
 {

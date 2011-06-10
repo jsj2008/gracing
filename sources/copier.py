@@ -18,6 +18,7 @@ resource_dir=None
 vehicles=[
   "squared",
   "sprinter",
+  "turing_machine",
   "bluest",
 ]
 

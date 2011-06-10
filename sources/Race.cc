@@ -227,6 +227,12 @@ void Race::updateVehiclesInfo()
     btScalar p1_project_length=p1.dot(p2) /  p2.length2();
     btVector3 p1_project= p2 * p1_project_length ;
 
+    btScalar dist=
+        (vehiclePosition-
+            controlPoints[vinfo.controlPointIndex] + p1_project).length();
+
+    m_communicator->show("dist: %f\n",dist*100);
+
     if(debugDrawer) {
       btVector3 color(0.,0.,1.);
       btVector3 color2(0.,1.,0.);
@@ -239,7 +245,6 @@ void Race::updateVehiclesInfo()
             controlPoints[vinfo.controlPointIndex] + p1_project,
             color2);
     }
-
   }
 }
 
@@ -288,6 +293,7 @@ bool Race::gotoState(unsigned state)
               m_track->getControlPoints());
         m_vehicles[i].lapNumber=0;
         m_vehicles[i].overturnCountDown=0;
+        m_vehicles[i].waitingForLapTrigger=false;
       }
       // reset gui controls
       m_readySetGo->restart();
