@@ -265,11 +265,33 @@ void Track::load()
 
   m_filesystem->removeFileArchive(archivepath);
 
-	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
+  // add track meshes to the physic world
+  for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
-  smgr->setAmbientLight(
-      irr::video::SColorf(1.0,.0,.0));
+
+  //  handle lighting 
+
+  irr::video::SColor   ambient_color = irr::video::SColor(255, 120, 120, 120);
+  irr::video::SColor   sun_specular_color = irr::video::SColor(255, 255, 255, 255);
+  irr::video::SColor   sun_diffuse_color = irr::video::SColor(255, 255, 255, 255); 
+  irr::core::vector3df sun_position  = irr::core::vector3df(0, 0, 0);
+
+  smgr->setAmbientLight(ambient_color);
+
+  const XmlNode * sun = m_rootNode->getChild("sun");
+
+  if(sun) {
+    // .....
+  }
+
+  m_sun = smgr->addLightSceneNode(NULL, 
+      sun_position,
+      sun_diffuse_color);
+  m_sun->setLightType(irr::video::ELT_DIRECTIONAL);
+  m_sun->setRotation( irr::core::vector3df(180, 45, 45) );
+  m_sun->getLightData().SpecularColor = sun_specular_color;
+
   m_loaded=true;
 }
 

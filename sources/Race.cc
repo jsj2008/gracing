@@ -194,6 +194,7 @@ void Race::updateVehiclesInfo()
           m_communicator->show("Wrong way");
         vinfo.wrongWay=true;
       } else
+        m_communicator->unshow();
         vinfo.wrongWay=false;
     }
 
@@ -230,8 +231,6 @@ void Race::updateVehiclesInfo()
     btScalar dist=
         (vehiclePosition-
             controlPoints[vinfo.controlPointIndex] + p1_project).length();
-
-    m_communicator->show("dist: %f\n",dist*100);
 
     if(debugDrawer) {
       btVector3 color(0.,0.,1.);

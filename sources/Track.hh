@@ -66,6 +66,8 @@ class Track
     //irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
     irr::core::array<irr::scene::IMeshSceneNode*>   
                                                    m_sceneNodes;
+    irr::scene::ILightSceneNode *                  m_sun;
+
     irr::scene::ICameraSceneNode *                 m_camera;
 
     CameraDataManager *                            m_cammgr;
