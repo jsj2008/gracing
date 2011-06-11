@@ -15,7 +15,6 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-
 // TODO: 
 // 1- move 'm_maxSuspensionTravel' from vehicle to wheel (one per wheel!)
 
@@ -25,6 +24,7 @@
 #include "Vehicle.h"
 #include "util.hh"
 #include "gmlog.h"
+#include "XmlNode.h"
 
 #define NOT_A_VALID_VEHICLE_IF_NOT(cond) assert(cond)
 #define NOT_A_VALID_VEHICLE_IF(cond) assert(!(cond))
@@ -77,6 +77,13 @@
     ot_first_position=ot_wrl_position,
     ot_first_radius=ot_wrl_radius,
     ot_first_width=ot_wrl_width
+  };
+
+  enum {
+    widx_wrl=0,
+    widx_wrr=1,
+    widx_wfl=2,
+    widx_wfr=3,
   };
 
 CFG_PARAM_D(glob_chassisDefaultMass)=.8;
@@ -341,6 +348,7 @@ void Vehicle::initPhysics()
                   m_wheelInitialPositions[i].Y,
                   m_wheelInitialPositions[i].Z);
 
+
     m_wheelsData[i].radius=m_wheelRadiuses[i];
     m_wheelsData[i].suspensionLength=m_suspensionRestLength;
     m_wheelsData[i].rotation=0.;
@@ -408,6 +416,164 @@ void Vehicle::deinitGraphics()
   m_using &= ~USE_GRAPHICS;
 }
 
+#define NEW_LOAD
+#ifdef NEW_LOAD
+void Vehicle::load()
+{
+  if(m_loaded)
+    return ;
+  XmlNode * node=0;
+
+  irr::io::path mypath(m_sourceName);
+  bool res=m_filesystem->addFileArchive(mypath);
+
+  if(!res) 
+    return ;
+
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
+
+  node=new XmlNode(xml);
+  assert(node && node->getName() == "vehicle"); // TODO: this must not be an assert!!!
+
+  res=m_filesystem->removeFileArchive(mypath);
+
+  std::vector<XmlNode*> nodes;
+  node->getChildren(nodes);
+
+  irr::scene::IAnimatedMesh* mesh;
+  irr::scene::ISceneManager * smgr=m_device->getSceneManager();
+
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    node=nodes[i];
+    if(node->getName() == "chassis") {
+      GM_LOG("loading '%s'\n",node->getText().c_str());
+      mesh=smgr->getMesh(node->getText().c_str());
+      WARNING_IF(mesh==0," - cannot load file '%s'\n",
+          node->getText().c_str());
+      if(mesh) {
+        mesh->grab();
+        m_chassis.push_back(mesh);
+      }
+      break;
+
+    } else if(node->getName() == "wfr_width") {
+      double width=Util::parseFloat(node->getText().c_str());
+      m_wheelWidths[ widx_wfr  ]=width;
+
+    } else if(node->getName() == "wfl_width") {
+      double width=Util::parseFloat(node->getText().c_str());
+      m_wheelWidths[ widx_wfl  ]=width;
+
+    } else if(node->getName() == "wrl_width") {
+      double width=Util::parseFloat(node->getText().c_str());
+      m_wheelWidths[ widx_wrl  ]=width;
+
+    } else if(node->getName() == "wrr_width") {
+      double width=Util::parseFloat(node->getText().c_str());
+      m_wheelWidths[ widx_wrr  ]=width;
+
+    } else if(node->getName() == "wfr_radius") {
+      double radius=Util::parseFloat(node->getText().c_str());
+      m_wheelRadiuses[ widx_wfr  ]=radius;
+
+    } else if(node->getName() == "wfl_radius") {
+      double radius=Util::parseFloat(node->getText().c_str());
+      m_wheelRadiuses[ widx_wfl  ]=radius;
+
+    } else if(node->getName() == "wrl_radius") {
+      double radius=Util::parseFloat(node->getText().c_str());
+      m_wheelRadiuses[ widx_wrl  ]=radius;
+
+    } else if(node->getName() == "wrr_radius") {
+      double radius=Util::parseFloat(node->getText().c_str());
+      m_wheelRadiuses[ widx_wrr  ]=radius;
+
+    } else if(node->getName() == "wfr_position") {
+      Util::parseVector(node->getText().c_str(),m_wheelInitialPositions[widx_wfr]);
+
+    } else if(node->getName() == "wfl_position") {
+      Util::parseVector(node->getText().c_str(),m_wheelInitialPositions[widx_wfl]);
+
+    } else if(node->getName() == "wrl_position") {
+      Util::parseVector(node->getText().c_str(),m_wheelInitialPositions[widx_wrl]);
+
+    } else if(node->getName() == "wrr_position") {
+      Util::parseVector(node->getText().c_str(),m_wheelInitialPositions[widx_wrr]);
+
+    } else if(node->getName() == "wfr") {
+      mesh=smgr->getMesh(node->getText().c_str());
+      WARNING_IF(mesh==0," - cannot load file '%s'\n",
+          node->getText().c_str());
+      if(m_wheels[widx_wfr]) {
+        WARNING("Double definition of wheel: front right");
+        break;
+      }
+      if(mesh) {
+        m_wheels[widx_wfr]=mesh;
+        mesh->grab();
+      }
+    } else if(node->getName() == "wfl") {
+      mesh=smgr->getMesh(node->getText().c_str());
+      WARNING_IF(mesh==0," - cannot load file '%s'\n",
+          node->getText().c_str());
+      if(m_wheels[widx_wfl]) {
+        WARNING("Double definition of wheel: front right");
+        break;
+      }
+      if(mesh) {
+        m_wheels[widx_wfl]=mesh;
+        mesh->grab();
+      }
+    } else if(node->getName() == "wrr") {
+      mesh=smgr->getMesh(node->getText().c_str());
+      WARNING_IF(mesh==0," - cannot load file '%s'\n",
+          node->getText().c_str());
+      if(m_wheels[widx_wrr]) {
+        WARNING("Double definition of wheel: front right");
+        break;
+      }
+      if(mesh) {
+        m_wheels[widx_wrr]=mesh;
+        mesh->grab();
+      }
+    } else if(node->getName() == "wrl") {
+      mesh=smgr->getMesh(node->getText().c_str());
+      WARNING_IF(mesh==0," - cannot load file '%s'\n",
+          node->getText().c_str());
+      if(m_wheels[widx_wrl]) {
+        WARNING("Double definition of wheel: front right");
+        break;
+      }
+      if(mesh) {
+        m_wheels[widx_wrl]=mesh;
+        mesh->grab();
+      }
+
+    } else if(node->getName() == "wheelFriction") {
+      m_wheelFriction=Util::parseFloat(node->getText().c_str());
+
+    } else if(node->getName() == "suspensionStiffness") {
+      m_suspensionStiffness=Util::parseFloat(node->getText().c_str());
+
+    } else if(node->getName() == "suspensionDamping") {
+      m_suspensionDamping=Util::parseFloat(node->getText().c_str());
+
+    } else if(node->getName() == "suspensionCompression") {
+      m_suspensionCompression=Util::parseFloat(node->getText().c_str());
+
+    } else if(node->getName() == "rollInfluence") {
+      m_rollInfluence=Util::parseFloat(node->getText().c_str());
+
+    } else if(node->getName() == "suspensionRestLength") {
+      m_suspensionRestLength=Util::parseFloat(node->getText().c_str());
+    } 
+  }
+
+  delete node;
+  m_loaded=true;
+}
+
+#else
 void Vehicle::load()
 {
   if(m_loaded)
@@ -445,14 +611,6 @@ void Vehicle::load()
 
   int ot;
   int nodeStack[MAX_DEPTH];
-#if 0
-  const char * wheel_names[4]={
-    "rear left",
-    "rear right",
-    "front left",
-    "front right"
-  };
-#endif
 
   irr::io::EXML_NODE nodeType;
   irr::scene::IAnimatedMesh* mesh;
@@ -662,8 +820,8 @@ void Vehicle::load()
 
   // TODO: check presence of all parts
   m_loaded=true;
-
 }
+#endif
 
 void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 {
@@ -934,6 +1092,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 			btScalar proj2 = fwd.dot(vel);
 			
 			wheel.deltaRotation = (proj2 * deltaTime) / (wheel.radius);
+
 			wheel.rotation += wheel.deltaRotation;
 
 		} else
@@ -986,6 +1145,7 @@ void Vehicle::updateFriction(btScalar timeStep)
       const btTransform& wheelTrans = wheel.worldTransform;
 
       btMatrix3x3 wheelBasis0 = wheelTrans.getBasis();
+
       m_axle[i] = btVector3(	
           wheelBasis0[0][2],
           wheelBasis0[1][2],

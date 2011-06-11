@@ -114,7 +114,6 @@ XmlNode * Track::loadXml(const char * filename)
   return node;
 }
 
-
 void Track::loadTriggers(XmlNode * root)
 {
   std::vector<XmlNode*> nodes;
