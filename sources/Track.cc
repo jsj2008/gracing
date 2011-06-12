@@ -253,6 +253,8 @@ void Track::load()
 
   const XmlNode * triggers=m_rootNode->getChild("triggers");
 
+  assert(triggers); // TODO: this should not be an assert
+
   nodes.clear();
   triggers->getChildren(nodes);
   for(unsigned int i=0; i<nodes.size(); i++) {

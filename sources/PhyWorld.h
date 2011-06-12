@@ -62,6 +62,8 @@ class PhyWorld : public btDiscreteDynamicsWorld
         btSequentialImpulseConstraintSolver *solver,
         btDefaultCollisionConfiguration     *collisionConfiguration);
 
+    // TODO: remote the following obsolete
+    //       meshBinder stuff
     struct meshBinder {
       btRigidBody *               body;
       irr::scene::ISceneNode *    irrNode;

@@ -194,7 +194,7 @@ void Race::updateVehiclesInfo()
           m_communicator->show("Wrong way");
         vinfo.wrongWay=true;
       } else
-        m_communicator->unshow();
+        //m_communicator->unshow();
         vinfo.wrongWay=false;
     }
 

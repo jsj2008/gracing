@@ -215,7 +215,6 @@ int main(int argc, char ** av)
   vehicle->load();
   vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
-#if 0
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle2 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
@@ -225,8 +224,9 @@ int main(int argc, char ** av)
   if(glob_enableDebug)
     ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle2->load();
-  vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+  //vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
+#if 0
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle3 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/

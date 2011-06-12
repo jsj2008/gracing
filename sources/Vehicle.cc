@@ -322,8 +322,9 @@ void Vehicle::initPhysics()
   m_chassisShape = new btBoxShape(btVector3(dX,dY,dZ));
 
 
-  // calc positio of the center of mass
-  // (X and Z are in the middle of the wheels)
+  // calc position of the center of the vehicle
+  // center of mass.
+  // put it in the middle of the wheels
   btVector3 centerOfMass(0.,0.,0.);
   for(int i=0; i<4; i++) {
     centerOfMass += btVector3(
@@ -332,13 +333,14 @@ void Vehicle::initPhysics()
         m_wheelInitialPositions[i].Z);
   }
   centerOfMass /= 4.;
+  /*
+     ??????
   centerOfMass.setY(30);
-
   centerOfMass -= btVector3(10., 0., 0.);
+  */
 
   btTransform tr(btTransform::getIdentity());
   tr.setOrigin(centerOfMass);
-
 
   m_carBody=m_world->createRigidBody(0, glob_chassisDefaultMass, tr,m_chassisShape, this);
 
@@ -359,7 +361,6 @@ void Vehicle::initPhysics()
   m_world->addAction(this);
   m_raycaster = new btDefaultVehicleRaycaster(m_world);
 
-  m_using|=USE_PHYSICS;
 }
 
 void Vehicle::initGraphics()
@@ -571,6 +572,11 @@ void Vehicle::load()
 
   delete node;
   m_loaded=true;
+
+  initGraphics();
+  initPhysics();
+
+  //m_carBody->setActivationState(DISABLE_SIMULATION);
 }
 
 #else
@@ -872,16 +878,18 @@ void Vehicle::unload()
 
 void Vehicle::use(unsigned int useFlags)
 {
-  if(useFlags & USE_GRAPHICS) 
-    initGraphics();
-  if(useFlags & USE_PHYSICS)
-    initPhysics();
+  if(useFlags & USE_PHYSICS && !(m_using & USE_PHYSICS)) {
+    m_using|=USE_PHYSICS;
+    m_world->addRigidBody(m_carBody);
+  }
 }
 
 void Vehicle::unuse(unsigned int useFlags)
 {
-  if(useFlags & USE_GRAPHICS)
-    deinitGraphics();
+  if(useFlags & USE_PHYSICS && (m_using & USE_PHYSICS)) {
+    m_world->removeRigidBody(m_carBody);
+    m_using&=~USE_PHYSICS;
+  }
 }
 
 #if 0

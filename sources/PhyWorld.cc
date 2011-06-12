@@ -92,7 +92,7 @@ btRigidBody * PhyWorld::createRigidBody(
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
 
-	addRigidBody(body);
+	//addRigidBody(body);
 
   if(node) {
     meshBinder * mbinder=new meshBinder(body,node);
