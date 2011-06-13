@@ -65,8 +65,9 @@ void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
   }   // for i
 
   // If no children, we are done
-  if(xml->isEmptyElement()) 
+  if(xml->isEmptyElement())  
     return;
+
 
   /** Read all children elements. */
   while(xml->read())

@@ -102,6 +102,8 @@ class Race : public  IPhaseHandler
 
     Track     *  m_track;
 
+    void restoreVehicle(VehicleInfo &);
+
 
     struct VehicleInfo m_vehicles[max_vehicles];
     unsigned           m_nVehicles;

@@ -234,6 +234,8 @@ Vehicle::Vehicle(
   m_loaded=false;
   m_controlsEnabled=true;
 
+  GM_LOG("creating vehicle '%s'\n",source);
+
   // accell dynamic info
   m_throttle=0.;
   m_throttleIncrement=glob_throttleIncrement;
@@ -281,6 +283,7 @@ void Vehicle::initPhysics()
     return;
   }
 
+#if 0
   if(!(m_using & USE_GRAPHICS)) {
     WARNING("cannot init phisics, must first init graphics");
     return;
@@ -289,6 +292,7 @@ void Vehicle::initPhysics()
   if(m_using & USE_PHYSICS) {
     return;
   }
+#endif
 
   // the chassis shape
   // TODO: use the mesh to create the shape
@@ -370,16 +374,17 @@ void Vehicle::initGraphics()
     return;
   }
 
+#if 0
   if(m_using & USE_GRAPHICS) {
     return;
   }
+#endif
 
   irr::u32 n;
   irr::u32 i;
   irr::scene::ISceneNode * node;
   irr::scene::ISceneManager * smgr=
     m_device->getSceneManager();
-
 
   m_chassisNode=new CompoundSceneNode(this,smgr,0x51ca);
 
@@ -393,9 +398,11 @@ void Vehicle::initGraphics()
 
   for(i=0; i<4; ++i) {
     m_wheelsNodes[i]=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcaf0);
+    GM_LOG("adding node: %p\n",
+      m_wheelsNodes[i]);
   }
   
-  m_using|=USE_GRAPHICS;
+  //m_using|=USE_GRAPHICS;
 }
 
 void Vehicle::deinitGraphics()
@@ -417,37 +424,38 @@ void Vehicle::deinitGraphics()
   m_using &= ~USE_GRAPHICS;
 }
 
-#define NEW_LOAD
-#ifdef NEW_LOAD
 void Vehicle::load()
 {
   if(m_loaded)
     return ;
-  XmlNode * node=0;
+  XmlNode * root=0;
 
   irr::io::path mypath(m_sourceName);
   bool res=m_filesystem->addFileArchive(mypath);
+
+  GM_LOG("loading vehicle '%s'\n",m_sourceName);
 
   if(!res) 
     return ;
 
   irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
 
-  node=new XmlNode(xml);
-  assert(node && node->getName() == "vehicle"); // TODO: this must not be an assert!!!
+  assert(xml); // TODO: should not be an assert
 
-  res=m_filesystem->removeFileArchive(mypath);
+  root=new XmlNode(xml);
+  assert(root && root->getName() == "vehicle"); // TODO: this must not be an assert!!!
+
 
   std::vector<XmlNode*> nodes;
-  node->getChildren(nodes);
+  root->getChildren(nodes);
 
   irr::scene::IAnimatedMesh* mesh;
   irr::scene::ISceneManager * smgr=m_device->getSceneManager();
 
   for(unsigned int i=0; i<nodes.size(); i++) {
-    node=nodes[i];
+    XmlNode * node=nodes[i];
+
     if(node->getName() == "chassis") {
-      GM_LOG("loading '%s'\n",node->getText().c_str());
       mesh=smgr->getMesh(node->getText().c_str());
       WARNING_IF(mesh==0," - cannot load file '%s'\n",
           node->getText().c_str());
@@ -455,7 +463,6 @@ void Vehicle::load()
         mesh->grab();
         m_chassis.push_back(mesh);
       }
-      break;
 
     } else if(node->getName() == "wfr_width") {
       double width=Util::parseFloat(node->getText().c_str());
@@ -476,6 +483,8 @@ void Vehicle::load()
     } else if(node->getName() == "wfr_radius") {
       double radius=Util::parseFloat(node->getText().c_str());
       m_wheelRadiuses[ widx_wfr  ]=radius;
+      GM_LOG("Raidius: %f\n",
+        m_wheelRadiuses[ widx_wfr  ]);
 
     } else if(node->getName() == "wfl_radius") {
       double radius=Util::parseFloat(node->getText().c_str());
@@ -512,6 +521,7 @@ void Vehicle::load()
       if(mesh) {
         m_wheels[widx_wfr]=mesh;
         mesh->grab();
+        smgr->getMeshCache()->renameMesh(mesh, "");
       }
     } else if(node->getName() == "wfl") {
       mesh=smgr->getMesh(node->getText().c_str());
@@ -524,6 +534,7 @@ void Vehicle::load()
       if(mesh) {
         m_wheels[widx_wfl]=mesh;
         mesh->grab();
+        smgr->getMeshCache()->renameMesh(mesh, "");
       }
     } else if(node->getName() == "wrr") {
       mesh=smgr->getMesh(node->getText().c_str());
@@ -536,6 +547,7 @@ void Vehicle::load()
       if(mesh) {
         m_wheels[widx_wrr]=mesh;
         mesh->grab();
+        smgr->getMeshCache()->renameMesh(mesh, "");
       }
     } else if(node->getName() == "wrl") {
       mesh=smgr->getMesh(node->getText().c_str());
@@ -548,6 +560,7 @@ void Vehicle::load()
       if(mesh) {
         m_wheels[widx_wrl]=mesh;
         mesh->grab();
+        smgr->getMeshCache()->renameMesh(mesh, "");
       }
 
     } else if(node->getName() == "wheelFriction") {
@@ -570,7 +583,11 @@ void Vehicle::load()
     } 
   }
 
-  delete node;
+  delete xml;
+  GM_LOG("removing '%s'\n",mypath.c_str());
+  res=m_filesystem->removeFileArchive(m_filesystem->getAbsolutePath(mypath));
+  assert(res);
+  delete root;
   m_loaded=true;
 
   initGraphics();
@@ -579,255 +596,6 @@ void Vehicle::load()
   //m_carBody->setActivationState(DISABLE_SIMULATION);
 }
 
-#else
-void Vehicle::load()
-{
-  if(m_loaded)
-    return;
-
-  irr::u32 cnt=m_filesystem->getFileArchiveCount();
-
-  bool res=m_filesystem->addFileArchive(m_sourceName);
-
-  NOT_A_VALID_VEHICLE_IF(!res);
-
-  irr::u32 archiveIndex=cnt;
-
-  irr::io::IFileArchive* archive=m_filesystem->
-    getFileArchive(archiveIndex);
-
-  NOT_A_VALID_VEHICLE_IF_NOT(archive);
-
-  const irr::io::IFileList * fileList=archive->getFileList();
-  irr::s32 manifestIndex;
-
-  manifestIndex=fileList->findFile(MANIFEST_NAME);
-
-  NOT_A_VALID_VEHICLE_IF(manifestIndex<0);
-
-  irr::io::IReadFile *  manifestFile=
-    archive->createAndOpenFile(manifestIndex);
-
-  assert(manifestFile);
-
-  irr::io::IXMLReaderUTF8 * xmlReader=
-    m_filesystem->createXMLReaderUTF8 (manifestFile);
-
-  enum { MAX_DEPTH=128 };
-
-  int ot;
-  int nodeStack[MAX_DEPTH];
-
-  irr::io::EXML_NODE nodeType;
-  irr::scene::IAnimatedMesh* mesh;
-  irr::scene::ISceneManager * smgr=m_device->getSceneManager();
-
-  for(int i=0, inElement=false, nodeStackPtr=0; 
-      xmlReader->read(); 
-      i++)
-  {
-    nodeType=xmlReader->getNodeType();
-    switch(nodeType) {
-      case irr::io::EXN_UNKNOWN:
-      case irr::io::EXN_CDATA:
-      case irr::io::EXN_COMMENT:
-      case irr::io::EXN_NONE:
-      break;
-      case irr::io::EXN_ELEMENT:
-        if(strcmp("chassis",xmlReader->getNodeName())==0) {
-          ot=ot_chassis;
-        } else if(strcmp("wfr_width",xmlReader->getNodeName())==0) {
-          ot=ot_wfr_width;
-        } else if(strcmp("wfl_width",xmlReader->getNodeName())==0) {
-          ot=ot_wfl_width;
-        } else if(strcmp("wrl_width",xmlReader->getNodeName())==0) {
-          ot=ot_wrl_width;
-        } else if(strcmp("wrr_width",xmlReader->getNodeName())==0) {
-          ot=ot_wrr_width;
-        } else if(strcmp("wfr_radius",xmlReader->getNodeName())==0) {
-          ot=ot_wfr_radius;
-        } else if(strcmp("wfl_radius",xmlReader->getNodeName())==0) {
-          ot=ot_wfl_radius;
-        } else if(strcmp("wrl_radius",xmlReader->getNodeName())==0) {
-          ot=ot_wrl_radius;
-        } else if(strcmp("wrr_radius",xmlReader->getNodeName())==0) {
-          ot=ot_wrr_radius;
-        } else if(strcmp("wfr_position",xmlReader->getNodeName())==0) {
-          ot=ot_wfr_position;
-        } else if(strcmp("wfl_position",xmlReader->getNodeName())==0) {
-          ot=ot_wfl_position;
-        } else if(strcmp("wrl_position",xmlReader->getNodeName())==0) {
-          ot=ot_wrl_position;
-        } else if(strcmp("wrr_position",xmlReader->getNodeName())==0) {
-          ot=ot_wrr_position;
-        } else if(strcmp("wfr",xmlReader->getNodeName())==0) {
-          ot=ot_wfr;
-        } else if(strcmp("wfl",xmlReader->getNodeName())==0) {
-          ot=ot_wfl;
-        } else if(strcmp("wrr",xmlReader->getNodeName())==0) {
-          ot=ot_wrr;
-        } else if(strcmp("wrl",xmlReader->getNodeName())==0) {
-          ot=ot_wrl;
-//
-        } else if(strcmp("wheelFriction",xmlReader->getNodeName())==0) {
-          ot=ot_wheelFriction;
-        } else if(strcmp("suspensionStiffness",xmlReader->getNodeName())==0) {
-          ot=ot_suspensionStiffness;
-        } else if(strcmp("suspensionDamping",xmlReader->getNodeName())==0) {
-          ot=ot_suspensionDamping;
-        } else if(strcmp("suspensionCompression",xmlReader->getNodeName())==0) {
-          ot=ot_suspensionCompression;
-        } else if(strcmp("rollInfluence",xmlReader->getNodeName())==0) {
-          ot=ot_rollInfluence;
-        } else if(strcmp("suspensionRestLength",xmlReader->getNodeName())==0) {
-          ot=ot_suspensionRestLength;
-        } else {
-          ot=ot_none;
-        }
-        nodeStack[++nodeStackPtr]=ot;
-        inElement=true;
-        break;
-      case irr::io::EXN_ELEMENT_END:
-        inElement=false;
-        nodeStackPtr --;
-      break;
-      case irr::io::EXN_TEXT:
-      if(inElement) {
-        switch(nodeStack[nodeStackPtr]) {
-          case ot_chassis:
-            GM_LOG("loading '%s'\n",xmlReader->getNodeName());
-            mesh=smgr->getMesh(xmlReader->getNodeName());
-            WARNING_IF(mesh==0," - cannot load file '%s'\n",
-                xmlReader->getNodeName());
-            if(mesh) {
-              mesh->grab();
-              m_chassis.push_back(mesh);
-            }
-            break;
-          case ot_wheelFriction:
-            m_wheelFriction=Util::parseFloat(xmlReader->getNodeName());
-            break;
-          case ot_suspensionStiffness:
-            m_suspensionStiffness=Util::parseFloat(xmlReader->getNodeName());
-            break;
-          case ot_suspensionDamping:
-            m_suspensionDamping=Util::parseFloat(xmlReader->getNodeName());
-            break;
-          case ot_suspensionCompression:
-            m_suspensionCompression=Util::parseFloat(xmlReader->getNodeName());
-            break;
-          case ot_rollInfluence:
-            m_rollInfluence=Util::parseFloat(xmlReader->getNodeName());
-            break;
-          case ot_suspensionRestLength:
-            m_suspensionRestLength=Util::parseFloat(xmlReader->getNodeName());
-            break;
-
-          case ot_wrl_position:
-          case ot_wrr_position:
-          case ot_wfl_position:
-          case ot_wfr_position:
-            {
-              int widx=nodeStack[nodeStackPtr]-ot_first_position;
-              assert(widx>-1 && widx<4);
-              Util::parseVector(xmlReader->getNodeName(),m_wheelInitialPositions[widx]);
-            }
-            break;
-
-          case ot_wrl_width:
-          case ot_wrr_width:
-          case ot_wfl_width:
-          case ot_wfr_width:
-            {
-              int widx=nodeStack[nodeStackPtr]-ot_first_width;
-              assert(widx>-1 && widx<4);
-              double width=Util::parseFloat(xmlReader->getNodeName());
-              m_wheelWidths[widx]=width;
-            }
-            break;
-
-          case ot_wrl_radius:
-          case ot_wrr_radius:
-          case ot_wfl_radius:
-          case ot_wfr_radius:
-            {
-              int widx=nodeStack[nodeStackPtr]-ot_first_radius;
-              assert(widx>-1 && widx<4);
-              double radius=Util::parseFloat(xmlReader->getNodeName());
-              m_wheelRadiuses[widx]=radius;
-            }
-            break;
-
-          case ot_wfl:
-            if(m_wheels[W_FRONT_LEFT]) {
-              WARNING("Double definizion of wheel: front left");
-              break;
-            } 
-            mesh=smgr->getMesh(xmlReader->getNodeName());
-            WARNING_IF(mesh==0," - cannot load file '%s'\n",
-                xmlReader->getNodeName());
-            if(mesh) {
-              m_wheels[W_FRONT_LEFT]=mesh;
-              mesh->grab();
-            }
-            break;
-
-          case ot_wfr:
-            mesh=smgr->getMesh(xmlReader->getNodeName());
-            WARNING_IF(mesh==0," - cannot load file '%s'\n",
-                xmlReader->getNodeName());
-            if(m_wheels[W_FRONT_RIGHT]) {
-              WARNING("Double definition of wheel: front right");
-              break;
-            }
-            if(mesh) {
-              m_wheels[W_FRONT_RIGHT]=mesh;
-              mesh->grab();
-            }
-            break;
-
-          case ot_wrl:
-            mesh=smgr->getMesh(xmlReader->getNodeName());
-            WARNING_IF(mesh==0," - cannot load file '%s'\n",
-                xmlReader->getNodeName());
-            if(m_wheels[W_REAR_LEFT]) {
-              WARNING("Double definition of wheel: rear left");
-              break;
-            }
-            if(mesh) {
-              m_wheels[W_REAR_LEFT]=mesh;
-              mesh->grab();
-            }
-            break;
-
-          case ot_wrr:
-            mesh=smgr->getMesh(xmlReader->getNodeName());
-            WARNING_IF(mesh==0," - cannot load file '%s'\n",
-                xmlReader->getNodeName());
-            if(m_wheels[W_REAR_RIGHT]) {
-              WARNING("Double definition of wheel: rear right");
-              break;
-            }
-            if(mesh) {
-              m_wheels[W_REAR_RIGHT]=mesh;
-              mesh->grab();
-            }
-            break;
-        }
-      }
-    }
-  }
-
-  manifestFile->drop();
-
-  m_filesystem->removeFileArchive(archiveIndex);
-
-  xmlReader->drop();
-
-  // TODO: check presence of all parts
-  m_loaded=true;
-}
-#endif
 
 void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 {
@@ -881,6 +649,15 @@ void Vehicle::use(unsigned int useFlags)
   if(useFlags & USE_PHYSICS && !(m_using & USE_PHYSICS)) {
     m_using|=USE_PHYSICS;
     m_world->addRigidBody(m_carBody);
+    if(!(useFlags & USE_PHYSICS))
+      use(USE_GRAPHICS);
+  }
+
+  if(useFlags & USE_GRAPHICS && !(m_using & USE_GRAPHICS)) {
+    irr::scene::ISceneManager * smgr=
+      m_device->getSceneManager();
+    m_using|=USE_GRAPHICS;
+    smgr->getRootSceneNode()->addChild(this);
   }
 }
 
@@ -1497,7 +1274,6 @@ void Vehicle::updateWheel(int index)
   assert(wheel);
 
   btTransform & wheelTrans=m_wheelsData[index].worldTransform;
-  //btTransform wheelTrans=btTransform::getIdentity();
 
   irr::core::matrix4 matr;
   PhyWorld::btTransformToIrrlichtMatrix(wheelTrans, matr);

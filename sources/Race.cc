@@ -93,6 +93,11 @@ static btVector3 vectIrrToBullet(const irr::core::vector3df & irrv)
   return btVector3(irrv.X, irrv.Y, irrv.Z);
 }
 
+static irr::core::vector3df vectBulletToIrr(const btVector3 & vect)
+{
+  return irr::core::vector3df(vect.getX(),vect.getY(),vect.getZ());
+}
+
 // !'!'!'!'!
 
 
@@ -210,6 +215,7 @@ void Race::updateVehiclesInfo()
       if(vinfo.overturnCountDown) {
         if(--vinfo.overturnCountDown == 0) {
           GM_LOG("vehicle overturn!!!!");
+          restoreVehicle(vinfo);
         }
       } else {
         vinfo.overturnCountDown=160;
@@ -217,33 +223,33 @@ void Race::updateVehiclesInfo()
     }
 
     // check to see if the vehicle is on the road
-    unsigned nindex=
-      nextIndexVehicleControlPoint(vinfo.controlPointIndex,controlPoints);
-    btVector3 p1=vehiclePosition - controlPoints[vinfo.controlPointIndex];
-    btVector3 p2=controlPoints[nindex] - controlPoints[vinfo.controlPointIndex];
 
-    //btScalar p1_project_length=p1.dot(p2) /  p2.length();
-    //btVector3 p1_proejct= p2 * (p1_project_length / p2.length());
-    // to previous two line shold be equivalent to the following two
-    btScalar p1_project_length=p1.dot(p2) /  p2.length2();
-    btVector3 p1_project= p2 * p1_project_length ;
+//    unsigned nindex=
+//      nextIndexVehicleControlPoint(vinfo.controlPointIndex,controlPoints);
+//    btVector3 p1=vehiclePosition - controlPoints[vinfo.controlPointIndex];
+//    btVector3 p2=controlPoints[nindex] - controlPoints[vinfo.controlPointIndex];
+//
+//    btScalar p1_project_length=p1.dot(p2) /  p2.length2();
+//    btVector3 p1_project= p2 * p1_project_length ;
 
+#if 0
     btScalar dist=
         (vehiclePosition-
             controlPoints[vinfo.controlPointIndex] + p1_project).length();
+#endif
 
-    if(debugDrawer) {
-      btVector3 color(0.,0.,1.);
-      btVector3 color2(0.,1.,0.);
-      if(vinfo.controlPointIndex%2)
-        debugDrawer->drawLine(vehiclePosition,
-            controlPoints[vinfo.controlPointIndex] + p1_project,
-            color);
-      else
-        debugDrawer->drawLine(vehiclePosition,
-            controlPoints[vinfo.controlPointIndex] + p1_project,
-            color2);
-    }
+//    if(debugDrawer) {
+//      btVector3 color(0.,0.,1.);
+//      btVector3 color2(0.,1.,0.);
+//      if(vinfo.controlPointIndex%2)
+//        debugDrawer->drawLine(vehiclePosition,
+//            controlPoints[vinfo.controlPointIndex] + p1_project,
+//            color);
+//      else
+//        debugDrawer->drawLine(vehiclePosition,
+//            controlPoints[vinfo.controlPointIndex] + p1_project,
+//            color2);
+//    }
   }
 }
 
@@ -254,7 +260,6 @@ void Race::step()
   switch(m_status) {
     case rs_readySetGo:
       if(m_readySetGo->isEnded()) {
-        GM_LOG("going into started state\n");
         gotoState(rs_started);
       }
       break;
@@ -277,6 +282,8 @@ bool Race::gotoState(unsigned state)
     case rs_readySetGo:
       // reset vehicles
       for(unsigned i=0; i<m_nVehicles; i++)  {
+        m_vehicles[i].vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+
         m_vehicles[i].vehicle->reset(m_vehicles[i].startPosition,
             m_vehicles[i].startRotation);
         m_vehicles[i].vehicle->setEnableControls(false);
@@ -293,6 +300,9 @@ bool Race::gotoState(unsigned state)
         m_vehicles[i].lapNumber=0;
         m_vehicles[i].overturnCountDown=0;
         m_vehicles[i].waitingForLapTrigger=false;
+        m_track->registerLapCallback(this, 
+            m_vehicles[i].vehicle, 
+            &(m_vehicles[i]));
       }
       // reset gui controls
       m_readySetGo->restart();
@@ -317,15 +327,15 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
     return false;
   if(m_track == 0)
     return false;
-  m_sceneManager->getRootSceneNode()->addChild(vehicle);
-  vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
 
   m_vehicles[m_nVehicles].vehicle=vehicle;
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
   m_vehicles[m_nVehicles].controller=controller;
 
-  m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
+  //m_sceneManager->getRootSceneNode()->addChild(vehicle);
+  //vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
+  //m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
 
   m_nVehicles++;
 
@@ -365,3 +375,20 @@ void Race::recalcVehicleVehiclesStartPositions()
   }
 }
 
+void Race::restoreVehicle(VehicleInfo & vinfo)
+{
+  unsigned nindex=
+    nextIndexVehicleControlPoint(vinfo.controlPointIndex,
+          m_track->getControlPoints());
+  btVector3 v=
+          m_track->getControlPoints()[nindex]-
+          m_track->getControlPoints()[vinfo.controlPointIndex];
+  btScalar  l=v.length();
+
+  btScalar  c = v.dot(btVector3(0.,0.,1.)) / l;
+  btScalar  s = v.dot(btVector3(1.,0.,0.)) / l;
+  double    a = atan2(c,s);
+
+  vinfo.vehicle->reset(
+    vectBulletToIrr(m_track->getControlPoints()[vinfo.controlPointIndex]),a);
+}

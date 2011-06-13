@@ -204,7 +204,8 @@ int main(int argc, char ** av)
 
   // prepare the vehicle
   std::string vehpath;
-  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
+  //resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -213,9 +214,9 @@ int main(int argc, char ** av)
   if(glob_enableDebug)
     ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle->load();
-  vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
+  //resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle2 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -224,7 +225,6 @@ int main(int argc, char ** av)
   if(glob_enableDebug)
     ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle2->load();
-  //vehicle2->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
 #if 0
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
@@ -279,9 +279,9 @@ int main(int argc, char ** av)
   IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
-  //race->addVehicle(vehicle,new VehicleAutoController());
-  race->addVehicle(vehicle,controller);
-  //race->addVehicle(vehicle2,new VehicleAutoController());
+  race->addVehicle(vehicle,new VehicleAutoController());
+  //race->addVehicle(vehicle,controller);
+  race->addVehicle(vehicle2,new VehicleAutoController());
   //race->addVehicle(vehicle3,new VehicleAutoController());
 
   IPhaseHandler * currentPhaseHandler;

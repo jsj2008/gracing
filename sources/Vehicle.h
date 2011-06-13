@@ -112,9 +112,10 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     };
     
     void initPhysics();
+    void initGraphics();
+
     void deinitPhysics();
     void deinitGraphics();
-    void initGraphics();
 
     void updateFriction(btScalar);
     void step();

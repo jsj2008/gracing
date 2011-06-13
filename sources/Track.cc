@@ -109,7 +109,10 @@ XmlNode * Track::loadXml(const char * filename)
   node=new XmlNode(xml);
   assert(node && node->getName() == "track"); // TODO: this must not be an assert!!!
 
-  res=m_filesystem->removeFileArchive(mypath);
+  xml->drop();
+
+  res=m_filesystem->removeFileArchive(m_filesystem->getAbsolutePath(mypath));
+  assert(res);
 
   return node;
 }
@@ -264,7 +267,8 @@ void Track::load()
     node=nodes[i];
   }
 
-  m_filesystem->removeFileArchive(archivepath);
+  res=m_filesystem->removeFileArchive(m_filesystem->getAbsolutePath(archivepath));
+  assert(res);
 
   // add track meshes to the physic world
   for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
@@ -295,170 +299,6 @@ void Track::load()
 
   m_loaded=true;
 }
-
-#if 0
-void Track::tmpLoad()
-{
-  GM_LOG("loading track\n");
-  if(m_loaded) return;
-
-  irr::io::path archivepath(m_filename.c_str());
-  bool res=m_filesystem->addFileArchive(archivepath);
-  if(!res)
-    throw Exception_cannotLoadFile(m_filename.c_str());
-
-  irr::io::IReadFile *  manifestFile=
-    m_filesystem->createAndOpenFile(MANIFEST_NAME);
-  
-  if(!manifestFile) {
-    throw Exception_cannotLoadFile(m_filename.c_str());
-  }
-
-  assert(manifestFile);
-
-  irr::io::IXMLReaderUTF8 * xmlReader=
-    m_filesystem->createXMLReaderUTF8 (manifestFile);
-
-  enum { MAX_DEPTH=128 };
-
-  int ot;
-  int nodeStack[MAX_DEPTH];
-
-  irr::scene::ISceneManager* smgr = m_device->getSceneManager();
-
-  irr::io::EXML_NODE nodeType;
-  enum {
-    ot_none,
-    ot_mesh,
-    ot_camera,
-    ot_lamp,
-    ot_start_pos,
-    ot_start_rot,
-    ot_unknown
-  };
-  irr::io::IReadFile * rfile;
-  for(int i=0, inElement=false, nodeStackPtr=0; 
-      xmlReader->read(); 
-      i++)
-  {
-    nodeType=xmlReader->getNodeType();
-    switch(nodeType) {
-      case irr::io::EXN_NONE:
-      break;
-      case irr::io::EXN_ELEMENT:
-        if(strcmp("mesh",xmlReader->getNodeName())==0) {
-          ot=ot_mesh;
-        } else if(strcmp("camera",xmlReader->getNodeName())==0) {
-          ot=ot_camera;
-        } else if(strcmp("lamp",xmlReader->getNodeName())==0) {
-          ot=ot_lamp;
-        } else if(strcmp("track_start_rot",xmlReader->getNodeName())==0) {
-          ot=ot_start_rot;
-        } else if(strcmp("track_start_pos",xmlReader->getNodeName())==0) {
-          ot=ot_start_pos;
-        } else {
-          ot=ot_unknown;
-        }
-        nodeStack[++nodeStackPtr]=ot;
-        inElement=true;
-      break;
-      case irr::io::EXN_ELEMENT_END:
-        inElement=false;
-        nodeStackPtr --;
-      break;
-      case irr::io::EXN_TEXT:
-        if(inElement) {
-          switch(nodeStack[nodeStackPtr]) {
-            case ot_start_pos:
-              Util::parseVector(xmlReader->getNodeName(), m_startPosition);
-              break;
-
-            case ot_start_rot:
-              m_startRotation=Util::parseFloat(xmlReader->getNodeName());
-              break;
-
-            case ot_lamp:
-              rfile=m_filesystem->
-                  createAndOpenFile (xmlReader->getNodeName());
-              if(rfile) {
-                loadLights(rfile,smgr);
-                rfile->drop();
-              } else {
-                GM_LOG("  --> cannot find file\n");
-              }
-              break;
-            case ot_mesh:
-              rfile=m_filesystem->
-                  createAndOpenFile (xmlReader->getNodeName());
-              if(rfile) {
-                irr::scene::IAnimatedMesh* mesh = smgr->getMesh(rfile);
-                irr::scene::IMeshSceneNode* node=0;
-                //node=smgr->addAnimatedMeshSceneNode( mesh,0,0xBADD );
-                node=smgr->addOctreeSceneNode( mesh,0,0xBADD );
-                if(!node) {
-                  GM_LOG("cannot load mesh '%s'\n",xmlReader->getNodeName());
-                } else {
-                  m_sceneNodes.push_back(node);
-                  node->grab();
-                }
-                rfile->drop();
-              } else {
-                GM_LOG("  cannot find file\n");
-              }
-              break;
-            case ot_camera:
-              irr::io::IReadFile * rfile=m_filesystem->
-                  createAndOpenFile (xmlReader->getNodeName());
-              if(rfile) {
-                if(m_cammgr)
-                  delete m_cammgr;
-                if(m_camera)
-                  m_camera->drop();
-                m_cammgr=new CameraDataManager(rfile);
-                //m_camera=smgr->addCameraSceneNodeFPS(0,100.f,0.f,0xBADD);
-                irr::core::vector3df p,r;
-                //m_cammgr->getPositionAndRotation(p,r);
-                //m_camera->setPosition(p);
-                //m_camera->setRotation(r);
-                //m_camera->grab();
-                rfile->drop();
-                
-              } else {
-                GM_LOG("Cannot load camera data, using default camera\n");
-                smgr->addCameraSceneNodeFPS();
-              }
-            break;
-          }
-        }
-      break;
-      case irr::io::EXN_COMMENT:
-      break;
-      case irr::io::EXN_CDATA:
-      break;
-      case irr::io::EXN_UNKNOWN:
-        GM_LOG("%d Unknown '%s'\n",i,
-            xmlReader->getNodeName());
-      break;
-      default:
-      GM_LOG("%d '%s', type: %d\n",i,
-          xmlReader->getNodeName(),
-          xmlReader->getNodeType());
-      break;
-    }
-  }
-  //xmlReader->drop();
-  manifestFile->drop();
-  m_filesystem->removeFileArchive(MANIFEST_NAME);
-	for (irr::u32 i=0; i < m_sceneNodes.size(); ++i ) {
-    m_world->addStaticMesh(m_sceneNodes[i]);
-  }
-  smgr->setAmbientLight(
-      //irr::video::SColorf(1.0,1.0,1.0));
-      irr::video::SColorf(1.0,0.0,0.));
-  m_loaded=true;
-  //////////////////////////
-}
-#endif
 
 void Track::unload()
 {
