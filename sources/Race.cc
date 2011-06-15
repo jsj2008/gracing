@@ -111,6 +111,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   irr::s32 px1,px2,py1,py2;
   irr::s32 width,height;
 
+
   width=400; height=100;
   px1=1024-width;     py1=0;
 
@@ -119,7 +120,6 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_cronometer = new GuiCronometer(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
       irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
-      //irr::core::rect<irr::s32>(0,100,400,200),device->getTimer());
 
   width=1024; height=100;
   px1=1024-width;     py1=(576-height)/2-50;
@@ -132,6 +132,11 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_nVehicles=0;
   m_track=0;
+  m_totalLaps=3;
+  m_camera = device->getSceneManager()->addCameraSceneNode();
+  m_device = device;
+  m_cameraAnim = 0;
+  m_followedVehicleIndex=invalidVehicleIndex;
 
   restart();
 }
@@ -264,6 +269,7 @@ void Race::step()
       }
       break;
     case rs_started:
+      updateKeyboard();
       updateVehiclesInfo();
       break;
   }
@@ -273,6 +279,33 @@ void Race::step()
   m_guiEnv->drawAll();
   m_world->debugDrawWorld();
   m_driver->endScene();
+}
+
+void Race::updateKeyboard()
+{
+  EventReceiver * erec;
+
+  erec=ResourceManager::getInstance()->getEventReceiver();
+
+  if(erec->OneShotKey(irr::KEY_KEY_C)) 
+    restart();
+
+  if(erec->OneShotKey(irr::KEY_TAB)) {
+    GM_LOG("changing vehicle\n");
+    followNextVehicle();
+  }
+}
+
+void Race::followNextVehicle()
+{
+  assert(m_followedVehicleIndex != invalidVehicleIndex);
+
+  m_followedVehicleIndex ++;
+
+  if(m_followedVehicleIndex == m_nVehicles)
+    m_followedVehicleIndex = 0;
+
+  m_cameraAnim->changeVehicle(m_vehicles[m_followedVehicleIndex].vehicle);
 }
 
 
@@ -321,7 +354,7 @@ bool Race::gotoState(unsigned state)
   return m_status==state;
 }
 
-bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
+bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller, bool followed)
 {
   if(m_nVehicles == max_vehicles)
     return false;
@@ -336,6 +369,15 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller)
   //m_sceneManager->getRootSceneNode()->addChild(vehicle);
   //vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
   //m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
+
+  if(followed) {
+    if(m_cameraAnim)
+      m_cameraAnim->drop();
+    m_cameraAnim=new
+      VehicleCameraAnimator(vehicle);
+    m_camera->addAnimator(m_cameraAnim);
+    m_followedVehicleIndex = m_nVehicles;
+  }
 
   m_nVehicles++;
 

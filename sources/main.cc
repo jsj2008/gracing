@@ -24,7 +24,6 @@
 #include "gmlog.h"
 #include "Vehicle.h"
 #include "TestVehicle.h"
-#include "VehicleCameraAnimator.h"
 #include "IrrDebugDrawer.h"
 #include "DataRecorder.h"
 #include "IPhaseHandler.h"
@@ -162,8 +161,6 @@ int main(int argc, char ** av)
  
   ResourceManager * resmanager=ResourceManager::getInstance();
 
-  EventReceiver receiver;
-
   video::E_DRIVER_TYPE driverType=video::EDT_OPENGL;
 
   u32 screenWidth;
@@ -174,7 +171,7 @@ int main(int argc, char ** av)
 
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 16,
-        false, false, false, &receiver);
+        false, false, false, resmanager->getEventReceiver()); 
   if (!device)
     return 1;
 
@@ -244,18 +241,23 @@ int main(int argc, char ** av)
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
       core::rect<s32>(0,0,200,100));
   vehicle->setSpeedOMeter(smeter);
+
+#if 0
   std::string fontPath = resmanager->getResourcePath() + "/title_font.xml";
 	gui::IGUIFont* font_big = guienv->getFont(fontPath.c_str());
 	if (font_big) 
 		guienv->getSkin()->setFont(font_big);
+#endif
 
 
   // camera
+#if 0
   irr::scene::ICameraSceneNode * camera;
   camera = smgr->addCameraSceneNode();
   VehicleCameraAnimator * camanim=new
       VehicleCameraAnimator(vehicle);
   camera->addAnimator(camanim);
+#endif
 
   bool flagC, flagD;
   bool flagL, flagU;
@@ -276,12 +278,12 @@ int main(int argc, char ** av)
   Race *          race;
   race = new Race(device,world);
 
-  IVehicleController * controller= new VehicleKeyboardController(&receiver);
+  //IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
   race->addVehicle(vehicle,new VehicleAutoController());
   //race->addVehicle(vehicle,controller);
-  race->addVehicle(vehicle2,new VehicleAutoController());
+  race->addVehicle(vehicle2,new VehicleAutoController(),true);
   //race->addVehicle(vehicle3,new VehicleAutoController());
 
   IPhaseHandler * currentPhaseHandler;
@@ -299,30 +301,11 @@ int main(int argc, char ** av)
       }
 
       /* temp keyboard handling part */
-      if(receiver.IsKeyDown(irr::KEY_ESCAPE) || 
-          receiver.IsKeyDown(irr::KEY_KEY_Q) )
+
+      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
         done=true;
 
-      if(receiver.IsKeyDown(irr::KEY_KEY_L)) {
-        thetrack->load();
-        if(flagL) {
-          dumpNode(smgr->getRootSceneNode());
-          flagL=false;
-        } 
-      } else {
-        flagL=true;
-      }
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_U)) {
-        thetrack->unload();
-        if(flagU) {
-          dumpNode(smgr->getRootSceneNode());
-          flagU=false;
-        }
-      } else {
-        flagU=true;
-      }
-
+#if 0
       if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
         if(flagC)  {
           race->restart();
@@ -335,8 +318,10 @@ int main(int argc, char ** av)
       } else {
         flagC=true;
       }
+#endif
 
 
+#if 0
       if(receiver.IsKeyDown(irr::KEY_KEY_W))
         camanim->moveXY(0.,CAMERA_STEP);
 
@@ -348,6 +333,7 @@ int main(int argc, char ** av)
 
       if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
         camanim->moveXY(-CAMERA_STEP,0.);
+#endif
 
       if (driver->getFPS() != lastFPS)
       {

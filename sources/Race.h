@@ -18,11 +18,14 @@
 #define RACE_H
 /* implemented interfaces */
 #include "IPhaseHandler.h"
+
+
 /* used interfaces */
 #include "IVehicle.h"
 #include "IVehicleController.h"
 
 #include "Track.hh"
+#include "VehicleCameraAnimator.h"
 
 /* gui elements */
 #include "GuiReadySetGo.h"
@@ -37,7 +40,7 @@ class Race : public  IPhaseHandler
 
     virtual void step();
 
-    bool addVehicle(IVehicle * vehicle, IVehicleController * controller);
+    bool addVehicle(IVehicle * vehicle, IVehicleController * controller, bool followed=false);
 
     inline void setTrack(Track * track) { m_track=track; }
 
@@ -60,6 +63,9 @@ class Race : public  IPhaseHandler
   
     bool gotoState(unsigned state);
     void updateVehiclesInfo();
+    void updateKeyboard();
+
+    inline void setLapNumber(unsigned n) { m_totalLaps=n; }
 
     enum { max_vehicles=3 };
 
@@ -102,7 +108,9 @@ class Race : public  IPhaseHandler
 
     Track     *  m_track;
 
+    // util
     void restoreVehicle(VehicleInfo &);
+    void followNextVehicle();
 
 
     struct VehicleInfo m_vehicles[max_vehicles];
@@ -112,7 +120,16 @@ class Race : public  IPhaseHandler
     GuiCronometer *   m_cronometer;
     GuiCommunicator * m_communicator;
 
-    unsigned             m_status;
+    unsigned          m_status;
+
+    unsigned          m_totalLaps;
+
+    VehicleCameraAnimator *        m_cameraAnim;
+    irr::scene::ICameraSceneNode * m_camera;
+    unsigned                       m_followedVehicleIndex;
+    enum { invalidVehicleIndex = 0xffff };
+
+    irr::IrrlichtDevice *          m_device;
 };
 
 

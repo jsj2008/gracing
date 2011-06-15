@@ -31,8 +31,10 @@ gui_lib_dir=
 
 log_enabled=-DLOG_ENABLED
 
-target=demo
-tgt_dir=../demo.app
+appl_name=gracing
+
+target=$(appl_name)
+tgt_dir=../$(target).app
 resources_dir=../resources
 resources_macosx_dir=../resources.macosx
 cplusplus=g++ 
@@ -48,9 +50,11 @@ tgt_tracks_dir=$(tgt_res_dir)/Tracks
 src_vehicles_dir=$(resources_dir)/vehicles
 src_tracks_dir=$(resources_dir)/tracks
 
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)\
-				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
-				-DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)
+
+
+#				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
+# -DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
 				
 ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
@@ -79,7 +83,7 @@ tags:
 copy_files:
 	@$(copier) --rm  $(tgt_dir)
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
-	@$(copier) --cp demo $(tgt_appl_dir)/
+	@$(copier) --cp $(target) $(tgt_appl_dir)/
 	@$(copier) --cp config.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/digits.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/digits.xml $(tgt_res_dir)

@@ -60,7 +60,7 @@ void GuiCronometer::draw()
 
   char buffer[64];
   if(m == 0)
-    snprintf(buffer,64,"%02d''.%02d",s,cs);
+    snprintf(buffer,64,"0' %02d''.%02d",s,cs);
   else
     snprintf(buffer,64,"%02d' %02d''.%02d",m,s,cs);
 

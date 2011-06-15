@@ -37,6 +37,8 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
       return irr::scene::ESNAT_UNKNOWN;
     }
 
+    void changeVehicle(IVehicle * vehicle);
+
     // Returns if the animator has finished. 
     virtual bool hasFinished (void) const { return false; }
 

@@ -22,6 +22,7 @@
 #include "config.h"
 #include "util.hh"
 #include "gmlog.h"
+#include "EventReceiver.h"
 
 #define  DEFAULT_FONT "braggadocio-64.xml"
 #define  DEFAULT_FONT_SMALL "braggadocio-32.xml"
@@ -30,6 +31,7 @@
 #ifdef __APPLE__
 #  include <CoreFoundation/CoreFoundation.h>
 
+static EventReceiver g_eventReceiver;
 
 CFG_PARAM_UINT(glob_screenWidth)=1024;
 CFG_PARAM_UINT(glob_screenHeight)=768;
@@ -148,6 +150,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   ///////////////////////
 
   // system font
+  GM_LOG("loading daf font\n");
   std::string fontName; 
   if(!cfgGet("system-font",fontName)) {
     fontName = DEFAULT_FONT;
@@ -156,14 +159,17 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   std::string fontPath = getResourcePath() + "/" + fontName;
   m_font = guienv->getFont(fontPath.c_str());
   assert(m_font);
+  GM_LOG("loading done font\n");
 
   // system font small
+  GM_LOG("loading small daf font\n");
   if(!cfgGet("system-font-small",fontName)) {
-    fontName = DEFAULT_FONT;
+    fontName = DEFAULT_FONT_SMALL;
   }
   fontPath = getResourcePath() + "/" + fontName;
   m_fontSmall = guienv->getFont(fontPath.c_str());
   assert(m_fontSmall);
+  GM_LOG("loading done font\n");
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -251,5 +257,10 @@ bool ResourceManager::cfgGet(const char * name, double value[3])
 
   Util::parseVector(text.c_str(),value);
   return true;
+}
+
+EventReceiver * ResourceManager::getEventReceiver()
+{
+  return &g_eventReceiver;
 }
     

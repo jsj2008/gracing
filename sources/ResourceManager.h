@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <irrlicht.h>
 
+#include "EventReceiver.h"
+
 class XmlNode;
 
 class ResourceManager 
@@ -36,6 +38,8 @@ class ResourceManager
     void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
+
+    EventReceiver * getEventReceiver();
 
     /* system font */
     inline irr::gui::IGUIFont *  getSystemFontSmall() { return m_fontSmall; }

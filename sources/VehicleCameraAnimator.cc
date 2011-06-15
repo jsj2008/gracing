@@ -36,6 +36,11 @@ VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
   type0_updateDerivate();
 }
 
+void VehicleCameraAnimator::changeVehicle(IVehicle * vehicle)
+{
+  m_vehicle=vehicle;
+}
+
 void 	VehicleCameraAnimator::animateNode (irr::scene::ISceneNode *node, irr::u32 timeMs)
 {
   assert(node->getType() == irr::scene::ESNT_CAMERA);

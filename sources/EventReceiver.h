@@ -29,8 +29,11 @@ class EventReceiver : public irr::IEventReceiver
     // This is used to check whether a key is being held down
     virtual bool IsKeyDown(irr::EKEY_CODE keyCode) const;
 
+    virtual bool OneShotKey(irr::EKEY_CODE keyCode);
+
   private:
     // We use this array to store the current state of each key
     bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
+    bool OneShotKeyIsDown[irr::KEY_KEY_CODES_COUNT];
 };
 #endif
