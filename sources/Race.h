@@ -16,6 +16,9 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef RACE_H
 #define RACE_H
+
+#include <string>
+
 /* implemented interfaces */
 #include "IPhaseHandler.h"
 
@@ -32,7 +35,6 @@
 #include "GuiCronometer.h"
 #include "GuiCommunicator.h"
 
-
 class Race : public  IPhaseHandler
 {
   public:
@@ -40,7 +42,10 @@ class Race : public  IPhaseHandler
 
     virtual void step();
 
-    bool addVehicle(IVehicle * vehicle, IVehicleController * controller, bool followed=false);
+    bool addVehicle(IVehicle * vehicle, 
+        IVehicleController * controller, 
+        const char * name=0,
+        bool followed=false);
 
     inline void setTrack(Track * track) { m_track=track; }
 
@@ -49,6 +54,7 @@ class Race : public  IPhaseHandler
     enum {
       rs_readySetGo,
       rs_started,
+      rs_finished,
       rs_paused
     };
 
@@ -104,14 +110,22 @@ class Race : public  IPhaseHandler
       /* frame in which the vehicle has overturn */
       unsigned             overturnCountDown;
 
+      /* whenever or not the vehicle has finished the race */
+      bool                 raceFinished;
+
+      unsigned             index;
+      std::string          name;
+
     };
 
     Track     *  m_track;
 
     // util
     void restoreVehicle(VehicleInfo &);
-    void followNextVehicle();
+    void vehicleFinished(VehicleInfo &);
 
+    void followNextVehicle();
+    void togglePause();
 
     struct VehicleInfo m_vehicles[max_vehicles];
     unsigned           m_nVehicles;
@@ -123,6 +137,8 @@ class Race : public  IPhaseHandler
     unsigned          m_status;
 
     unsigned          m_totalLaps;
+
+    unsigned          m_nFinishedVehicles;
 
     VehicleCameraAnimator *        m_cameraAnim;
     irr::scene::ICameraSceneNode * m_camera;

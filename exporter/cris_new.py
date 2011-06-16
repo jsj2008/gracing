@@ -37,7 +37,7 @@ cris binary file format
 # TODO: change naming convention of the xmlnodes for using "-"
 
 # LOG configuration
-LOG_ON_STDOUT=1
+LOG_ON_STDOUT=0
 LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
@@ -974,7 +974,7 @@ class export_OT_vehicle(bpy.types.Operator):
     dimY=ob.dimensions[1]
     dimZ=ob.dimensions[2]
     if (dimX - dimZ) < -EPSILON or (dimX - dimZ) > EPSILON:
-      log("Wheel %s %f,%f\n"%(WHEEL_PREFIX[idx],dimX,dimZ));
+      log("Wheel %s %f,%f\n"%(prefix,dimX,dimZ));
       RaiseError("Wheel is not 'squared'")
 
     radius=dimX / 2.;

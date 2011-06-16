@@ -44,7 +44,6 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-#define CAMERA_STEP 0.05
 
 IrrDebugDrawer * debugDrawer= 0;
 
@@ -202,7 +201,8 @@ int main(int argc, char ** av)
   // prepare the vehicle
   std::string vehpath;
   //resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  //resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  resmanager->getVehicleCompletePath("tractor.zip",vehpath);
   IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -212,8 +212,8 @@ int main(int argc, char ** av)
     ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle->load();
 
-  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
-  //resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  //resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
+  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle2 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -281,9 +281,9 @@ int main(int argc, char ** av)
   //IVehicleController * controller= new VehicleKeyboardController(&receiver);
 
   race->setTrack(thetrack);
-  race->addVehicle(vehicle,new VehicleAutoController());
+  race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
   //race->addVehicle(vehicle,controller);
-  race->addVehicle(vehicle2,new VehicleAutoController(),true);
+  race->addVehicle(vehicle2,new VehicleAutoController(),"turing machine",true);
   //race->addVehicle(vehicle3,new VehicleAutoController());
 
   IPhaseHandler * currentPhaseHandler;

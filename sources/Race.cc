@@ -20,6 +20,8 @@
 
 extern IrrDebugDrawer * debugDrawer;
 
+#define CAMERA_STEP 0.05
+
 // !'!'!'!'!unsigned
 static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex, 
     const std::vector<btVector3> & controlPoints)  
@@ -132,7 +134,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_nVehicles=0;
   m_track=0;
-  m_totalLaps=3;
+  m_totalLaps=2;
   m_camera = device->getSceneManager()->addCameraSceneNode();
   m_device = device;
   m_cameraAnim = 0;
@@ -219,7 +221,6 @@ void Race::updateVehiclesInfo()
     } else {
       if(vinfo.overturnCountDown) {
         if(--vinfo.overturnCountDown == 0) {
-          GM_LOG("vehicle overturn!!!!");
           restoreVehicle(vinfo);
         }
       } else {
@@ -260,25 +261,42 @@ void Race::updateVehiclesInfo()
 
 void Race::step()
 {
-  m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
   // status handling
   switch(m_status) {
+    case rs_paused:
+      m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+      m_communicator->show("PAUSED");
+      m_sceneManager->drawAll();
+      m_guiEnv->drawAll();
+      m_world->debugDrawWorld();
+      m_driver->endScene();
+      updateKeyboard();
+      break;
     case rs_readySetGo:
       if(m_readySetGo->isEnded()) {
         gotoState(rs_started);
       }
+      m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+      m_sceneManager->drawAll();
+      m_world->step();
+      m_guiEnv->drawAll();
+      m_world->debugDrawWorld();
+      m_driver->endScene();
       break;
     case rs_started:
+      m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       updateKeyboard();
       updateVehiclesInfo();
+      m_sceneManager->drawAll();
+      m_world->step();
+      m_guiEnv->drawAll();
+      m_world->debugDrawWorld();
+      m_driver->endScene();
+      break;
+    default:
       break;
   }
 
-  m_sceneManager->drawAll();
-  m_world->step();
-  m_guiEnv->drawAll();
-  m_world->debugDrawWorld();
-  m_driver->endScene();
 }
 
 void Race::updateKeyboard()
@@ -290,10 +308,25 @@ void Race::updateKeyboard()
   if(erec->OneShotKey(irr::KEY_KEY_C)) 
     restart();
 
+  if(erec->OneShotKey(irr::KEY_KEY_P)) 
+    togglePause();
+
   if(erec->OneShotKey(irr::KEY_TAB)) {
     GM_LOG("changing vehicle\n");
     followNextVehicle();
   }
+
+  if(erec->IsKeyDown(irr::KEY_KEY_W))
+    m_cameraAnim->moveXY(0.,CAMERA_STEP);
+
+  if(erec->IsKeyDown(irr::KEY_KEY_Z)) 
+    m_cameraAnim->moveXY(0.,-CAMERA_STEP);
+
+  if(erec->IsKeyDown(irr::KEY_KEY_A))
+    m_cameraAnim->moveXY(CAMERA_STEP,0.);
+
+  if(erec->IsKeyDown(irr::KEY_KEY_S)) 
+    m_cameraAnim->moveXY(-CAMERA_STEP,0.);
 }
 
 void Race::followNextVehicle()
@@ -312,6 +345,16 @@ void Race::followNextVehicle()
 bool Race::gotoState(unsigned state)
 {
   switch(state) {
+    case rs_paused:
+      if(m_status != rs_started)
+        return false;
+      m_status=rs_paused;
+      break;
+    case rs_finished:
+      GM_LOG("race finished\n");
+      m_status=rs_finished;
+      exit(0);
+      break;
     case rs_readySetGo:
       // reset vehicles
       for(unsigned i=0; i<m_nVehicles; i++)  {
@@ -333,6 +376,7 @@ bool Race::gotoState(unsigned state)
         m_vehicles[i].lapNumber=0;
         m_vehicles[i].overturnCountDown=0;
         m_vehicles[i].waitingForLapTrigger=false;
+        m_vehicles[i].raceFinished=false;
         m_track->registerLapCallback(this, 
             m_vehicles[i].vehicle, 
             &(m_vehicles[i]));
@@ -341,30 +385,45 @@ bool Race::gotoState(unsigned state)
       m_readySetGo->restart();
       m_cronometer->stop();
       m_status=rs_readySetGo;
+      m_nFinishedVehicles=0;
       break;
     case rs_started:
-      if(m_status!=rs_readySetGo)
-        return false;
-      for(unsigned i=0; i<m_nVehicles; i++) 
-        m_vehicles[i].vehicle->setEnableControls(true);
-      m_status=rs_started;
-      m_cronometer->start();
+      if(m_status==rs_paused) {
+        m_status=rs_started;
+      } else if(m_status==rs_readySetGo) {
+        for(unsigned i=0; i<m_nVehicles; i++) 
+          m_vehicles[i].vehicle->setEnableControls(true);
+        m_status=rs_started;
+        m_cronometer->start();
+      }
   }
 
   return m_status==state;
 }
 
-bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller, bool followed)
+bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller, 
+    const char * name,
+    bool followed)
+
 {
   if(m_nVehicles == max_vehicles)
     return false;
   if(m_track == 0)
     return false;
 
+  m_vehicles[m_nVehicles].index=m_nVehicles;
   m_vehicles[m_nVehicles].vehicle=vehicle;
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
   m_vehicles[m_nVehicles].controller=controller;
+  if(!name) {
+    char buffer[32];
+    snprintf(buffer,32,"vehicle %d",m_nVehicles);
+    m_vehicles[m_nVehicles].name=buffer;
+  } else {
+    m_vehicles[m_nVehicles].name=name;
+  }
+
 
   //m_sceneManager->getRootSceneNode()->addChild(vehicle);
   //vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
@@ -389,11 +448,13 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller, bool f
 void Race::lapTriggered(void * userdata)
 {
   VehicleInfo * vinfo=(VehicleInfo*)userdata;
+
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
-    GM_LOG("Finished lap %d\n",vinfo->lapNumber+1);
     m_communicator->show("lap %d",vinfo->lapNumber+1);
     vinfo->lapNumber++;
+    if(vinfo->lapNumber == m_totalLaps) 
+      vehicleFinished(*vinfo);
   }
 }
 
@@ -433,4 +494,32 @@ void Race::restoreVehicle(VehicleInfo & vinfo)
 
   vinfo.vehicle->reset(
     vectBulletToIrr(m_track->getControlPoints()[vinfo.controlPointIndex]),a);
+}
+
+void Race::vehicleFinished(VehicleInfo & vinfo)
+{
+  vinfo.raceFinished=true; 
+  vinfo.vehicle->setEnableControls(false);
+
+  m_nFinishedVehicles++;
+
+  if(m_nFinishedVehicles == 1) {
+    m_communicator->show("%s wins!",vinfo.name.c_str());
+  }
+  
+  GM_LOG("vehicle '%s' finished, still to finish %d\n",
+      vinfo.name.c_str(),m_nVehicles - m_nFinishedVehicles);
+
+  if(m_nFinishedVehicles == m_nVehicles) {
+    gotoState(rs_finished);
+  }
+}
+
+void Race::togglePause()
+{
+  if(m_status==rs_paused) {
+    m_communicator->unshow();
+    gotoState(rs_started);
+  } else if(m_status==rs_started)  
+    gotoState(rs_paused);
 }

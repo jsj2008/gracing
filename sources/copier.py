@@ -19,6 +19,7 @@ vehicles=[
   "squared",
   "sprinter",
   "turing_machine",
+  "tractor",
   "bluest",
 ]
 
