@@ -134,6 +134,11 @@ void ResourceManager::getConfigCompletePath(const char * filename, std::string &
   path=m_rootDir + std::string(filename);
 }
 
+void ResourceManager::getResourceCompletePath(const char * filename, std::string & path)
+{
+  path=m_rootDir + std::string(filename);
+}
+
 void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 {
   if(m_device)

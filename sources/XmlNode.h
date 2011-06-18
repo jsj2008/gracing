@@ -54,10 +54,18 @@ class XmlNode
     // get value as double
     int get(const std::string &attribute, double & value) const;
 
+    int get(const std::string &attribute, int & value) const;
+
+    int get(const std::string &attribute, unsigned & value) const;
+
     int get(const std::string &attribute, btQuaternion & value) const;
+
+		int get(const std::string &attribute, irr::core::rect<irr::s32>& rectangle) const;
 
     // get value as 2d vector
     int get(const std::string &attribute, irr::core::vector2df *value) const;
+
+    int get(const std::string &attribute, irr::core::vector2d<irr::s32> &value) const;
 
     // get value as 3d vector
     int get(const std::string &attribute, irr::core::vector3df *value) const;

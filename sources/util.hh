@@ -102,6 +102,67 @@ class Util
     vec.Y=readDouble(file);
   }
 
+  static inline void parseVector(const char * str, irr::core::vector2d<irr::s32>& vect) 
+  {
+	  const irr::u32 WORD_BUFFER_LENGTH = 256;
+	  char wordBuffer[WORD_BUFFER_LENGTH];
+    int  c[2];
+    char * ptr;
+    int n;
+    c[0]=c[1]=0;
+
+    for(n=0, ptr=wordBuffer; *str && n<2;  str++) {
+      if( *str && *str != ',') {
+        *ptr=*str;
+        ptr++;
+      } else {
+        *ptr=0;
+        c[n]=irr::core::fast_atof(wordBuffer);
+        n++;
+        ptr=wordBuffer;
+      }
+    }
+    if(n<2) {
+      *ptr=0;
+      c[n]=atoi(wordBuffer);
+    }
+
+    vect.X=c[0];
+    vect.Y=c[1];
+  }
+
+  static inline void parseRect(const char * str, irr::core::rect<irr::s32>& rect) 
+  {
+	  const irr::u32 WORD_BUFFER_LENGTH = 256;
+	  char wordBuffer[WORD_BUFFER_LENGTH];
+    int  c[4];
+    char * ptr;
+    int n;
+    c[0]=c[1]=c[2]=c[3]=0;
+
+
+    for(n=0, ptr=wordBuffer; *str && n<4;  str++) {
+      if( *str && *str != ',') {
+        *ptr=*str;
+        ptr++;
+      } else {
+        *ptr=0;
+        c[n]=atoi(wordBuffer);
+        n++;
+        ptr=wordBuffer;
+      }
+    }
+    if(n<4) {
+      *ptr=0;
+      c[n]=atoi(wordBuffer);
+    }
+
+    rect.UpperLeftCorner.X=c[0];
+    rect.UpperLeftCorner.Y=c[1];
+    rect.LowerRightCorner.X=c[2];
+    rect.LowerRightCorner.Y=c[3];
+  }
+
   static inline void parseQuaternion(const char * str, double c[4])
   {
 	  const irr::u32 WORD_BUFFER_LENGTH = 256;

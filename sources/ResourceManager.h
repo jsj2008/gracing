@@ -38,6 +38,7 @@ class ResourceManager
     void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
+    void getResourceCompletePath(const char * filename, std::string & path);
 
     EventReceiver * getEventReceiver();
 
@@ -60,7 +61,8 @@ class ResourceManager
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
 
-    
+    inline irr::io::IFileSystem * getFileSystem() { return m_fileSystem; }
+    inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
 
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }

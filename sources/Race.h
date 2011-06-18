@@ -67,9 +67,6 @@ class Race : public  IPhaseHandler
 
     void recalcVehicleVehiclesStartPositions();
   
-    bool gotoState(unsigned state);
-    void updateVehiclesInfo();
-    void updateKeyboard();
 
     inline void setLapNumber(unsigned n) { m_totalLaps=n; }
 
@@ -120,14 +117,24 @@ class Race : public  IPhaseHandler
 
     Track     *  m_track;
 
-    // util
+    // vehicle stuff
     void restoreVehicle(VehicleInfo &);
     void vehicleFinished(VehicleInfo &);
+    void updateVehiclesInfo();
+    int vehicleInfoCmp(const VehicleInfo &, const VehicleInfo &);
 
+    // camera handling
     void followNextVehicle();
+
+    // util
     void togglePause();
+    void updateKeyboard();
+    void updateRanking();
+
+    bool gotoState(unsigned state);
 
     struct VehicleInfo m_vehicles[max_vehicles];
+    unsigned           m_ranking[max_vehicles];
     unsigned           m_nVehicles;
 
     GuiReadySetGo *   m_readySetGo;
