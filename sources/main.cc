@@ -278,11 +278,11 @@ int main(int argc, char ** av)
   Race *          race;
   race = new Race(device,world);
 
-  //IVehicleController * controller= new VehicleKeyboardController(&receiver);
+  IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
 
   race->setTrack(thetrack);
-  race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
-  //race->addVehicle(vehicle,controller);
+  //race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
+  race->addVehicle(vehicle,controller);
   race->addVehicle(vehicle2,new VehicleAutoController(),"turing machine",true);
   //race->addVehicle(vehicle3,new VehicleAutoController());
 
