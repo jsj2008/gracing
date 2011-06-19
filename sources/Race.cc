@@ -18,20 +18,13 @@
 #include "Race.h"
 #include "IrrDebugDrawer.h"
 
-#include "GuiCockpit.h"
-
 extern IrrDebugDrawer * debugDrawer;
 
 #define CAMERA_STEP 0.05
 
 /* versione due */
 
-
-
-
-
-
-// !'!'!'!'!unsigned
+// !'!'!'!'!
 static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex, 
     const std::vector<btVector3> & controlPoints)  
 { 
@@ -122,7 +115,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   irr::s32 px1,px2,py1,py2;
   irr::s32 width,height;
 
-
+#if 0
   width=400; height=100;
   px1=1024-width;     py1=0;
 
@@ -131,6 +124,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_cronometer = new GuiCronometer(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
       irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
+#endif
 
   width=1024; height=100;
   px1=1024-width;     py1=(576-height)/2-50;
@@ -139,7 +133,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_communicator = new GuiCommunicator(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
       irr::core::rect<irr::s32>(px1,py1,px2,py2));
-  assert(m_cronometer);
+  assert(m_communicator);
 
   m_nVehicles=0;
   m_track=0;
@@ -150,12 +144,12 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   m_followedVehicleIndex=invalidVehicleIndex;
 
   width=200; height=100;
-  px1=5;     py1=750-height;
+  px1=5;     py1=740-height;
 
   px2=px1+width;
   py2=py1+height;
-  GuiCockpit * cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
-      irr::core::rect<irr::s32>(px1,py1,px2,py2));
+  m_cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
+      irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
 
   restart();
 }
@@ -356,12 +350,17 @@ void Race::followNextVehicle()
 {
   assert(m_followedVehicleIndex != invalidVehicleIndex);
 
+  m_vehicles[m_followedVehicleIndex].vehicle->setSpeedOMeter(0);
+
   m_followedVehicleIndex ++;
 
   if(m_followedVehicleIndex == m_nVehicles)
     m_followedVehicleIndex = 0;
 
+  m_vehicles[m_followedVehicleIndex].vehicle->setSpeedOMeter(m_cockpit);
   m_cameraAnim->changeVehicle(m_vehicles[m_followedVehicleIndex].vehicle);
+  m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+
 }
 
 
@@ -406,7 +405,7 @@ bool Race::gotoState(unsigned state)
       }
       // reset gui controls
       m_readySetGo->restart();
-      m_cronometer->stop();
+      m_cockpit->stop();
       m_status=rs_readySetGo;
       m_nFinishedVehicles=0;
       break;
@@ -417,7 +416,7 @@ bool Race::gotoState(unsigned state)
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_vehicles[i].vehicle->setEnableControls(true);
         m_status=rs_started;
-        m_cronometer->start();
+        m_cockpit->start();
       }
   }
 
@@ -459,6 +458,8 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
       VehicleCameraAnimator(vehicle);
     m_camera->addAnimator(m_cameraAnim);
     m_followedVehicleIndex = m_nVehicles;
+    vehicle->setSpeedOMeter(m_cockpit);
+    m_cockpit->setLap(1,m_totalLaps);
   }
 
   m_nVehicles++;
@@ -474,8 +475,11 @@ void Race::lapTriggered(void * userdata)
 
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
-    m_communicator->show("lap %d",vinfo->lapNumber+1);
     vinfo->lapNumber++;
+    if(vinfo->index==m_followedVehicleIndex) {
+      m_communicator->show("lap %d",vinfo->lapNumber+1);
+      m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
+    }
     if(vinfo->lapNumber == m_totalLaps) 
       vehicleFinished(*vinfo);
   }

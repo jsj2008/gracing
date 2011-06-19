@@ -34,6 +34,7 @@
 #include "GuiReadySetGo.h"
 #include "GuiCronometer.h"
 #include "GuiCommunicator.h"
+#include "GuiCockpit.h"
 
 class Race : public  IPhaseHandler
 {
@@ -138,7 +139,9 @@ class Race : public  IPhaseHandler
     unsigned           m_nVehicles;
 
     GuiReadySetGo *   m_readySetGo;
-    GuiCronometer *   m_cronometer;
+    //GuiCronometer *   m_cronometer;
+
+    GuiCockpit *      m_cockpit;
     GuiCommunicator * m_communicator;
 
     unsigned          m_status;

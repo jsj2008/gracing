@@ -181,7 +181,7 @@ int main(int argc, char ** av)
 
   ISceneManager* smgr = device->getSceneManager();
   IVideoDriver* driver = device->getVideoDriver();
-  IGUIEnvironment* guienv = device->getGUIEnvironment();
+  //IGUIEnvironment* guienv = device->getGUIEnvironment();
   PhyWorld * world = PhyWorld::buildMe();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
 
@@ -238,38 +238,14 @@ int main(int argc, char ** av)
 
 
   // gui
+#if 0
   GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
       core::rect<s32>(0,0,200,100));
   vehicle->setSpeedOMeter(smeter);
-
-#if 0
-  std::string fontPath = resmanager->getResourcePath() + "/title_font.xml";
-	gui::IGUIFont* font_big = guienv->getFont(fontPath.c_str());
-	if (font_big) 
-		guienv->getSkin()->setFont(font_big);
 #endif
 
-
-  // camera
-#if 0
-  irr::scene::ICameraSceneNode * camera;
-  camera = smgr->addCameraSceneNode();
-  VehicleCameraAnimator * camanim=new
-      VehicleCameraAnimator(vehicle);
-  camera->addAnimator(camanim);
-#endif
-
-  bool flagC, flagD;
-  bool flagL, flagU;
-  bool flagI;
   bool done=false;
   int lastFPS=-1;
-
-  flagL=true;
-  flagU=true;
-  flagC=true;
-  flagD=true;
-  flagI=true;
 
   unsigned long startFrameTime;
   unsigned long endFrameTime;
