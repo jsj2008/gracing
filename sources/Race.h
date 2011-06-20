@@ -114,6 +114,8 @@ class Race : public  IPhaseHandler
       unsigned             index;
       std::string          name;
 
+      unsigned             rank;
+
     };
 
     Track     *  m_track;
@@ -122,7 +124,7 @@ class Race : public  IPhaseHandler
     void restoreVehicle(VehicleInfo &);
     void vehicleFinished(VehicleInfo &);
     void updateVehiclesInfo();
-    int vehicleInfoCmp(const VehicleInfo &, const VehicleInfo &);
+    int  vehicleInfoCmp(const VehicleInfo &, const VehicleInfo &);
 
     // camera handling
     void followNextVehicle();
@@ -149,6 +151,8 @@ class Race : public  IPhaseHandler
     unsigned          m_totalLaps;
 
     unsigned          m_nFinishedVehicles;
+
+    unsigned          m_firstControlPoint;
 
     VehicleCameraAnimator *        m_cameraAnim;
     irr::scene::ICameraSceneNode * m_camera;

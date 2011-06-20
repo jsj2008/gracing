@@ -296,6 +296,11 @@ void Race::step()
       break;
     case rs_started:
       updateRanking();
+
+      m_cockpit->setRank(
+          m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
+          //m_vehicles[m_followedVehicleIndex].controlPointIndex);
+          
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       updateKeyboard();
       updateVehiclesInfo();
@@ -312,8 +317,41 @@ void Race::step()
 
 void Race::updateRanking()
 {
-  for(unsigned i=0; i<m_nVehicles; i++) {
+#if 0
+  unsigned rank[max_vehicles];
+  unsigned i,j,m,o;
+  for(i=0; i<m_nVehicles; i++) 
+    rank[i]=i;
+
+
+  for(i=0; i<m_nVehicles; i++) {
+    m=i;
+    for(j=i+1; j<m_nVehicles; j++) {
+      VehicleInfo & a=m_vehicles[rank[j]];
+      VehicleInfo & b=m_vehicles[rank[m]];
+      if( vehicleInfoCmp(a,b) > 0) 
+        m=j;
+    }
+    o=rank[i];
+    rank[i]=rank[m];
+    rank[m]=o;
   }
+
+  for(i=0; i<m_nVehicles; i++) 
+    m_vehicles[i].rank=rank[i];
+#endif
+
+  VehicleInfo & a=m_vehicles[0];
+  VehicleInfo & b=m_vehicles[1];
+
+  if( vehicleInfoCmp(a,b) > 0) {
+    m_vehicles[0].rank=0;
+    m_vehicles[1].rank=1;
+  } else {
+    m_vehicles[0].rank=1;
+    m_vehicles[1].rank=0;
+  }
+
 }
 
 void Race::updateKeyboard()
@@ -389,6 +427,8 @@ bool Race::gotoState(unsigned state)
         btVector3 pos=vectIrrToBullet(m_vehicles[i].startPosition);
         m_vehicles[i].controlPointIndex=
           initVehicleControlPoint(pos,m_track->getControlPoints());
+        m_firstControlPoint=m_vehicles[i].controlPointIndex;
+
         m_vehicles[i].wrongWay=false;
         m_vehicles[i].ctrlPntDistance=
           distanceVehicleControlPoint(
@@ -555,9 +595,28 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
 {
   if(a.lapNumber > b.lapNumber) 
     return 1;
-  else if(a.lapNumber < b.lapNumber)
+
+  if(a.lapNumber < b.lapNumber)
     return -1;
 
-  // the vehicles are on the same lap number
+  unsigned na,nb;
+
+  const std::vector<btVector3> & controlPoints=m_track->getControlPoints();
+
+  na = (a.controlPointIndex +  controlPoints.size() - m_firstControlPoint) % controlPoints.size();
+  nb = (b.controlPointIndex +  controlPoints.size() - m_firstControlPoint) % controlPoints.size();
+
+  if( na > nb )
+    return 1;
+    
+  if( na < nb )
+    return -1;
+
+  if( a.ctrlPntDistance <  b.ctrlPntDistance )
+    return 1;
+
+  if( a.ctrlPntDistance >  b.ctrlPntDistance )
+    return -1;
+
   return 0;
 }
