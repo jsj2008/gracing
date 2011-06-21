@@ -1,3 +1,4 @@
+
 //  gracing - an idiot (but physically powered) racing game 
 //  Copyright (C) 2010 gianni masullo
 //
@@ -18,6 +19,7 @@
 #define GUI_COMMUNICATOR_H
 
 #include <irrlicht.h>
+#include "GuiFrame.h"
 
 class GuiCommunicator : public irr::gui::IGUIElement
 {
@@ -27,6 +29,7 @@ class GuiCommunicator : public irr::gui::IGUIElement
       const irr::core::rect<irr::s32> rectangle);
 
   void show(const char * fmt,...);
+  void add(const char * fmt,...);
   void unshow();
 
   virtual void draw();
@@ -34,9 +37,22 @@ class GuiCommunicator : public irr::gui::IGUIElement
   private:
   enum                  { bufferSize=64 };
   enum                  { numberOfFrames=160 }; // TODO: calc this dinamically 
-  char                  m_buffer[bufferSize];
+  enum                  { maxMessages=7 };
+  //char                  m_buffer[maxMessages][bufferSize];
+  struct message {
+    char text[bufferSize];
+  };
+  message               m_buffers[maxMessages];
+  unsigned              m_buffersHeights[maxMessages];
   bool                  m_showingMessage;
   unsigned              m_framesStillToShow;
+  unsigned              m_nMessages;
+  unsigned              m_totalHeight;
+  unsigned              m_totalWidth;
   irr::gui::IGUIFont *  m_font;
+  GuiFrame *            m_frame;
+
+  void adjustSizeWithLastInsert();
+
 };
 #endif

@@ -33,4 +33,8 @@
 
 #endif
 
+#define GM_LOG_RECT(r) {  \
+  GM_LOG("%d %d -> %d %d", r.UpperLeftCorner.X,r.UpperLeftCorner.Y, r.LowerRightCorner.X, r.LowerRightCorner.Y);\
+}
+
 #endif // GMLOG_H

@@ -137,7 +137,7 @@ class Race : public  IPhaseHandler
     bool gotoState(unsigned state);
 
     struct VehicleInfo m_vehicles[max_vehicles];
-    unsigned           m_ranking[max_vehicles];
+    unsigned           m_rank[max_vehicles];
     unsigned           m_nVehicles;
 
     GuiReadySetGo *   m_readySetGo;

@@ -223,8 +223,7 @@ int main(int argc, char ** av)
     ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle2->load();
 
-#if 0
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
+  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
   IVehicle * vehicle3 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
         device,
@@ -234,7 +233,6 @@ int main(int argc, char ** av)
     ((Vehicle*)vehicle3)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle3->load();
   vehicle3->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-#endif
 
 
   // gui
@@ -258,9 +256,9 @@ int main(int argc, char ** av)
 
   race->setTrack(thetrack);
   //race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
-  race->addVehicle(vehicle,controller);
-  race->addVehicle(vehicle2,new VehicleAutoController(),"turing machine",true);
-  //race->addVehicle(vehicle3,new VehicleAutoController());
+  race->addVehicle(vehicle, new VehicleAutoController(),"turing machine");
+  race->addVehicle(vehicle2, controller, "speedstar",true);
+  race->addVehicle(vehicle3,new VehicleAutoController(), "gonorra");
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;

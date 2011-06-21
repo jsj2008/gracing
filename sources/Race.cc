@@ -126,7 +126,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
       irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
 #endif
 
-  width=1024; height=100;
+  width=1024; height=600;
   px1=1024-width;     py1=(576-height)/2-50;
   px2=px1+width;
   py2=py1+height;
@@ -137,7 +137,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_nVehicles=0;
   m_track=0;
-  m_totalLaps=2;
+  m_totalLaps=1;
   m_camera = device->getSceneManager()->addCameraSceneNode();
   m_device = device;
   m_cameraAnim = 0;
@@ -274,6 +274,16 @@ void Race::step()
 {
   // status handling
   switch(m_status) {
+
+    case rs_finished:
+      m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+      m_sceneManager->drawAll();
+      m_guiEnv->drawAll();
+      m_world->step();
+      m_world->debugDrawWorld();
+      m_driver->endScene();
+      break;
+
     case rs_paused:
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       m_communicator->show("PAUSED");
@@ -317,18 +327,16 @@ void Race::step()
 
 void Race::updateRanking()
 {
-#if 0
   unsigned rank[max_vehicles];
   unsigned i,j,m,o;
   for(i=0; i<m_nVehicles; i++) 
     rank[i]=i;
 
-
   for(i=0; i<m_nVehicles; i++) {
     m=i;
     for(j=i+1; j<m_nVehicles; j++) {
-      VehicleInfo & a=m_vehicles[rank[j]];
-      VehicleInfo & b=m_vehicles[rank[m]];
+      VehicleInfo & a=m_vehicles[rank[m]];
+      VehicleInfo & b=m_vehicles[rank[j]];
       if( vehicleInfoCmp(a,b) > 0) 
         m=j;
     }
@@ -339,18 +347,23 @@ void Race::updateRanking()
 
   for(i=0; i<m_nVehicles; i++) 
     m_vehicles[i].rank=rank[i];
-#endif
 
+#if 0
   VehicleInfo & a=m_vehicles[0];
   VehicleInfo & b=m_vehicles[1];
 
   if( vehicleInfoCmp(a,b) > 0) {
     m_vehicles[0].rank=0;
     m_vehicles[1].rank=1;
+    m_rank[0]=0;
+    m_rank[1]=1;
   } else {
     m_vehicles[0].rank=1;
     m_vehicles[1].rank=0;
+    m_rank[0]=1;
+    m_rank[1]=0;
   }
+#endif
 
 }
 
@@ -412,10 +425,21 @@ bool Race::gotoState(unsigned state)
       break;
     case rs_finished:
       GM_LOG("race finished\n");
+      m_communicator->show("race rank");
+      m_cockpit->stop();
+      for(unsigned i=0; i < m_nVehicles; i++) {
+       VehicleInfo & vinfo=m_vehicles[m_rank[i]];
+       m_communicator->add("[%d] %s",i,vinfo.name.c_str());
+      }
       m_status=rs_finished;
-      exit(0);
       break;
     case rs_readySetGo:
+      m_communicator->show("race rank");
+      for(unsigned i=0; i<m_nVehicles; i++) {
+        m_communicator->add("[%d] %s",
+            i,
+            m_vehicles[i].name.c_str());
+      }
       // reset vehicles
       for(unsigned i=0; i<m_nVehicles; i++)  {
         m_vehicles[i].vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
