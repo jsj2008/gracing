@@ -234,8 +234,6 @@ Vehicle::Vehicle(
   m_loaded=false;
   m_controlsEnabled=true;
 
-  GM_LOG("creating vehicle '%s'\n",source);
-
   // accell dynamic info
   m_throttle=0.;
   m_throttleIncrement=glob_throttleIncrement;
@@ -396,11 +394,8 @@ void Vehicle::initGraphics()
 
   ((CompoundSceneNode*)m_chassisNode)->recalculateBoundingBox();
 
-  for(i=0; i<4; ++i) {
+  for(i=0; i<4; ++i) 
     m_wheelsNodes[i]=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcaf0);
-    GM_LOG("adding node: %p\n",
-      m_wheelsNodes[i]);
-  }
   
   //m_using|=USE_GRAPHICS;
 }
@@ -432,8 +427,6 @@ void Vehicle::load()
 
   irr::io::path mypath(m_sourceName);
   bool res=m_filesystem->addFileArchive(mypath);
-
-  GM_LOG("loading vehicle '%s'\n",m_sourceName);
 
   if(!res) 
     return ;
@@ -483,9 +476,6 @@ void Vehicle::load()
     } else if(node->getName() == "wfr_radius") {
       double radius=Util::parseFloat(node->getText().c_str());
       m_wheelRadiuses[ widx_wfr  ]=radius;
-      GM_LOG("Raidius: %f\n",
-        m_wheelRadiuses[ widx_wfr  ]);
-
     } else if(node->getName() == "wfl_radius") {
       double radius=Util::parseFloat(node->getText().c_str());
       m_wheelRadiuses[ widx_wfl  ]=radius;
@@ -584,7 +574,6 @@ void Vehicle::load()
   }
 
   delete xml;
-  GM_LOG("removing '%s'\n",mypath.c_str());
   res=m_filesystem->removeFileArchive(m_filesystem->getAbsolutePath(mypath));
   assert(res);
   delete root;

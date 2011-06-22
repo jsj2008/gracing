@@ -45,15 +45,34 @@ class GuiFrame  /*: public irr::gui::IGUIElement*/
       bp_bottom_right
     };
 
+    enum {
+      bp_top=0,
+      bp_bottom,
+      bp_left,
+      bp_rite
+    };
+
     struct angleInfo
     {
       unsigned                       tidx;
-      irr::core::vector2d<irr::s32>  size;
       irr::core::vector2d<irr::s32>  position;
       irr::core::rect<irr::s32>      srcRect;
+      irr::core::rect<irr::s32>      dstRect;
+      bool                           loaded;
+    };
+
+    struct borderInfo
+    {
+      unsigned                       tidx;
+      irr::core::vector2d<irr::s32>  position;
+      irr::core::rect<irr::s32>      srcRect;
+      irr::core::rect<irr::s32>      dstRect;
+      bool                           loaded;
     };
 
     angleInfo                  m_angles[4];
+    borderInfo                 m_borders[4];
+
     irr::core::rect<irr::s32>  m_requestedRectangle;      
     irr::core::rect<irr::s32>  m_fillRectangle;      
     irr::video::SColor         m_backgroundColor;

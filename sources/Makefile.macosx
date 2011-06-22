@@ -99,6 +99,7 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/title_font.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/frame.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_dir)
 	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
 	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(src_tracks_dir)
