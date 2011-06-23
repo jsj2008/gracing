@@ -232,7 +232,7 @@ int main(int argc, char ** av)
   if(glob_enableDebug)
     ((Vehicle*)vehicle3)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle3->load();
-  vehicle3->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
+  //vehicle3->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
 
   // gui
@@ -255,10 +255,9 @@ int main(int argc, char ** av)
   IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
 
   race->setTrack(thetrack);
-  //race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
-  race->addVehicle(vehicle, new VehicleAutoController(),"turing machine");
-  race->addVehicle(vehicle2, controller, "speedstar",true);
-  race->addVehicle(vehicle3,new VehicleAutoController(), "gonorra");
+  race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
+  race->addVehicle(vehicle2, controller, "ccaaspeedstar",true);
+  race->addVehicle(vehicle3,new VehicleAutoController(), "aaccgonorra");
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;

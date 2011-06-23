@@ -22,6 +22,8 @@ extern IrrDebugDrawer * debugDrawer;
 
 #define CAMERA_STEP 0.05
 
+CFG_PARAM_D(glob_epsilonDist)=0.1;
+
 /* versione due */
 
 // !'!'!'!'!
@@ -29,29 +31,6 @@ static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex,
     const std::vector<btVector3> & controlPoints)  
 { 
   return (currentIndex+1) % controlPoints.size(); 
-}
-
-static bool evolveVehicleControlPoint(
-    unsigned &                        currentIndex,
-    const    btVector3 &              position,
-    const    std::vector<btVector3> & controlPoints)
-{
-  double   d0,d1; 
-  unsigned i1; 
-
-  assert(currentIndex < controlPoints.size());
-
-  i1=nextIndexVehicleControlPoint(currentIndex,controlPoints);
-
-  d0=(controlPoints[currentIndex]-position).length2();
-  d1=(controlPoints[i1]-position).length2();
-
-  if(d0 <= d1) 
-    return false;
-
-  currentIndex = i1;
-
-  return true;
 }
 
 static inline double distanceVehicleControlPoint(
@@ -65,10 +44,46 @@ static inline double distanceVehicleControlPoint(
 
   btVector3 relPos = position - controlPoints[i1];
 
+  if( relPos.length() < .001)
+    return 0.;
+
   double d=(controlPoints[currentIndex] - controlPoints[i1]).dot(relPos);
+
+  d /= (controlPoints[currentIndex] - controlPoints[i1]).length2();
+
+  if(d < 0) {
+    GM_LOG("<<<<%f\n",d);
+  }
+
+  //assert( d >= 0);
+  //assert( d <= (controlPoints[currentIndex] - controlPoints[i1]).length());
 
   return d;
 }
+
+static bool evolveVehicleControlPoint(
+    unsigned &                        currentIndex,
+    const    btVector3 &              position,
+    const    std::vector<btVector3> & controlPoints)
+{
+  //double   d0,d1; 
+  //unsigned i1; 
+
+  assert(currentIndex < controlPoints.size());
+
+  // TODO: optimize the double calc of the control
+  //       point distance
+  double dist=
+    distanceVehicleControlPoint(currentIndex, position,controlPoints); 
+
+  if (dist < glob_epsilonDist) {
+    currentIndex = nextIndexVehicleControlPoint(currentIndex,controlPoints);
+    return true;
+  }
+
+  return false;
+}
+
 
 static unsigned initVehicleControlPoint(
     const btVector3 & position,
@@ -137,7 +152,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_nVehicles=0;
   m_track=0;
-  m_totalLaps=1;
+  m_totalLaps=3;
   m_camera = device->getSceneManager()->addCameraSceneNode();
   m_device = device;
   m_cameraAnim = 0;
@@ -213,7 +228,7 @@ void Race::updateVehiclesInfo()
             controlPoints);
 
       if(newDist > (vinfo.ctrlPntDistance+0.5)) {
-        if(!vinfo.wrongWay)
+        if(!vinfo.wrongWay && m_followedVehicleIndex == vinfo.index)
           m_communicator->show("Wrong way");
         vinfo.wrongWay=true;
       } else
@@ -307,10 +322,12 @@ void Race::step()
     case rs_started:
       updateRanking();
 
+      // update cockpit
       m_cockpit->setRank(
           m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
-          //m_vehicles[m_followedVehicleIndex].controlPointIndex);
-          
+      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+      ///////////////////////
+
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       updateKeyboard();
       updateVehiclesInfo();
@@ -345,26 +362,9 @@ void Race::updateRanking()
     rank[m]=o;
   }
 
+
   for(i=0; i<m_nVehicles; i++) 
-    m_vehicles[i].rank=rank[i];
-
-#if 0
-  VehicleInfo & a=m_vehicles[0];
-  VehicleInfo & b=m_vehicles[1];
-
-  if( vehicleInfoCmp(a,b) > 0) {
-    m_vehicles[0].rank=0;
-    m_vehicles[1].rank=1;
-    m_rank[0]=0;
-    m_rank[1]=1;
-  } else {
-    m_vehicles[0].rank=1;
-    m_vehicles[1].rank=0;
-    m_rank[0]=1;
-    m_rank[1]=0;
-  }
-#endif
-
+    m_vehicles[rank[i]].rank=i;
 }
 
 void Race::updateKeyboard()
@@ -410,7 +410,9 @@ void Race::followNextVehicle()
 
   m_vehicles[m_followedVehicleIndex].vehicle->setSpeedOMeter(m_cockpit);
   m_cameraAnim->changeVehicle(m_vehicles[m_followedVehicleIndex].vehicle);
-  m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+  //m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+  GM_LOG("following next vehicle: '%s' rank: %d\n",m_vehicles[m_followedVehicleIndex].name.c_str(),
+                m_vehicles[m_followedVehicleIndex].rank);
 
 }
 
@@ -434,12 +436,14 @@ bool Race::gotoState(unsigned state)
       m_status=rs_finished;
       break;
     case rs_readySetGo:
+#if 0
       m_communicator->show("race rank");
       for(unsigned i=0; i<m_nVehicles; i++) {
         m_communicator->add("[%d] %s",
             i,
             m_vehicles[i].name.c_str());
       }
+#endif
       // reset vehicles
       for(unsigned i=0; i<m_nVehicles; i++)  {
         m_vehicles[i].vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
@@ -523,7 +527,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     m_camera->addAnimator(m_cameraAnim);
     m_followedVehicleIndex = m_nVehicles;
     vehicle->setSpeedOMeter(m_cockpit);
-    m_cockpit->setLap(1,m_totalLaps);
+    //m_cockpit->setLap(1,m_totalLaps);
   }
 
   m_nVehicles++;
@@ -542,7 +546,7 @@ void Race::lapTriggered(void * userdata)
     vinfo->lapNumber++;
     if(vinfo->index==m_followedVehicleIndex) {
       m_communicator->show("lap %d",vinfo->lapNumber+1);
-      m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
+      //m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
     }
     if(vinfo->lapNumber == m_totalLaps) 
       vehicleFinished(*vinfo);
@@ -617,11 +621,17 @@ void Race::togglePause()
 
 int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
 {
+
+  // return:
+  // -1 : if the vehicle a is more advanced than b
+  //  1 : if the vehciel b is more advanced than c
+  //  0 : in the (remote) case that they have both the same rank
+
   if(a.lapNumber > b.lapNumber) 
-    return 1;
+    return -1;
 
   if(a.lapNumber < b.lapNumber)
-    return -1;
+    return 1;
 
   unsigned na,nb;
 
@@ -630,17 +640,26 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
   na = (a.controlPointIndex +  controlPoints.size() - m_firstControlPoint) % controlPoints.size();
   nb = (b.controlPointIndex +  controlPoints.size() - m_firstControlPoint) % controlPoints.size();
 
-  if( na > nb )
-    return 1;
-    
-  if( na < nb )
+  if( na > nb ) {
     return -1;
+  }
+    
+  if( na < nb ) {
+    return 1;
+  }
+
+
+#if 0
+  static int ufo=0;
+  if(a.index == 1 )
+    GM_LOG("%d zogna %d: %f '%s'  %d: %f\n",ufo++,a.index,a.ctrlPntDistance,a.name.c_str(),b.index,b.ctrlPntDistance);
+#endif
 
   if( a.ctrlPntDistance <  b.ctrlPntDistance )
-    return 1;
+    return -1;
 
   if( a.ctrlPntDistance >  b.ctrlPntDistance )
-    return -1;
+    return 1;
 
   return 0;
 }

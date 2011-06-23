@@ -16,5 +16,6 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         VehicleAutoController.cc \
         EventReceiver.cc \
         Race.cc \
+        Util.cc \
         XmlNode.cc  
 
