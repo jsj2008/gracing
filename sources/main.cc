@@ -200,8 +200,6 @@ int main(int argc, char ** av)
 
   // prepare the vehicle
   std::string vehpath;
-  //resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
-  //resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   resmanager->getVehicleCompletePath("tractor.zip",vehpath);
   IVehicle * vehicle=new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
@@ -212,7 +210,6 @@ int main(int argc, char ** av)
     ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
   vehicle->load();
 
-  //resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
   resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
   IVehicle * vehicle2 = new Vehicle(
         0, /* smgr->getRootSceneNode(),*/
@@ -256,8 +253,8 @@ int main(int argc, char ** av)
 
   race->setTrack(thetrack);
   race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
-  race->addVehicle(vehicle2, controller, "ccaaspeedstar",true);
-  race->addVehicle(vehicle3,new VehicleAutoController(), "aaccgonorra");
+  race->addVehicle(vehicle2, new VehicleAutoController(), "ccaaspeedstar",true);
+  race->addVehicle(vehicle3,controller , "aaccgonorra");
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;

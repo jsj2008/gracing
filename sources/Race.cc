@@ -152,7 +152,7 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_nVehicles=0;
   m_track=0;
-  m_totalLaps=3;
+  m_totalLaps=1;
   m_camera = device->getSceneManager()->addCameraSceneNode();
   m_device = device;
   m_cameraAnim = 0;
@@ -344,27 +344,31 @@ void Race::step()
 
 void Race::updateRanking()
 {
-  unsigned rank[max_vehicles];
+  //unsigned rank[max_vehicles];
   unsigned i,j,m,o;
+#if 0
   for(i=0; i<m_nVehicles; i++) 
-    rank[i]=i;
+    m_rank[i]=i;
+#endif
 
   for(i=0; i<m_nVehicles; i++) {
     m=i;
     for(j=i+1; j<m_nVehicles; j++) {
-      VehicleInfo & a=m_vehicles[rank[m]];
-      VehicleInfo & b=m_vehicles[rank[j]];
+      VehicleInfo & a=m_vehicles[m_rank[m]];
+      VehicleInfo & b=m_vehicles[m_rank[j]];
       if( vehicleInfoCmp(a,b) > 0) 
         m=j;
     }
-    o=rank[i];
-    rank[i]=rank[m];
-    rank[m]=o;
+    if(m!=i) {
+      o=m_rank[i];
+      m_rank[i]=m_rank[m];
+      m_rank[m]=o;
+    }
   }
 
 
   for(i=0; i<m_nVehicles; i++) 
-    m_vehicles[rank[i]].rank=i;
+    m_vehicles[m_rank[i]].rank=i;
 }
 
 void Race::updateKeyboard()
@@ -481,6 +485,8 @@ bool Race::gotoState(unsigned state)
       if(m_status==rs_paused) {
         m_status=rs_started;
       } else if(m_status==rs_readySetGo) {
+        for(unsigned i=0; i<m_nVehicles; i++) 
+          m_rank[i]=i;
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_vehicles[i].vehicle->setEnableControls(true);
         m_status=rs_started;
