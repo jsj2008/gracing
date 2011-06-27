@@ -41,8 +41,8 @@ class Util
 
     static void drawRectWithBackgroung(irr::video::IVideoDriver *driver, 
         irr::video::ITexture* backgroud , 
-        irr::core::rect<irr::s32> sourceRect, 
         irr::core::rect<irr::s32> destRect, 
+        bool useAlphaChannel,
         unsigned modeHoriz,
         unsigned modeVert);
 

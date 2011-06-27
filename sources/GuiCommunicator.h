@@ -29,7 +29,7 @@ class GuiCommunicator : public irr::gui::IGUIElement
       const irr::core::rect<irr::s32> rectangle);
 
   void show(const char * fmt,...);
-  void add(const char * fmt,...);
+  void add(bool center,const char * fmt,...);
   void unshow();
 
   virtual void draw();
@@ -43,6 +43,7 @@ class GuiCommunicator : public irr::gui::IGUIElement
     char text[bufferSize];
   };
   message               m_buffers[maxMessages];
+  bool                  m_centers[maxMessages];
   unsigned              m_buffersHeights[maxMessages];
   bool                  m_showingMessage;
   unsigned              m_framesStillToShow;
@@ -53,6 +54,9 @@ class GuiCommunicator : public irr::gui::IGUIElement
   GuiFrame *            m_frame;
 
   void adjustSizeWithLastInsert();
+  
+  public:
+  inline void refreshTime() {  m_framesStillToShow=numberOfFrames; }
 
 };
 #endif

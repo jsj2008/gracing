@@ -291,6 +291,7 @@ void Race::step()
   switch(m_status) {
 
     case rs_finished:
+      m_communicator->refreshTime();
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       m_sceneManager->drawAll();
       m_guiEnv->drawAll();
@@ -346,12 +347,8 @@ void Race::updateRanking()
 {
   //unsigned rank[max_vehicles];
   unsigned i,j,m,o;
-#if 0
-  for(i=0; i<m_nVehicles; i++) 
-    m_rank[i]=i;
-#endif
 
-  for(i=0; i<m_nVehicles; i++) {
+  for(i=m_nFinishedVehicles; i<m_nVehicles; i++) {
     m=i;
     for(j=i+1; j<m_nVehicles; j++) {
       VehicleInfo & a=m_vehicles[m_rank[m]];
@@ -367,7 +364,7 @@ void Race::updateRanking()
   }
 
 
-  for(i=0; i<m_nVehicles; i++) 
+  for(i=m_nFinishedVehicles; i<m_nVehicles; i++) 
     m_vehicles[m_rank[i]].rank=i;
 }
 
@@ -427,6 +424,7 @@ bool Race::gotoState(unsigned state)
     case rs_paused:
       if(m_status != rs_started)
         return false;
+      m_cockpit->pause();
       m_status=rs_paused;
       break;
     case rs_finished:
@@ -435,20 +433,11 @@ bool Race::gotoState(unsigned state)
       m_cockpit->stop();
       for(unsigned i=0; i < m_nVehicles; i++) {
        VehicleInfo & vinfo=m_vehicles[m_rank[i]];
-       m_communicator->add("[%d] %s",i,vinfo.name.c_str());
+       m_communicator->add(false,"[%d] %s",i,vinfo.name.c_str());
       }
       m_status=rs_finished;
       break;
     case rs_readySetGo:
-#if 0
-      m_communicator->show("race rank");
-      for(unsigned i=0; i<m_nVehicles; i++) {
-        m_communicator->add("[%d] %s",
-            i,
-            m_vehicles[i].name.c_str());
-      }
-#endif
-      // reset vehicles
       for(unsigned i=0; i<m_nVehicles; i++)  {
         m_vehicles[i].vehicle->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
 
@@ -484,6 +473,7 @@ bool Race::gotoState(unsigned state)
     case rs_started:
       if(m_status==rs_paused) {
         m_status=rs_started;
+        m_cockpit->unpause();
       } else if(m_status==rs_readySetGo) {
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_rank[i]=i;

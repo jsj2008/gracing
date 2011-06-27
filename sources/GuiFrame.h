@@ -75,7 +75,16 @@ class GuiFrame  /*: public irr::gui::IGUIElement*/
 
     irr::core::rect<irr::s32>  m_requestedRectangle;      
     irr::core::rect<irr::s32>  m_fillRectangle;      
+
+
+    enum {
+      ft_none,
+      ft_solid=1,
+      ft_texture=2
+    };
+    unsigned                   m_fillType;
     irr::video::SColor         m_backgroundColor;
+    unsigned                   m_backgroundTidx;
 
     std::vector<irr::video::ITexture*>  m_textures;
 

@@ -91,6 +91,8 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/transuranium-64.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/braggadocio-64.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/braggadocio-64.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/greddario-64.xml $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/greddario-64.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/braggadocio-32.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/braggadocio-32.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)

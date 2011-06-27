@@ -63,13 +63,14 @@ void GuiCommunicator::adjustSizeWithLastInsert()
   m_frame->setSize(AbsoluteRect);
 }
 
-void GuiCommunicator::add(const char * fmt, ...)
+void GuiCommunicator::add(bool center,const char * fmt, ...)
 {
   va_list ap;
   if(m_nMessages < maxMessages) {
     va_start(ap, fmt);
     vsnprintf(m_buffers[m_nMessages].text, bufferSize, fmt, ap);
     va_end(ap);
+    m_centers[m_nMessages]=center;
     irr::core::dimension2d<irr::u32>  dim=
        m_font->getDimension(irr::core::stringw(m_buffers[0].text).c_str());
     m_nMessages++;
@@ -83,6 +84,7 @@ void GuiCommunicator::show(const char * fmt, ...)
   va_start(ap, fmt);
   vsnprintf(m_buffers[0].text, bufferSize, fmt, ap);
   va_end(ap);
+  m_centers[0]=true;
   m_nMessages=1;
   m_totalHeight=0;
   m_totalWidth=0;
@@ -111,7 +113,7 @@ void GuiCommunicator::draw()
   irr::core::rect<irr::s32> frameRect(AbsoluteRect);
   frameRect.LowerRightCorner.Y = frameRect.UpperLeftCorner.Y + m_buffersHeights[0];
   for(unsigned i=0; i<m_nMessages; i++) {
-    m_font->draw(m_buffers[i].text, frameRect,FGColor,true, true, &AbsoluteClippingRect);
+    m_font->draw(m_buffers[i].text, frameRect,FGColor,m_centers[i], true, &AbsoluteClippingRect);
     frameRect.UpperLeftCorner.Y = frameRect.LowerRightCorner.Y;
     frameRect.LowerRightCorner.Y = m_buffersHeights[i] + frameRect.UpperLeftCorner.Y;
   }

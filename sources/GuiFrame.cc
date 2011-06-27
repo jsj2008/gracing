@@ -20,8 +20,17 @@
 #include "gmlog.h"
 #include "GuiFrame.h"
 #include "ResourceManager.h"
+#include "util.hh"
 
 #define MANIFEST_NAME "FRAME"
+
+inline void normalizeRect( irr::core::rect<irr::s32> & r)
+{
+#if 0 
+  r.LowerRightCorner.Y++;
+  r.LowerRightCorner.X++;
+#endif
+}
 
 /*
 GuiFrame::GuiFrame(irr::gui::IGUIEnvironment* environment,
@@ -71,6 +80,8 @@ void GuiFrame::load(XmlNode * root)
     m_borders[i].loaded=false;
   }
 
+  m_fillType=0;
+
   for(unsigned i=0; i<nodes.size(); i++) {
     XmlNode * node;
     node=nodes[i];
@@ -108,24 +119,30 @@ void GuiFrame::load(XmlNode * root)
       unsigned a=bp_top;
       node->get("texture",m_borders[a].tidx);
       node->get("rect",m_borders[a].srcRect);
+      normalizeRect(m_borders[a].srcRect);
       m_borders[a].loaded=true;
     } else if(node->getName() == "bottom-border") {
       unsigned a=bp_bottom;
       node->get("texture",m_borders[a].tidx);
       node->get("rect",m_borders[a].srcRect);
+      normalizeRect(m_borders[a].srcRect);
       m_borders[a].loaded=true;
     } else if(node->getName() == "left-border") {
       unsigned a=bp_left;
       node->get("texture",m_borders[a].tidx);
       node->get("rect",m_borders[a].srcRect);
+      normalizeRect(m_borders[a].srcRect);
       m_borders[a].loaded=true;
     } else if(node->getName() == "right-border") {
       unsigned a=bp_rite;
       node->get("texture",m_borders[a].tidx);
       node->get("rect",m_borders[a].srcRect);
+      normalizeRect(m_borders[a].srcRect);
       m_borders[a].loaded=true;
     } else if(node->getName() == "fill") {
-      // ...
+      if(node->get("texture",m_backgroundTidx)) {
+        m_fillType |= ft_texture;
+      }
     } else if(node->getName() == "texture") {
       irr::video::ITexture * texture;
       std::string src;
@@ -141,7 +158,13 @@ void GuiFrame::load(XmlNode * root)
 
 void GuiFrame::adjustPositions()
 {
+  irr::s32 span=10;
   m_fillRectangle=m_requestedRectangle;
+
+  m_fillRectangle.UpperLeftCorner.X -= span;
+  m_fillRectangle.UpperLeftCorner.Y -= span;
+  m_fillRectangle.LowerRightCorner.X += span;
+  m_fillRectangle.LowerRightCorner.Y += span;
 
   m_angles[bp_top_left].dstRect.UpperLeftCorner =
     m_fillRectangle.UpperLeftCorner + m_angles[bp_top_left].position;
@@ -179,7 +202,8 @@ void GuiFrame::adjustPositions()
   m_borders[bp_top].dstRect.LowerRightCorner.X =
     m_angles[bp_top_right].dstRect.UpperLeftCorner.X;
   m_borders[bp_top].dstRect.LowerRightCorner.Y =
-    m_borders[bp_top].dstRect.UpperLeftCorner.Y + m_borders[bp_top].srcRect.getSize().Height;;
+    m_borders[bp_top].dstRect.UpperLeftCorner.Y + m_borders[bp_top].srcRect.getSize().Height ;
+
 
   //////// BOTTOM /////////
   m_borders[bp_bottom].dstRect.LowerRightCorner.X =
@@ -211,25 +235,30 @@ void GuiFrame::adjustPositions()
   m_borders[bp_rite].dstRect.UpperLeftCorner.Y = 
     m_angles[bp_top_left].dstRect.LowerRightCorner.Y;
 
+
+  m_fillRectangle.UpperLeftCorner.X += 2;
+  m_fillRectangle.UpperLeftCorner.Y += 2;
+  m_fillRectangle.LowerRightCorner.X -= 2;
+  m_fillRectangle.LowerRightCorner.Y -= 2;
 }
 
 void GuiFrame::draw()
 {
   irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+
   // draw background
+  if(m_fillType & ft_solid) {
+    driver->draw2DRectangle (
+        m_backgroundColor,m_fillRectangle);
+  }
 
-  driver->draw2DRectangle (
-      m_backgroundColor,m_fillRectangle);
+  if((m_fillType & ft_texture)  && m_backgroundTidx < m_textures.size()){
+    Util::drawRectWithBackgroung(driver, 
+        m_textures[m_backgroundTidx],m_fillRectangle,true,0,0);
+  }  
 
-  // draw orizontal borders
+  // draw borders and angles
   irr::video::SColor color(255,255,255,255);
-#if 0
-  driver->draw2DRectangle (
-      color,
-      m_borders[bp_top].dstRect);
-#endif
-
-  // draw angles
   for(unsigned i=0; i<4; i++) {
     if(m_angles[i].loaded && m_angles[i].tidx < m_textures.size()) 
       driver->draw2DImage(

@@ -24,7 +24,7 @@
 #include "gmlog.h"
 #include "EventReceiver.h"
 
-#define  DEFAULT_FONT "braggadocio-64.xml"
+#define  DEFAULT_FONT "greddario-64.xml"
 #define  DEFAULT_FONT_SMALL "braggadocio-32.xml"
 
 
