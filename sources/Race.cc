@@ -433,7 +433,7 @@ bool Race::gotoState(unsigned state)
       m_cockpit->stop();
       for(unsigned i=0; i < m_nVehicles; i++) {
        VehicleInfo & vinfo=m_vehicles[m_rank[i]];
-       m_communicator->add(false,"[%d] %s",i,vinfo.name.c_str());
+       m_communicator->add(false,"[%d] %s",i+1,vinfo.name.c_str());
       }
       m_status=rs_finished;
       break;

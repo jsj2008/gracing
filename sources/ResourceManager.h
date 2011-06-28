@@ -18,8 +18,12 @@
 #ifndef RESOURCEMANAGER_H
 #define RESOURCEMANAGER_H
 #include <string>
+#include <vector>
 #include <stdlib.h>
 #include <irrlicht.h>
+
+#include "PhyWorld.h"
+#include "Vehicle.h"
 
 #include "EventReceiver.h"
 
@@ -61,8 +65,11 @@ class ResourceManager
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
 
-    inline irr::io::IFileSystem * getFileSystem() { return m_fileSystem; }
+    inline irr::io::IFileSystem *     getFileSystem()  { return m_fileSystem; }
     inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
+    inline PhyWorld *                 getPhyWorld()    { return m_world; }
+
+    inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
 
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
@@ -73,9 +80,13 @@ class ResourceManager
 
     void loadConfig(const std::string & filename);
 
+    void loadVehicles();
 
-    irr::IrrlichtDevice * m_device;
+
+
+    irr::IrrlichtDevice *  m_device;
     irr::io::IFileSystem * m_fileSystem;
+    PhyWorld *             m_world;// = PhyWorld::buildMe();
 
     std::string m_rootDir;
     std::string m_trackDir;
@@ -89,6 +100,8 @@ class ResourceManager
     // resources
     irr::gui::IGUIFont *  m_font;
     irr::gui::IGUIFont *  m_fontSmall;
+    
+    std::vector<IVehicle*> m_vehicles;
 };
 
 #endif

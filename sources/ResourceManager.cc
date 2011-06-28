@@ -16,6 +16,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <string>
+#include <dirent.h>
 
 #include "ResourceManager.h"
 #include "XmlNode.h"
@@ -23,6 +24,7 @@
 #include "util.hh"
 #include "gmlog.h"
 #include "EventReceiver.h"
+#include "CCrisMeshFileLoader.h"
 
 #define  DEFAULT_FONT "greddario-64.xml"
 #define  DEFAULT_FONT_SMALL "braggadocio-32.xml"
@@ -35,6 +37,27 @@ static EventReceiver g_eventReceiver;
 
 CFG_PARAM_UINT(glob_screenWidth)=1024;
 CFG_PARAM_UINT(glob_screenHeight)=768;
+
+static unsigned listDirectory(const char* path, 
+    std::vector<std::string> &return_files, 
+    //const std::vector<std::string> *allowedExtensions, 
+    int type) 
+{ 
+  unsigned fileCount = 0; 
+  DIR *searchDir = opendir(path); 
+  if(searchDir != NULL) { 
+    struct dirent *entry; 
+    while((entry=readdir(searchDir))!=NULL) {
+      if(entry->d_type == type) 
+        if(std::string(entry->d_name)!="." && std::string(entry->d_name)!="..") { 
+            return_files.push_back(entry->d_name); 
+            fileCount++; 
+        } 
+    }
+    closedir(searchDir);
+  } 
+  return fileCount; 
+}; 
 
 static bool macGetBundlePath(std::string& data_dir)
 {
@@ -66,6 +89,7 @@ static bool macGetBundlePath(std::string& data_dir)
 using namespace irr;
 
 ResourceManager * ResourceManager::s_instance;
+
 
 irr::io::path ResourceManager::createAbsoluteFilename(const std::string & fileName)
 {
@@ -146,20 +170,24 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   m_device=device;
   m_fileSystem=m_device->getFileSystem();
+  m_world = PhyWorld::buildMe();
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
 
-  ///////////////////////
-  // load resources
-  ///////////////////////
+  irr::scene::ISceneManager* smgr = device->getSceneManager();
+  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
+  smgr->addExternalMeshLoader(mloader);
+
+  ////////////////////
+  // load resources //
+  ////////////////////
 
   // system font
   GM_LOG("loading daf font\n");
   std::string fontName; 
-  if(!cfgGet("system-font",fontName)) {
+  if(!cfgGet("system-font",fontName)) 
     fontName = DEFAULT_FONT;
-  }
   irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
   std::string fontPath = getResourcePath() + "/" + fontName;
   m_font = guienv->getFont(fontPath.c_str());
@@ -168,13 +196,15 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   // system font small
   GM_LOG("loading small daf font\n");
-  if(!cfgGet("system-font-small",fontName)) {
+  if(!cfgGet("system-font-small",fontName)) 
     fontName = DEFAULT_FONT_SMALL;
-  }
+
   fontPath = getResourcePath() + "/" + fontName;
   m_fontSmall = guienv->getFont(fontPath.c_str());
   assert(m_fontSmall);
   GM_LOG("loading done font\n");
+
+  loadVehicles();
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -269,3 +299,27 @@ EventReceiver * ResourceManager::getEventReceiver()
   return &g_eventReceiver;
 }
     
+void ResourceManager::loadVehicles()
+{
+  // first retrieve the list of files
+  std::vector<std::string> files;
+  int type=DT_REG;
+  unsigned nFiles;
+
+  nFiles=listDirectory(m_vehicleDir.c_str(),files,type);
+  std::string vpath;
+  IVehicle * vehicle;
+
+  for(unsigned i=0; i < nFiles; i++) {
+    getVehicleCompletePath(files[i].c_str(), vpath);
+    // TODO: should be use a factory like loader??
+    vehicle=new Vehicle(
+        0, 
+        m_device,
+        m_world,
+        vpath.c_str(),0xcafe);
+    vehicle->load();
+    GM_LOG("loaded '%s'\n",vpath.c_str());
+    m_vehicles.push_back(vehicle);
+  }
+}

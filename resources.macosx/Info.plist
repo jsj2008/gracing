@@ -12,7 +12,7 @@
 	<string>6.0</string>
 
 	<key>CFBundleIconFile</key>
-	<string>stk.icns</string>
+	<string>icon.icns</string>
 
 	<key>CFBundleName</key>
 	<string>gracing</string>

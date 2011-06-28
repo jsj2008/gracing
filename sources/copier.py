@@ -16,11 +16,9 @@ action=ACTION_PRINT_HELP
 target_dir=None
 resource_dir=None
 vehicles=[
-  "squared",
   "sprinter",
   "turing_machine",
   "tractor",
-  "bluest",
 ]
 
 tracks=[

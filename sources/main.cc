@@ -18,7 +18,6 @@
 
 #include "gException.h"
 #include "ResourceManager.h"
-#include "CCrisMeshFileLoader.h"
 #include "Track.hh"
 #include "PhyWorld.h"
 #include "gmlog.h"
@@ -179,11 +178,8 @@ int main(int argc, char ** av)
 
   device->setWindowCaption(L"gracing - rosco-p");
 
-  ISceneManager* smgr = device->getSceneManager();
   IVideoDriver* driver = device->getVideoDriver();
-  //IGUIEnvironment* guienv = device->getGUIEnvironment();
-  PhyWorld * world = PhyWorld::buildMe();
-  CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
+  PhyWorld * world = ResourceManager::getInstance()->getPhyWorld(); 
 
   if(glob_enableDebug) {
     debugDrawer= new IrrDebugDrawer(driver);
@@ -191,53 +187,11 @@ int main(int argc, char ** av)
     debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawAabb);
   }
 
-  smgr->addExternalMeshLoader(mloader);
 
   // prepare the track
   Track * thetrack;
   thetrack=new Track(device,world,"farm.zip");
   thetrack->load();
-
-  // prepare the vehicle
-  std::string vehpath;
-  resmanager->getVehicleCompletePath("tractor.zip",vehpath);
-  IVehicle * vehicle=new Vehicle(
-        0, /* smgr->getRootSceneNode(),*/
-        device,
-        world,
-        vehpath.c_str(),0xcafe);
-  if(glob_enableDebug)
-    ((Vehicle*)vehicle)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
-  vehicle->load();
-
-  resmanager->getVehicleCompletePath("sprinter.zip",vehpath);
-  IVehicle * vehicle2 = new Vehicle(
-        0, /* smgr->getRootSceneNode(),*/
-        device,
-        world,
-        vehpath.c_str(),0xcafe);
-  if(glob_enableDebug)
-    ((Vehicle*)vehicle2)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
-  vehicle2->load();
-
-  resmanager->getVehicleCompletePath("turing_machine.zip",vehpath);
-  IVehicle * vehicle3 = new Vehicle(
-        0, /* smgr->getRootSceneNode(),*/
-        device,
-        world,
-        vehpath.c_str(),0xcafe);
-  if(glob_enableDebug)
-    ((Vehicle*)vehicle3)->setDebugDrawFlags(Vehicle::db_forwardImpulse | Vehicle::db_sideImpulse | Vehicle::db_suspensions);
-  vehicle3->load();
-  //vehicle3->use(IVehicle::USE_GRAPHICS | IVehicle::USE_PHYSICS);
-
-
-  // gui
-#if 0
-  GUISpeedometer * smeter=new GUISpeedometer(true,guienv,guienv->getRootGUIElement(),1,
-      core::rect<s32>(0,0,200,100));
-  vehicle->setSpeedOMeter(smeter);
-#endif
 
   bool done=false;
   int lastFPS=-1;
@@ -252,9 +206,15 @@ int main(int argc, char ** av)
   IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
 
   race->setTrack(thetrack);
-  race->addVehicle(vehicle,new VehicleAutoController(),"speedstar");
-  race->addVehicle(vehicle2, new VehicleAutoController(), "ccaaspeedstar",true);
-  race->addVehicle(vehicle3,controller , "aaccgonorra");
+
+  const std::vector<IVehicle*> & vehicles=
+    resmanager->getVehiclesList();
+
+  assert(vehicles.size() >= 3);
+
+  race->addVehicle(vehicles[0],new VehicleAutoController(),"speedstar");
+  race->addVehicle(vehicles[1], new VehicleAutoController(), "ccaaspeedstar");
+  race->addVehicle(vehicles[2],controller , "aaccgonorra",true);
 
   IPhaseHandler * currentPhaseHandler;
   currentPhaseHandler = race;
