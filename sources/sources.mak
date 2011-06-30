@@ -1,7 +1,6 @@
 sources=main.cc Track.cc CCrisMeshFileLoader.cc \
 				CameraDataManager.cc PhyWorld.cc \
 				Vehicle.cc IrrMotionState.cc \
-				VehiclesHandler.cc \
         ResourceManager.cc\
         VehicleCameraAnimator.cc\
         IrrDebugDrawer.cc\
@@ -14,6 +13,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiFrame.cc \
         VehicleKeyboardController.cc \
         VehicleAutoController.cc \
+        VehicleChooser.cc \
         EventReceiver.cc \
         Race.cc \
         Util.cc \

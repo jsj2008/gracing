@@ -29,6 +29,7 @@
 #include "Race.h"
 #include "GUISpeedometer.h"
 #include "EventReceiver.h"
+#include "VehicleChooser.h"
 
 // vehicle controllers
 #include "VehicleKeyboardController.h"
@@ -191,7 +192,7 @@ int main(int argc, char ** av)
   // prepare the track
   Track * thetrack;
   thetrack=new Track(device,world,"farm.zip");
-  thetrack->load();
+  //thetrack->load();
 
   bool done=false;
   int lastFPS=-1;
@@ -200,26 +201,33 @@ int main(int argc, char ** av)
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / 80;
 
+  IPhaseHandler * currentPhaseHandler;
+
+#define START_CHOOSER 1
+#ifdef START_CHOOSER
+  currentPhaseHandler = new VehicleChooser(device,world);
+#else
   Race *          race;
   race = new Race(device,world);
-
-  IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
-
-  race->setTrack(thetrack);
-
+  //IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
   const std::vector<IVehicle*> & vehicles=
     resmanager->getVehiclesList();
-
-  assert(vehicles.size() >= 3);
-
-  race->addVehicle(vehicles[0],new VehicleAutoController(),"speedstar");
-  race->addVehicle(vehicles[1], new VehicleAutoController(), "ccaaspeedstar");
-  race->addVehicle(vehicles[2],controller , "aaccgonorra",true);
-
-  IPhaseHandler * currentPhaseHandler;
-  currentPhaseHandler = race;
-
+  assert(vehicles.size() >= 4);
+  race->setTrack(thetrack);
+  race->addVehicle(vehicles[1],
+      //new VehicleKeyboardController(resmanager->getEventReceiver()), 
+      new VehicleAutoController(), 
+      "gonorra",true);
+  race->addVehicle(vehicles[0], 
+      new VehicleAutoController(), 
+      "ccaaspeedstar");
+  race->addVehicle(vehicles[3], new VehicleAutoController(),
+      "speedstar");
   race->restart();
+  currentPhaseHandler = race;
+#endif
+
+  currentPhaseHandler->prepare();
 
   while(device->run() && !done) {
     if(device->isWindowActive()) {
@@ -231,39 +239,8 @@ int main(int argc, char ** av)
       }
 
       /* temp keyboard handling part */
-
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
         done=true;
-
-#if 0
-      if(receiver.IsKeyDown(irr::KEY_KEY_C)) {
-        if(flagC)  {
-          race->restart();
-          GM_LOG("start position: %f,%f,%f\n",
-              thetrack->getStartPosition().X,
-              thetrack->getStartPosition().Y,
-              thetrack->getStartPosition().Z);
-          flagC=false;
-        }
-      } else {
-        flagC=true;
-      }
-#endif
-
-
-#if 0
-      if(receiver.IsKeyDown(irr::KEY_KEY_W))
-        camanim->moveXY(0.,CAMERA_STEP);
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_Z)) 
-        camanim->moveXY(0.,-CAMERA_STEP);
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_A))
-        camanim->moveXY(CAMERA_STEP,0.);
-
-      if(receiver.IsKeyDown(irr::KEY_KEY_S)) 
-        camanim->moveXY(-CAMERA_STEP,0.);
-#endif
 
       if (driver->getFPS() != lastFPS)
       {

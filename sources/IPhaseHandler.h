@@ -40,6 +40,8 @@ class IPhaseHandler /*: public irr::IEventReceiver*/
       m_sceneManager->drawAll();
     }
 
+    virtual void prepare() { }
+
   protected:
     irr::IrrlichtDevice  *      m_device;
     irr::scene::ISceneManager * m_sceneManager;
@@ -47,11 +49,5 @@ class IPhaseHandler /*: public irr::IEventReceiver*/
     PhyWorld *                  m_world;
     irr::video::IVideoDriver*   m_driver;
  
-#if 0
-  IGUIEnvironment* guienv = device->getGUIEnvironment();
-  IVideoDriver* driver = device->getVideoDriver();
-  ISceneManager* smgr = device->getSceneManager();
-#endif
-
 };
 #endif

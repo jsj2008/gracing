@@ -84,6 +84,11 @@ static bool evolveVehicleControlPoint(
   return false;
 }
 
+void Race::setTrack(Track * track) { 
+  m_track=track;
+  m_track->load();
+}
+
 
 static unsigned initVehicleControlPoint(
     const btVector3 & position,

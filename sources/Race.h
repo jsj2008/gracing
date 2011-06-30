@@ -48,7 +48,8 @@ class Race : public  IPhaseHandler
         const char * name=0,
         bool followed=false);
 
-    inline void setTrack(Track * track) { m_track=track; }
+    //inline void setTrack(Track * track) { m_track=track; }
+    void setTrack(Track * track);
 
     inline void restart() { gotoState(rs_readySetGo); }
 

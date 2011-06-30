@@ -588,43 +588,45 @@ void Vehicle::load()
 
 void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
 {
-  m_chassisNode->setPosition(pos);
-  //grad = rad * 180 / PI
-  m_chassisNode->setRotation(irr::core::vector3df(0.,RAD2DEG(rotation),0.));
+  if(m_using & USE_PHYSICS) {
+    m_steering=0.;
+    m_throttle=0.;
+    m_brake=0.;
 
-  m_steering=0.;
-  m_throttle=0.;
-  m_brake=0.;
-
-  m_vehicleCommands.throttling=0.;
-  m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
+    m_vehicleCommands.throttling=0.;
+    m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
 
 
-  // reset position
-  btTransform trans=btTransform::getIdentity();
-  trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
+    // reset position
+    btTransform trans=btTransform::getIdentity();
+    trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
 
-  // reset rotation
-  btQuaternion rotQuat(btVector3(0.,1.,0.),rotation);
-  btMatrix3x3  rotMat(rotQuat);
-  trans.setBasis(rotMat);
+    // reset rotation
+    btQuaternion rotQuat(btVector3(0.,1.,0.),rotation);
+    btMatrix3x3  rotMat(rotQuat);
+    trans.setBasis(rotMat);
 
-  m_carBody->setCenterOfMassTransform(trans);
+    m_carBody->setCenterOfMassTransform(trans);
 
-  // reset velocity
-  m_carBody->setLinearVelocity(btVector3(0,0,0));
-  m_carBody->setAngularVelocity(btVector3(0,0,0));
+    // reset velocity
+    m_carBody->setLinearVelocity(btVector3(0,0,0));
+    m_carBody->setAngularVelocity(btVector3(0,0,0));
 
-  // TODO: reset wheels
-  for(int i=0; i<4; i++) {
-    WheelData & wheel=m_wheelsData[i];
-    wheel.rotation=0.;
-    wheel.deltaRotation=0.;
+    // TODO: reset wheels
+    for(int i=0; i<4; i++) {
+      WheelData & wheel=m_wheelsData[i];
+      wheel.rotation=0.;
+      wheel.deltaRotation=0.;
+    }
+
+    // reset collosion
+    m_world->getBroadphase()->getOverlappingPairCache()->
+      cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
+  } else if(m_using & USE_GRAPHICS) {
+    m_chassisNode->setPosition(pos);
+    //grad = rad * 180 / PI
+    m_chassisNode->setRotation(irr::core::vector3df(0.,RAD2DEG(rotation),0.));
   }
-
-  // reset collosion
-  m_world->getBroadphase()->getOverlappingPairCache()->
-    cleanProxyFromPairs(m_carBody->getBroadphaseHandle(),m_world->getDispatcher()); 
 
 }
 
@@ -655,6 +657,12 @@ void Vehicle::unuse(unsigned int useFlags)
   if(useFlags & USE_PHYSICS && (m_using & USE_PHYSICS)) {
     m_world->removeRigidBody(m_carBody);
     m_using&=~USE_PHYSICS;
+  }
+  if(useFlags & USE_GRAPHICS && (m_using & USE_GRAPHICS)) {
+    irr::scene::ISceneManager * smgr=
+      m_device->getSceneManager();
+    m_using&=~USE_GRAPHICS;
+    smgr->getRootSceneNode()->removeChild(this);
   }
 }
 

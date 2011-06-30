@@ -320,6 +320,7 @@ void ResourceManager::loadVehicles()
         vpath.c_str(),0xcafe);
     vehicle->load();
     GM_LOG("loaded '%s'\n",vpath.c_str());
+    vehicle->grab();
     m_vehicles.push_back(vehicle);
   }
 }
