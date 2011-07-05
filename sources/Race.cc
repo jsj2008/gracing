@@ -290,7 +290,7 @@ void Race::updateVehiclesInfo()
   }
 }
 
-void Race::step()
+bool Race::step()
 {
   // status handling
   switch(m_status) {
@@ -346,11 +346,11 @@ void Race::step()
     default:
       break;
   }
+  return false;
 }
 
 void Race::updateRanking()
 {
-  //unsigned rank[max_vehicles];
   unsigned i,j,m,o;
 
   for(i=m_nFinishedVehicles; i<m_nVehicles; i++) {
@@ -367,7 +367,6 @@ void Race::updateRanking()
       m_rank[m]=o;
     }
   }
-
 
   for(i=m_nFinishedVehicles; i<m_nVehicles; i++) 
     m_vehicles[m_rank[i]].rank=i;

@@ -35,9 +35,10 @@ class IPhaseHandler /*: public irr::IEventReceiver*/
       m_guiEnv = device->getGUIEnvironment();
     }
 
-    virtual void step()
+    virtual bool step()
     {
       m_sceneManager->drawAll();
+      return false;
     }
 
     virtual void prepare() { }

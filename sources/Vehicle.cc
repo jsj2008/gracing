@@ -596,7 +596,6 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
     m_vehicleCommands.throttling=0.;
     m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
 
-
     // reset position
     btTransform trans=btTransform::getIdentity();
     trans.setOrigin(btVector3(pos.X,pos.Y,pos.Z));
@@ -626,8 +625,15 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
     m_chassisNode->setPosition(pos);
     //grad = rad * 180 / PI
     m_chassisNode->setRotation(irr::core::vector3df(0.,RAD2DEG(rotation),0.));
-  }
 
+    irr::core::matrix4 chMatrix= m_chassisNode->getAbsoluteTransformation();
+
+    for(int i=0; i<4; i++) {
+      irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
+      wheel->setPosition(m_wheelInitialPositions[i]);
+      wheel->updateAbsolutePosition();
+    }
+  }
 }
 
 
@@ -640,6 +646,10 @@ void Vehicle::use(unsigned int useFlags)
   if(useFlags & USE_PHYSICS && !(m_using & USE_PHYSICS)) {
     m_using|=USE_PHYSICS;
     m_world->addRigidBody(m_carBody);
+    for(unsigned i=0; i<4; i++) {
+      irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
+      wheel->setParent(0);
+    }
     if(!(useFlags & USE_PHYSICS))
       use(USE_GRAPHICS);
   }
@@ -649,6 +659,13 @@ void Vehicle::use(unsigned int useFlags)
       m_device->getSceneManager();
     m_using|=USE_GRAPHICS;
     smgr->getRootSceneNode()->addChild(this);
+
+    if(!(m_using & USE_PHYSICS)) {
+      for(unsigned i=0; i<4; i++) {
+        irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
+        wheel->setParent(m_chassisNode);
+      }
+    }
   }
 }
 

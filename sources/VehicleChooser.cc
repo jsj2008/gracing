@@ -47,6 +47,81 @@ struct rotateTrans : public VehicleChooser::iTransiction
   }
 };
 
+template<class T>
+struct quadInTrans : public VehicleChooser::iTransiction
+{
+  virtual void init(double t, const T & start, const T & end)
+  {
+    m_startPos = start;
+    m_totalChange = end - start;
+    m_startTime = t;
+  }
+
+  virtual bool doit(double _t, T & position, double & rotation)
+  {
+    double t = _t - m_startTime;
+
+    if (t < 1.) {
+      position = m_totalChange * t * t + m_startPos;
+      return false;
+    } else {
+      position = m_totalChange + m_startPos;
+      return true;
+    }
+  }
+
+  private:
+    double m_startTime;
+    T      m_startPos;
+    T      m_totalChange;
+};
+
+template<class T>
+struct bounceOutTrans : public VehicleChooser::iTransiction
+{
+  virtual void init(double t, const T & start, const T & end)
+  {
+    m_startPos = start;
+    m_totalChange = end - start;
+    m_startTime = t;
+  }
+
+  virtual bool doit(double _t, T & position, double & rotation)
+  {
+    double t=_t - m_startTime;
+    bool   ret;
+    rotation = t;
+    ret = false;
+
+    if( t < (1/2.75)) {
+      position =  m_totalChange * (7.5625*t*t) + m_startPos;
+    } else if(t < (2/2.75)) {
+      t -= 1.5 / 2.75;
+      position =  m_totalChange * (7.5625 * t * t + .75)  + m_startPos;
+    } else if(t <(2.5 / 2.75)) {
+      t -= 2.25 / 2.75;
+      position =  m_totalChange * (7.5625 * t * t + .9375) + m_startPos;
+    } else if(t < 1.) {
+      t -= 2.625 / 2.75;
+      position =  m_totalChange * (7.5625 * t * t + .984375) + m_startPos;
+    } else {
+      position = m_totalChange + m_startPos;
+      ret = true;
+    }
+
+    return ret;
+  }
+
+  private:
+    double m_startTime;
+    T      m_startPos;
+    T      m_totalChange;
+};
+
+
+typedef bounceOutTrans<irr::core::vector3df> bounceOutTrans3df;
+typedef quadInTrans<irr::core::vector3df> quadInTrans3df;
+
 struct linearTrans : public VehicleChooser::iTransiction
 {
   virtual void init(double t, const irr::core::vector3df & sPos, const irr::core::vector3df & ePos)
@@ -79,14 +154,14 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
   : IPhaseHandler(device,world)
 {
 
-  double o=3.;
+  double o=3.5;
   m_pos0= irr::core::vector3df(0.,0.,0);
   m_pos1= irr::core::vector3df(0.,0.,o);
   m_pos2= irr::core::vector3df(0,0.,-o);
 
   m_transictions[trans_stay]=new rotateTrans;
-  m_transictions[trans_enter]=new linearTrans();
-  m_transictions[trans_exit]=new linearTrans();
+  m_transictions[trans_enter]=new bounceOutTrans3df;   //new linearTrans();
+  m_transictions[trans_exit]=new quadInTrans3df;
 }
 
 void VehicleChooser::prepare()
@@ -121,16 +196,16 @@ void VehicleChooser::prepare()
 }
 
 
-void VehicleChooser::changeVehicle()
+void VehicleChooser::changeVehicle(int direction)
 {
   const std::vector<IVehicle*> & vehicles=
     ResourceManager::getInstance()->getVehiclesList();
 
   if(m_vehicle) {
     m_vehicle->unuse(IVehicle::USE_GRAPHICS);
-    m_currentVehicle++;
-    if(m_currentVehicle == vehicles.size())
-      m_currentVehicle = 0;
+    
+    m_currentVehicle+=direction;
+    m_currentVehicle%=vehicles.size();
   }
 
 
@@ -139,12 +214,17 @@ void VehicleChooser::changeVehicle()
   //m_vehicle->reset(irr::core::vector3df(0.,0.,0.),0.);
   m_status = status_vehicle_entering;
   m_nextStatus = status_uninited;
-  m_transictions[trans_enter]->init(0., m_pos1, m_pos0);
+
   m_transictionTime = 0.;
+  if(direction > 0)
+    m_transictions[trans_enter]->init(m_transictionTime, m_pos1, m_pos0);
+  else 
+    m_transictions[trans_enter]->init(m_transictionTime, m_pos2, m_pos0);
+
   m_timeStep = 1. / 80.; // get the frame rate from the resource manager
 }
 
-void VehicleChooser::step()
+bool VehicleChooser::step()
 {
   EventReceiver * erec;
 
@@ -157,26 +237,32 @@ void VehicleChooser::step()
         break;
       }
       m_nextStatus=status_vehicle_staying;
-      GM_LOG("next status: staying\n");
       break;
 
     case status_vehicle_staying:
       m_transictions[trans_stay]->doit(m_transictionTime,m_vPosition,m_vRotation);
-      if(erec->OneShotKey(irr::KEY_LEFT))  {
+      if(erec->OneShotKey(irr::KEY_LEFT)) {
+        m_vdir=1;
         m_nextStatus = status_vehicle_exiting;
         m_transictions[trans_exit]->init(m_transictionTime, m_pos0, m_pos2);
-        GM_LOG("next status: exiting\n");
+      }
+      if(erec->OneShotKey(irr::KEY_RIGHT)) {
+        m_vdir=-1;
+        m_nextStatus = status_vehicle_exiting;
+        m_transictions[trans_exit]->init(m_transictionTime, m_pos0, m_pos1);
+      }
+
+      if(erec->OneShotKey(irr::KEY_RETURN)) {
+        GM_LOG("Choosen vehicle: %d\n",m_currentVehicle);
       }
       break;
 
     case status_vehicle_exiting:
-      if(!m_transictions[trans_exit]->doit(m_transictionTime,m_vPosition,m_vRotation)) {
+      if(!m_transictions[trans_exit]->doit(m_transictionTime,m_vPosition,m_vRotation)) 
         break;
-      }
+      
 
       m_nextStatus=status_vehicle_entering;
-      m_transictions[trans_enter]->init(m_transictionTime, m_pos1, m_pos0);
-
       break;
 
         
@@ -200,7 +286,9 @@ void VehicleChooser::step()
     m_nextStatus = status_uninited;
 
     if(m_status == status_vehicle_entering) {
-      changeVehicle();
+      changeVehicle(m_vdir);
     }
   }
+
+  return false;
 }

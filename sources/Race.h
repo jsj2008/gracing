@@ -41,7 +41,7 @@ class Race : public  IPhaseHandler
   public:
     Race(irr::IrrlichtDevice * device, PhyWorld * world);
 
-    virtual void step();
+    virtual bool step();
 
     bool addVehicle(IVehicle * vehicle, 
         IVehicleController * controller, 

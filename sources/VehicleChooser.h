@@ -32,7 +32,7 @@ class VehicleChooser :  public IPhaseHandler
     VehicleChooser(irr::IrrlichtDevice * device,
         PhyWorld * world);
 
-    void step();
+    bool step();
     void prepare();
 
     struct iTransiction 
@@ -42,12 +42,6 @@ class VehicleChooser :  public IPhaseHandler
     };
 
   private:
-
-#if 0
-    bool stayTransiction(double t, irr::core::vector3df & position, double & rotation);
-    bool enterTransiction(double t, irr::core::vector3df & position, double & rotation);
-    bool exitTransiction(double t, irr::core::vector3df & position, double  & rotation);
-#endif
 
     enum {
       status_uninited,
@@ -65,7 +59,7 @@ class VehicleChooser :  public IPhaseHandler
 
     iTransiction * m_transictions[3];
 
-    void changeVehicle();
+    void changeVehicle(int direction=1);
 
     unsigned m_currentVehicle;
     unsigned m_maxVehicles;
@@ -83,6 +77,8 @@ class VehicleChooser :  public IPhaseHandler
     irr::core::vector3df  m_pos0;
     irr::core::vector3df  m_pos1;
     irr::core::vector3df  m_pos2;
+
+    int                   m_vdir;
 };
 
 #endif
