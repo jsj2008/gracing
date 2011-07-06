@@ -135,17 +135,6 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   irr::s32 px1,px2,py1,py2;
   irr::s32 width,height;
 
-#if 0
-  width=400; height=100;
-  px1=1024-width;     py1=0;
-
-  px2=px1+width;
-  py2=py1+height;
-
-  m_cronometer = new GuiCronometer(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
-      irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
-#endif
-
   width=1024; height=600;
   px1=1024-width;     py1=(576-height)/2-50;
   px2=px1+width;
@@ -158,7 +147,8 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   m_nVehicles=0;
   m_track=0;
   m_totalLaps=1;
-  m_camera = device->getSceneManager()->addCameraSceneNode();
+  //m_camera = device->getSceneManager()->addCameraSceneNode();
+  m_camera = 0;
   m_device = device;
   m_cameraAnim = 0;
   m_followedVehicleIndex=invalidVehicleIndex;
@@ -171,7 +161,8 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   m_cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
       irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
 
-  restart();
+  m_status=rs_notRunning;
+  //restart();
 }
 
 void Race::updateVehiclesInfo()
@@ -292,8 +283,13 @@ void Race::updateVehiclesInfo()
 
 bool Race::step()
 {
+  bool ret=false;
+  EventReceiver * erec=ResourceManager::getInstance()->getEventReceiver();
   // status handling
   switch(m_status) {
+
+    case rs_notRunning:
+      break;
 
     case rs_finished:
       m_communicator->refreshTime();
@@ -303,6 +299,10 @@ bool Race::step()
       m_world->step();
       m_world->debugDrawWorld();
       m_driver->endScene();
+      if(erec->IsAnyKeyDown()) {
+        GM_LOG("SUKKA SUKKA SUKKA\n");
+        ret=true;
+      }
       break;
 
     case rs_paused:
@@ -346,7 +346,7 @@ bool Race::step()
     default:
       break;
   }
-  return false;
+  return ret;
 }
 
 void Race::updateRanking()
@@ -432,7 +432,6 @@ bool Race::gotoState(unsigned state)
       m_status=rs_paused;
       break;
     case rs_finished:
-      GM_LOG("race finished\n");
       m_communicator->show("race rank");
       m_cockpit->stop();
       for(unsigned i=0; i < m_nVehicles; i++) {
@@ -522,8 +521,13 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
   if(followed) {
     if(m_cameraAnim)
       m_cameraAnim->drop();
+
+    if(m_camera)
+      m_camera->drop();
+
     m_cameraAnim=new
       VehicleCameraAnimator(vehicle);
+    m_camera = m_device->getSceneManager()->addCameraSceneNode();
     m_camera->addAnimator(m_cameraAnim);
     m_followedVehicleIndex = m_nVehicles;
     vehicle->setSpeedOMeter(m_cockpit);

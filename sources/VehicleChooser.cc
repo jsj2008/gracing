@@ -15,6 +15,8 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#include <assert.h>
+
 #include "VehicleChooser.h"
 #include "ResourceManager.h"
 #include "gmlog.h"
@@ -164,14 +166,23 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
   m_transictions[trans_exit]=new quadInTrans3df;
 }
 
-void VehicleChooser::prepare()
+void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsigned * vehiclesListPtr)
 {
+
+  assert(nHumanVehicles == 1);
+
   const std::vector<IVehicle*> & vehicles=
     ResourceManager::getInstance()->getVehiclesList();
 
   m_currentVehicle=0;
   m_maxVehicles=vehicles.size();
   m_vehicle=0;
+
+  assert(TotVehicles <= m_maxVehicles);
+
+  m_choosenVehicles=vehiclesListPtr;
+  m_totChooseableVehicles=TotVehicles;
+  m_humanVehicles=nHumanVehicles;
 
   changeVehicle();
 
@@ -193,6 +204,13 @@ void VehicleChooser::prepare()
   m_sun->setLightType(irr::video::ELT_DIRECTIONAL);
   m_sun->setRotation( irr::core::vector3df(180, 45, 45) );
   m_sun->getLightData().SpecularColor = sun_specular_color;
+}
+
+void VehicleChooser::unprepare()
+{
+  GM_LOG("unpreparing\n");
+  m_camera->remove();
+  m_sun->remove();
 }
 
 
@@ -230,6 +248,8 @@ bool VehicleChooser::step()
 
   erec=ResourceManager::getInstance()->getEventReceiver();
 
+  bool done=false;
+
   switch(m_status) {
 
     case status_vehicle_entering:
@@ -253,7 +273,12 @@ bool VehicleChooser::step()
       }
 
       if(erec->OneShotKey(irr::KEY_RETURN)) {
-        GM_LOG("Choosen vehicle: %d\n",m_currentVehicle);
+        done=true;
+        m_choosenVehicles[0]=m_currentVehicle;
+        for(unsigned i=0, cc=1; i<m_maxVehicles && cc<m_totChooseableVehicles; i++)
+          if(i!=m_currentVehicle && i!=0)
+            m_choosenVehicles[cc++]=i;
+
       }
       break;
 
@@ -290,5 +315,5 @@ bool VehicleChooser::step()
     }
   }
 
-  return false;
+  return done;
 }

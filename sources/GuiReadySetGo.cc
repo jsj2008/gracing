@@ -63,6 +63,8 @@ GuiReadySetGo::GuiReadySetGo(irr::gui::IGUIEnvironment * environment,
   m_fraction=0.;
   m_delta=0.05;
   m_isStill=false;
+  IsVisible=false;
+  m_isEnded=true;
 }
 
 void GuiReadySetGo::evolve()
@@ -100,6 +102,7 @@ void GuiReadySetGo::restart()
   m_isStill=false;
   IsVisible=true;
   m_isEnded=false;
+  IsVisible=true;
 }
 
 void GuiReadySetGo::draw()

@@ -33,7 +33,8 @@ class VehicleChooser :  public IPhaseHandler
         PhyWorld * world);
 
     bool step();
-    void prepare();
+    void prepare(unsigned nHumanVehicles, unsigned nTotVehicles, unsigned * choosenVehicles);
+    void unprepare();
 
     struct iTransiction 
     {
@@ -63,6 +64,12 @@ class VehicleChooser :  public IPhaseHandler
 
     unsigned m_currentVehicle;
     unsigned m_maxVehicles;
+
+    /// !!! /// !!!
+    unsigned * m_choosenVehicles;
+    unsigned   m_totChooseableVehicles;
+    unsigned   m_humanVehicles;
+    /// !!! /// !!!
 
     double   m_transictionTime;
     double   m_timeStep;

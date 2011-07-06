@@ -394,8 +394,10 @@ void Vehicle::initGraphics()
 
   ((CompoundSceneNode*)m_chassisNode)->recalculateBoundingBox();
 
-  for(i=0; i<4; ++i) 
+  for(i=0; i<4; ++i) {
     m_wheelsNodes[i]=smgr->addAnimatedMeshSceneNode(m_wheels[i],this,0xcaf0);
+    m_wheelsNodes[i]->grab();
+  }
   
   //m_using|=USE_GRAPHICS;
 }
@@ -643,20 +645,21 @@ void Vehicle::unload()
 
 void Vehicle::use(unsigned int useFlags)
 {
+  irr::scene::ISceneManager * smgr=
+      m_device->getSceneManager();
   if(useFlags & USE_PHYSICS && !(m_using & USE_PHYSICS)) {
     m_using|=USE_PHYSICS;
     m_world->addRigidBody(m_carBody);
     for(unsigned i=0; i<4; i++) {
       irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
-      wheel->setParent(0);
+      //m_chassisNode->removeChild(wheel);
+      wheel->setParent(smgr->getRootSceneNode());
     }
     if(!(useFlags & USE_PHYSICS))
       use(USE_GRAPHICS);
   }
 
   if(useFlags & USE_GRAPHICS && !(m_using & USE_GRAPHICS)) {
-    irr::scene::ISceneManager * smgr=
-      m_device->getSceneManager();
     m_using|=USE_GRAPHICS;
     smgr->getRootSceneNode()->addChild(this);
 
@@ -664,6 +667,7 @@ void Vehicle::use(unsigned int useFlags)
       for(unsigned i=0; i<4; i++) {
         irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
         wheel->setParent(m_chassisNode);
+        GM_LOG("fogna %d\n",i);
       }
     }
   }

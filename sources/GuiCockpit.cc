@@ -126,6 +126,8 @@ GuiCockpit::GuiCockpit(
   ResourceManager * resmanager=ResourceManager::getInstance();
   m_guiEnv=environment;
 
+  IsVisible=false;
+
   XmlNode * root=0;
 
   std::string path_name;
@@ -372,5 +374,6 @@ void GuiCockpit::stop()
 void GuiCockpit::start()
 {
   m_started=true;
+  IsVisible=true;
   m_startTime=m_timer->getRealTime();
 }

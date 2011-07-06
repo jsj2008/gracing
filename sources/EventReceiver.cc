@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#include <assert.h>
+
 #include "EventReceiver.h"
 #include "gmlog.h"
 
@@ -23,14 +25,28 @@ bool EventReceiver::OnEvent(const SEvent& event)
 {
   // Remember whether each key is down or up
   if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
-    if(!KeyIsDown[event.KeyInput.Key] && event.KeyInput.PressedDown) 
+    if(!KeyIsDown[event.KeyInput.Key] && event.KeyInput.PressedDown) {
       OneShotKeyIsDown[event.KeyInput.Key] = true;
+    }
+    if(event.KeyInput.PressedDown) {
+      if(!KeyIsDown[event.KeyInput.Key])
+        KeysPressed++;
+    } else {
+      if(KeyIsDown[event.KeyInput.Key]) 
+        KeysPressed--;
+    }
     KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
   }
+  assert(KeysPressed >= 0);
   return false;
 }
 
-    // This is used to check whether a key is being held down
+bool EventReceiver::IsAnyKeyDown() const
+{
+  return KeysPressed > 0;
+}
+
+// This is used to check whether a key is being held down
 bool EventReceiver::IsKeyDown(EKEY_CODE keyCode) const
 {
   return KeyIsDown[keyCode];
@@ -50,5 +66,6 @@ EventReceiver::EventReceiver()
     KeyIsDown[i] = false;
     OneShotKeyIsDown[i]=false;
   }
+  KeysPressed = 0;
 }
 

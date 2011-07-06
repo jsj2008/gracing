@@ -31,9 +31,12 @@ class EventReceiver : public irr::IEventReceiver
 
     virtual bool OneShotKey(irr::EKEY_CODE keyCode);
 
+    virtual bool IsAnyKeyDown() const;
+
   private:
     // We use this array to store the current state of each key
     bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
     bool OneShotKeyIsDown[irr::KEY_KEY_CODES_COUNT];
+    int  KeysPressed;
 };
 #endif

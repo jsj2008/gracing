@@ -15,6 +15,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <irrlicht.h>
+#include <typeinfo>
 
 #include "gException.h"
 #include "ResourceManager.h"
@@ -201,15 +202,21 @@ int main(int argc, char ** av)
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / 80;
 
-  IPhaseHandler * currentPhaseHandler;
+  // phase handlers
+  VehicleChooser * vehicleChooser;
+  Race *           race;
+  IPhaseHandler *  currentPhaseHandler;
+
+  vehicleChooser=new VehicleChooser(device,world);
+  race = new Race(device,world);
+
+  currentPhaseHandler = 0;
+
 
 #define START_CHOOSER 1
 #ifdef START_CHOOSER
   currentPhaseHandler = new VehicleChooser(device,world);
 #else
-  Race *          race;
-  race = new Race(device,world);
-  //IVehicleController * controller= new VehicleKeyboardController(resmanager->getEventReceiver());
   const std::vector<IVehicle*> & vehicles=
     resmanager->getVehiclesList();
   assert(vehicles.size() >= 4);
@@ -227,7 +234,14 @@ int main(int argc, char ** av)
   currentPhaseHandler = race;
 #endif
 
-  currentPhaseHandler->prepare();
+
+  unsigned runningVehicles[3];
+
+  // temp init !!!!!
+  vehicleChooser->prepare(1,3,runningVehicles);
+  currentPhaseHandler= vehicleChooser;
+
+  bool donePhase;
 
   while(device->run() && !done) {
     if(device->isWindowActive()) {
@@ -235,7 +249,7 @@ int main(int argc, char ** av)
       startFrameTime=device->getTimer()->getRealTime();
       if(!stepMode || !doneStep) {
         doneStep=true;
-        currentPhaseHandler->step();
+        donePhase=currentPhaseHandler->step();
       }
 
       /* temp keyboard handling part */
@@ -251,6 +265,45 @@ int main(int argc, char ** av)
         device->setWindowCaption(tmp.c_str());
       }
 
+      if(donePhase) {
+        if(currentPhaseHandler == race) {
+          vehicleChooser->prepare(1,3,runningVehicles);
+          currentPhaseHandler= vehicleChooser;
+        }
+
+        if(currentPhaseHandler == vehicleChooser) {
+          vehicleChooser->unprepare();
+          // start the race
+          const std::vector<IVehicle*> & vehicles=
+            resmanager->getVehiclesList();
+          assert(vehicles.size() >= 4);
+
+          race->setTrack(thetrack);
+
+          race->addVehicle(vehicles[runningVehicles[0]],
+              new VehicleKeyboardController(resmanager->getEventReceiver()), 
+              "gonorra",true);
+
+          race->addVehicle(vehicles[runningVehicles[1]], 
+              new VehicleAutoController(), 
+              "ccaaspeedstar");
+
+          race->addVehicle(vehicles[runningVehicles[2]], 
+              new VehicleAutoController(),
+              "speedstar");
+
+          race->restart();
+
+          currentPhaseHandler = race;
+
+
+          GM_LOG("Vehicle choosen\n");
+          for(unsigned i=0; i<3; i++) {
+            GM_LOG("Vehicle choosen: '%d'\n",runningVehicles[i]);
+          }
+        }
+      }
+
       endFrameTime=device->getTimer()->getRealTime();
       unsigned long dt = (endFrameTime - startFrameTime);
       if(dt < frameDuration) {
@@ -264,5 +317,3 @@ int main(int argc, char ** av)
   }
 }
 
-#if 0
-#endif

@@ -57,7 +57,8 @@ class Race : public  IPhaseHandler
       rs_readySetGo,
       rs_started,
       rs_finished,
-      rs_paused
+      rs_paused,
+      rs_notRunning
     };
 
     /* callback for lap trigger */
