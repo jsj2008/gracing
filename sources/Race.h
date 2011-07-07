@@ -51,6 +51,8 @@ class Race : public  IPhaseHandler
     //inline void setTrack(Track * track) { m_track=track; }
     void setTrack(Track * track);
 
+    void unprepare();
+
     inline void restart() { gotoState(rs_readySetGo); }
 
     enum {
@@ -133,7 +135,7 @@ class Race : public  IPhaseHandler
 
     // util
     void togglePause();
-    void updateKeyboard();
+    bool updateKeyboard();
     void updateRanking();
 
     bool gotoState(unsigned state);

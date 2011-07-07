@@ -267,11 +267,10 @@ int main(int argc, char ** av)
 
       if(donePhase) {
         if(currentPhaseHandler == race) {
+          race->unprepare();
           vehicleChooser->prepare(1,3,runningVehicles);
           currentPhaseHandler= vehicleChooser;
-        }
-
-        if(currentPhaseHandler == vehicleChooser) {
+        } else if(currentPhaseHandler == vehicleChooser) {
           vehicleChooser->unprepare();
           // start the race
           const std::vector<IVehicle*> & vehicles=

@@ -19,7 +19,7 @@
 #include <irrlicht.h>
 #include "INumberOutput.h"
 
-class GuiCockpit : public  INumberOutput, irr::gui::IGUIElement 
+class GuiCockpit : public  INumberOutput, public irr::gui::IGUIElement 
 {
   public:
     GuiCockpit(irr::gui::IGUIEnvironment* environment,

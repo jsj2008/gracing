@@ -666,8 +666,9 @@ void Vehicle::use(unsigned int useFlags)
     if(!(m_using & USE_PHYSICS)) {
       for(unsigned i=0; i<4; i++) {
         irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
+        wheel->setPosition(m_wheelInitialPositions[i]);
+        wheel->setRotation(irr::core::vector3df(0.,0.,0.));
         wheel->setParent(m_chassisNode);
-        GM_LOG("fogna %d\n",i);
       }
     }
   }

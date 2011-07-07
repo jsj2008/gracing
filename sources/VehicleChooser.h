@@ -26,6 +26,15 @@
 /* used interfaces */
 #include "IVehicle.h"
 
+#include "Tweening.h"
+typedef ITween<irr::core::vector3df>         ITween3df;
+typedef TweenQuadIn<irr::core::vector3df>    TweenQuadIn3df;
+typedef TweenBounceOut<irr::core::vector3df> TweenBounceOut3df;
+
+typedef ITween<double>         ITween1d;
+typedef TweenQuadIn<double>    TweenQuadIn1d;
+typedef TweenBounceOut<double> TweenBounceOut1d;
+
 class VehicleChooser :  public IPhaseHandler
 {
   public:

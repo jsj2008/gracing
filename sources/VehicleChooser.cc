@@ -21,6 +21,7 @@
 #include "ResourceManager.h"
 #include "gmlog.h"
 
+
 struct voidTrans : public VehicleChooser::iTransiction
 {
   virtual void init(double t, const irr::core::vector3df & startPos, const irr::core::vector3df & endPos)

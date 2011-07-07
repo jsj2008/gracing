@@ -316,6 +316,8 @@ void Track::unload()
   }
   m_sceneNodes.erase(0,m_sceneNodes.size());
 
+  m_sun->remove();
+
   if(m_camera) {
     m_camera->remove();
     m_camera->drop();

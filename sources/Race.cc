@@ -302,6 +302,7 @@ bool Race::step()
       if(erec->IsAnyKeyDown()) {
         GM_LOG("SUKKA SUKKA SUKKA\n");
         ret=true;
+        m_status=rs_notRunning;
       }
       break;
 
@@ -312,7 +313,7 @@ bool Race::step()
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
       m_driver->endScene();
-      updateKeyboard();
+      ret=updateKeyboard();
       break;
     case rs_readySetGo:
       if(m_readySetGo->isEnded()) {
@@ -335,7 +336,7 @@ bool Race::step()
       ///////////////////////
 
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
-      updateKeyboard();
+      ret=updateKeyboard();
       updateVehiclesInfo();
       m_sceneManager->drawAll();
       m_world->step();
@@ -372,9 +373,10 @@ void Race::updateRanking()
     m_vehicles[m_rank[i]].rank=i;
 }
 
-void Race::updateKeyboard()
+bool Race::updateKeyboard()
 {
   EventReceiver * erec;
+  bool ret=false;
 
   erec=ResourceManager::getInstance()->getEventReceiver();
 
@@ -383,6 +385,11 @@ void Race::updateKeyboard()
 
   if(erec->OneShotKey(irr::KEY_KEY_P)) 
     togglePause();
+
+  if(erec->OneShotKey(irr::KEY_KEY_Q)) {
+    ret=true;
+    m_status=rs_notRunning;
+  }
 
   if(erec->OneShotKey(irr::KEY_TAB)) {
     GM_LOG("changing vehicle\n");
@@ -400,6 +407,7 @@ void Race::updateKeyboard()
 
   if(erec->IsKeyDown(irr::KEY_KEY_S)) 
     m_cameraAnim->moveXY(-CAMERA_STEP,0.);
+  return ret;
 }
 
 void Race::followNextVehicle()
@@ -470,6 +478,7 @@ bool Race::gotoState(unsigned state)
       // reset gui controls
       m_readySetGo->restart();
       m_cockpit->stop();
+      m_cockpit->setVisible(true);
       m_status=rs_readySetGo;
       m_nFinishedVehicles=0;
       break;
@@ -666,4 +675,16 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
     return 1;
 
   return 0;
+}
+
+void Race::unprepare()
+{
+  m_track->unload();
+  m_camera->remove();
+  m_camera->drop();
+  m_cockpit->setVisible(false);
+  for(unsigned i=0; i<m_nVehicles; i++) {
+    VehicleInfo & vinfo=m_vehicles[i];
+    vinfo.vehicle->unuse(IVehicle::USE_PHYSICS|IVehicle::USE_GRAPHICS);
+  }
 }
