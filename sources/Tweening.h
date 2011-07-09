@@ -22,14 +22,14 @@ template<class T>
 struct ITween 
 {
    virtual void init(double t, const T & startPos, const T & endPos)=0;
-   virtual bool doit(double t, T & position);
+   virtual bool doit(double t, T & position)=0;
 };
 
 
 template<class T>
 struct TweenVoid : public ITween<T>
 {
-  virtual void init(double t, T & startPos, const T & endPos)
+  virtual void init(double t, const T & startPos, const T & endPos)
   {
   
   }
@@ -50,7 +50,7 @@ struct TweenQuadIn : public ITween<T>
     m_startTime = t;
   }
 
-  virtual bool doit(double _t, T & position, double & rotation)
+  virtual bool doit(double _t, T & position)
   {
     double t = _t - m_startTime;
 
@@ -69,6 +69,10 @@ struct TweenQuadIn : public ITween<T>
     T      m_totalChange;
 };
 
+//static const double amp[3]= { .75, .9375, .984375 };
+static const double amp[3]= { .75, .9375, .984375 };
+static const double mult=7.5625;
+
 template<class T>
 struct TweenBounceOut : public ITween<T>
 {
@@ -79,24 +83,23 @@ struct TweenBounceOut : public ITween<T>
     m_startTime = t;
   }
 
-  virtual bool doit(double _t, T & position, double & rotation)
+  virtual bool doit(double _t, T & position)
   {
     double t=_t - m_startTime;
     bool   ret;
-    rotation = t;
     ret = false;
 
     if( t < (1/2.75)) {
-      position =  m_totalChange * (7.5625*t*t) + m_startPos;
+      position =  m_totalChange * (mult*t*t) + m_startPos;
     } else if(t < (2/2.75)) {
       t -= 1.5 / 2.75;
-      position =  m_totalChange * (7.5625 * t * t + .75)  + m_startPos;
+      position =  m_totalChange * (mult* t * t + amp[0])  + m_startPos;
     } else if(t <(2.5 / 2.75)) {
       t -= 2.25 / 2.75;
-      position =  m_totalChange * (7.5625 * t * t + .9375) + m_startPos;
+      position =  m_totalChange * (mult* t * t + amp[1]) + m_startPos;
     } else if(t < 1.) {
       t -= 2.625 / 2.75;
-      position =  m_totalChange * (7.5625 * t * t + .984375) + m_startPos;
+      position =  m_totalChange * (mult* t * t + amp[2]) + m_startPos;
     } else {
       position = m_totalChange + m_startPos;
       ret = true;

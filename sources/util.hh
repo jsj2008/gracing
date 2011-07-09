@@ -20,9 +20,15 @@
 #include <irrlicht.h>
 #include "gmlog.h"
 
+//1 degree = 0.017453293 radiant 
 inline double rad2deg(double value)
 {
   return 57.2957795 * value;
+}
+
+inline double deg2rad(double value)
+{
+  return 0.017453293 * value;
 }
 
 class Util 

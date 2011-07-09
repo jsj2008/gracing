@@ -28,10 +28,12 @@
 
 #include "Tweening.h"
 typedef ITween<irr::core::vector3df>         ITween3df;
+typedef TweenVoid<irr::core::vector3df>      TweenVoid3df;
 typedef TweenQuadIn<irr::core::vector3df>    TweenQuadIn3df;
 typedef TweenBounceOut<irr::core::vector3df> TweenBounceOut3df;
 
 typedef ITween<double>         ITween1d;
+typedef TweenVoid<double>      TweenVoid1d;
 typedef TweenQuadIn<double>    TweenQuadIn1d;
 typedef TweenBounceOut<double> TweenBounceOut1d;
 
@@ -45,34 +47,21 @@ class VehicleChooser :  public IPhaseHandler
     void prepare(unsigned nHumanVehicles, unsigned nTotVehicles, unsigned * choosenVehicles);
     void unprepare();
 
+#if 0
     struct iTransiction 
     {
       virtual void init(double t, const irr::core::vector3df & startPos, const irr::core::vector3df & endPos)=0;
       virtual bool doit(double t, irr::core::vector3df & position, double  & rotation)=0;
     };
+#endif
 
   private:
 
     enum {
       status_uninited,
-      status_vehicle_staying,
-      status_vehicle_entering,
-      status_vehicle_exiting,
-    } m_status,m_nextStatus;
-
-    enum {
-      trans_stay,
-      trans_exit,
-      trans_enter
-    };
-
-
-    iTransiction * m_transictions[3];
-
-    void changeVehicle(int direction=1);
-
-    unsigned m_currentVehicle;
-    unsigned m_maxVehicles;
+      status_rotating,
+      status_still
+    } m_status;
 
     /// !!! /// !!!
     unsigned * m_choosenVehicles;
@@ -83,18 +72,27 @@ class VehicleChooser :  public IPhaseHandler
     double   m_transictionTime;
     double   m_timeStep;
 
-    irr::core::vector3df   m_vPosition;
-    double                 m_vRotation;
 
-    IVehicle * m_vehicle;
+    ITween1d *             m_transiction;
+    double                 m_angle;
+
+
+    enum                   { m_shownVehicles=3 };
+
+    struct vinfo {
+      IVehicle *             vehicle;
+      unsigned               index;
+      double                 angleOffset;
+      double                 rotation;
+    } m_infos[m_shownVehicles];
+    unsigned                       m_vehicleIndex;
+    
     irr::scene::ICameraSceneNode * m_camera;
     irr::scene::ILightSceneNode *  m_sun;
 
-    irr::core::vector3df  m_pos0;
-    irr::core::vector3df  m_pos1;
-    irr::core::vector3df  m_pos2;
-
-    int                   m_vdir;
+    // options
+    double m_radius;
+    double m_angleSpan;
 };
 
 #endif
