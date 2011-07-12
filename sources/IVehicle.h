@@ -17,6 +17,8 @@
 #ifndef IVEHICLE_H
 #define IVEHICLE_H
 
+#include <string>
+
 #include "CompoundSceneNode.h"
 #include "INumberOutput.h"
 #include "PhyWorld.h"
@@ -55,7 +57,7 @@ class IVehicle : public CompoundSceneNode
   virtual btVector3            getChassisUpDirection()=0;
   virtual bool                 getIfChassisIsTouchingTheGround()=0;
 
-  virtual double               getStartHeight(float x, float y)=0; // still not working !!
+  virtual double               getRestHeight(/*float x, float y*/)=0; // still not working !!
 
   // position/physics reset //
   virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;
@@ -74,6 +76,8 @@ class IVehicle : public CompoundSceneNode
 
   virtual void             setEnableControls(bool enable)=0;
   inline VehicleCommands & getVehicleCommands() { return m_vehicleCommands; }
+
+  virtual const std::string & getName()=0;
 
   // debug //
   virtual void dumpDebugInfo()=0;

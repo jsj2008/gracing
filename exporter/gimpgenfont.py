@@ -5,6 +5,9 @@ import math
 
 num_col=16
 
+width_additional=5
+height_additional=5
+
 def get_closer_power_of_two(i):
   if i<=2:
     return 2
@@ -41,6 +44,10 @@ def calc_image_size(char_begin,char_end,fontname, font_size):
           break
         string= '%c' % c
         width, height, asc, desc =pdb.gimp_text_get_extents_fontname(string,font_size,0,fontname)
+
+        width = width + width_additional * 2
+        height = height + height_additional * 2
+
         row_width = row_width + width
         if height > row_height:
           row_height = height
@@ -90,6 +97,9 @@ def python_generate_font(font,font_size,filename,color):
       offset = i - char_begin
 
       width, height, asc, desc = pdb.gimp_text_get_extents_fontname(string,font_size,0,font)
+
+      width = width + width_additional * 2
+      height = height + height_additional * 2
 
       if max_height < height:
         max_height = height

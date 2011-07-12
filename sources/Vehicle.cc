@@ -88,7 +88,8 @@
 
 CFG_PARAM_D(glob_chassisDefaultMass)=.8;
 CFG_PARAM_D(glob_steeringIncrement)=0.02f;
-CFG_PARAM_D(glob_throttleIncrement)=0.5;
+CFG_PARAM_D(glob_throttleIncrement)=1.; //0.5;
+CFG_PARAM_D(glob_maxThrottle)=2.;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
@@ -233,6 +234,8 @@ Vehicle::Vehicle(
   m_speedometer=0;
   m_loaded=false;
   m_controlsEnabled=true;
+
+  m_name=source;
 
   // accell dynamic info
   m_throttle=0.;
@@ -421,6 +424,18 @@ void Vehicle::deinitGraphics()
   m_using &= ~USE_GRAPHICS;
 }
 
+void Vehicle::loadInfo(XmlNode * root)
+{
+  std::vector<XmlNode*> nodes;
+  root->getChildren(nodes);
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    XmlNode * node=nodes[i];
+
+    if(node->getName() == "name") 
+      m_name=node->getText();
+  }
+}
+
 void Vehicle::load()
 {
   if(m_loaded)
@@ -440,7 +455,6 @@ void Vehicle::load()
   root=new XmlNode(xml);
   assert(root && root->getName() == "vehicle"); // TODO: this must not be an assert!!!
 
-
   std::vector<XmlNode*> nodes;
   root->getChildren(nodes);
 
@@ -459,6 +473,8 @@ void Vehicle::load()
         m_chassis.push_back(mesh);
       }
 
+    } else if(node->getName() == "info") {
+      loadInfo(node);
     } else if(node->getName() == "wfr_width") {
       double width=Util::parseFloat(node->getText().c_str());
       m_wheelWidths[ widx_wfr  ]=width;
@@ -750,14 +766,14 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     if(m_vehicleCommands.throttling > 0.) {
       m_brake=0.;
       m_throttle+=m_throttleIncrement;
-      if(m_throttle>.5)
-        m_throttle=.5;
+      if(m_throttle>glob_maxThrottle)
+        m_throttle=glob_maxThrottle;
     } else if(m_vehicleCommands.throttling<0) {
       m_brake=0.;
       m_throttle-=m_throttleIncrement;
 
-      if(m_throttle<-.5)  {
-        m_throttle=-.5;
+      if(m_throttle<-glob_maxThrottle)  {
+        m_throttle=-glob_maxThrottle;
       }
     } else {
       if(m_throttle>0.) {
@@ -1320,6 +1336,7 @@ void Vehicle::setSpeedOMeter(INumberOutput * speedometer)
 }
 
 
+#if 0
 double Vehicle::getStartHeight(float x, float z)
 {
   double startHeight=20.;
@@ -1356,6 +1373,7 @@ double Vehicle::getStartHeight(float x, float z)
 
   return totHeight / 4.;
 }
+#endif
 
 void Vehicle::setEnableControls(bool enable)
 {
@@ -1383,6 +1401,12 @@ btVector3 Vehicle::getChassisUpDirection()
 {
   btTransform chassisTrans = m_carBody->getCenterOfMassTransform();
   return chassisTrans.getBasis() * btVector3(0.,1.,0.);
+}
+
+double Vehicle::getRestHeight(/*float x, float y*/)
+{
+  return 
+    m_wheelsData[0].radius - m_wheelInitialPositions[0].Y;
 }
 
 bool Vehicle::getIfChassisIsTouchingTheGround()

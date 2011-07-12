@@ -17,6 +17,7 @@ import bpy,os,struct,zipfile,math,time,mathutils,shutil,string
 from bpy.props import *
 from io_utils import ExportHelper, ImportHelper
 from io_utils import create_derived_objects, free_derived_objects
+import re
 
 """
 cris binary file format
@@ -38,7 +39,7 @@ cris binary file format
 
 # LOG configuration
 LOG_ON_STDOUT=0
-LOG_ON_FILE=0
+LOG_ON_FILE=1
 LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
@@ -466,20 +467,12 @@ class XmlMeshNode(XmlNode):
     vertices=self.getChild("vertices")
     for node in vertices.getChildrenList():
       co=[0., 0., 0.]
-      log("from %f,%f,%f"%(
-        float(node.getProp("X")),
-        float(node.getProp("Y")),
-        float(node.getProp("Z"))))
       co[0]=float(node.getProp("X"))+trasl[0]
       co[1]=float(node.getProp("Y"))+trasl[1]
       co[2]=float(node.getProp("Z"))+trasl[2]
       node.setProp("X",co[0])
       node.setProp("Y",co[1])
       node.setProp("Z",co[2])
-      log("to %f,%f,%f\n"%(
-        float(node.getProp("X")),
-        float(node.getProp("Y")),
-        float(node.getProp("Z"))))
 
   def exportBinary(self,filename):
     vertices=self.getChild("vertices")
@@ -969,6 +962,24 @@ class export_OT_vehicle(bpy.types.Operator):
   
   chassis_bbound =  BBound()
 
+  def extractTextInfo(self):
+    root=XmlNode("info")
+    for textFile in bpy.data.texts:
+      if textFile.name != "data":
+        continue
+      for line in textFile.lines:
+        body=line.body
+        couple=re.split('=',body)
+        if len(couple) != 2:
+          continue
+        key=couple[0]
+        value=couple[1]
+        node=XmlNode(key)
+        node.setText(value)
+        root.addChild(node)
+    return root
+
+
   def getWheelInfo(self,root,prefix,ob):
     dimX=ob.dimensions[0]
     dimY=ob.dimensions[1]
@@ -1019,6 +1030,9 @@ class export_OT_vehicle(bpy.types.Operator):
     xmlname=tmpdir+"/"+"VEHICLE"
 
     root=XmlNode("vehicle")
+
+    infos=self.extractTextInfo()
+    root.addChild(infos)
 
     materialDict, mesh_objects = createMaterialDictAndMeshList2(context.scene,False)
 

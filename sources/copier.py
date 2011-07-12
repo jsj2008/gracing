@@ -19,7 +19,8 @@ vehicles=[
   "sprinter",
   "turing_machine",
   "tractor",
-  "skate"
+  "skate",
+  "rocket"
 ]
 
 tracks=[

@@ -682,9 +682,11 @@ void Race::unprepare()
   m_track->unload();
   m_camera->remove();
   m_camera->drop();
+  m_camera=0;
   m_cockpit->setVisible(false);
   for(unsigned i=0; i<m_nVehicles; i++) {
     VehicleInfo & vinfo=m_vehicles[i];
     vinfo.vehicle->unuse(IVehicle::USE_PHYSICS|IVehicle::USE_GRAPHICS);
   }
+  m_nVehicles=0;
 }

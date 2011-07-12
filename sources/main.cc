@@ -238,7 +238,7 @@ int main(int argc, char ** av)
   unsigned runningVehicles[3];
 
   // temp init !!!!!
-  vehicleChooser->prepare(1,3,runningVehicles);
+  vehicleChooser->prepare(1,1,runningVehicles);
   currentPhaseHandler= vehicleChooser;
 
   bool donePhase;
@@ -283,6 +283,7 @@ int main(int argc, char ** av)
               new VehicleKeyboardController(resmanager->getEventReceiver()), 
               "gonorra",true);
 
+#if 0
           race->addVehicle(vehicles[runningVehicles[1]], 
               new VehicleAutoController(), 
               "ccaaspeedstar");
@@ -290,6 +291,7 @@ int main(int argc, char ** av)
           race->addVehicle(vehicles[runningVehicles[2]], 
               new VehicleAutoController(),
               "speedstar");
+#endif
 
           race->restart();
 

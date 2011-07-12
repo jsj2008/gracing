@@ -77,13 +77,14 @@ class VehicleChooser :  public IPhaseHandler
     double                 m_angle;
 
 
-    enum                   { m_shownVehicles=3 };
+    enum                   { m_shownVehicles=4 };
 
     struct vinfo {
       IVehicle *             vehicle;
       unsigned               index;
       double                 angleOffset;
       double                 rotation;
+      double                 height;
     } m_infos[m_shownVehicles];
     unsigned                       m_vehicleIndex;
     
@@ -93,6 +94,7 @@ class VehicleChooser :  public IPhaseHandler
     // options
     double m_radius;
     double m_angleSpan;
+    double m_vehiclesHeight;
 };
 
 #endif

@@ -21,6 +21,8 @@
 #include "PhyWorld.h"
 #include "IVehicle.h"
 
+class XmlNode;
+
 class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 {
   public:
@@ -41,13 +43,16 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     virtual void unuse(unsigned int useFlags);
 
+    const std::string & getName() { return m_name; }
+
+
     virtual irr::core::vector3df getChassisPos();
     virtual btVector3            getChassisForwardDirection();
     virtual btVector3            getChassisRightDirection();
     virtual btVector3            getChassisUpDirection();
     virtual bool                 getIfChassisIsTouchingTheGround();
 
-    virtual double getStartHeight(float x, float y);
+    virtual double getRestHeight(/*float x, float y*/);
 
     void reset(const irr::core::vector3d<float>& position, double rotation);
     
@@ -120,6 +125,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     void updateFriction(btScalar);
     void step();
 
+    void loadInfo(XmlNode *);
+
     inline bool isFrontWheel(int index) 
     { 
       return index==W_FRONT_RIGHT || index==W_FRONT_LEFT;
@@ -142,13 +149,6 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     bool  m_controlsEnabled;
     float m_steering;
-#if 0
-    enum {
-      steeredNone,
-      steeredLeft,
-      steeredRight,
-    } m_steered;
-#endif
     float m_steeringIncrement;
     float m_steeringClamp;
     float m_throttle;
@@ -221,6 +221,10 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     btVehicleRaycaster *  m_raycaster;
 
     unsigned              m_debugDrawFlags;
+
+    // vehicle description
+    std::string           m_name;
+    std::string           m_author;
 
 };
 

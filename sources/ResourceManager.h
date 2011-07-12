@@ -49,6 +49,7 @@ class ResourceManager
     /* system font */
     inline irr::gui::IGUIFont *  getSystemFontSmall() { return m_fontSmall; }
     inline irr::gui::IGUIFont *  getSystemFont() { return m_font; }
+    inline irr::gui::IGUIFont *  getSystemFontBig() { return m_fontBig; }
 
     /* config access */
     bool cfgGet(const char * name, bool & value);
@@ -100,6 +101,7 @@ class ResourceManager
     // resources
     irr::gui::IGUIFont *  m_font;
     irr::gui::IGUIFont *  m_fontSmall;
+    irr::gui::IGUIFont *  m_fontBig;
     
     std::vector<IVehicle*> m_vehicles;
 };

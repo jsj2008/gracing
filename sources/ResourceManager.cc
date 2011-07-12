@@ -26,8 +26,9 @@
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
 
-#define  DEFAULT_FONT "greddario-64.xml"
+#define  DEFAULT_FONT "komika-32.xml"
 #define  DEFAULT_FONT_SMALL "braggadocio-32.xml"
+#define  DEFAULT_FONT_BIG "greddario-64.xml"
 
 
 #ifdef __APPLE__
@@ -191,6 +192,14 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
   std::string fontPath = getResourcePath() + "/" + fontName;
   m_font = guienv->getFont(fontPath.c_str());
+  assert(m_font);
+  GM_LOG("loading done font\n");
+
+  GM_LOG("loading big font\n");
+  if(!cfgGet("system-font",fontName)) 
+    fontName = DEFAULT_FONT_BIG;
+  fontPath = getResourcePath() + "/" + fontName;
+  m_fontBig = guienv->getFont(fontPath.c_str());
   assert(m_font);
   GM_LOG("loading done font\n");
 
