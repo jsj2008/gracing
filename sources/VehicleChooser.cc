@@ -33,6 +33,41 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
   m_angleSpan=deg2rad(8.);
   m_timeStep=1./80.;
   m_vehiclesHeight=1.;
+
+  std::string respat=ResourceManager::getInstance()->getResourcePath();
+
+  std::string filename=respat + "roombox.zip";
+
+  m_rootNode=loadXml(filename.c_str(), "ROOMBOX");
+
+  std::vector<XmlNode*> nodes;
+  m_rootNode->getChildren(nodes);
+
+
+  irr::scene::IAnimatedMesh* mesh;
+  irr::scene::ISceneManager * smgr=device->getSceneManager();
+
+  irr::io::path mypath(filename.c_str());
+  irr::io::IFileSystem * filesystem=ResourceManager::getInstance()->getFileSystem();
+  bool res=filesystem->addFileArchive(filename.c_str());
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    XmlNode * node=nodes[i];
+    if(node->getName() == "mesh") {
+      mesh=smgr->getMesh(node->getText().c_str());
+      if(mesh)  {
+        GM_LOG("loaded '%s'\n",node->getText().c_str());
+        mesh->grab();
+        m_meshes.push_back(mesh);
+      } else {
+        GM_LOG("non c'e'\n");
+      }
+    }
+    
+  }
+
+  res=filesystem->removeFileArchive(filesystem->getAbsolutePath(mypath));
+  assert(res);
 }
 
 void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsigned * vehiclesListPtr)
@@ -40,7 +75,6 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
   assert(nHumanVehicles == 1);
 
   m_angle=0.;
-
 
   const std::vector<IVehicle*> & vehicles=
     ResourceManager::getInstance()->getVehiclesList();
@@ -66,11 +100,9 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
   m_totChooseableVehicles=TotVehicles;
   m_humanVehicles=nHumanVehicles;
 
-
-
   // should be loaded from the XML
   m_camera = m_device->getSceneManager()->addCameraSceneNode();
-  m_camera->setPosition(irr::core::vector3df(3.,0.,0.));
+  m_camera->setPosition(irr::core::vector3df(3.,.5,0.));
   m_camera->setTarget(irr::core::vector3df(0,0.,0.));
 
   irr::video::SColor   ambient_color = irr::video::SColor(255, 120, 120, 120);
@@ -84,12 +116,26 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
   m_sun->setLightType(irr::video::ELT_DIRECTIONAL);
   m_sun->setRotation( irr::core::vector3df(180, 45, 45) );
   m_sun->getLightData().SpecularColor = sun_specular_color;
+
+  for(unsigned i=0; i<m_meshes.size(); i++) {
+    irr::scene::IAnimatedMeshSceneNode* anode = 0;
+    anode =m_device->getSceneManager()->
+            addAnimatedMeshSceneNode(m_meshes[i],0,0xcafe);
+    anode->grab();
+    m_meshNodes.push_back(anode);
+  }
 }
 
 void VehicleChooser::unprepare()
 {
   m_camera->remove();
   m_sun->remove();
+  for(unsigned i=0; i<m_meshNodes.size(); i++) {
+    irr::scene::IAnimatedMeshSceneNode* anode = 0;
+    anode=m_meshNodes[i];
+    anode->remove();
+    anode->drop();
+  }
 }
 
 bool VehicleChooser::step()
@@ -213,7 +259,10 @@ bool VehicleChooser::step()
   m_font->draw("CHOOSE VEHICLE",rect,irr::video::SColor(255,255,255,255),true,true);
 
   if(m_status == status_still) {
-    irr::core::rect<irr::s32> rect(0,100,width,200);
+    unsigned height;
+    resman->getScreenHeight(height);
+    height-=100;
+    irr::core::rect<irr::s32> rect(0,height,width,height+100);
     const std::string & name=m_infos[m_vehicleIndex].vehicle->getName();
     m_fontSmall->draw(name.c_str(),rect,irr::video::SColor(255,255,255,255),true,true);
   }

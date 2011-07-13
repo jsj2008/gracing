@@ -26,6 +26,8 @@
 /* used interfaces */
 #include "IVehicle.h"
 
+#include "XmlNode.h"
+
 #include "Tweening.h"
 typedef ITween<irr::core::vector3df>         ITween3df;
 typedef TweenVoid<irr::core::vector3df>      TweenVoid3df;
@@ -95,6 +97,11 @@ class VehicleChooser :  public IPhaseHandler
     double m_radius;
     double m_angleSpan;
     double m_vehiclesHeight;
+
+    // ~~~~~~~~~~
+    XmlNode * m_rootNode;
+    irr::core::array<irr::scene::IAnimatedMesh*>   m_meshes;
+    irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   m_meshNodes;
 };
 
 #endif

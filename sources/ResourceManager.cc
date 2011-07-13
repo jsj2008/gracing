@@ -26,9 +26,14 @@
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
 
-#define  DEFAULT_FONT "komika-32.xml"
-#define  DEFAULT_FONT_SMALL "braggadocio-32.xml"
-#define  DEFAULT_FONT_BIG "greddario-64.xml"
+#if 0
+#define  DEFAULT_FONT       "impact-condensed-32.xml"
+#define  DEFAULT_FONT_SMALL "impact-condensed-24.xml"
+#define  DEFAULT_FONT_BIG    "impact-condensed-64.xml"
+#endif
+#define  DEFAULT_FONT       "droid-serif-32.xml"
+#define  DEFAULT_FONT_SMALL "droid-serif-24.xml"
+#define  DEFAULT_FONT_BIG    "droid-serif-64.xml"
 
 
 #ifdef __APPLE__
@@ -185,7 +190,6 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   ////////////////////
 
   // system font
-  GM_LOG("loading daf font\n");
   std::string fontName; 
   if(!cfgGet("system-font",fontName)) 
     fontName = DEFAULT_FONT;

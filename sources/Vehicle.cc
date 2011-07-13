@@ -389,11 +389,18 @@ void Vehicle::initGraphics()
 
   m_chassisNode=new CompoundSceneNode(this,smgr,0x51ca);
 
+  bool enableShadows=false;
+  ResourceManager::getInstance()->cfgGet("glob_enableShadows",enableShadows);
+
   n=m_chassis.size();
   // actually build nodes
   for(i=0; i<n; ++i) {
-    node=smgr->addAnimatedMeshSceneNode(m_chassis[i],m_chassisNode,0xcafe);
+    irr::scene::IAnimatedMeshSceneNode* anode = 0;
+    anode=smgr->addAnimatedMeshSceneNode(m_chassis[i],m_chassisNode,0xcafe);
+    if(enableShadows)
+      anode->addShadowVolumeSceneNode();
   }
+
 
   ((CompoundSceneNode*)m_chassisNode)->recalculateBoundingBox();
 

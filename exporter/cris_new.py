@@ -802,7 +802,11 @@ def createZipFile(root,xmlfile,path,srcdir):
       fn=node.getMeshFileName()
       p=os.path.basename(fn)
       log("Zipping '%s' as '%s'"%(fn,p))
-      zf.write(fn,p)
+      try:
+        zf.write(fn,p)
+      except:
+        log("Cannot zip the file!")
+        continue
       mats=node.getChild("materials")
       for mat in mats.getChildrenList():
         for inode in mat.getChildrenList():
@@ -1017,7 +1021,6 @@ class export_OT_vehicle(bpy.types.Operator):
     filepath=self.properties.filepath
     log("filepath: %s"%filepath)
     tmpdir = "/tmp/tmp"
-
 
     if not os.path.exists(tmpdir):
       os.mkdir(tmpdir)
@@ -1283,19 +1286,101 @@ class export_OT_track(bpy.types.Operator):
     context.window_manager.fileselect_add(self)
     return {'RUNNING_MODAL'}
 
+class export_OT_roombox(bpy.types.Operator):
+  bl_idname = "io_export_scene.crisalide_roombox_exporter"
+  bl_label = "Export crisalide file formats"
+  
+  filename_ext = ".zip"
+  filter_glob = StringProperty(default="*.zip", options={'HIDDEN'})
+
+  filepath = bpy.props.StringProperty(
+    name="File Path", 
+    description="File path used for exporting the crisalide file", 
+    maxlen= 1024, default= "")
+
+  exportXML = bpy.props.BoolProperty(
+    name="Export xml", 
+    description="Export also xml files of the meshes (debug purposes)",
+    default=EXPORT_XML_MESH)
+
+  exportEXP = bpy.props.BoolProperty(
+    name="Export exp", 
+    description="Export only object with name starting with 'exp.' (debug purposes",
+    default=False)
+
+  def invoke(self, context, event):
+    context.window_manager.fileselect_add(self)
+    return {'RUNNING_MODAL'}
+
+  def execute(self, context):
+    tmpdir = "/tmp/tmp"
+
+    if not os.path.exists(tmpdir):
+      os.mkdir(tmpdir)
+    else:
+      if os.path.isdir(tmpdir):
+        pass
+      else:
+        RaiseError("horrorororor!")
+
+    xmlname=tmpdir+"/"+"ROOMBOX"
+    root=XmlNode("roombox")
+
+    scene = context.scene
+
+    for ob in [ ob for ob in scene.objects if ob.is_visible(scene) ]:
+      materialDict, mesh_objects = createMaterialDictAndMeshList(scene,ob)
+
+      for ob, blender_mesh in mesh_objects:
+        if ob.type=="MESH":
+          if ob.name.startswith("ignore."):
+            log("Ignoring: %s"%ob.name)
+            continue
+
+          if self.properties.exportEXP and not ob.name.startswith("exp."):
+            log("Ignoring: %s"%ob.name)
+            continue
+
+          if len(materialDict) == 0:
+            log("Ignoring: '%s' (zero materials!)"%ob.name)
+            continue
+
+          log("Exporting: '%s', material #: %d"%(ob.name,len(materialDict)))
+
+          node=XmlMeshNode(ob,blender_mesh,materialDict,tmpdir)
+          node.setExportXmlMesh(self.properties.exportXML)
+          node.setProp("name",ob.name)
+          root.addChild(node)
+
+    root.export()
+
+    file=open(xmlname,"w")
+    root.writeSubTree(file)
+    file.close()
+
+    filepath=self.properties.filepath
+    createZipFile(root,xmlname,filepath,tmpdir)
+    return {'FINISHED'}
+
+
 def menu_func_track_export(self, context):
     self.layout.operator(export_OT_track.bl_idname, text="Crisalide track exporter (*.zip)")
 
 def menu_func_vehicle_export(self, context):
     self.layout.operator(export_OT_vehicle.bl_idname, text="Crisalide vehicle exporter (*.zip)")
 
+def menu_func_roombox_export(self, context):
+    self.layout.operator(export_OT_roombox.bl_idname, text="Crisalide room box export (*zip)") 
+
 def register():
     bpy.types.INFO_MT_file_export.append(menu_func_track_export)
     bpy.types.INFO_MT_file_export.append(menu_func_vehicle_export)
+    bpy.types.INFO_MT_file_export.append(menu_func_roombox_export)
 
 def unregister():
     bpy.types.INFO_MT_file_export.remove(menu_func_track_export)
     bpy.types.INFO_MT_file_export.remove(menu_func_vehicle_export)
+    bpy.types.INFO_MT_file_export.remove(menu_func_roombox_export)
 
 if __name__ == "__main__":
   log("*** crisalide exporter ***\n")

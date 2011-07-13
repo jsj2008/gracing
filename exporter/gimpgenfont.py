@@ -98,11 +98,11 @@ def python_generate_font(font,font_size,filename,color):
 
       width, height, asc, desc = pdb.gimp_text_get_extents_fontname(string,font_size,0,font)
 
-      width = width + width_additional * 2
-      height = height + height_additional * 2
+#width = width  + width_additional * 2
+#height = height + height_additional * 2
 
-      if max_height < height:
-        max_height = height
+      if max_height < height + height_additional:
+        max_height = height + height_additional
 
       text_layer = pdb.gimp_text_fontname(img, None, x_pos, y_pos, string, -1, False, font_size, PIXELS, font)
       gimp.progress_update(float(offset) / float(num_chars))
@@ -122,7 +122,7 @@ def python_generate_font(font,font_size,filename,color):
         y_pos = y_pos + max_height
         max_height = 0
       else:
-        x_pos = x_pos + width 
+        x_pos = x_pos + width + width_additional * 2
 
       cnt = cnt + 1
     
@@ -132,7 +132,10 @@ def python_generate_font(font,font_size,filename,color):
     if filename != "":
       file=open(filename,"w")
       for el in elements:
-        line = "<c c=\"%s\" r=\"%s\" i=\"%d\"/>\n" % (el["c"], el["r"], el["i"])
+        if el["c"] != '"':
+          line = "<c c=\"%s\" r=\"%s\" i=\"%d\"/>\n" % (el["c"], el["r"], el["i"])
+        else
+          line = "<c c='%s' r=\"%s\" i=\"%d\"/>\n" % (el["c"], el["r"], el["i"])
         print line
         file.write(line)
       file.close

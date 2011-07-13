@@ -15,6 +15,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "util.hh"
+#include "XmlNode.h"
 
 
 #define ULCORNER_X(r) r.UpperLeftCorner.X
@@ -191,4 +192,38 @@ void Util::draw2DImage_v2(irr::video::IVideoDriver *driver,
    driver->setTransform(irr::video::ETS_PROJECTION,oldProjMat); 
    driver->setTransform(irr::video::ETS_VIEW,oldViewMat); 
    driver->setTransform(irr::video::ETS_WORLD,oldWorldMat); 
+}
+
+//////////////////////////////////////
+// load an xml node from a zip file //
+//////////////////////////////////////
+XmlNode * loadXml(const char * filename, const char * manifestName)
+{
+  XmlNode * node=0;
+
+  irr::io::IFileSystem * filesystem=ResourceManager::getInstance()->getFileSystem();
+
+  irr::io::path mypath(filename);
+  bool res=filesystem->addFileArchive(mypath);
+
+  if(!res) {
+    GM_LOG("cannot find '%s'\n",filename);
+    return 0;
+  }
+
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(manifestName);
+
+  if(!xml) {
+    GM_LOG("cannot load '%s'\n",manifestName);
+    return 0;
+  }
+
+  node=new XmlNode(xml);
+
+  xml->drop();
+
+  res=filesystem->removeFileArchive(filesystem->getAbsolutePath(mypath));
+  assert(res);
+
+  return node;
 }

@@ -20,6 +20,7 @@
 #include <irrlicht.h>
 #include "gmlog.h"
 
+
 //1 degree = 0.017453293 radiant 
 inline double rad2deg(double value)
 {
@@ -266,5 +267,9 @@ class Util
 
 
 };
+
+
+class XmlNode;
+XmlNode * loadXml(const char * filename, const char * manifestName);
 
 #endif
