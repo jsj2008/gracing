@@ -50,6 +50,7 @@ tgt_tracks_dir=$(tgt_res_dir)/Tracks
 
 src_vehicles_dir=$(resources_dir)/vehicles
 src_tracks_dir=$(resources_dir)/tracks
+src_fonts_dir=$(resources_dir)/gfx/fonts
 
 ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)
 
@@ -86,13 +87,7 @@ copy_files:
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp $(target) $(tgt_appl_dir)/
 	@$(copier) --cp config.xml $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/digits.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/digits.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/title_font.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/title_font_2.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/title_font.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/frame.zip $(tgt_res_dir)
@@ -100,14 +95,20 @@ copy_files:
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
 	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
 	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(src_tracks_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-64.xml $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-64.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-32.xml $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-32.png $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-24.xml $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/droid-serif-24.png $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-64.xml $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-64.png $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-32.xml $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-32.png $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-24.xml $(tgt_res_dir)
+	@$(copier) --cp $(src_fonts_dir)/droid-serif-24.png $(tgt_res_dir)
     
 
+#	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
+#	@$(copier) --cp $(resources_dir)/gfx/title_font.png $(tgt_res_dir)
+#	@$(copier) --cp $(resources_dir)/gfx/title_font_2.png $(tgt_res_dir)
+#	@$(copier) --cp $(resources_dir)/gfx/title_font.xml $(tgt_res_dir)
+#	@$(copier) --cp $(resources_dir)/gfx/digits.png $(tgt_res_dir)
+#	@$(copier) --cp $(resources_dir)/gfx/digits.xml $(tgt_res_dir)
 #	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-64.xml $(tgt_res_dir)
 #	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-64.png $(tgt_res_dir)
 #	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-32.xml $(tgt_res_dir)

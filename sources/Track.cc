@@ -232,8 +232,10 @@ void Track::load()
       if(rfile) {
         if(m_cammgr)
           delete m_cammgr;
-        if(m_camera)
-          m_camera->drop();
+        if(m_camera) {
+          m_camera->remove();
+          m_camera=0;
+        }
         m_cammgr=new CameraDataManager(rfile);
         irr::core::vector3df p,r;
         //m_cammgr->getPositionAndRotation(p,r);
@@ -314,13 +316,13 @@ void Track::unload()
     m_sceneNodes[i]->remove();
     m_sceneNodes[i]->drop();
   }
-  m_sceneNodes.erase(0,m_sceneNodes.size());
+  //m_sceneNodes.erase(0,m_sceneNodes.size());
+  m_sceneNodes.clear();
 
   m_sun->remove();
 
   if(m_camera) {
     m_camera->remove();
-    m_camera->drop();
     m_camera=0;
   }
 
@@ -336,8 +338,6 @@ void Track::unload()
 Track::~Track()
 {
   unload();
-  //m_filesystem->drop();
-  //m_device->drop();
 }
 
 

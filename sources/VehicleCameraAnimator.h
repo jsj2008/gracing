@@ -58,7 +58,11 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
 
     IVehicle * m_vehicle;
 
-    int        m_camType;
+    enum {
+      ct_micromachine=0,
+      ct_tuxracer=1,
+      ct_birdeye=2
+    }      m_camType;
 
     struct {
       float                distance;

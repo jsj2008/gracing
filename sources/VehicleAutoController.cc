@@ -32,7 +32,7 @@ void VehicleAutoController::updateCommands(
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)
 {
-  unsigned nindex=(index+1) % controlPoints.size(); 
+  unsigned nindex=index; //(index+1) % controlPoints.size(); 
 
   //btVector3 dir = controlPoints[nindex] - controlPoints[index];
   btVector3 dir = controlPoints[nindex] - vehiclePosition;

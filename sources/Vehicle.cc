@@ -88,8 +88,8 @@
 
 CFG_PARAM_D(glob_chassisDefaultMass)=.8;
 CFG_PARAM_D(glob_steeringIncrement)=0.02f;
-CFG_PARAM_D(glob_throttleIncrement)=1.; //0.5;
-CFG_PARAM_D(glob_maxThrottle)=2.;
+CFG_PARAM_D(glob_throttleIncrement)=0.2;
+CFG_PARAM_D(glob_maxThrottle)=0.7;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;

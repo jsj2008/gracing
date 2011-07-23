@@ -45,6 +45,8 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+extern double glob_frameRate;
+
 
 IrrDebugDrawer * debugDrawer= 0;
 
@@ -199,7 +201,10 @@ int main(int argc, char ** av)
 
   // prepare the track
   Track * thetrack;
-  thetrack=new Track(device,world,"farm.zip");
+  //thetrack=new Track(device,world,"farm.zip");
+  //thetrack=new Track(device,world,"tuxtollway.zip");
+  //thetrack=new Track(device,world,"jungle.zip");
+  thetrack=new Track(device,world,"beach.zip");
   //thetrack->load();
 
   bool done=false;
@@ -207,7 +212,7 @@ int main(int argc, char ** av)
 
   unsigned long startFrameTime;
   unsigned long endFrameTime;
-  unsigned long frameDuration = 1000 / 80;
+  unsigned long frameDuration = 1000 / glob_frameRate;
 
   // phase handlers
   VehicleChooser * vehicleChooser;
@@ -288,27 +293,13 @@ int main(int argc, char ** av)
 
           race->addVehicle(vehicles[runningVehicles[0]],
               new VehicleKeyboardController(resmanager->getEventReceiver()), 
+              //new VehicleAutoController(),
               "gonorra",true);
 
-#if 0
-          race->addVehicle(vehicles[runningVehicles[1]], 
-              new VehicleAutoController(), 
-              "ccaaspeedstar");
-
-          race->addVehicle(vehicles[runningVehicles[2]], 
-              new VehicleAutoController(),
-              "speedstar");
-#endif
 
           race->restart();
 
           currentPhaseHandler = race;
-
-
-          GM_LOG("Vehicle choosen\n");
-          for(unsigned i=0; i<3; i++) {
-            GM_LOG("Vehicle choosen: '%d'\n",runningVehicles[i]);
-          }
         }
       }
 

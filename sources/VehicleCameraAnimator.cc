@@ -26,9 +26,9 @@ CFG_PARAM_D(glob_type0cam_height)=2.f;
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {
   m_vehicle=vehicle;
-  m_camType=0;
+  m_camType=ct_micromachine;
 
-  // type 0 init
+  // type micromachine init
   m_type0_parms.phi=glob_type0cam_phi;
   m_type0_parms.distance=glob_type0cam_distance;
   m_type0_parms.height=glob_type0cam_height;

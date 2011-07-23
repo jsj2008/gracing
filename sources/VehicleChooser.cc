@@ -22,6 +22,7 @@
 #include "gmlog.h"
 #include "util.hh"
 
+extern double glob_frameRate;
 
 VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
         PhyWorld * world)
@@ -31,7 +32,7 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
 
   m_radius=20.;
   m_angleSpan=deg2rad(8.);
-  m_timeStep=1./80.;
+  m_timeStep=1./glob_frameRate;
   m_vehiclesHeight=1.;
 
   std::string respat=ResourceManager::getInstance()->getResourcePath();
@@ -57,10 +58,8 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
       mesh=smgr->getMesh(node->getText().c_str());
       if(mesh)  {
         GM_LOG("loaded '%s'\n",node->getText().c_str());
-        mesh->grab();
         m_meshes.push_back(mesh);
-      } else {
-        GM_LOG("non c'e'\n");
+        smgr->getMeshCache()->renameMesh(mesh, "");
       }
     }
     
@@ -121,7 +120,7 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
     irr::scene::IAnimatedMeshSceneNode* anode = 0;
     anode =m_device->getSceneManager()->
             addAnimatedMeshSceneNode(m_meshes[i],0,0xcafe);
-    anode->grab();
+    GM_LOG("sukka %p\n",anode);
     m_meshNodes.push_back(anode);
   }
 }
@@ -133,9 +132,10 @@ void VehicleChooser::unprepare()
   for(unsigned i=0; i<m_meshNodes.size(); i++) {
     irr::scene::IAnimatedMeshSceneNode* anode = 0;
     anode=m_meshNodes[i];
+    GM_LOG("remove %p\n",anode);
     anode->remove();
-    anode->drop();
   }
+  m_meshNodes.clear();
 }
 
 bool VehicleChooser::step()

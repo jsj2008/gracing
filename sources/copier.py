@@ -1,4 +1,9 @@
 #!/opt/local/bin/python
+#
+# a little utility for some os operation
+# (it can be used across platforms. wherever there is python, of course).
+#
+
 import sys,getopt,shutil,os,re
 
 ACTION_NONE=0
@@ -25,12 +30,10 @@ vehicles=[
 
 tracks=[
   "devtrack",
-  "arena_stadium",
-  "beach",
-  "mathclass",
   "tuxtollway",
   "farm",
-  "canyon"
+  "jungle",
+  "beach",
 ]
 
 paths=[
