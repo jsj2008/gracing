@@ -43,6 +43,7 @@ class ResourceManager
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
     void getResourceCompletePath(const char * filename, std::string & path);
+    void getTexturesCompletePath(const char * texturesName, std::string & path);
 
     EventReceiver * getEventReceiver();
 
@@ -92,6 +93,7 @@ class ResourceManager
     std::string m_rootDir;
     std::string m_trackDir;
     std::string m_vehicleDir;
+    std::string m_texturesDir;
 
     XmlNode *   m_configRoot;
 

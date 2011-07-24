@@ -47,10 +47,12 @@ tgt_res_dir=$(tgt_dir)/Contents/Resources
 tgt_cnt_dir=$(tgt_dir)/Contents
 tgt_vehicles_dir=$(tgt_res_dir)/Vehicles
 tgt_tracks_dir=$(tgt_res_dir)/Tracks
+tgt_textures_dir=$(tgt_res_dir)/Textures
 
 src_vehicles_dir=$(resources_dir)/vehicles
 src_tracks_dir=$(resources_dir)/tracks
 src_fonts_dir=$(resources_dir)/gfx/fonts
+src_textures_dir=$(resources_dir)/gfx/textures
 
 ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)
 
@@ -87,20 +89,26 @@ copy_files:
 	@$(copier) --mkt --tgtdir $(tgt_dir) 
 	@$(copier) --cp $(target) $(tgt_appl_dir)/
 	@$(copier) --cp config.xml $(tgt_res_dir)
+	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
+	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
+# GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/frame.zip $(tgt_res_dir)
-	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
-	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
+# VEHICLES
 	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
+# TRACKS
 	@$(copier) --cpt --tgtdir $(tgt_tracks_dir) --resdir $(src_tracks_dir)
+# FONTS
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-64.xml $(tgt_res_dir)
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-64.png $(tgt_res_dir)
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-32.xml $(tgt_res_dir)
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-32.png $(tgt_res_dir)
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-24.xml $(tgt_res_dir)
 	@$(copier) --cp $(src_fonts_dir)/droid-serif-24.png $(tgt_res_dir)
+# TEXTURES
+	@$(copier) --cp $(src_textures_dir)/clouds.png $(tgt_textures_dir)
+	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
     
 
 #	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)

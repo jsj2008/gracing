@@ -38,8 +38,8 @@ cris binary file format
 # TODO: change naming convention of the xmlnodes for using "-"
 
 # LOG configuration
-LOG_ON_STDOUT=0
-LOG_ON_FILE=1
+LOG_ON_STDOUT=1
+LOG_ON_FILE=0
 LOG_FILENAME="/tmp/log.txt"
 EPSILON=0.0001
 
@@ -96,6 +96,11 @@ WIDX_REAR_LEFT=2
 WIDX_REAR_RIGHT=3
 
 WHEEL_PREFIX=[ 'wfl_', 'wfr_', 'wrl_', 'wrr_' ]
+
+
+def buildPath(rel):
+  b=os.path.dirname(bpy.data.filepath)
+  return b + "/" + rel
 
 class BBound:
   def __init__(self):
@@ -338,6 +343,8 @@ class XmlNode:
   def addChild(self,child):
     if child == None:
       ErrorError()
+    if child == self:
+      RaiseError("Recursive addChils")
     self.x_children.append(child)
 
   def getChildrenList(self):
@@ -822,6 +829,19 @@ def createZipFile(root,xmlfile,path,srcdir):
               zf.write(iname,dname)
             else:
               log("skipping image (src: '%s', dst: '%s')"%(iname,dname))
+    if node.x_name == "skydome":
+      for t in node.getChildrenList():
+        iname=os.path.basename(t.getProp("src"))
+        if iname in inserted_images.keys():
+          continue
+        inserted_images[iname]=True
+        dname = iname
+        iname = srcdir + "/" + iname
+        if os.path.exists(iname):
+          log("Zipping skydome '%s' as '%s'"%(iname,dname))
+          zf.write(iname,dname)
+        else:
+          log("skipping skydome image (src: '%s', dst: '%s')"%(iname,dname))
 
   log("Zipping '%s' as '%s'"%(xmlfile,os.path.basename(xmlfile)))
   zf.write(xmlfile,os.path.basename(xmlfile))
@@ -1164,6 +1184,68 @@ class export_OT_track(bpy.types.Operator):
     description="Export only object with name starting with 'exp.' (debug purposes",
     default=False)
 
+  def extractTextInfo(self,tmpdir,root):
+# 0: means none
+# 1: means box
+# 2: means sphere
+    skydomeType=0  
+    skydomeTextures=[ "", "", "", "", "", "" ]
+    skydomeRe=re.compile("skydome(.+)")
+    for textFile in bpy.data.texts:
+      if textFile.name != "data":
+        continue
+      for line in textFile.lines:
+        body=line.body
+        couple=re.split('=',body)
+        if len(couple) != 2:
+          continue
+        key=couple[0]
+        value=couple[1]
+        if key == "skydomeType":
+          if value == "box" or value == "cube":
+            skydomeType=1
+          elif value == "sphere":
+            skydomeType=2
+          else:
+            RaiseError("Unsupported skydome type")
+        elif key.startswith("skydome"):
+          m=skydomeRe.match(key)
+          if m and len(m.groups()) == 1:
+            n=int(m.group(1))-1
+            skydomeTextures[n]=value
+        else:
+          node=XmlNode(key)
+          node.setText(value)
+          root.addChild(node)
+
+    if skydomeType == 1:
+      log("Skydome box")
+      skydomeNode = XmlNode("skydome")
+      skydomeNode.setProp("type","box")
+      for i in range(0,6):
+        tNode=XmlNode("texture")
+        tNode.setProp("idx","%d"%(i+1))
+        src=skydomeTextures[i]
+        tNode.setProp("src",src)
+        absSrc=buildPath(src)
+        copy_image(absSrc,tmpdir)
+
+        skydomeNode.addChild(tNode)
+      root.addChild(skydomeNode)
+    elif skydomeType == 2:
+      log("Skydome sphere")
+      skydomeNode = XmlNode("skydome")
+      skydomeNode.setProp("type","sphere")
+      tNode=XmlNode("texture")
+      src=skydomeTextures[0]
+      tNode.setProp("src",src)
+      tNode.addChild(skydomeNode)
+      absSrc=buildPath(src)
+      copy_image(absSrc,tmpdir)
+      root.addChild(tNode)
+
+    return root
+
   def handleTrackProfile(self, obj):
     if obj.type != 'CURVE':
       return
@@ -1211,6 +1293,8 @@ class export_OT_track(bpy.types.Operator):
     scene = context.scene
     ctrlPoint=None
 
+    self.extractTextInfo(tmpdir,root)
+    
     for ob in [ ob for ob in scene.objects if ob.is_visible(scene) ]:
       if ob.name.startswith("trig."):
         triggerType = ob.name.replace("trig.","")

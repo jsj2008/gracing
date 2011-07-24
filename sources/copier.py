@@ -40,7 +40,8 @@ paths=[
   "Contents/MacOs",
   "Contents/Resources",
   "Contents/Resources/Vehicles",
-  "Contents/Resources/Tracks"
+  "Contents/Resources/Tracks",
+  "Contents/Resources/Textures"
 ]
 
 

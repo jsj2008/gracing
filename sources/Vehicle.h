@@ -153,6 +153,7 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     float m_steeringClamp;
     float m_throttle;
     float m_throttleIncrement;
+    float m_throttleDecrement;
     float m_brake;
 
 

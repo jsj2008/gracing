@@ -26,11 +26,6 @@
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
 
-#if 0
-#define  DEFAULT_FONT       "impact-condensed-32.xml"
-#define  DEFAULT_FONT_SMALL "impact-condensed-24.xml"
-#define  DEFAULT_FONT_BIG    "impact-condensed-64.xml"
-#endif
 #define  DEFAULT_FONT       "droid-serif-32.xml"
 #define  DEFAULT_FONT_SMALL "droid-serif-24.xml"
 #define  DEFAULT_FONT_BIG    "droid-serif-64.xml"
@@ -159,6 +154,12 @@ void ResourceManager::getVehicleCompletePath(const char * vehicleName, std::stri
   path=m_vehicleDir + std::string(vehicleName);
 }
 
+void ResourceManager::getTexturesCompletePath(const char * texturesName, std::string & path)
+{    
+  path=m_texturesDir + std::string(texturesName);
+}
+
+
 void ResourceManager::getConfigCompletePath(const char * filename, std::string & path)
 {
   path=m_rootDir + std::string(filename);
@@ -180,6 +181,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
+  m_texturesDir = m_rootDir + std::string("/Textures/");
 
   irr::scene::ISceneManager* smgr = device->getSceneManager();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());

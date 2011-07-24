@@ -49,14 +49,6 @@ class VehicleChooser :  public IPhaseHandler
     void prepare(unsigned nHumanVehicles, unsigned nTotVehicles, unsigned * choosenVehicles);
     void unprepare();
 
-#if 0
-    struct iTransiction 
-    {
-      virtual void init(double t, const irr::core::vector3df & startPos, const irr::core::vector3df & endPos)=0;
-      virtual bool doit(double t, irr::core::vector3df & position, double  & rotation)=0;
-    };
-#endif
-
   private:
 
     enum {
@@ -74,10 +66,8 @@ class VehicleChooser :  public IPhaseHandler
     double   m_transictionTime;
     double   m_timeStep;
 
-
     ITween1d *             m_transiction;
     double                 m_angle;
-
 
     enum                   { m_shownVehicles=4 };
 

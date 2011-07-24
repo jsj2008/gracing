@@ -120,7 +120,6 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
     irr::scene::IAnimatedMeshSceneNode* anode = 0;
     anode =m_device->getSceneManager()->
             addAnimatedMeshSceneNode(m_meshes[i],0,0xcafe);
-    GM_LOG("sukka %p\n",anode);
     m_meshNodes.push_back(anode);
   }
 }
@@ -132,7 +131,6 @@ void VehicleChooser::unprepare()
   for(unsigned i=0; i<m_meshNodes.size(); i++) {
     irr::scene::IAnimatedMeshSceneNode* anode = 0;
     anode=m_meshNodes[i];
-    GM_LOG("remove %p\n",anode);
     anode->remove();
   }
   m_meshNodes.clear();

@@ -187,6 +187,7 @@ void Track::loadControlPoints(XmlNode * root)
     m_controlPoints.push_back(point);
   }
 }
+
 void Track::load()
 { 
   std::vector<XmlNode*> nodes;
@@ -198,6 +199,8 @@ void Track::load()
 
   m_rootNode->getChildren(nodes);
   irr::scene::ISceneManager* smgr = m_device->getSceneManager();
+  
+  m_skydome=0;
 
   for(unsigned int i=0; i<nodes.size(); i++) {
     node=nodes[i];
@@ -209,6 +212,49 @@ void Track::load()
       Util::parseVector(node->getText().c_str(), m_startPosition);
     } else if(node->getName() == "track_start_rot") {
       m_startRotation=Util::parseFloat(node->getText().c_str());
+    } else if(node->getName() == "skydome") {
+      std::string textureName;
+      std::string type;
+      node->get("type",type);
+
+      if(type == "box") {
+        std::vector<XmlNode*> ts;
+        irr::video::ITexture  * skydomeTexture[6];
+        node->getChildren(ts);
+        for(unsigned i=0; i<6; i++) skydomeTexture[i]=0;
+        for(unsigned i=0; i<ts.size(); i++) {
+          unsigned idx;
+          XmlNode * t=ts[i];
+          t->get("idx",idx);
+          t->get("src",textureName);
+          idx--;
+          if(idx >= 0 && idx < 6) {
+            // TODO: check that at index i there is no texture yet
+            std::string path;
+            ResourceManager::getInstance()->getTexturesCompletePath(textureName.c_str(),path);
+            skydomeTexture[idx] = smgr->getVideoDriver()->getTexture(path.c_str());
+            if(!skydomeTexture[idx]) {
+              GM_LOG("Cannot load idx: %d, texture name: %s, path: %s\n",idx,textureName.c_str(),path.c_str());
+            }
+          }
+          m_skydome = smgr->addSkyBoxSceneNode(
+              skydomeTexture[0],
+              skydomeTexture[1],
+              skydomeTexture[2],
+              skydomeTexture[3],
+              skydomeTexture[4],
+              skydomeTexture[5]);
+        }
+      } else if(type == "sphere") {
+#if 0
+        skydomeTexture = smgr->getVideoDriver()->getTexture(textureName.c_str());
+        if(skydomeTexture)
+          m_skydome = smgr->addSkyDomeSceneNode(skydomeTexture);
+#endif
+      } else {
+        GM_LOG("Uknown type of skydome '%s'\n",type.c_str());
+      }
+
     } else if(node->getName() == "mesh") {
       irr::io::IReadFile * rfile=m_filesystem->
         createAndOpenFile (node->getText().c_str());
@@ -238,10 +284,6 @@ void Track::load()
         }
         m_cammgr=new CameraDataManager(rfile);
         irr::core::vector3df p,r;
-        //m_cammgr->getPositionAndRotation(p,r);
-        //m_camera->setPosition(p);
-        //m_camera->setRotation(r);
-        //m_camera->grab();
         rfile->drop();
       }
     } else if(node->getName() == "lamp") {
@@ -262,6 +304,7 @@ void Track::load()
 
   nodes.clear();
   triggers->getChildren(nodes);
+  // ?????????????????
   for(unsigned int i=0; i<nodes.size(); i++) {
     btVector3 pos;
     btVector3 dim;
@@ -277,8 +320,18 @@ void Track::load()
     m_world->addStaticMesh(m_sceneNodes[i]);
   }
 
-  //  handle lighting 
+  // skydome
+  if(m_skydome == 0) {
+    irr::video::ITexture  * skydomeTexture;
+    std::string textureName;
 
+    ResourceManager::getInstance()->getTexturesCompletePath("clouds.png", textureName);
+    skydomeTexture = smgr->getVideoDriver()->getTexture(textureName.c_str());
+    if(skydomeTexture)
+      m_skydome = smgr->addSkyDomeSceneNode(skydomeTexture);
+  }
+
+  //  handle lighting 
   irr::video::SColor   ambient_color = irr::video::SColor(255, 120, 120, 120);
   irr::video::SColor   sun_specular_color = irr::video::SColor(255, 255, 255, 255);
   irr::video::SColor   sun_diffuse_color = irr::video::SColor(255, 255, 255, 255); 
@@ -319,7 +372,15 @@ void Track::unload()
   //m_sceneNodes.erase(0,m_sceneNodes.size());
   m_sceneNodes.clear();
 
-  m_sun->remove();
+  if(m_sun) {
+    m_sun->remove();
+    m_sun=0;
+  }
+
+  if(m_skydome) {
+    m_skydome->remove();
+    m_skydome=0;
+  }
 
   if(m_camera) {
     m_camera->remove();

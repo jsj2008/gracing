@@ -89,6 +89,7 @@
 CFG_PARAM_D(glob_chassisDefaultMass)=.8;
 CFG_PARAM_D(glob_steeringIncrement)=0.02f;
 CFG_PARAM_D(glob_throttleIncrement)=0.2;
+CFG_PARAM_D(glob_throttleDecrement)=0.01;
 CFG_PARAM_D(glob_maxThrottle)=0.7;
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
@@ -240,6 +241,7 @@ Vehicle::Vehicle(
   // accell dynamic info
   m_throttle=0.;
   m_throttleIncrement=glob_throttleIncrement;
+  m_throttleDecrement=glob_throttleDecrement;
 
   // steering dynamic info
   m_steering = 0.;
@@ -374,12 +376,6 @@ void Vehicle::initGraphics()
     WARNING("cannot init graphics, coz vehicle still not loaded");
     return;
   }
-
-#if 0
-  if(m_using & USE_GRAPHICS) {
-    return;
-  }
-#endif
 
   irr::u32 n;
   irr::u32 i;
@@ -777,6 +773,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         m_throttle=glob_maxThrottle;
     } else if(m_vehicleCommands.throttling<0) {
       m_brake=0.;
+
       m_throttle-=m_throttleIncrement;
 
       if(m_throttle<-glob_maxThrottle)  {
@@ -784,13 +781,13 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
       }
     } else {
       if(m_throttle>0.) {
-        m_throttle-=m_throttleIncrement;
+        m_throttle-=m_throttleDecrement;
         if(m_throttle < 0.) {
           m_brake=.1;
           m_throttle=0.;
         }
       } else if(m_throttle<0.) {
-        m_throttle+=m_throttleIncrement;
+        m_throttle+=m_throttleDecrement;
         if(m_throttle > 0.) {
           m_brake=.1;
           m_throttle=0.;
