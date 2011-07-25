@@ -1236,13 +1236,14 @@ class export_OT_track(bpy.types.Operator):
       log("Skydome sphere")
       skydomeNode = XmlNode("skydome")
       skydomeNode.setProp("type","sphere")
+
       tNode=XmlNode("texture")
       src=skydomeTextures[0]
       tNode.setProp("src",src)
-      tNode.addChild(skydomeNode)
+      skydomeNode.addChild(tNode)
       absSrc=buildPath(src)
       copy_image(absSrc,tmpdir)
-      root.addChild(tNode)
+      root.addChild(skydomeNode)
 
     return root
 

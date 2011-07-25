@@ -780,6 +780,8 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         m_throttle=-glob_maxThrottle;
       }
     } else {
+      m_throttle=0.;
+#if 0
       if(m_throttle>0.) {
         m_throttle-=m_throttleDecrement;
         if(m_throttle < 0.) {
@@ -793,6 +795,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
           m_throttle=0.;
         }
       }
+#endif
     }
     m_vehicleCommands.throttling=0;
 

@@ -86,8 +86,6 @@ Track::Track(
   m_world=world;
   m_filesystem->grab();
   //m_device->grab();
-  m_cammgr=0;
-  m_camera=0;
 
   m_rootNode=loadXml(m_filename.c_str());
 
@@ -216,7 +214,6 @@ void Track::load()
       std::string textureName;
       std::string type;
       node->get("type",type);
-
       if(type == "box") {
         std::vector<XmlNode*> ts;
         irr::video::ITexture  * skydomeTexture[6];
@@ -246,11 +243,19 @@ void Track::load()
               skydomeTexture[5]);
         }
       } else if(type == "sphere") {
-#if 0
-        skydomeTexture = smgr->getVideoDriver()->getTexture(textureName.c_str());
-        if(skydomeTexture)
+        std::vector<XmlNode*> ts;
+        irr::video::ITexture  * skydomeTexture;
+        node->getChildren(ts);
+        XmlNode * t=ts[0];
+        t->get("src",textureName);
+        std::string path;
+        ResourceManager::getInstance()->getTexturesCompletePath(textureName.c_str(),path);
+        skydomeTexture = smgr->getVideoDriver()->getTexture(path.c_str());
+        if(!skydomeTexture) {
+          GM_LOG("Cannot load texture name: %s, path: %s\n",textureName.c_str(),path.c_str());
+        } else {
           m_skydome = smgr->addSkyDomeSceneNode(skydomeTexture);
-#endif
+        }
       } else {
         GM_LOG("Uknown type of skydome '%s'\n",type.c_str());
       }
@@ -273,6 +278,8 @@ void Track::load()
         GM_LOG("  cannot find file\n");
       }
     } else if(node->getName() == "camera") {
+      // not handled 
+#if 0
       irr::io::IReadFile * rfile=m_filesystem->
         createAndOpenFile (node->getText().c_str());
       if(rfile) {
@@ -286,6 +293,7 @@ void Track::load()
         irr::core::vector3df p,r;
         rfile->drop();
       }
+#endif
     } else if(node->getName() == "lamp") {
       irr::io::IReadFile * rfile=m_filesystem->
         createAndOpenFile (node->getText().c_str());
@@ -381,17 +389,6 @@ void Track::unload()
     m_skydome->remove();
     m_skydome=0;
   }
-
-  if(m_camera) {
-    m_camera->remove();
-    m_camera=0;
-  }
-
-  if(m_cammgr) {
-    delete m_cammgr;
-    m_cammgr=0;
-  }
-
 
   m_loaded=false;
 }

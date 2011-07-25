@@ -69,9 +69,8 @@ class Track
     irr::scene::ILightSceneNode *                  m_sun;
     irr::scene::ISceneNode *                       m_skydome;
 
-    irr::scene::ICameraSceneNode *                 m_camera;
-
-    CameraDataManager *                            m_cammgr;
+    //irr::scene::ICameraSceneNode *                 m_camera;
+    //CameraDataManager *                            m_cammgr;
 
     bool                                           m_loaded;
     std::string                                    m_filename;
