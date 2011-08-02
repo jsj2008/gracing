@@ -18,6 +18,7 @@
 #define VEHICLECAMERAANIMATOR_H
 #include <irrlicht.h>
 #include "IVehicle.h"
+#include "Tweening.h"
 
 class ICamAnimator 
 {
@@ -35,6 +36,8 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
 {
   public:
     VehicleCameraAnimator(IVehicle * vehicle);
+
+    ~VehicleCameraAnimator();
 
     // Animates a scene node. 
     virtual void 	animateNode (irr::scene::ISceneNode *node, irr::u32 timeMs);
@@ -63,23 +66,12 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
 
     void setCameraType(unsigned camType);
 
-    void nextCameraType() { m_camType++; m_camType %= 3; }
+    //void nextCameraType() { m_camType++; m_camType %= 3; }
+    void nextCameraType() { setCameraType(m_camType+1); }
 
     // Event receiver, override this function for camera controlling animators. 
     //virtual bool 	OnEvent (const SEvent &event);
   private:
-
-    void type0_moveXY(float dx, float y);
-    void type0_updateDerivate();
-    void type0_init();
-
-    void type1_moveXY(float dx, float y);
-    void type1_init();
-
-    void init(unsigned);
-
-
-
 
     IVehicle * m_vehicle;
 
@@ -91,32 +83,19 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
 
     
     unsigned  m_camType;
+    unsigned  m_oldCamType;
+    float     m_transictionTime;
+    float     m_transictionStep;
+    bool      m_changingCamera;
 
     ICamAnimator * m_animators[3];
+    
+    ITween<double> * m_transiction;
+
+    
     irr::core::vector3df m_camPosition;
     irr::core::vector3df m_camTarget;
     irr::core::vector3df m_camUpDir;
-
-    // obsoleted
-    struct {
-      float                distance;
-      float                phi;
-      float                height;
-
-      // derivate
-      irr::core::vector3df pos;
-    } m_type0_parms;
-
-
-    struct {
-      //irr::core::vector3df            deltaPos; 
-      //irr::core::vector3df            deltaTarget;
-
-      irr::core::vector3df            up;
-
-      //float            offsPos;
-      //float            offsTarget;
-    } m_type1_parms;
 
 };
 

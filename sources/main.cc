@@ -109,7 +109,7 @@ static bool doneStep=false;
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
 CFG_PARAM_BOOL(glob_enableShadows)=false;
-CFG_PARAM_BOOL(glob_enableFullScreen)=true;
+CFG_PARAM_BOOL(glob_enableFullScreen)=false;
 CFG_PARAM_BOOL(glob_enableVSync)=false;
 
 

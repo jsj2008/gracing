@@ -129,6 +129,14 @@ class ThirdPersonCamAnimator : public ICamAnimator
 
 };
 
+VehicleCameraAnimator::~VehicleCameraAnimator()
+{
+  delete m_transiction;
+  delete m_animators[0];
+  delete m_animators[1];
+  delete m_animators[2];
+}
+
 VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
 {
   m_vehicle=vehicle;
@@ -137,29 +145,34 @@ VehicleCameraAnimator::VehicleCameraAnimator(IVehicle * vehicle)
   m_animators[0]=new ThirdPersonCamAnimator();
   m_animators[1]=new FirstPersonCamAnimator();
   m_animators[2]=new BirdFlyCamAnimator();
-  // type micromachine init
-#if 0
-  m_type0_parms.phi=glob_type0cam_phi;
-  m_type0_parms.distance=glob_type0cam_distance;
-  m_type0_parms.height=glob_type0cam_height;
-  type0_updateDerivate();
 
-  setCameraType(1);
-#endif
+  m_changingCamera=false;
+  //m_transiction=new TweenBounceOut<double>();
+  m_transiction=new TweenQuadIn<double>();
 }
 
 void VehicleCameraAnimator::setCameraType(unsigned camType)
 {
 
-  m_camType=camType % 3;
-#if 0
-  if(camType == 1) {
-    m_camType = ct_tuxracer;
+  GM_LOG("suha\n");
+  if(m_changingCamera)
+    return;
+
+  camType %= 3;
+
+  if(m_transiction) {
+    m_oldCamType=m_camType;
+    m_camType=camType;
+
+    m_transiction->init(0.,0.,1.);
+    m_transictionTime=0.;
+    m_transictionStep= .5 /  15; // TODO: request resource manager the framerare
+    m_changingCamera=true;
+    GM_LOG("starting tranction from %d to %d\n",m_oldCamType,m_camType);
   } else {
-    m_camType = ct_micromachine;
+    m_oldCamType=m_camType;
+    m_camType=camType % 3;
   }
-  init(m_camType);
-#endif
 }
 
 void VehicleCameraAnimator::changeVehicle(IVehicle * vehicle)
@@ -174,59 +187,38 @@ void 	VehicleCameraAnimator::animateNode (irr::scene::ISceneNode *node, irr::u32
 
   assert(node->getType() == irr::scene::ESNT_CAMERA);
   irr::scene::ICameraSceneNode * cam=(irr::scene::ICameraSceneNode*)node;
-
   irr::core::vector3df pos=m_vehicle->getChassisPos();
-
   btVector3 vd = m_vehicle->getChassisForwardDirection();
   irr::core::vector3df forward = irr::core::vector3df(vd.getX(),vd.getY(),vd.getZ());
 
-  camAnim->doit(pos,forward, m_camPosition, m_camTarget,m_camUpDir);
+  if(m_changingCamera) {
+    assert(m_transiction);
+
+    irr::core::vector3df ccpos,cctar,ccup;
+    camAnim->doit(pos,forward, m_camPosition, m_camTarget,m_camUpDir);
+    camAnim = m_animators[m_oldCamType];
+    camAnim->doit(pos,forward, ccpos, cctar,ccup);
+  
+
+    double t,t1;
+    m_changingCamera=!m_transiction->doit(m_transictionTime, t);
+
+    if(!m_changingCamera) 
+      GM_LOG("end transiction %f\n",t);
+
+
+    t1=1.-t;
+    m_transictionTime += m_transictionStep;
+    m_camPosition= t1 * ccpos + t * m_camPosition;
+    m_camTarget= t1* cctar + t * m_camTarget;
+    m_camUpDir= t1 * ccup + t * m_camUpDir;
+  } else {
+    camAnim->doit(pos,forward, m_camPosition, m_camTarget,m_camUpDir);
+  }
 
   cam->setPosition(m_camPosition);
   cam->setTarget(m_camTarget);
   cam->setUpVector(m_camUpDir);
-
-#if 0
-  assert(node->getType() == irr::scene::ESNT_CAMERA);
-  irr::core::vector3df pos=m_vehicle->getChassisPos();
-
-  irr::scene::ICameraSceneNode * cam=(irr::scene::ICameraSceneNode*)node;
-  
-  irr::core::vector3df tgt = pos;
-
-  switch(m_camType) 
-  {
-    case 1:
-      {
-        double oo1=1.1;
-        double oo2=.9;
-        double aa=3.;
-
-        btVector3 vd = m_vehicle->getChassisForwardDirection();
-        irr::core::vector3df direction = irr::core::vector3df(vd.getX(),vd.getY()+oo1,vd.getZ());
-        cam->setTarget(pos + direction);
-        pos.X -= direction.X * aa; //pos.Y += oo;
-        pos.Y += oo2;
-        pos.Z -= direction.Z * aa; //pos.Y += oo;
-        cam->setPosition(pos);
-        cam->setUpVector(irr::core::vector3df(0.,1.,0));
-      }
-      break;
-    case 2:
-      cam->setTarget(pos);
-      pos.Y += 10.;
-      cam->setUpVector(m_type1_parms.up);
-      cam->setPosition(pos);
-      break;
-    case 0:
-    default:
-      cam->setTarget(pos);
-      pos+=m_type0_parms.pos*m_type0_parms.distance;
-      cam->setPosition(pos);
-      cam->setUpVector(irr::core::vector3df(0.,1.,0));
-      break;
-  }
-#endif
 }
 
 irr::scene::ISceneNodeAnimator * VehicleCameraAnimator::createClone(irr::scene::ISceneNode *node, 
@@ -235,52 +227,13 @@ irr::scene::ISceneNodeAnimator * VehicleCameraAnimator::createClone(irr::scene::
   return 0;
 } 
 
-void VehicleCameraAnimator::type1_init()
-{
-  btVector3 vd = m_vehicle->getChassisForwardDirection();
-  irr::core::vector3df direction = irr::core::vector3df(vd.getX(),vd.getY(),vd.getZ());
-  m_type1_parms.up=direction;
-}
-
-void VehicleCameraAnimator::type0_init()
-{
-
-}
-
-void VehicleCameraAnimator::init(unsigned camType) 
-{
-  switch(camType) {
-    case 1:
-      m_camType = 1;
-      type1_init();
-      break;
-    default:
-    case 0:
-      m_camType = 0;
-      type0_init();
-      break;
-  }
-   
-}
-
 void VehicleCameraAnimator::moveXY(float dx, float dy)
 {
-  switch(m_camType)
-  {
-    case 1:
-      type1_moveXY(dx,dy);
-      break;
-    case 0:
-    default:
-      type0_moveXY(dx,dy);
-      break;
-  }
+  m_animators[m_camType]->move(dx,dy);
 }
 
-void VehicleCameraAnimator::type1_moveXY(float dx, float dy)
-{
-}
 
+#if 0
 void VehicleCameraAnimator::type0_moveXY(float dx, float dy)
 {
   m_type0_parms.phi+=dx;
@@ -293,13 +246,5 @@ void VehicleCameraAnimator::type0_moveXY(float dx, float dy)
 
   type0_updateDerivate();
 }
+#endif
 
-void VehicleCameraAnimator::type0_updateDerivate()
-{
-  double sphi=sin(m_type0_parms.phi);
-  double cphi=cos(m_type0_parms.phi);
-   
-  m_type0_parms.pos.X=m_type0_parms.distance * sphi;
-  m_type0_parms.pos.Y=m_type0_parms.height;
-  m_type0_parms.pos.Z=m_type0_parms.distance * cphi;
-}
