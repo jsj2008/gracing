@@ -29,7 +29,6 @@
 #define NOT_A_VALID_VEHICLE_IF_NOT(cond) assert(cond)
 #define NOT_A_VALID_VEHICLE_IF(cond) assert(!(cond))
 
-#define RAD2DEG(v)     (v*(180. / M_PI))
 
 #define WARNING_IF(cond,fmt,...) do {\
   if(cond) {\
@@ -379,7 +378,6 @@ void Vehicle::initGraphics()
 
   irr::u32 n;
   irr::u32 i;
-  irr::scene::ISceneNode * node;
   irr::scene::ISceneManager * smgr=
     m_device->getSceneManager();
 
@@ -645,7 +643,7 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
   } else if(m_using & USE_GRAPHICS) {
     m_chassisNode->setPosition(pos);
     //grad = rad * 180 / PI
-    m_chassisNode->setRotation(irr::core::vector3df(0.,RAD2DEG(rotation),0.));
+    m_chassisNode->setRotation(irr::core::vector3df(0.,rad2deg(rotation),0.));
 
     irr::core::matrix4 chMatrix= m_chassisNode->getAbsoluteTransformation();
 
@@ -671,7 +669,6 @@ void Vehicle::use(unsigned int useFlags)
     m_world->addRigidBody(m_carBody);
     for(unsigned i=0; i<4; i++) {
       irr::scene::ISceneNode * wheel=m_wheelsNodes[i];
-      //m_chassisNode->removeChild(wheel);
       wheel->setParent(smgr->getRootSceneNode());
     }
     if(!(useFlags & USE_PHYSICS))
@@ -707,57 +704,6 @@ void Vehicle::unuse(unsigned int useFlags)
   }
 }
 
-#if 0
-void Vehicle::brake()
-{
-  m_throttle=0;
-  m_brake=.1;
-}
-
-void Vehicle::throttleUp()
-{
-   m_throttling=1;
-}
-
-void Vehicle::throttleDown()
-{
-  m_throttling=-1;
-}
-
-void Vehicle::throttleSet(double value)
-{
-  m_throttle=value;
-}
-#endif
-
-#if 0
-void Vehicle::steerRight()
-{
-#if 0
-  m_steering += m_steeringIncrement;
-  if (	m_steering > m_steeringClamp)
-    m_steering = m_steeringClamp;
-#endif
-  m_steered=steeredRight;
-}
-
-void Vehicle::steerLeft()
-{
-#if 0
-  m_steering -= m_steeringIncrement;
-  if (	m_steering < -m_steeringClamp)
-    m_steering = -m_steeringClamp;
-#endif
-  m_steered=steeredLeft;
-}
-
-
-void Vehicle::applyTorque(float x, float y, float z)
-{
-  m_carBody->applyTorque(btVector3(x,y,z));
-}
-#endif
-
 irr::core::vector3df Vehicle::getChassisPos()
 {
   return m_chassisNode->getPosition();
@@ -781,21 +727,6 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
       }
     } else {
       m_throttle=0.;
-#if 0
-      if(m_throttle>0.) {
-        m_throttle-=m_throttleDecrement;
-        if(m_throttle < 0.) {
-          m_brake=.1;
-          m_throttle=0.;
-        }
-      } else if(m_throttle<0.) {
-        m_throttle+=m_throttleDecrement;
-        if(m_throttle > 0.) {
-          m_brake=.1;
-          m_throttle=0.;
-        }
-      }
-#endif
     }
     m_vehicleCommands.throttling=0;
 
@@ -949,7 +880,6 @@ void Vehicle::updateFriction(btScalar timeStep)
   m_sideImpulse.resize(4);
 
   m_nWheelTouchGround=0;
-
 
   for (int i=0;i<4;i++)
   {
@@ -1265,8 +1195,7 @@ void Vehicle::step()
 	btTransform trans;
   assert(m_carBody);
   
-  //getWorldTransform(trans);
-  trans=m_carBody->getCenterOfMassTransform();
+  trans= m_chassisWorldTrans; //m_carBody->getCenterOfMassTransform();
 
   irr::core::matrix4 matr;
   PhyWorld::btTransformToIrrlichtMatrix(trans, matr);

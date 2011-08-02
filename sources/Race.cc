@@ -19,15 +19,16 @@
 #include "IrrDebugDrawer.h"
 
 extern IrrDebugDrawer * debugDrawer;
+GuiCommunicator * TEMP_communicator=0;
 
 #define CAMERA_STEP 0.05
+#define WRONG_WAY_EPSILON .001
 
 CFG_PARAM_D(glob_epsilonDist)=0.1;
 
-/* versione due */
-
 // !'!'!'!'!
-static inline unsigned nextIndexVehicleControlPoint(unsigned currentIndex, 
+static inline unsigned nextIndexVehicleControlPoint(
+    unsigned currentIndex, 
     const std::vector<btVector3> & controlPoints)  
 { 
   return (currentIndex+1) % controlPoints.size(); 
@@ -51,13 +52,6 @@ static inline double distanceVehicleControlPoint(
 
   d /= (controlPoints[currentIndex] - controlPoints[i1]).length2();
 
-  if(d < 0) {
-    GM_LOG("<<<<%f\n",d);
-  }
-
-  //assert( d >= 0);
-  //assert( d <= (controlPoints[currentIndex] - controlPoints[i1]).length());
-
   return d;
 }
 
@@ -66,9 +60,6 @@ static bool evolveVehicleControlPoint(
     const    btVector3 &              position,
     const    std::vector<btVector3> & controlPoints)
 {
-  //double   d0,d1; 
-  //unsigned i1; 
-
   assert(currentIndex < controlPoints.size());
 
   // TODO: optimize the double calc of the control
@@ -122,9 +113,6 @@ static irr::core::vector3df vectBulletToIrr(const btVector3 & vect)
   return irr::core::vector3df(vect.getX(),vect.getY(),vect.getZ());
 }
 
-// !'!'!'!'!
-
-
 Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   : IPhaseHandler(device,world)
 {
@@ -142,20 +130,26 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
 
   m_communicator = new GuiCommunicator(m_guiEnv,m_guiEnv->getRootGUIElement(),2,
       irr::core::rect<irr::s32>(px1,py1,px2,py2));
+  TEMP_communicator = m_communicator;
+
+  m_communicator->setPosition(GuiCommunicator::posLow);
+
   assert(m_communicator);
 
   m_nVehicles=0;
   m_track=0;
-  m_totalLaps=1;
-  //m_camera = device->getSceneManager()->addCameraSceneNode();
+  m_totalLaps=3;
   m_camera = 0;
   m_device = device;
   m_cameraAnim = 0;
   m_followedVehicleIndex=invalidVehicleIndex;
 
-  width=200; height=100;
-  px1=5;     py1=740-height;
-
+  // cock pit!!
+  unsigned sw,sh;
+  ResourceManager::getInstance()->getScreenHeight(sh);
+  ResourceManager::getInstance()->getScreenWidth(sw);
+  width=200; height=140;
+  px1=5;     py1=sh-height;
   px2=px1+width;
   py2=py1+height;
   m_cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
@@ -200,14 +194,17 @@ void Race::updateVehiclesInfo()
         vehicleDirection,
         vehicleRightDirection,
         vehiclePosition,
-        vinfo.controlPointIndex,
         controlPoints,
         vinfo.vehicle->getVehicleCommands());
 
     double newDist;
 
-    if(evolveVehicleControlPoint(vinfo.controlPointIndex,
-          vehiclePosition,controlPoints)) {
+
+    if(evolveVehicleControlPoint(
+          vinfo.controlPointIndex,
+          vehiclePosition,
+          controlPoints))
+    {
       if(vinfo.controlPointIndex == controlPoints.size()-1) 
         vinfo.waitingForLapTrigger=true;
       newDist=
@@ -223,13 +220,14 @@ void Race::updateVehiclesInfo()
             vehiclePosition,
             controlPoints);
 
-      if(newDist > (vinfo.ctrlPntDistance+0.5)) {
-        if(!vinfo.wrongWay && m_followedVehicleIndex == vinfo.index)
+
+      if(newDist > vinfo.ctrlPntDistance + WRONG_WAY_EPSILON) {
+        if(!vinfo.wrongWay && m_followedVehicleIndex == vinfo.index && m_status == rs_started)
           m_communicator->show("Wrong way");
         vinfo.wrongWay=true;
-      } else
-        //m_communicator->unshow();
+      } else {
         vinfo.wrongWay=false;
+      }
     }
 
     if(vinfo.wrongWay) {
@@ -320,6 +318,7 @@ bool Race::step()
         gotoState(rs_started);
       }
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+      updateVehiclesInfo();
       m_sceneManager->drawAll();
       m_world->step();
       m_guiEnv->drawAll();
@@ -333,7 +332,12 @@ bool Race::step()
       m_cockpit->setRank(
           m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
       m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+#if 0
+      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
+          m_vehicles[m_followedVehicleIndex].controlPointIndex);
+#endif
       ///////////////////////
+
 
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       ret=updateKeyboard();
@@ -391,10 +395,20 @@ bool Race::updateKeyboard()
     m_status=rs_notRunning;
   }
 
+#if 0
   if(erec->OneShotKey(irr::KEY_TAB)) {
     GM_LOG("changing vehicle\n");
     followNextVehicle();
   }
+#endif
+
+  if(erec->OneShotKey(irr::KEY_TAB)) {
+    GM_LOG("changing camera\n");
+    m_cameraAnim->nextCameraType();
+  }
+
+  if(erec->OneShotKey(irr::KEY_KEY_Y)) 
+    restoreVehicle(m_vehicles[0]);
 
   if(erec->IsKeyDown(irr::KEY_KEY_W))
     m_cameraAnim->moveXY(0.,CAMERA_STEP);
@@ -404,6 +418,7 @@ bool Race::updateKeyboard()
 
   if(erec->IsKeyDown(irr::KEY_KEY_A))
     m_cameraAnim->moveXY(CAMERA_STEP,0.);
+
 
   if(erec->IsKeyDown(irr::KEY_KEY_S)) 
     m_cameraAnim->moveXY(-CAMERA_STEP,0.);
@@ -493,6 +508,14 @@ bool Race::gotoState(unsigned state)
           m_vehicles[i].vehicle->setEnableControls(true);
         m_status=rs_started;
         m_cockpit->start();
+
+        for(unsigned i=0; i<m_nVehicles; i++) {
+          VehicleInfo & vinfo = m_vehicles[i];
+          const std::vector<btVector3> & controlPoints=m_track->getControlPoints();
+          btVector3 vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
+          btVector3 vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
+          m_vehicles[i].controller->init(controlPoints,vehicleDirection,vehiclePosition);
+        }
       }
   }
 
@@ -521,7 +544,6 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
   } else {
     m_vehicles[m_nVehicles].name=name;
   }
-
 
   //m_sceneManager->getRootSceneNode()->addChild(vehicle);
   //vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
@@ -598,7 +620,7 @@ void Race::restoreVehicle(VehicleInfo & vinfo)
 
   btScalar  c = v.dot(btVector3(0.,0.,1.)) / l;
   btScalar  s = v.dot(btVector3(1.,0.,0.)) / l;
-  double    a = atan2(c,s);
+  double    a = -atan2(c,s);
 
   vinfo.vehicle->reset(
     vectBulletToIrr(m_track->getControlPoints()[vinfo.controlPointIndex]),a);

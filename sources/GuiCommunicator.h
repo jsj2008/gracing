@@ -20,6 +20,7 @@
 
 #include <irrlicht.h>
 #include "GuiFrame.h"
+#include "gmlog.h"
 
 class GuiCommunicator : public irr::gui::IGUIElement
 {
@@ -34,11 +35,19 @@ class GuiCommunicator : public irr::gui::IGUIElement
 
   virtual void draw();
 
+  enum position {
+    posCenter,
+    posLow
+  };
+
+  void setPosition(enum position);
+
   private:
   enum                  { bufferSize=64 };
   enum                  { numberOfFrames=160 }; // TODO: calc this dinamically 
   enum                  { maxMessages=7 };
-  //char                  m_buffer[maxMessages][bufferSize];
+
+  enum position         m_verticalPosition;
   struct message {
     char text[bufferSize];
   };
@@ -53,7 +62,10 @@ class GuiCommunicator : public irr::gui::IGUIElement
   irr::gui::IGUIFont *  m_font;
   GuiFrame *            m_frame;
 
+
   void adjustSizeWithLastInsert();
+  void recalcSize();
+  void recalcRects();
   
   public:
   inline void refreshTime() {  m_framesStillToShow=numberOfFrames; }

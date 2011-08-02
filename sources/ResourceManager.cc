@@ -36,8 +36,10 @@
 
 static EventReceiver g_eventReceiver;
 
-CFG_PARAM_UINT(glob_screenWidth)=1024;
-CFG_PARAM_UINT(glob_screenHeight)=768;
+//CFG_PARAM_UINT(glob_screenWidth)=1280;
+//CFG_PARAM_UINT(glob_screenHeight)=800;
+CFG_PARAM_UINT(glob_screenWidth)=1280;
+CFG_PARAM_UINT(glob_screenHeight)=800;
 
 static unsigned listDirectory(const char* path, 
     std::vector<std::string> &return_files, 

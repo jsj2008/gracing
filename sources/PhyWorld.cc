@@ -21,7 +21,7 @@
 
 using namespace irr;
 
-CFG_PARAM_D(glob_frameRate)=80.;
+CFG_PARAM_D(glob_frameRate)=60.;
 
 static inline void irr2bt(const core::vector3df & irrVertex,
     btVector3 & btVertex)
@@ -57,8 +57,7 @@ PhyWorld::PhyWorld(
   btDefaultCollisionConfiguration     *collisionConfiguration)
   : btDiscreteDynamicsWorld(dispatcher, broadPhase, solver, collisionConfiguration)
 {
-  //CFG_INIT_D(m_frameRate,1.f/60.f);
-  CFG_INIT_D(m_frameRate,1.f/glob_frameRate);
+  CFG_INIT_D(m_frameDuration,1.f/glob_frameRate);
   CFG_INIT_D(m_frameSubsteps,1);
   CFG_INIT_V3(m_gravity,0.f,-10.f,0.f);
   CFG_INIT_D(m_defaultContactProcessingThreshold,BT_LARGE_FLOAT);
@@ -94,10 +93,12 @@ btRigidBody * PhyWorld::createRigidBody(
 
 	//addRigidBody(body);
 
+#if 0
   if(node) {
     meshBinder * mbinder=new meshBinder(body,node);
     m_binds.push_back(mbinder);
   }
+#endif
 
 	return body;
 }
@@ -154,9 +155,10 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
   n_buffers=mesh->getMeshBufferCount();
   u16 * indices;
+#if 0
   meshBinder * mbinder=new meshBinder();
-
   mbinder->irrNode=meshNode;
+#endif
 
   meshNode->grab();
 
@@ -192,23 +194,13 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
       mass,motionState,
       shape,localInertia);
   btRigidBody* body = new btRigidBody(rbInfo);
-  mbinder->body=body;
   addRigidBody(body);
 
+#if 0
+  mbinder->body=body;
   m_binds.push_back(mbinder);
+#endif
   return body;
-}
-
-void PhyWorld::clearAll()
-{
-
-  for(unsigned int i=0; i<m_binds.size(); i++) {
-    removeRigidBody(m_binds[i]->body);
-    m_binds[i]->irrNode->drop();
-    delete m_binds[i]->body;
-    delete m_binds[i];
-  }
-  m_binds.clear();
 }
 
 btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node, 
@@ -237,72 +229,16 @@ btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
     rbInfo(btMass,motionState,shape,localInertia);
   btRigidBody* body = new btRigidBody(rbInfo);
 
+#if 0
   meshBinder * mbinder=new meshBinder(body,node);
   m_binds.push_back(mbinder);
+#endif
 
   addRigidBody(body);
   return body;
 }
 
-void PhyWorld::setBodyPosition( irr::scene::ISceneNode * node,
-   float X,float Y, float Z ) 
-{
-  int j;
-  for (j=m_binds.size()-1; j>=0 ;j--) {
-    if(m_binds[j]->irrNode==node) 
-      break;
-  }
-
-  if(j>=0) {
-    btTransform trans=btTransform::getIdentity();
-    trans.setOrigin(btVector3(X,Y,Z));
-    m_binds[j]->body->setCenterOfMassTransform(trans);
-  }
-
-}
-
-void PhyWorld::resetBodyDynamics(irr::scene::ISceneNode * node)
-{
-  int j;
-  for (j=m_binds.size()-1; j>=0 ;j--) {
-    if(m_binds[j]->irrNode==node) 
-      break;
-  }
-  if(j>=0) {
-    m_binds[j]->body->setLinearVelocity(btVector3(0,0,0));
-    m_binds[j]->body->setAngularVelocity(btVector3(0,0,0));
-  }
-}
-
-void PhyWorld::dumpBodyPositions()
-{
-  btTransform trans;
-  for (int i=m_binds.size()-1; i>=0; i--) {
-    btRigidBody* body = m_binds[i]->body;
-    body->getMotionState()->getWorldTransform(trans);
-
-  }
-}
-
 void PhyWorld::step()
 {
-  stepSimulation(m_frameRate,m_frameSubsteps);
-#if 0
-  for (int j=m_binds.size()-1; j>=0 ;j--) {
-    btRigidBody* body = m_binds[j]->body;
-    if (body && body->getMotionState()) {
-      if(m_binds[j]->irrNode->getID()==0xbadd)
-        continue;
-      btTransform trans;
-      btQuaternion quaternion;
-      body->getMotionState()->getWorldTransform(trans);
-      quaternion=trans.getRotation();
-      m_binds[j]->irrNode->setPosition(
-          core::vector3df(
-            float(trans.getOrigin().getX()),
-            float(trans.getOrigin().getY()),
-            float(trans.getOrigin().getZ())));
-    }
-  }
-#endif
+  stepSimulation(m_frameDuration,m_frameSubsteps,m_frameDuration);
 }

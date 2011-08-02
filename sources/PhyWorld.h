@@ -38,18 +38,11 @@ class PhyWorld : public btDiscreteDynamicsWorld
         btCollisionShape* shape,
         btMotionState * motionState=0);
 
-    void setBodyPosition(irr::scene::ISceneNode * node, float X,float Y, float Z);
-
-    void resetBodyDynamics(irr::scene::ISceneNode * node);
-
-    void clearAll();
-
     void step();
 
     ~PhyWorld();
 
     // debug stuff
-    void dumpBodyPositions();
 
     static inline void btTransformToIrrlichtMatrix(const btTransform& worldTrans, irr::core::matrix4 &matr) 
     {
@@ -62,32 +55,10 @@ class PhyWorld : public btDiscreteDynamicsWorld
         btSequentialImpulseConstraintSolver *solver,
         btDefaultCollisionConfiguration     *collisionConfiguration);
 
-    // TODO: remote the following obsolete
-    //       meshBinder stuff
-    struct meshBinder {
-      btRigidBody *               body;
-      irr::scene::ISceneNode *    irrNode;
-
-      meshBinder() { body=0; irrNode=0; }
-      meshBinder(
-          btRigidBody * b,
-          irr::scene::ISceneNode * i)
-      { body=b; irrNode=i; }
-
-      ~meshBinder()
-      {
-        if(body) delete body;
-        if(irrNode) irrNode->drop();
-      }
-    };
-
-    irr::core::array<meshBinder*>        m_binds;
-
-    CFG_PARAM_D(m_frameRate);
+    CFG_PARAM_D(m_frameDuration);
     CFG_PARAM_D(m_frameSubsteps);
     CFG_PARAM_V3(m_gravity);
     CFG_PARAM_D(m_defaultContactProcessingThreshold);
-
 };
 
 #endif

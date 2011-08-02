@@ -16,36 +16,128 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "VehicleAutoController.h"
+#include "Util.hh"
 
-static const double epsilon=2.5;  //1.1;
+#include "GuiCommunicator.h"
+extern GuiCommunicator * TEMP_communicator;
+#define SHOW(fmt,...) do { if(TEMP_communicator) TEMP_communicator->show(fmt, ## __VA_ARGS__); } while(0)
+#define ADD(fmt,...) do { if(TEMP_communicator) TEMP_communicator->add(true,fmt, ## __VA_ARGS__); } while(0)
+
+CFG_PARAM_D(glob_autocontrolAngleEpsilon)=.2;
+CFG_PARAM_D(glob_autocontrolAngleBraking)=.5;
+CFG_PARAM_D(glob_autocontrolDistance)=4.0;
+
 
 VehicleAutoController::VehicleAutoController()
 {
-  // ?!?!
+   m_initialized=false;
 }
+
 
 void VehicleAutoController::updateCommands(
         const btVector3 &              vehicleDirection,
         const btVector3 &              vehicleRightDirection,
         const btVector3 &              vehiclePosition,
-        unsigned                       index,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)
 {
-  unsigned nindex=index; //(index+1) % controlPoints.size(); 
+  unsigned size = controlPoints.size();
+  unsigned nextIndex = (m_currentIndex + 1) % size;
 
-  //btVector3 dir = controlPoints[nindex] - controlPoints[index];
-  btVector3 dir = controlPoints[nindex] - vehiclePosition;
+  if(!m_initialized)
+    return;
 
-  btScalar dot = dir.dot(vehicleRightDirection);
+  btVector3 dir = controlPoints[m_currentIndex] - vehiclePosition;
+  btVector3 dir2 = controlPoints[nextIndex] - vehiclePosition;
 
-  if(dot > epsilon) 
-    commands.steering=IVehicle::VehicleCommands::steerLeft;
+  double dist = dir.length();
+  double dist2 = dir2.length();
 
-  if(dot < - epsilon) 
+  if(dist2 < dist || dist < glob_autocontrolDistance) {
+    m_currentIndex = nextIndex;
+    dir = dir2;
+    dist = dist2;
+  }
+
+  dir /= dist;
+
+  double dot = vehicleRightDirection.dot( dir );
+
+  //static unsigned cnt=0;
+  //if(cnt ++ % 2 == 0)
+    commands.throttling = 1.;
+
+  const char * steering;
+
+
+  steering = "none";
+  //if(dot < 0.)  {
+  if(dot < -glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
+    steering = "rite";
+  }
+  //if(dot > 0.) {
+  if(dot > glob_autocontrolAngleEpsilon) {
+    commands.steering=IVehicle::VehicleCommands::steerLeft;
+    steering = "left";
+  }
 
-  commands.throttling=1.;
+  if(dot > glob_autocontrolAngleBraking || 
+     dot < - glob_autocontrolAngleBraking ) {
+    commands.throttling = -1.;
+  }
+
+
+  //SHOW("f:%d,s:%s,d:%2.2f,d:%2.2f",m_currentIndex,steering,dist,dist2);
+  SHOW("s:%s",steering);
+
+  
+}
+
+void VehicleAutoController::init(
+        const std::vector<btVector3> & controlPoints,
+        const btVector3 vehicleDirection,
+        const btVector3 startPosition)
+{
+  unsigned size=0;
+
+  size=controlPoints.size();
+
+#if 0
+  GM_LOG("** initting auto controller **\n");
+#endif
+  double bestDistance=1000000.;
+  unsigned bestDistanceIndex=0xffff;
+  for(unsigned i=0; i<size; i++) {
+    const btVector3 & cpnt = controlPoints[i];
+
+    double dist =  (cpnt - startPosition).length();
+
+    if(dist < bestDistance) {
+      bestDistance = dist;
+      bestDistanceIndex = i;
+    }
+
+#if 1
+    GM_LOG("[%d] %2.2f %2.2f %2.2f - dist: %2.2f\n",
+        i,
+        cpnt.getX(),
+        cpnt.getY(),
+        cpnt.getZ(),dist);
+#endif
+  }
+
+  unsigned otherIndex = (bestDistanceIndex + 1) % size;
+
+  double dot = vehicleDirection.dot( controlPoints[bestDistanceIndex] - startPosition );
+
+  if(dot < 0) {
+    m_currentIndex = otherIndex;
+  } else
+    m_currentIndex = bestDistanceIndex;
+
+  m_initialized=true;
 
 }
+
 

@@ -21,11 +21,7 @@
 #include "GuiReadySetGo.h"
 #include "ResourceManager.h"
 
-
-// measures
-// ready: 0,0 220,180 
-// set: 0,188 170,343
-// go: 0,344 106,150
+extern double glob_frameRate; // !!! sorry for this
 
 GuiReadySetGo::GuiReadySetGo(irr::gui::IGUIEnvironment * environment,
       irr::gui::IGUIElement * parent, irr::s32 id,
@@ -61,11 +57,12 @@ GuiReadySetGo::GuiReadySetGo(irr::gui::IGUIEnvironment * environment,
 
   m_partIndex=0;
   m_fraction=0.;
-  m_delta=0.05;
+  m_delta=1 / glob_frameRate;    //0.05;
   m_isStill=false;
   IsVisible=false;
   m_isEnded=true;
 }
+
 
 void GuiReadySetGo::evolve()
 {
@@ -75,7 +72,7 @@ void GuiReadySetGo::evolve()
 
   if(m_isStill) {
     framesStill++;
-    if(framesStill >= 80) {
+    if(framesStill >= glob_frameRate) {
       m_partIndex++;
       if(m_partIndex >= m_parts.size()) {
         m_partIndex=0;

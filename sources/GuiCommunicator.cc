@@ -1,4 +1,4 @@
-//  gracing - an idiot (but physically powered) racing game 
+#//  gracing - an idiot (but physically powered) racing game 
 //  Copyright (C) 2010 gianni masullo
 //
 //  This program is free software; you can redistribute it and/or
@@ -26,14 +26,70 @@ GuiCommunicator::GuiCommunicator(irr::gui::IGUIEnvironment * environment,
 {
   m_showingMessage=false;
   m_nMessages=0;
-  m_font=ResourceManager::getInstance()->getSystemFont();
+  m_font=ResourceManager::getInstance()->getSystemFontSmall();
 
   m_frame=new GuiFrame(rectangle);
+  m_verticalPosition=posCenter;
 }
 
 void GuiCommunicator::unshow()
 {
   m_showingMessage=false;
+}
+
+void GuiCommunicator::recalcSize()
+{
+  m_totalWidth = 0;
+  m_totalHeight = 0;
+  irr::core::dimension2d<irr::u32>  dim;
+  for(unsigned i=0; i< m_nMessages; i++) {
+     dim=m_font->getDimension(irr::core::stringw(m_buffers[i].text).c_str());
+     m_totalHeight += dim.Height;
+     if(dim.Width > m_totalWidth)
+       m_totalWidth = dim.Width;
+  }
+
+  recalcRects();
+}
+
+void GuiCommunicator::setPosition(enum position pos) 
+{ 
+  m_verticalPosition = pos;
+  recalcSize();
+}
+
+void GuiCommunicator::recalcRects()
+{
+  unsigned sheight,swidth;
+  ResourceManager::getInstance()->getScreenHeight(sheight);
+  ResourceManager::getInstance()->getScreenWidth(swidth);
+
+  switch(m_verticalPosition) {
+    case posLow:
+
+      AbsoluteRect.UpperLeftCorner.Y = sheight * 3 / 4 - m_totalHeight / 2;
+      AbsoluteRect.LowerRightCorner.Y = 
+        AbsoluteRect.UpperLeftCorner.Y + m_totalHeight;
+
+      AbsoluteRect.UpperLeftCorner.X = (swidth - m_totalWidth) >> 1;
+      AbsoluteRect.LowerRightCorner.X =
+        AbsoluteRect.UpperLeftCorner.X + m_totalWidth;
+
+      break;
+
+    case posCenter: 
+    default:
+      AbsoluteRect.UpperLeftCorner.Y = (sheight - m_totalHeight) >> 1;
+      AbsoluteRect.LowerRightCorner.Y = 
+        AbsoluteRect.UpperLeftCorner.Y + m_totalHeight;
+
+      AbsoluteRect.UpperLeftCorner.X = (swidth - m_totalWidth) >> 1;
+      AbsoluteRect.LowerRightCorner.X =
+        AbsoluteRect.UpperLeftCorner.X + m_totalWidth;
+      break;
+  }
+
+  m_frame->setSize(AbsoluteRect);
 }
 
 void GuiCommunicator::adjustSizeWithLastInsert()
@@ -49,18 +105,7 @@ void GuiCommunicator::adjustSizeWithLastInsert()
     m_totalWidth = dim.Width;
   }
 
-  unsigned sheight,swidth;
-  ResourceManager::getInstance()->getScreenHeight(sheight);
-  ResourceManager::getInstance()->getScreenWidth(swidth);
-  
-  AbsoluteRect.UpperLeftCorner.Y = (sheight - m_totalHeight) >> 1;
-  AbsoluteRect.LowerRightCorner.Y = 
-    AbsoluteRect.UpperLeftCorner.Y + m_totalHeight;
-
-  AbsoluteRect.UpperLeftCorner.X = (swidth - m_totalWidth) >> 1;
-  AbsoluteRect.LowerRightCorner.X =
-    AbsoluteRect.UpperLeftCorner.X + m_totalWidth;
-  m_frame->setSize(AbsoluteRect);
+  recalcRects();
 }
 
 void GuiCommunicator::add(bool center,const char * fmt, ...)
@@ -112,8 +157,9 @@ void GuiCommunicator::draw()
   irr::video::SColor FGColor(255,255,255,255);
   irr::core::rect<irr::s32> frameRect(AbsoluteRect);
   frameRect.LowerRightCorner.Y = frameRect.UpperLeftCorner.Y + m_buffersHeights[0];
+
   for(unsigned i=0; i<m_nMessages; i++) {
-    m_font->draw(m_buffers[i].text, frameRect,FGColor,m_centers[i], true, &AbsoluteClippingRect);
+    m_font->draw(m_buffers[i].text, frameRect,FGColor,m_centers[i], false, 0); 
     frameRect.UpperLeftCorner.Y = frameRect.LowerRightCorner.Y;
     frameRect.LowerRightCorner.Y = m_buffersHeights[i] + frameRect.UpperLeftCorner.Y;
   }

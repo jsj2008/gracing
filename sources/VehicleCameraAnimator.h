@@ -19,6 +19,18 @@
 #include <irrlicht.h>
 #include "IVehicle.h"
 
+class ICamAnimator 
+{
+  public:
+    virtual void doit(const irr::core::vector3df & position,
+        const irr::core::vector3df & forward,
+        irr::core::vector3df & camPosition,
+        irr::core::vector3df & camTarget,
+        irr::core::vector3df & camUpDir)=0;
+
+    virtual void move(float dx, float dy)=0;
+};
+
 class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
 {
   public:
@@ -49,12 +61,25 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
     // move the camera
     void moveXY(float dx, float dy);
 
+    void setCameraType(unsigned camType);
+
+    void nextCameraType() { m_camType++; m_camType %= 3; }
+
     // Event receiver, override this function for camera controlling animators. 
     //virtual bool 	OnEvent (const SEvent &event);
   private:
 
     void type0_moveXY(float dx, float y);
     void type0_updateDerivate();
+    void type0_init();
+
+    void type1_moveXY(float dx, float y);
+    void type1_init();
+
+    void init(unsigned);
+
+
+
 
     IVehicle * m_vehicle;
 
@@ -62,8 +87,17 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
       ct_micromachine=0,
       ct_tuxracer=1,
       ct_birdeye=2
-    }      m_camType;
+    };
 
+    
+    unsigned  m_camType;
+
+    ICamAnimator * m_animators[3];
+    irr::core::vector3df m_camPosition;
+    irr::core::vector3df m_camTarget;
+    irr::core::vector3df m_camUpDir;
+
+    // obsoleted
     struct {
       float                distance;
       float                phi;
@@ -72,6 +106,17 @@ class VehicleCameraAnimator : public irr::scene::ISceneNodeAnimator
       // derivate
       irr::core::vector3df pos;
     } m_type0_parms;
+
+
+    struct {
+      //irr::core::vector3df            deltaPos; 
+      //irr::core::vector3df            deltaTarget;
+
+      irr::core::vector3df            up;
+
+      //float            offsPos;
+      //float            offsTarget;
+    } m_type1_parms;
 
 };
 

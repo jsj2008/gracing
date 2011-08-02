@@ -109,7 +109,7 @@ static bool doneStep=false;
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
 CFG_PARAM_BOOL(glob_enableShadows)=false;
-CFG_PARAM_BOOL(glob_enableFullScreen)=false;
+CFG_PARAM_BOOL(glob_enableFullScreen)=true;
 CFG_PARAM_BOOL(glob_enableVSync)=false;
 
 
@@ -176,7 +176,7 @@ int main(int argc, char ** av)
   resmanager->getScreenWidth(screenWidth);
 
   IrrlichtDevice *device =
-    createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 16,
+    createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 24,
         glob_enableFullScreen,
         glob_enableShadows, 
         glob_enableVSync,
@@ -202,10 +202,10 @@ int main(int argc, char ** av)
   // prepare the track
   Track * thetrack;
   //thetrack=new Track(device,world,"farm.zip");
-  //thetrack=new Track(device,world,"devtrack.zip");
+  thetrack=new Track(device,world,"devtrack.zip");
   //thetrack=new Track(device,world,"tuxtollway.zip");
   //thetrack=new Track(device,world,"jungle.zip");
-  thetrack=new Track(device,world,"beach.zip");
+  //thetrack=new Track(device,world,"beach.zip");
   //thetrack->load();
 
   bool done=false;
@@ -235,8 +235,8 @@ int main(int argc, char ** av)
   assert(vehicles.size() >= 4);
   race->setTrack(thetrack);
   race->addVehicle(vehicles[1],
-      //new VehicleKeyboardController(resmanager->getEventReceiver()), 
-      new VehicleAutoController(), 
+      new VehicleKeyboardController(resmanager->getEventReceiver()), 
+      //new VehicleAutoController(), 
       "gonorra",true);
   race->addVehicle(vehicles[0], 
       new VehicleAutoController(), 
@@ -251,7 +251,7 @@ int main(int argc, char ** av)
   unsigned runningVehicles[3];
 
   // temp init !!!!!
-  vehicleChooser->prepare(1,1,runningVehicles);
+  vehicleChooser->prepare(1,3,runningVehicles);
   currentPhaseHandler= vehicleChooser;
 
   bool donePhase;
@@ -297,7 +297,6 @@ int main(int argc, char ** av)
               //new VehicleAutoController(),
               "gonorra",true);
 
-
           race->restart();
 
           currentPhaseHandler = race;
@@ -309,8 +308,6 @@ int main(int argc, char ** av)
       if(dt < frameDuration) {
         device->sleep(frameDuration - dt);
       }
-
-
     } else {
       device->yield();
     }

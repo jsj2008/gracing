@@ -25,14 +25,20 @@ class VehicleAutoController : public IVehicleController
   public: 
     VehicleAutoController();
 
+    virtual void init(
+        const std::vector<btVector3> & controlPoints,
+        const btVector3 vehicleDirection,
+        const btVector3 startPosition);
+
     virtual void updateCommands(
         const btVector3 &              vehicleDirection,
         const btVector3 &              vehicleRightDirection,
         const btVector3 &              vehiclePosition,
-        unsigned                       index,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands);
   private:
+    unsigned m_currentIndex;
+    bool     m_initialized;
 };
 
 #endif

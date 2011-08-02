@@ -34,6 +34,7 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
   m_angleSpan=deg2rad(8.);
   m_timeStep=1./glob_frameRate;
   m_vehiclesHeight=1.;
+  m_rotationSpeed= deg2rad(180) / glob_frameRate;
 
   std::string respat=ResourceManager::getInstance()->getResourcePath();
 
@@ -237,7 +238,7 @@ bool VehicleChooser::step()
     pos.X=cos(angle) * m_radius - m_radius;
     pos.Y=m_infos[i].height - m_vehiclesHeight;
     pos.Z=sin(angle) * m_radius;
-    m_infos[i].rotation+=.05;
+    m_infos[i].rotation+=m_rotationSpeed;
 
     m_infos[i].vehicle->reset(pos,m_infos[i].rotation);
   }

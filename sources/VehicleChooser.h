@@ -87,6 +87,7 @@ class VehicleChooser :  public IPhaseHandler
     double m_radius;
     double m_angleSpan;
     double m_vehiclesHeight;
+    double m_rotationSpeed;
 
     // ~~~~~~~~~~
     XmlNode * m_rootNode;
