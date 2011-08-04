@@ -59,6 +59,8 @@ class ResourceManager
     bool cfgGet(const char * name, unsigned & value);
     bool cfgGet(const char * name, std::string & value);
 
+    bool cfgGet(const char * nodeName, const XmlNode * & node);
+
     inline const std::string & getResourcePath() { return m_rootDir; }
 
 

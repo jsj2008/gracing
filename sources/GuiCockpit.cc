@@ -214,14 +214,17 @@ void GuiCockpit::draw()
       true);
 
   // draw the hand
-  static double angle=0.;
-  angle+=1.;
+
+  double angle = 2. * getValue();
+
+  if(angle < 0.) angle=0.;
+
   Util::draw2DImage_v2(driver,
     m_textures[m_handTidx],
     m_handRect,
     m_handDstRect.UpperLeftCorner,
     m_handCenter,
-    2.*getValue(), // rotation
+    angle,
     irr::core::vector2df(1.,1.),  // scale
     true,
     irr::video::SColor(255,255,255,255));

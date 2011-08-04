@@ -177,6 +177,8 @@ void Race::updateVehiclesInfo()
           color2);
   }
 
+  SVehicleParameters vpar;
+
   for(unsigned index=0; index<m_nVehicles; index++) {
     VehicleInfo & vinfo=m_vehicles[index];
 
@@ -186,14 +188,14 @@ void Race::updateVehiclesInfo()
     btVector3 vehicleRightDirection;
     btVector3 vehiclePosition;
 
-    vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
-    vehicleRightDirection = vinfo.vehicle->getChassisRightDirection();
-    vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
+    vpar.vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
+    vpar.vehicleRightDirection = vinfo.vehicle->getChassisRightDirection();
+    vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
+    vpar.vehicleSpeed = vinfo.vehicle->getSpeed();
+
 
     vinfo.controller->updateCommands(
-        vehicleDirection,
-        vehicleRightDirection,
-        vehiclePosition,
+        vpar,
         controlPoints,
         vinfo.vehicle->getVehicleCommands());
 
@@ -559,6 +561,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     m_cameraAnim=new
       VehicleCameraAnimator(vehicle);
     m_camera = m_device->getSceneManager()->addCameraSceneNode();
+    m_camera->grab();
     m_camera->addAnimator(m_cameraAnim);
     m_followedVehicleIndex = m_nVehicles;
     vehicle->setSpeedOMeter(m_cockpit);

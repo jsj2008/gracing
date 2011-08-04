@@ -57,7 +57,8 @@ class IVehicle : public CompoundSceneNode
   virtual btVector3            getChassisUpDirection()=0;
   virtual bool                 getIfChassisIsTouchingTheGround()=0;
 
-  virtual double               getRestHeight(/*float x, float y*/)=0; // still not working !!
+  virtual double               getRestHeight()=0; 
+  virtual double               getSpeed()=0;
 
   // position/physics reset //
   virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;

@@ -53,6 +53,12 @@ class BirdFlyCamAnimator : public ICamAnimator
 class FirstPersonCamAnimator : public ICamAnimator
 {
   public:
+    FirstPersonCamAnimator()
+    {
+      m_lookingBackward=false;
+      m_lookingHeight=.9;
+    }
+
     virtual void doit(const irr::core::vector3df & position,
         const irr::core::vector3df & forward,
         irr::core::vector3df & camPosition,
@@ -60,19 +66,42 @@ class FirstPersonCamAnimator : public ICamAnimator
         irr::core::vector3df & camUpDir)
     {
       double oo1=1.1;
-      double oo2=.9;
+      //double oo2=.9;
       double aa=3.;
 
       irr::core::vector3df direction = irr::core::vector3df(forward.X,forward.Y+oo1,forward.Z);
-      camTarget = position + direction;
 
-      camPosition = position;
-      camPosition.X -= direction.X * aa; 
-      camPosition.Y += oo2;
-      camPosition.Z -= direction.Z * aa; 
-      camUpDir=irr::core::vector3df(0.,1.,0);
+      if(m_lookingBackward) {
+        camPosition = position + direction;
+        camTarget = position;
+        camTarget.X -= direction.X * aa; 
+        camTarget.Y += m_lookingHeight;
+        camTarget.Z -= direction.Z * aa; 
+        camUpDir=irr::core::vector3df(0.,1.,0);
+        m_lookingBackward = false;
+      } else {
+        camTarget = position + direction;
+        camPosition = position;
+        camPosition.X -= direction.X * aa; 
+        camPosition.Y += m_lookingHeight;
+        camPosition.Z -= direction.Z * aa; 
+        camUpDir=irr::core::vector3df(0.,1.,0);
+      }
     }
-    virtual void move(float,float) { }
+    virtual void move(float dx,float dy) 
+    { 
+      if(dx != 0.) 
+        m_lookingBackward = true;
+      m_lookingHeight += dy;
+      if(m_lookingHeight < .3) 
+        m_lookingHeight = .3;
+      else if(m_lookingHeight > 1.5)
+        m_lookingHeight = 1.5;
+    }
+
+   private:
+    bool     m_lookingBackward;
+    double   m_lookingHeight;
 };
 
 class ThirdPersonCamAnimator : public ICamAnimator

@@ -25,9 +25,12 @@ class VehicleKeyboardController : public IVehicleController
   public: 
     VehicleKeyboardController(EventReceiver * receiver);
     virtual void updateCommands(
+        const SVehicleParameters  &    vehicleParameters,
+#if 0
         const btVector3 &              vehicleDirection,
         const btVector3 &              vehicleRightDirection,
         const btVector3 &              vehiclePosition,
+#endif
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands);
   private:

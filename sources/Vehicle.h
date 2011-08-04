@@ -85,6 +85,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     virtual void setSpeedOMeter(INumberOutput * speedometer);
 
+    virtual double getSpeed();
+
   private:
 
     // in/out data
@@ -222,6 +224,8 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
     btVehicleRaycaster *  m_raycaster;
 
     unsigned              m_debugDrawFlags;
+
+    double                m_forwardSpeed;
 
     // vehicle description
     std::string           m_name;

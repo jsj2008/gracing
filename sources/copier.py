@@ -146,6 +146,16 @@ def extract_configuration():
   f.write("<config>\n")
   for el in list:
     f.write("  <%s>%s</%s>\n"%(el[0],el[1],el[0]))
+
+  try:
+    xf=open("uconfig.xml","r")
+    lines=xf.readlines()
+    for line in lines:
+      f.write(line)
+  except:
+    print("  skipping uconfig.xml insertion")
+
+
   f.write("</config>\n")
   f.close()
 

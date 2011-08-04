@@ -199,14 +199,35 @@ int main(int argc, char ** av)
   }
 
 
-  // prepare the track
-  Track * thetrack;
+  Track * thetrack=0;
+
+  // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
+  const XmlNode * defaultTrack;
+  ResourceManager::getInstance()->cfgGet("default-track",defaultTrack);
+
+  if(defaultTrack) {
+    std::string name;
+    defaultTrack->get("name",name);
+    thetrack=new Track(device,world,name.c_str());
+    GM_LOG("got the default track %s!!!!\n",name.c_str());
+  }
+
   //thetrack=new Track(device,world,"farm.zip");
-  thetrack=new Track(device,world,"devtrack.zip");
+  //thetrack=new Track(device,world,"devtrack.zip");
   //thetrack=new Track(device,world,"tuxtollway.zip");
   //thetrack=new Track(device,world,"jungle.zip");
   //thetrack=new Track(device,world,"beach.zip");
-  //thetrack->load();
+
+
+  if(!thetrack) 
+    thetrack=new Track(device,world,"farm.zip");
+
+
+  bool autoplayer;
+  ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
+
+  // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
+
 
   bool done=false;
   int lastFPS=-1;
@@ -292,17 +313,20 @@ int main(int argc, char ** av)
 
           race->setTrack(thetrack);
 
-          race->addVehicle(vehicles[runningVehicles[0]],
-              new VehicleKeyboardController(resmanager->getEventReceiver()), 
-              //new VehicleAutoController(),
-              "gonorra",true);
+          if(autoplayer) 
+            race->addVehicle(vehicles[runningVehicles[0]],
+                new VehicleAutoController(),
+                vehicles[runningVehicles[0]]->getName().c_str(),true);
+          else
+            race->addVehicle(vehicles[runningVehicles[0]],
+                new VehicleKeyboardController(resmanager->getEventReceiver()), 
+                vehicles[runningVehicles[0]]->getName().c_str(),true);
 
           race->restart();
 
           currentPhaseHandler = race;
         }
       }
-
       endFrameTime=device->getTimer()->getRealTime();
       unsigned long dt = (endFrameTime - startFrameTime);
       if(dt < frameDuration) {

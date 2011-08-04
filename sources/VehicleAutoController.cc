@@ -35,11 +35,9 @@ VehicleAutoController::VehicleAutoController()
 
 
 void VehicleAutoController::updateCommands(
-        const btVector3 &              vehicleDirection,
-        const btVector3 &              vehicleRightDirection,
-        const btVector3 &              vehiclePosition,
-        const std::vector<btVector3> & controlPoints,
-        IVehicle::VehicleCommands &    commands)
+    const SVehicleParameters & parameters,
+    const std::vector<btVector3> & controlPoints,
+    IVehicle::VehicleCommands &    commands)
 {
   unsigned size = controlPoints.size();
   unsigned nextIndex = (m_currentIndex + 1) % size;
@@ -47,8 +45,9 @@ void VehicleAutoController::updateCommands(
   if(!m_initialized)
     return;
 
-  btVector3 dir = controlPoints[m_currentIndex] - vehiclePosition;
-  btVector3 dir2 = controlPoints[nextIndex] - vehiclePosition;
+
+  btVector3 dir = controlPoints[m_currentIndex] - parameters.vehiclePosition;
+  btVector3 dir2 = controlPoints[nextIndex] - parameters.vehiclePosition;
 
   double dist = dir.length();
   double dist2 = dir2.length();
@@ -61,10 +60,10 @@ void VehicleAutoController::updateCommands(
 
   dir /= dist;
 
-  double dot = vehicleRightDirection.dot( dir );
+  double dot = parameters.vehicleRightDirection.dot( dir );
 
-  //static unsigned cnt=0;
-  //if(cnt ++ % 2 == 0)
+  static unsigned cnt=0;
+  if(cnt ++ % 2 == 0)
     commands.throttling = 1.;
 
   const char * steering;
@@ -89,9 +88,8 @@ void VehicleAutoController::updateCommands(
 
 
   //SHOW("f:%d,s:%s,d:%2.2f,d:%2.2f",m_currentIndex,steering,dist,dist2);
-  SHOW("s:%s",steering);
+  SHOW("s:%s,sp:%2.3f",steering,parameters.vehicleSpeed);
 
-  
 }
 
 void VehicleAutoController::init(
@@ -118,7 +116,7 @@ void VehicleAutoController::init(
       bestDistanceIndex = i;
     }
 
-#if 1
+#if 0
     GM_LOG("[%d] %2.2f %2.2f %2.2f - dist: %2.2f\n",
         i,
         cpnt.getX(),
@@ -131,13 +129,12 @@ void VehicleAutoController::init(
 
   double dot = vehicleDirection.dot( controlPoints[bestDistanceIndex] - startPosition );
 
-  if(dot < 0) {
+  if(dot < 0)
     m_currentIndex = otherIndex;
-  } else
+  else
     m_currentIndex = bestDistanceIndex;
 
   m_initialized=true;
-
 }
 
 

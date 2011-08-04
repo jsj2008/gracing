@@ -21,6 +21,14 @@
 
 #include "IVehicle.h"
 
+struct SVehicleParameters
+{
+  btVector3 vehicleDirection;
+  btVector3 vehicleRightDirection;
+  btVector3 vehiclePosition;
+  double    vehicleSpeed;
+};
+
 class IVehicleController
 {
   public: 
@@ -30,9 +38,7 @@ class IVehicleController
         const btVector3 startPosition) { };
 
     virtual void updateCommands(
-        const btVector3 &              vehicleDirection,
-        const btVector3 &              vehicleRightDirection,
-        const btVector3 &              vehiclePosition,
+        const SVehicleParameters &     vehicleParameters,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)=0;
 };

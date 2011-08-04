@@ -31,14 +31,18 @@ class VehicleAutoController : public IVehicleController
         const btVector3 startPosition);
 
     virtual void updateCommands(
+        const SVehicleParameters &     parameters,
+#if 0
         const btVector3 &              vehicleDirection,
         const btVector3 &              vehicleRightDirection,
         const btVector3 &              vehiclePosition,
+#endif
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands);
   private:
-    unsigned m_currentIndex;
-    bool     m_initialized;
+    unsigned   m_currentIndex;
+    bool       m_initialized;
+    btVector3  m_previousPos;
 };
 
 #endif

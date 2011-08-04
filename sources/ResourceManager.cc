@@ -246,6 +246,16 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
   return true;
 }
 
+bool ResourceManager::cfgGet(const char * nodeName, const XmlNode * & node)
+{
+  if(!m_configRoot)
+    return false;
+
+  node = m_configRoot->getChild(nodeName);
+
+  return (node);
+}
+
 bool ResourceManager::cfgGet(const char * name, std::string & value)
 {
   if(!m_configRoot)

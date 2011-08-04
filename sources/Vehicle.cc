@@ -759,8 +759,11 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     updateWheelPhysics(i);
 
   // 2- update speed km/h
-  if(m_speedometer) 
-    m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
+  if(m_speedometer) {
+    m_forwardSpeed = 3.6 * getChassisForwardDirection().dot(m_carBody->getLinearVelocity());
+    m_speedometer->setValue(m_forwardSpeed);
+    //m_speedometer->setValue(btScalar(3.6) * m_carBody->getLinearVelocity().length());
+  }
 
   // 3- simulate suspensions
   for (int i=0;i<4;i++)
@@ -1349,3 +1352,9 @@ bool Vehicle::getIfChassisIsTouchingTheGround()
 {
   return m_nWheelTouchGround!=0;
 }
+
+double Vehicle::getSpeed()
+{
+  return m_forwardSpeed;
+}
+
