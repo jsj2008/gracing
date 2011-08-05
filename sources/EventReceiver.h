@@ -17,7 +17,16 @@
 #ifndef EVENTRECEIVER_H
 #define EVENTRECEIVER_H
 #include <irrlicht.h>
+#include <vector>
 
+class IEventListener  
+{
+  public:
+    virtual void mouseEvent(const irr::SEvent::SMouseInput & MouseInput) { }
+};
+
+// TODO: probably this should be called
+//       'EventDispacther' and not 'EventReceiver'
 class EventReceiver : public irr::IEventReceiver
 {
   public:
@@ -33,10 +42,28 @@ class EventReceiver : public irr::IEventReceiver
 
     virtual bool IsAnyKeyDown() const;
 
+    inline void addListener(IEventListener * lstnr)
+    {
+      m_listeners.push_back(lstnr);
+    }
+
+    inline bool removeListener(IEventListener * lstnr)
+    {
+      std::vector<IEventListener*>::iterator it;
+      for(it=m_listeners.begin(); it < m_listeners.end(); it++) 
+        if( *it == lstnr ) {
+          m_listeners.erase(it);
+          return true;
+        }
+      return false;
+    }
+
   private:
     // We use this array to store the current state of each key
     bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
     bool OneShotKeyIsDown[irr::KEY_KEY_CODES_COUNT];
     int  KeysPressed;
+
+    std::vector<IEventListener*>  m_listeners;
 };
 #endif

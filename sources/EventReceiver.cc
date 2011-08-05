@@ -21,6 +21,7 @@
 
 using namespace irr;
 
+
 bool EventReceiver::OnEvent(const SEvent& event)
 {
   // Remember whether each key is down or up
@@ -36,7 +37,13 @@ bool EventReceiver::OnEvent(const SEvent& event)
         KeysPressed--;
     }
     KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+  } else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
+    if( event.MouseInput.X >= 0 && event.MouseInput.Y >= 0 ) 
+      for(unsigned i=0; i< m_listeners.size(); i++) 
+        m_listeners[i]->mouseEvent(event.MouseInput);
+
   }
+
   assert(KeysPressed >= 0);
   return false;
 }

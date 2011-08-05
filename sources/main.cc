@@ -229,6 +229,12 @@ int main(int argc, char ** av)
   GuiMenu * menu = new GuiMenu(device->getGUIEnvironment(),
     device->getGUIEnvironment()->getRootGUIElement(),0,rect);
 
+  resmanager->getEventReceiver()->addListener(menu);
+
+
+  menu->addStaticText(L"gianni");
+  menu->addStaticText(L"massimo");
+  menu->centerOnTheScreen();
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
 
@@ -293,6 +299,9 @@ int main(int argc, char ** av)
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
         done=true;
 
+      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_O))
+        resmanager->getEventReceiver()->removeListener(menu);
+
       if (driver->getFPS() != lastFPS)
       {
         lastFPS = driver->getFPS();
@@ -340,4 +349,8 @@ int main(int argc, char ** av)
     }
   }
 }
+
+
+
+
 
