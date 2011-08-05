@@ -86,7 +86,7 @@
   };
 
 CFG_PARAM_D(glob_chassisDefaultMass)=.8;
-CFG_PARAM_D(glob_steeringIncrement)=0.02f;
+CFG_PARAM_D(glob_steeringIncrement)=0.005f;
 CFG_PARAM_D(glob_throttleIncrement)=0.2;
 CFG_PARAM_D(glob_throttleDecrement)=0.01;
 CFG_PARAM_D(glob_maxThrottle)=0.7;

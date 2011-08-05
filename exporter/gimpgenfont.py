@@ -134,7 +134,7 @@ def python_generate_font(font,font_size,filename,color):
       for el in elements:
         if el["c"] != '"':
           line = "<c c=\"%s\" r=\"%s\" i=\"%d\"/>\n" % (el["c"], el["r"], el["i"])
-        else
+        else:
           line = "<c c='%s' r=\"%s\" i=\"%d\"/>\n" % (el["c"], el["r"], el["i"])
         print line
         file.write(line)

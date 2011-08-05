@@ -31,6 +31,7 @@
 #include "GUISpeedometer.h"
 #include "EventReceiver.h"
 #include "VehicleChooser.h"
+#include "GuiMenu.h"
 
 // vehicle controllers
 #include "VehicleKeyboardController.h"
@@ -218,13 +219,15 @@ int main(int argc, char ** av)
   //thetrack=new Track(device,world,"jungle.zip");
   //thetrack=new Track(device,world,"beach.zip");
 
-
   if(!thetrack) 
     thetrack=new Track(device,world,"farm.zip");
 
-
   bool autoplayer;
   ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
+
+  irr::core::rect<irr::s32> rect;
+  GuiMenu * menu = new GuiMenu(device->getGUIEnvironment(),
+    device->getGUIEnvironment()->getRootGUIElement(),0,rect);
 
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
