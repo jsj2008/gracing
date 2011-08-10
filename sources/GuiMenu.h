@@ -30,6 +30,7 @@ typedef irr::core::dimension2d<irr::u32>  GuiDimension;
 typedef struct { GuiS32 x,y; }            GuiPoint;
 typedef irr::core::rect<irr::s32>         GuiRect;
 typedef irr::gui::IGUIFont                GuiFont;
+typedef irr::video::ITexture                GuiImage;
 
 #define _X(pnt)   pnt.x
 #define _Y(pnt)   pnt.y
@@ -38,6 +39,18 @@ typedef irr::gui::IGUIFont                GuiFont;
 #define _H(dim)   dim.Height
 
 /////////////////////////////////////////////////
+
+class GuiTheme
+{
+  public:
+    GuiTheme(const char * filename);
+
+    const XmlNode * getNode(const char * node);
+
+  private:
+    std::vector<GuiImage*> m_images;
+    XmlNode *              m_root;
+};
 
 class IGuiMenuItem 
 {
@@ -50,10 +63,13 @@ class IGuiMenuItem
       updateRectangle();
     }
 
-    virtual void setPosition(const GuiPoint position) { 
+    virtual void setPosition(const GuiPoint position) 
+    { 
       m_position=position;
       updateRectangle();
     }
+
+    virtual void setTheme(GuiTheme * theme)=0;
 
     virtual void draw()=0;
 
@@ -61,10 +77,11 @@ class IGuiMenuItem
 
     void updateRectangle()
     {
+#if 0
       GM_LOG("updating rectangle: pos: %d,%d, dim: %d,%d\n",
           _X(m_position),_Y(m_position),
           _W(m_dimension),_H(m_dimension));
-
+#endif
       m_rectangle.UpperLeftCorner.X = _X(m_position);
       m_rectangle.UpperLeftCorner.Y = _Y(m_position);
       m_rectangle.LowerRightCorner.X = _X(m_position) + _W(m_dimension);
@@ -84,6 +101,8 @@ class GuiItemStaticText : public IGuiMenuItem
   public:
     GuiItemStaticText(const std::wstring & caption);
     GuiItemStaticText(const wchar_t * caption);
+
+    virtual void setTheme(GuiTheme * theme);
 
     GuiDimension getPreferredSize();
 
@@ -138,6 +157,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     void draw();
 
+    void loadTheme(const char * filename);
+
   private:
 
     void refreshSize();
@@ -151,6 +172,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiContainerPolicy * m_policy;
 
     std::vector<IGuiMenuItem*> m_items;
+
+    GuiTheme *   m_theme;
 
 };
 

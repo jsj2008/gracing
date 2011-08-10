@@ -124,9 +124,13 @@ XmlNode::~XmlNode()
 
 int XmlNode::get(const std::string &attribute, std::string & value) const
 {
+  GM_LOG("----%d, %s on '%s'\n",__LINE__,attribute.c_str()/*,m_name.c_str()*/,"oo");
   if(m_attributes.size()==0) return 0;
+  GM_LOG("----%d\n",__LINE__);
   std::map<std::string, core::stringw>::const_iterator o;
+  GM_LOG("----%d\n",__LINE__);
   o = m_attributes.find(attribute);
+  GM_LOG("----%d\n",__LINE__);
   if(o==m_attributes.end()) return 0;
   //*value=core::stringc(o->second).c_str();
   value=core::stringc(o->second).c_str();

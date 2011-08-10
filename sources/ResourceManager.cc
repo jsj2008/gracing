@@ -226,7 +226,6 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
 {
-  GM_LOG("Getting var name '%s'\n",name);
   if(!m_configRoot)
     return false;
 

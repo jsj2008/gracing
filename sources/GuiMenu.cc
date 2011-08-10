@@ -16,17 +16,75 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "GuiMenu.h"
 
+#define MANIFEST_NAME "THEME"
+
+GuiTheme::GuiTheme(const char * filename)
+{
+  irr::io::IFileSystem * fileSystem = ResourceManager::getInstance()->getFileSystem();
+  std::string respat=ResourceManager::getInstance()->getResourcePath() + filename;
+
+  irr::io::path mypath(respat.c_str());
+
+  GM_LOG("loading %s\n",filename);
+
+    
+  fileSystem->addFileArchive(mypath);
+
+  bool res=ResourceManager::getInstance()->getFileSystem()->addFileArchive(mypath);
+
+  if(!res) 
+    return; // !!!
+
+  GM_LOG(" 2 loading %s\n",filename);
+
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
+
+  m_root=new XmlNode(xml);
+  assert(m_root && m_root->getName() == "theme"); // TODO: this must not be an assert!!!
+
+  // load images 
+  std::vector<XmlNode*> nodes;
+  m_root->getChildren("img",nodes);
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    XmlNode * node=nodes[i];
+    std::string src;
+    unsigned id;
+    node->get("src",src);
+    node->get("id",id); 
+    GuiImage * texture = 0;
+    texture = ResourceManager::getInstance()->getVideoDriver()->getTexture(src.c_str());
+    if(texture) {
+      m_images.push_back(texture);
+    }
+
+    GM_LOG("loading image: %s as id: %d\n",src.c_str(),id);
+  }
+
+  res=fileSystem->removeFileArchive(fileSystem->getAbsolutePath(mypath));
+
+  assert(res);
+}
+
+const XmlNode * GuiTheme::getNode(const char * name)
+{
+  return m_root->getChild(name);
+}
 
 GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
         irr::gui::IGUIElement* parent, irr::s32 id, 
         const irr::core::rect<irr::s32>& rectangle)
   : IGUIElement(irr::gui::EGUIET_ELEMENT,environment,parent,id,rectangle)
 {
+  ResourceManager *  resman=ResourceManager::getInstance();
+
   m_frame=new GuiFrame(rectangle);
   m_hasFrame=true;
   m_growSize=true;
   m_font= ResourceManager::getInstance()->getSystemFontBig();
   m_policy=new GuiContainerPolicy_GrowVertical();
+
+  m_theme=new GuiTheme("theme-default.zip");
 
   _H(m_dimension)=100;
   _W(m_dimension)=200;
@@ -35,7 +93,6 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
 
   // tmp tmp tmp
   unsigned width;
-  ResourceManager *  resman=ResourceManager::getInstance();
   resman->getScreenWidth(width);
   width-=100;
   irr::core::rect<irr::s32> rect(0,0,width,100);
@@ -154,6 +211,9 @@ GuiItemStaticText * GuiMenu::addStaticText(const std::wstring & caption)
 
   st = new GuiItemStaticText(caption);
 
+  if(m_theme)
+    st->setTheme(m_theme);
+
   m_items.push_back(st);
   refreshSize();
 
@@ -192,6 +252,21 @@ GuiDimension GuiItemStaticText::getPreferredSize()
 void GuiItemStaticText::draw()
 {
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),true,true);
+}
+
+void GuiItemStaticText::setTheme(GuiTheme * theme)
+{
+  const XmlNode * node = theme->getNode("static-text");
+  std::string value;
+
+  if(node->get("font",value)) {
+    if(value == "big") 
+      m_font = ResourceManager::getInstance()->getSystemFontBig();
+    else if(value == "small") 
+      m_font = ResourceManager::getInstance()->getSystemFontSmall();
+    else if(value == "normal")
+      m_font = ResourceManager::getInstance()->getSystemFont();
+  }
 }
 ////////////////////////////////////////////////// GUI STATIC TEXT END
 

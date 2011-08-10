@@ -28,7 +28,6 @@ gui_home=/Users/gianni/MyLibraries/CEGUI-0.7.5
 gui_inc_dir=$(gui_home)/cegui/include
 gui_lib_dir=
 
-
 log_enabled=-DLOG_ENABLED
 
 appl_name=gracing
@@ -53,6 +52,7 @@ src_vehicles_dir=$(resources_dir)/vehicles
 src_tracks_dir=$(resources_dir)/tracks
 src_fonts_dir=$(resources_dir)/gfx/fonts
 src_textures_dir=$(resources_dir)/gfx/textures
+src_themes_dir=$(resources_dir)/themes
 
 ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)
 
@@ -91,6 +91,8 @@ copy_files:
 	@$(copier) --cp config.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
 	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/themes/default/theme-default.zip $(tgt_res_dir)
+
 # GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)

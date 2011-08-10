@@ -45,7 +45,6 @@ class ResourceManager
     void getResourceCompletePath(const char * filename, std::string & path);
     void getTexturesCompletePath(const char * texturesName, std::string & path);
 
-    EventReceiver * getEventReceiver();
 
     /* system font */
     inline irr::gui::IGUIFont *  getSystemFontSmall() { return m_fontSmall; }
@@ -72,6 +71,7 @@ class ResourceManager
     inline irr::io::IFileSystem *     getFileSystem()  { return m_fileSystem; }
     inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
     inline PhyWorld *                 getPhyWorld()    { return m_world; }
+           EventReceiver *            getEventReceiver();
 
     inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
 
