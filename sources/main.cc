@@ -232,8 +232,8 @@ int main(int argc, char ** av)
   resmanager->getEventReceiver()->addListener(menu);
 
 
-  menu->addStaticText(L"gianni");
-  menu->addStaticText(L"massimo");
+  menu->addStaticText(L"testo di prova");
+  menu->addCheckbox(L"check box");
   menu->centerOnTheScreen();
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 

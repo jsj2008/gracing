@@ -57,8 +57,9 @@ void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
   m_name = std::string(core::stringc(xml->getNodeName()).c_str());
   m_text = "";
 
-  for(unsigned int i=0; i<xml->getAttributeCount(); i++)
-  {
+  //GM_LOG("name: '%s'\n",m_name.c_str());
+
+  for(unsigned int i=0; i<xml->getAttributeCount(); i++) {
     std::string   name  = core::stringc(xml->getAttributeName(i)).c_str();
     core::stringw value = xml->getAttributeValue(i);
     m_attributes[name] = value;
@@ -100,7 +101,6 @@ const void XmlNode::getChildren(const std::string &s, std::vector<XmlNode*>& out
   }
 }   
 
-
 const XmlNode *XmlNode::getChild(const std::string &s) const
 {
   for(unsigned int i=0; i<m_nodes.size(); i++) {
@@ -124,13 +124,9 @@ XmlNode::~XmlNode()
 
 int XmlNode::get(const std::string &attribute, std::string & value) const
 {
-  GM_LOG("----%d, %s on '%s'\n",__LINE__,attribute.c_str()/*,m_name.c_str()*/,"oo");
   if(m_attributes.size()==0) return 0;
-  GM_LOG("----%d\n",__LINE__);
   std::map<std::string, core::stringw>::const_iterator o;
-  GM_LOG("----%d\n",__LINE__);
   o = m_attributes.find(attribute);
-  GM_LOG("----%d\n",__LINE__);
   if(o==m_attributes.end()) return 0;
   //*value=core::stringc(o->second).c_str();
   value=core::stringc(o->second).c_str();

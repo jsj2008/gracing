@@ -15,6 +15,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "GuiMenu.h"
+#include "Util.hh"
 
 #define MANIFEST_NAME "THEME"
 
@@ -25,17 +26,12 @@ GuiTheme::GuiTheme(const char * filename)
 
   irr::io::path mypath(respat.c_str());
 
-  GM_LOG("loading %s\n",filename);
-
-    
   fileSystem->addFileArchive(mypath);
 
   bool res=ResourceManager::getInstance()->getFileSystem()->addFileArchive(mypath);
 
   if(!res) 
     return; // !!!
-
-  GM_LOG(" 2 loading %s\n",filename);
 
   irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
 
@@ -50,6 +46,10 @@ GuiTheme::GuiTheme(const char * filename)
     XmlNode * node=nodes[i];
     std::string src;
     unsigned id;
+    // TODO: use the "id" field to enter the
+    //       image into the m_images vector.
+    //       up to now the id is taken from
+    //       the order of the images into the xml file
     node->get("src",src);
     node->get("id",id); 
     GuiImage * texture = 0;
@@ -57,13 +57,19 @@ GuiTheme::GuiTheme(const char * filename)
     if(texture) {
       m_images.push_back(texture);
     }
-
-    GM_LOG("loading image: %s as id: %d\n",src.c_str(),id);
   }
 
   res=fileSystem->removeFileArchive(fileSystem->getAbsolutePath(mypath));
 
   assert(res);
+#if 0
+  nodes.clear();
+  m_root->getChildren("img",nodes);
+  
+  for(unsigned i=0; i<nodes.size(); i++) {
+    GM_LOG("[%d] %s\n",i,nodes[i]->getName().c_str());
+  }
+#endif
 }
 
 const XmlNode * GuiTheme::getNode(const char * name)
@@ -154,10 +160,15 @@ void GuiContainerPolicy_GrowVertical::applyPolicy(
 
     _H(dimension) += _H(dim);
     _Y(pos) += _H(dim);
+
+    if(_W(dim) > _W(dimension))
+      _W(dimension) = _W(dim);
+
+#if 0
     _W(dim) = _W(dimension);
-
-
+#endif
     (*it)->setSize(dim);
+
   }
 }
 
@@ -197,12 +208,29 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
       break;
 
     case irr::EMIE_MOUSE_MOVED:
+#if 0
       GM_LOG("mouse move %d,%d\n",MouseInput.X,
           MouseInput.Y);
+#endif
       break;
     default:
       break;
   }
+}
+
+GuiItemCheckbox * GuiMenu::addCheckbox(const std::wstring & caption)
+{
+  GuiItemCheckbox * st;
+
+  st = new GuiItemCheckbox(caption);
+
+  if(m_theme)
+    st->setTheme(m_theme);
+
+  m_items.push_back(st);
+  refreshSize();
+
+  return st;
 }
 
 GuiItemStaticText * GuiMenu::addStaticText(const std::wstring & caption)
@@ -259,7 +287,7 @@ void GuiItemStaticText::setTheme(GuiTheme * theme)
   const XmlNode * node = theme->getNode("static-text");
   std::string value;
 
-  if(node->get("font",value)) {
+  if(node && node->get("font",value)) {
     if(value == "big") 
       m_font = ResourceManager::getInstance()->getSystemFontBig();
     else if(value == "small") 
@@ -269,4 +297,100 @@ void GuiItemStaticText::setTheme(GuiTheme * theme)
   }
 }
 ////////////////////////////////////////////////// GUI STATIC TEXT END
+
+
+GuiItemCheckbox::GuiItemCheckbox(const std::wstring & caption)
+{
+  m_caption=caption;
+  m_checked=false;
+  m_boxImage=0;
+  m_checkerImage=0;
+
+  m_font = ResourceManager::getInstance()->getSystemFont();
+}
+
+GuiDimension GuiItemCheckbox::getPreferredSize()
+{
+  GuiDimension fdim=m_font->getDimension(m_caption.c_str());
+
+  if(m_boxImage) {
+    GuiDimension bdim;
+    bdim = m_boxImage->getSize();
+
+    _W(fdim) += _W(bdim);
+
+    if(_H(fdim) < _H(bdim))
+      _H(fdim) = _H(bdim);
+  }
+
+  return fdim;
+}
+
+void GuiItemCheckbox::draw()
+{
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),true,true);
+
+  if(m_boxImage) {
+#if 0
+    GM_LOG("helo helo %d,%d,%d,%d\n",
+        m_boxDstRect.UpperLeftCorner.X,
+        m_boxDstRect.UpperLeftCorner.Y,
+        m_boxDstRect.LowerRightCorner.X,
+        m_boxDstRect.LowerRightCorner.Y);
+#endif
+    irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+    driver->draw2DImage (
+        m_boxImage,
+        m_boxDstRect,
+        m_boxSrcRect,
+        0,
+        0, //irr::video::SColor(255,255,255,255),
+        true);
+  }
+
+}
+
+void GuiItemCheckbox::setTheme(GuiTheme * theme)
+{
+  const XmlNode * root = theme->getNode("checkbox");
+  std::string value;
+  unsigned idx;
+
+  if(!root) // no checkbox theme present
+    return;
+
+  const XmlNode * boxNode = root->getChild("box");
+
+  GuiRect  rect;
+
+  if(boxNode &&  boxNode->get("r",value)) {
+    Util::parseRect(value.c_str(),m_boxSrcRect);
+  }
+
+  if(boxNode && boxNode->get("img",idx)) {
+    m_boxImage = theme->getImage(idx);
+  }
+
+  updateGeometry();
+}
+
+void GuiItemCheckbox::updateGeometry() 
+{
+  m_boxDstRect.UpperLeftCorner.X = 
+    m_rectangle.LowerRightCorner.X - 40;
+
+  m_boxDstRect.UpperLeftCorner.Y = 
+    m_rectangle.UpperLeftCorner.Y;
+
+  m_boxDstRect.LowerRightCorner.X = 
+    m_boxDstRect.UpperLeftCorner.X + 100;
+
+  m_boxDstRect.LowerRightCorner.Y = 
+    m_boxDstRect.UpperLeftCorner.Y + 100;
+
+  
+}
+
+
+
 

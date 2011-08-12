@@ -47,6 +47,12 @@ class GuiTheme
 
     const XmlNode * getNode(const char * node);
 
+    inline GuiImage * getImage(unsigned index) {
+      if(index < m_images.size()) 
+        return m_images[index];
+      return 0;
+    }
+
   private:
     std::vector<GuiImage*> m_images;
     XmlNode *              m_root;
@@ -63,6 +69,11 @@ class IGuiMenuItem
       updateRectangle();
     }
 
+    virtual const GuiDimension & getSize()
+    {
+      return m_dimension;
+    }
+
     virtual void setPosition(const GuiPoint position) 
     { 
       m_position=position;
@@ -73,27 +84,54 @@ class IGuiMenuItem
 
     virtual void draw()=0;
 
-  private:
+  protected:
 
     void updateRectangle()
     {
-#if 0
-      GM_LOG("updating rectangle: pos: %d,%d, dim: %d,%d\n",
-          _X(m_position),_Y(m_position),
-          _W(m_dimension),_H(m_dimension));
-#endif
       m_rectangle.UpperLeftCorner.X = _X(m_position);
       m_rectangle.UpperLeftCorner.Y = _Y(m_position);
       m_rectangle.LowerRightCorner.X = _X(m_position) + _W(m_dimension);
       m_rectangle.LowerRightCorner.Y = _Y(m_position) + _H(m_dimension);
+
+      updateGeometry();
     }
 
-  protected:
+    virtual void updateGeometry()
+    {
+    }
+
     
     GuiDimension m_dimension;
     GuiPoint     m_position;
 
     GuiRect      m_rectangle;
+};
+
+class GuiItemCheckbox : public IGuiMenuItem 
+{
+  public:
+    GuiItemCheckbox(const std::wstring & caption);
+    GuiItemCheckbox(const wchar_t * caption);
+
+    virtual void setTheme(GuiTheme * theme);
+
+    GuiDimension getPreferredSize();
+
+    void draw();
+
+  protected:
+    virtual void updateGeometry();
+  
+  private:
+    GuiImage * m_checkerImage;
+
+    GuiImage * m_boxImage;
+    GuiRect    m_boxSrcRect;
+    GuiRect    m_boxDstRect;
+
+    std::wstring m_caption;
+    bool        m_checked;
+    GuiFont *   m_font;
 };
 
 class GuiItemStaticText : public IGuiMenuItem
@@ -148,6 +186,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     // elements building
     GuiItemStaticText * addStaticText(const std::wstring & caption);
+    GuiItemCheckbox * addCheckbox(const std::wstring & caption);
 
 
     // position/size
@@ -158,6 +197,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     void draw();
 
     void loadTheme(const char * filename);
+
 
   private:
 
