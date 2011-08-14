@@ -38,6 +38,25 @@ typedef irr::video::ITexture                GuiImage;
 #define _W(dim)   dim.Width
 #define _H(dim)   dim.Height
 
+#define _RW(rect) ( (rect).LowerRightCorner.X - (rect).UpperLeftCorner.X )
+#define _RH(rect) ( (rect).LowerRightCorner.Y - (rect).UpperLeftCorner.Y )
+#define _RMINX(rect) (rect).UpperLeftCorner.X
+#define _RMINY(rect) (rect).UpperLeftCorner.Y
+
+#define _RMAXX(rect) (rect).LowerRightCorner.X
+#define _RMAXY(rect) (rect).LowerRightCorner.Y
+
+// point in rect !
+#define _PINR(pnt, rect)  (\
+    _X(pnt) >= _RMINX(rect) && _X(pnt) <= _RMAXX(rect) && \
+    _Y(pnt) >= _RMINY(rect) && _Y(pnt) <= _RMAXY(rect)\
+    )
+
+
+
+#define _LOGRECT(rect) do { GM_LOG("rect: %d,%d,%d,%d\n",_RMINX(rect),_RMINY(rect),_RMAXX(rect),_RMAXY(rect)); } while(0)
+#define _LOGDIM(dim) do { GM_LOG("dim: %d,%d\n",_W(dim),_H(dim)); } while(0)
+
 /////////////////////////////////////////////////
 
 class GuiTheme
@@ -84,6 +103,14 @@ class IGuiMenuItem
 
     virtual void draw()=0;
 
+    virtual bool selfDrawFocused() { return false; }
+
+    virtual GuiRect getRectangle() { return m_rectangle; }
+
+    virtual bool isPointInside(const GuiPoint & point) { return _PINR(point,m_rectangle); }
+
+    virtual void  onMouseClick(const GuiPoint & point) { };
+
   protected:
 
     void updateRectangle()
@@ -119,11 +146,14 @@ class GuiItemCheckbox : public IGuiMenuItem
 
     void draw();
 
+    virtual void onMouseClick(const GuiPoint & point);
+
   protected:
     virtual void updateGeometry();
   
   private:
     GuiImage * m_checkerImage;
+    GuiRect    m_checkerSrcRect;
 
     GuiImage * m_boxImage;
     GuiRect    m_boxSrcRect;
@@ -198,6 +228,12 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     void loadTheme(const char * filename);
 
+    void selectItemByPoint(const GuiPoint & point);
+
+    unsigned pickupItemByPoint(const GuiPoint & point);
+
+    inline bool isItemIndexValid(unsigned i) { return i < m_items.size(); }
+
 
   private:
 
@@ -215,6 +251,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     GuiTheme *   m_theme;
 
+    unsigned     m_focusedItem;
 };
 
 #endif

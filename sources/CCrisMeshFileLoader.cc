@@ -156,7 +156,7 @@ scene::IAnimatedMesh* CCrisMeshFileLoader::createMesh(io::IReadFile* file)
               currMtl->Meshbuffer->Material.MaterialType=video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
               //currMtl->Meshbuffer->Material.DiffuseColor.set(
               //  currMtl->Meshbuffer->Material.DiffuseColor.getAlpha(), 255, 255, 255 );
-              GM_LOG("Loaded texture '%s'\n",imageName);
+              //GM_LOG("Loaded texture '%s'\n",imageName);
             } else {
               GM_LOG("  --> cannot load texture '%s'\n",imageName);
             }
