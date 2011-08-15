@@ -105,11 +105,14 @@ class IGuiMenuItem
 
     virtual bool selfDrawFocused() { return false; }
 
+    virtual void drawFocus() { }
+
     virtual GuiRect getRectangle() { return m_rectangle; }
 
     virtual bool isPointInside(const GuiPoint & point) { return _PINR(point,m_rectangle); }
 
     virtual void  onMouseClick(const GuiPoint & point) { };
+    virtual void  onMouseMove(const GuiPoint & point) { };
 
   protected:
 
@@ -154,6 +157,7 @@ class GuiItemCheckbox : public IGuiMenuItem
   private:
     GuiImage * m_checkerImage;
     GuiRect    m_checkerSrcRect;
+    GuiRect    m_checkerDstRect;
 
     GuiImage * m_boxImage;
     GuiRect    m_boxSrcRect;
@@ -180,6 +184,47 @@ class GuiItemStaticText : public IGuiMenuItem
     std::wstring m_caption;
 
     GuiFont * m_font;
+};
+
+class GuiItemListBox : public IGuiMenuItem
+{
+  public:
+    GuiItemListBox(const std::wstring & caption);
+
+    GuiDimension getPreferredSize();
+
+    virtual void setTheme(GuiTheme * theme);
+
+    void draw();
+
+    virtual bool selfDrawFocused() { return true; }
+    virtual void drawFocus();
+
+    virtual void  onMouseMove(const GuiPoint & point);
+    virtual void  onMouseClick(const GuiPoint & point);
+
+  protected:
+    virtual void updateGeometry();
+
+  private:
+    std::wstring               m_caption;
+    std::vector<std::wstring>  m_items;
+    GuiFont *                  m_font;
+
+    GuiImage * m_riteImage;
+    GuiRect    m_riteSrcRect;
+    GuiRect    m_riteDstRect;
+
+    GuiImage * m_leftImage;
+    GuiRect    m_leftSrcRect;
+    GuiRect    m_leftDstRect;
+
+    enum {
+      mouseOnNothing,
+      mouseOnLeftImage,
+      mouseOnRiteImage
+    } m_mouseOver;
+
 };
 
 class GuiContainerPolicy
@@ -216,7 +261,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     // elements building
     GuiItemStaticText * addStaticText(const std::wstring & caption);
-    GuiItemCheckbox * addCheckbox(const std::wstring & caption);
+    GuiItemCheckbox *   addCheckbox(const std::wstring & caption);
+    GuiItemListBox *    addListBox(const std::wstring & caption);
 
 
     // position/size

@@ -115,15 +115,13 @@ void GuiMenu::draw()
   if(m_hasFrame && m_frame)
     m_frame->draw();
 
-
   if(m_focusedItem < m_items.size()) {
     IGuiMenuItem * item=m_items[m_focusedItem];
 
     if(item->selfDrawFocused()) {
-      // TODO: call the draw focus
+      item->drawFocus();
     } else {
       irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-
       GuiRect rect= item->getRectangle();
       irr::video::SColor color(200,200,200,200);
       driver->draw2DRectangle(color,rect);
@@ -184,14 +182,11 @@ void GuiContainerPolicy_GrowVertical::applyPolicy(
     else
       _W(dim) = _W(dimension);
 
-
 #if 0
     _W(dim) = _W(dimension);
 #endif
 
-    GM_LOG("setting width: %d\n",_W(dim));
     (*it)->setSize(dim);
-
   }
 }
 
@@ -266,7 +261,15 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
       {
         GuiPoint pnt;
         _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
+        // TODO: avoid double "selectItemByPoint" and "pickupItemByPoint"
         selectItemByPoint(pnt);
+
+        unsigned i;
+        i = pickupItemByPoint(pnt);
+
+        if(isItemIndexValid(i)) {
+          m_items[i]->onMouseMove(pnt);
+        }
       }
       break;
     default:
@@ -296,6 +299,21 @@ GuiItemStaticText * GuiMenu::addStaticText(const std::wstring & caption)
   GuiItemStaticText * st;
 
   st = new GuiItemStaticText(caption);
+
+  if(m_theme)
+    st->setTheme(m_theme);
+
+  m_items.push_back(st);
+  refreshSize();
+
+  return st;
+}
+
+GuiItemListBox * GuiMenu::addListBox(const std::wstring & caption)
+{
+  GuiItemListBox * st;
+
+  st = new GuiItemListBox(caption);
 
   if(m_theme)
     st->setTheme(m_theme);
@@ -416,7 +434,8 @@ void GuiItemCheckbox::draw()
   if(m_checked && m_checkerImage) {
     driver->draw2DImage (
         m_checkerImage,
-        m_boxDstRect,
+        //m_boxDstRect,
+        m_checkerDstRect,
         m_checkerSrcRect,
         0,
         0, //irr::video::SColor(255,255,255,255),
@@ -477,9 +496,147 @@ void GuiItemCheckbox::updateGeometry()
   m_boxDstRect.LowerRightCorner.Y = 
     m_boxDstRect.UpperLeftCorner.Y + _RW(m_boxSrcRect);
 
-  
+  m_checkerDstRect = m_boxDstRect;
+
+  unsigned delta=2;
+  _RMINX(m_boxDstRect) += delta;
+  _RMINY(m_boxDstRect) += delta;
+
+  _RMAXX(m_boxDstRect) -= delta;
+  _RMAXY(m_boxDstRect) -= delta;
+
+}
+
+void GuiItemListBox::updateGeometry()
+{
+  _RMINX(m_riteDstRect) = _RMAXX(m_rectangle) - _RW(m_riteSrcRect);
+  _RMINY(m_riteDstRect) = _RMINY(m_rectangle);
+  _RMAXX(m_riteDstRect) = _RMINX(m_riteDstRect) + _RW(m_riteSrcRect);
+  _RMAXY(m_riteDstRect) = _RMINY(m_riteDstRect) + _RH(m_riteSrcRect);
+
+  _RMINX(m_leftDstRect) = _RMINX(m_riteDstRect) - _RW(m_leftSrcRect);
+  _RMINY(m_leftDstRect) = _RMINY(m_rectangle);
+  _RMAXX(m_leftDstRect) = _RMINX(m_leftDstRect) + _RW(m_leftSrcRect);
+  _RMAXY(m_leftDstRect) = _RMINY(m_leftDstRect) + _RH(m_leftSrcRect);
 }
 
 
+void GuiItemListBox::drawFocus()
+{
+  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+  irr::video::SColor color(200,200,200,200);
+  irr::video::SColor c(100,100,100,255);
+  driver->draw2DRectangle(color,m_rectangle);
+
+  switch(m_mouseOver) {
+    case mouseOnRiteImage:
+      driver->draw2DRectangle(c,m_riteDstRect);
+      break;
+
+    case mouseOnLeftImage:
+      driver->draw2DRectangle(c,m_leftDstRect);
+      break;
+
+    case mouseOnNothing:
+      break;
+  }
+}
+
+void GuiItemListBox::onMouseMove(const GuiPoint & pnt)
+{
+  m_mouseOver = mouseOnNothing;
+
+  if(_PINR(pnt,m_leftDstRect)) 
+    m_mouseOver = mouseOnLeftImage;
+
+  if(_PINR(pnt,m_riteDstRect))
+    m_mouseOver = mouseOnRiteImage;
+}
+
+void GuiItemListBox::onMouseClick(const GuiPoint & pnt)
+{
+  if(_PINR(pnt,m_leftDstRect)) {
+    GM_LOG("on prev item\n");
+  }
+
+  if(_PINR(pnt,m_riteDstRect)) {
+    GM_LOG("on next item\n");
+  }
+}
+
+GuiItemListBox::GuiItemListBox(const std::wstring & caption)
+{
+  m_caption = caption;
+  m_font = ResourceManager::getInstance()->getSystemFont();
+  m_mouseOver = mouseOnNothing;
+}
+
+void GuiItemListBox::setTheme(GuiTheme * theme)
+{
+  const XmlNode * root = theme->getNode("listbox");
+  std::string value;
+  unsigned idx;
+
+  if(!root) // no checkbox theme present
+    return;
+
+  const XmlNode * leftNode = root->getChild("left");
+
+  if(leftNode) { 
+    if(leftNode->get("r",value)) 
+      Util::parseRect(value.c_str(),m_leftSrcRect);
+
+    if(leftNode->get("img",idx)) 
+      m_leftImage = theme->getImage(idx);
+  }
+
+  const XmlNode * riteNode = root->getChild("right");
+
+  if(riteNode) { 
+    if(riteNode->get("r",value)) 
+      Util::parseRect(value.c_str(),m_riteSrcRect);
+
+    if(riteNode->get("img",idx)) 
+      m_riteImage = theme->getImage(idx);
+
+    _LOGRECT(m_riteSrcRect);
+
+  }
+}
+
+GuiDimension GuiItemListBox::getPreferredSize()
+{
+  GuiDimension dim;
+  dim = m_font->getDimension(m_caption.c_str());
+
+  // TODO: complete here!
+
+  return dim;
+}
+
+void GuiItemListBox::draw()
+{
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+
+  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+
+  if(m_riteImage) 
+    driver->draw2DImage (
+        m_riteImage,
+        m_riteDstRect,
+        m_riteSrcRect,
+        0,
+        0,
+        true);
+
+  if(m_leftImage) 
+    driver->draw2DImage (
+        m_leftImage,
+        m_leftDstRect,
+        m_leftSrcRect,
+        0,
+        0,
+        true);
+}
 
 

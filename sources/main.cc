@@ -236,6 +236,9 @@ int main(int argc, char ** av)
   menu->addCheckbox(L"sample 1 of check box");
   menu->addCheckbox(L"sample 2 of check box");
   menu->addCheckbox(L"sample 3 of check box");
+
+  GuiItemListBox * lb;
+  lb=menu->addListBox(L"list box");
   menu->centerOnTheScreen();
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
