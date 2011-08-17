@@ -277,11 +277,11 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
   }
 }
 
-GuiItemCheckbox * GuiMenu::addCheckbox(const std::wstring & caption)
+GuiItemCheckBox * GuiMenu::addCheckBox(const std::wstring & caption)
 {
-  GuiItemCheckbox * st;
+  GuiItemCheckBox * st;
 
-  st = new GuiItemCheckbox(caption);
+  st = new GuiItemCheckBox(caption);
 
   if(m_theme)
     st->setTheme(m_theme);
@@ -375,7 +375,7 @@ void GuiItemStaticText::setTheme(GuiTheme * theme)
 ////////////////////////////////////////////////// GUI STATIC TEXT END
 
 
-GuiItemCheckbox::GuiItemCheckbox(const std::wstring & caption)
+GuiItemCheckBox::GuiItemCheckBox(const std::wstring & caption)
 {
   m_caption=caption;
   m_checked=false;
@@ -385,19 +385,12 @@ GuiItemCheckbox::GuiItemCheckbox(const std::wstring & caption)
   m_font = ResourceManager::getInstance()->getSystemFont();
 }
 
-GuiDimension GuiItemCheckbox::getPreferredSize()
+GuiDimension GuiItemCheckBox::getPreferredSize()
 {
   GuiDimension fdim=m_font->getDimension(m_caption.c_str());
 
   if(m_boxImage) {
     GuiDimension bdim;
-
-#if 0
-    GM_LOG("before: ");
-    _LOGDIM(fdim);
-#endif
-
-    //bdim = m_boxImage->getSize();
     _W(bdim) = _RW(m_boxSrcRect);
     _H(bdim) = _RH(m_boxSrcRect);
 
@@ -405,17 +398,24 @@ GuiDimension GuiItemCheckbox::getPreferredSize()
 
     if(_H(fdim) < _H(bdim))
       _H(fdim) = _H(bdim);
-
-#if 0
-    GM_LOG("after: ");
-    _LOGDIM(fdim);
-#endif
   }
 
   return fdim;
 }
 
-void GuiItemCheckbox::draw()
+void GuiItemListBox::addItem(const std::wstring & item)
+{
+  m_selectedItem = m_items.size();
+  m_items.push_back(item);
+}
+
+void GuiItemListBox::clearItems()
+{
+  m_items.clear();
+  m_selectedItem = 0xffff;
+}
+
+void GuiItemCheckBox::draw()
 {
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
 
@@ -444,7 +444,7 @@ void GuiItemCheckbox::draw()
 
 }
 
-void GuiItemCheckbox::setTheme(GuiTheme * theme)
+void GuiItemCheckBox::setTheme(GuiTheme * theme)
 {
   const XmlNode * root = theme->getNode("checkbox");
   std::string value;
@@ -477,12 +477,12 @@ void GuiItemCheckbox::setTheme(GuiTheme * theme)
   updateGeometry();
 }
 
-void GuiItemCheckbox::onMouseClick(const GuiPoint & pnt)
+void GuiItemCheckBox::onMouseClick(const GuiPoint & pnt)
 {
   m_checked = ! m_checked;
 }
 
-void GuiItemCheckbox::updateGeometry() 
+void GuiItemCheckBox::updateGeometry() 
 {
   m_boxDstRect.UpperLeftCorner.X = 
     m_rectangle.LowerRightCorner.X - _RW(m_boxSrcRect);
@@ -514,7 +514,14 @@ void GuiItemListBox::updateGeometry()
   _RMAXX(m_riteDstRect) = _RMINX(m_riteDstRect) + _RW(m_riteSrcRect);
   _RMAXY(m_riteDstRect) = _RMINY(m_riteDstRect) + _RH(m_riteSrcRect);
 
-  _RMINX(m_leftDstRect) = _RMINX(m_riteDstRect) - _RW(m_leftSrcRect);
+  _RMINX(m_itemDstRect) = _RMINX(m_riteDstRect) - getItemMaxWidth();
+  _RMINY(m_itemDstRect) = _RMINY(m_rectangle);
+
+  _RMAXX(m_itemDstRect) = _RMINX(m_itemDstRect) + getItemMaxWidth();
+  _RMAXY(m_itemDstRect) = _RMAXY(m_rectangle);
+
+  //_RMINX(m_leftDstRect) = _RMINX(m_riteDstRect) - _RW(m_leftSrcRect) - getItemMaxWidth();
+  _RMINX(m_leftDstRect) = _RMINX(m_itemDstRect) - _RW(m_leftSrcRect);
   _RMINY(m_leftDstRect) = _RMINY(m_rectangle);
   _RMAXX(m_leftDstRect) = _RMINX(m_leftDstRect) + _RW(m_leftSrcRect);
   _RMAXY(m_leftDstRect) = _RMINY(m_leftDstRect) + _RH(m_leftSrcRect);
@@ -556,11 +563,15 @@ void GuiItemListBox::onMouseMove(const GuiPoint & pnt)
 void GuiItemListBox::onMouseClick(const GuiPoint & pnt)
 {
   if(_PINR(pnt,m_leftDstRect)) {
-    GM_LOG("on prev item\n");
+    if(m_selectedItem == 0)
+      m_selectedItem = m_items.size() - 1;
+    else
+      m_selectedItem --;
   }
 
   if(_PINR(pnt,m_riteDstRect)) {
-    GM_LOG("on next item\n");
+    m_selectedItem ++;
+    m_selectedItem %= m_items.size();
   }
 }
 
@@ -569,6 +580,7 @@ GuiItemListBox::GuiItemListBox(const std::wstring & caption)
   m_caption = caption;
   m_font = ResourceManager::getInstance()->getSystemFont();
   m_mouseOver = mouseOnNothing;
+  m_selectedItem = 0xffff;
 }
 
 void GuiItemListBox::setTheme(GuiTheme * theme)
@@ -604,12 +616,25 @@ void GuiItemListBox::setTheme(GuiTheme * theme)
   }
 }
 
+unsigned GuiItemListBox::getItemMaxWidth()
+{
+  GuiDimension idim;
+  unsigned width=0;
+  for(unsigned i=0; i < m_items.size(); i++) {
+    idim= m_font->getDimension(m_items[i].c_str());
+    if(_W(idim) > width)
+      width=_W(idim);
+  }
+  return width;
+}
+
 GuiDimension GuiItemListBox::getPreferredSize()
 {
   GuiDimension dim;
   dim = m_font->getDimension(m_caption.c_str());
 
-  // TODO: complete here!
+  // TODO: take into account the arrow rectangle
+  _W(dim) += getItemMaxWidth();
 
   return dim;
 }
@@ -619,6 +644,10 @@ void GuiItemListBox::draw()
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
 
   irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+
+  if(m_selectedItem < m_items.size()) 
+     m_font->draw(m_items[m_selectedItem].c_str(),m_itemDstRect,irr::video::SColor(255,255,255,255),true,false);
+
 
   if(m_riteImage) 
     driver->draw2DImage (

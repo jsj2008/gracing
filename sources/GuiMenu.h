@@ -137,11 +137,11 @@ class IGuiMenuItem
     GuiRect      m_rectangle;
 };
 
-class GuiItemCheckbox : public IGuiMenuItem 
+class GuiItemCheckBox : public IGuiMenuItem 
 {
   public:
-    GuiItemCheckbox(const std::wstring & caption);
-    GuiItemCheckbox(const wchar_t * caption);
+    GuiItemCheckBox(const std::wstring & caption);
+    GuiItemCheckBox(const wchar_t * caption);
 
     virtual void setTheme(GuiTheme * theme);
 
@@ -195,6 +195,9 @@ class GuiItemListBox : public IGuiMenuItem
 
     virtual void setTheme(GuiTheme * theme);
 
+    void addItem(const std::wstring & item);
+    void clearItems();
+
     void draw();
 
     virtual bool selfDrawFocused() { return true; }
@@ -207,8 +210,10 @@ class GuiItemListBox : public IGuiMenuItem
     virtual void updateGeometry();
 
   private:
+    
+    unsigned getItemMaxWidth();
+
     std::wstring               m_caption;
-    std::vector<std::wstring>  m_items;
     GuiFont *                  m_font;
 
     GuiImage * m_riteImage;
@@ -219,12 +224,19 @@ class GuiItemListBox : public IGuiMenuItem
     GuiRect    m_leftSrcRect;
     GuiRect    m_leftDstRect;
 
+    GuiRect    m_itemDstRect;
+    std::vector<std::wstring>  m_items;
+    unsigned   m_selectedItem;
+
     enum {
       mouseOnNothing,
       mouseOnLeftImage,
       mouseOnRiteImage
     } m_mouseOver;
+};
 
+class GuiItemSlider : public IGuiMenuItem
+{
 };
 
 class GuiContainerPolicy
@@ -261,7 +273,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     // elements building
     GuiItemStaticText * addStaticText(const std::wstring & caption);
-    GuiItemCheckbox *   addCheckbox(const std::wstring & caption);
+    GuiItemCheckBox *   addCheckBox(const std::wstring & caption);
     GuiItemListBox *    addListBox(const std::wstring & caption);
 
 

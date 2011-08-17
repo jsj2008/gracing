@@ -231,14 +231,15 @@ int main(int argc, char ** av)
 
   resmanager->getEventReceiver()->addListener(menu);
 
-
-  menu->addStaticText(L"sample of static text");
-  menu->addCheckbox(L"sample 1 of check box");
-  menu->addCheckbox(L"sample 2 of check box");
-  menu->addCheckbox(L"sample 3 of check box");
+  menu->addStaticText(L"start game");
+  menu->addCheckBox(L"sample 1 of check box");
 
   GuiItemListBox * lb;
   lb=menu->addListBox(L"list box");
+  lb->addItem(L"item 1");
+  lb->addItem(L"item 2");
+  lb->addItem(L"item 3");
+  lb->addItem(L"item 4");
   menu->centerOnTheScreen();
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
