@@ -225,14 +225,19 @@ int main(int argc, char ** av)
   bool autoplayer;
   ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
 
+  /* menu menu menu */
   irr::core::rect<irr::s32> rect;
   GuiMenu * menu = new GuiMenu(device->getGUIEnvironment(),
     device->getGUIEnvironment()->getRootGUIElement(),0,rect);
+
+  menu->setVisible(true);
+  menu->setHasFrame(true);
 
   resmanager->getEventReceiver()->addListener(menu);
 
   menu->addStaticText(L"start game");
   menu->addCheckBox(L"sample 1 of check box");
+  menu->addSlider(L"slider");
 
   GuiItemListBox * lb;
   lb=menu->addListBox(L"list box");
@@ -241,6 +246,7 @@ int main(int argc, char ** av)
   lb->addItem(L"item 3");
   lb->addItem(L"item 4");
   menu->centerOnTheScreen();
+  /* menu menu menu */
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
 

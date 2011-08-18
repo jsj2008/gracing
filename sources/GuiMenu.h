@@ -237,6 +237,49 @@ class GuiItemListBox : public IGuiMenuItem
 
 class GuiItemSlider : public IGuiMenuItem
 {
+  public:
+    GuiItemSlider(const std::wstring & caption);
+
+    GuiDimension getPreferredSize();
+
+    void draw();
+
+    void setTheme(GuiTheme * theme);
+
+    bool selfDrawFocused() { return true; }
+
+    void drawFocus();
+
+    void  onMouseMove(const GuiPoint & point);
+
+
+  protected:
+    void updateGeometry();
+
+  private:
+
+    void updateHandlePosition();
+
+
+    std::wstring m_caption;
+    GuiFont *    m_font;
+
+    GuiImage * m_leftEdgeImage;
+    GuiRect    m_leftEdgeSrcRect;
+    GuiRect    m_leftEdgeDstRect;
+
+    GuiImage * m_riteEdgeImage;
+    GuiRect    m_riteEdgeSrcRect;
+    GuiRect    m_riteEdgeDstRect;
+
+    GuiImage * m_handleImage;
+    GuiRect    m_handleSrcRect;
+    GuiRect    m_handleDstRect;
+    bool       m_handleFocused;
+
+    GuiImage * m_fillerImage;
+    unsigned   m_rangeLen;
+    GuiRect    m_fillerDstRect;
 };
 
 class GuiContainerPolicy
@@ -275,6 +318,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiItemStaticText * addStaticText(const std::wstring & caption);
     GuiItemCheckBox *   addCheckBox(const std::wstring & caption);
     GuiItemListBox *    addListBox(const std::wstring & caption);
+    GuiItemSlider *     addSlider(const std::wstring & caption);
 
 
     // position/size
@@ -293,6 +337,12 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     inline bool isItemIndexValid(unsigned i) { return i < m_items.size(); }
 
 
+    inline void setVisible(bool visible) { m_isVisible = visible; }
+    inline bool getVisible() { return m_isVisible; }
+
+    inline void setHasFrame(bool hasFrame) { m_hasFrame = hasFrame; }
+    inline bool getHasFrame() { return m_hasFrame; }
+
   private:
 
     void refreshSize();
@@ -310,6 +360,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiTheme *   m_theme;
 
     unsigned     m_focusedItem;
+
+    bool         m_isVisible;
 };
 
 #endif

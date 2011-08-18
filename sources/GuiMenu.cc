@@ -62,14 +62,6 @@ GuiTheme::GuiTheme(const char * filename)
   res=fileSystem->removeFileArchive(fileSystem->getAbsolutePath(mypath));
 
   assert(res);
-#if 0
-  nodes.clear();
-  m_root->getChildren("img",nodes);
-  
-  for(unsigned i=0; i<nodes.size(); i++) {
-    GM_LOG("[%d] %s\n",i,nodes[i]->getName().c_str());
-  }
-#endif
 }
 
 const XmlNode * GuiTheme::getNode(const char * name)
@@ -86,6 +78,7 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
 
   m_frame=new GuiFrame(rectangle);
   m_hasFrame=true;
+  m_isVisible=true;
   m_growSize=true;
   m_font= ResourceManager::getInstance()->getSystemFontBig();
   m_policy=new GuiContainerPolicy_GrowVertical();
@@ -112,6 +105,9 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
 
 void GuiMenu::draw()
 {
+  if(!m_isVisible)
+    return;
+
   if(m_hasFrame && m_frame)
     m_frame->draw();
 
@@ -130,7 +126,6 @@ void GuiMenu::draw()
 
   for(unsigned i=0; i < m_items.size(); i++) 
     m_items[i]->draw();
-
 }
 
 void GuiContainerPolicy_GrowHorizontal::applyPolicy(
@@ -290,6 +285,21 @@ GuiItemCheckBox * GuiMenu::addCheckBox(const std::wstring & caption)
   refreshSize();
 
   m_focusedItem = m_items.size() - 1;
+
+  return st;
+}
+
+GuiItemSlider * GuiMenu::addSlider(const std::wstring & caption)
+{
+  GuiItemSlider * st;
+
+  st = new GuiItemSlider(caption);
+
+  if(m_theme)
+    st->setTheme(m_theme);
+
+  m_items.push_back(st);
+  refreshSize();
 
   return st;
 }
@@ -667,5 +677,190 @@ void GuiItemListBox::draw()
         0,
         true);
 }
+
+///////////////////////////////////////
+GuiItemSlider::GuiItemSlider(const std::wstring & caption)
+{
+  const unsigned defRangeLen=100;
+  m_caption = caption;
+  m_rangeLen = defRangeLen;
+  m_font= ResourceManager::getInstance()->getSystemFont();
+  m_handleFocused=false;
+}
+
+void  GuiItemSlider::onMouseMove(const GuiPoint & pnt)
+{
+  if(_PINR(pnt,m_handleDstRect)) 
+    m_handleFocused = true;
+}
+
+GuiDimension GuiItemSlider::getPreferredSize()
+{
+  GuiDimension dim;
+  GuiDimension idim;
+
+  if(m_font)
+   dim = m_font->getDimension(m_caption.c_str());
+
+  if(m_leftEdgeImage)  
+    _W(dim) += _RW(m_leftEdgeDstRect);
+
+  if(m_riteEdgeImage)  
+    _W(dim) += _RW(m_riteEdgeDstRect);
+
+  _W(dim) += m_rangeLen;
+
+  return dim;
+}
+
+void GuiItemSlider::draw()
+{
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+
+  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+
+  if(m_leftEdgeImage) 
+    driver->draw2DImage (
+        m_leftEdgeImage,
+        m_leftEdgeDstRect,
+        m_leftEdgeSrcRect,
+        0,
+        0, //irr::video::SColor(255,255,255,255),
+        true);
+
+  if(m_leftEdgeImage) 
+    driver->draw2DImage (
+        m_riteEdgeImage,
+        m_riteEdgeDstRect,
+        m_riteEdgeSrcRect,
+        0,
+        0, //irr::video::SColor(255,255,255,255),
+        true);
+
+
+  if(m_fillerImage)
+    Util::drawRectWithBackgroung(driver, 
+        m_fillerImage,m_fillerDstRect,true,0,0);
+
+  if(m_handleFocused) {
+    irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+    irr::video::SColor c(100,100,100,255);
+    driver->draw2DRectangle(c,m_handleDstRect);
+  }
+
+  if(m_handleImage) 
+    driver->draw2DImage (
+        m_handleImage,
+        m_handleDstRect,
+        m_handleSrcRect,
+        0,
+        0, //irr::video::SColor(255,255,255,255),
+        true);
+}
+
+void GuiItemSlider::updateGeometry()
+{ 
+  unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
+
+  if(m_font) {
+    GuiDimension dim;
+    dim=m_font->getDimension(m_caption.c_str());
+    m_rangeLen = (_RW(m_rectangle) - _W(dim) - _RW(m_riteEdgeSrcRect) - _RW(m_leftEdgeSrcRect)) * 2 / 3;
+  } else {
+    m_rangeLen = 100;
+  }
+
+  _RMINX(m_riteEdgeDstRect) = _RMAXX(m_rectangle) - _RW(m_riteEdgeSrcRect);
+  _RMINY(m_riteEdgeDstRect) = _RMINY(m_rectangle) + offset;
+  _RMAXX(m_riteEdgeDstRect) = _RMINX(m_riteEdgeDstRect) + _RW(m_riteEdgeSrcRect);
+  _RMAXY(m_riteEdgeDstRect) = _RMINY(m_riteEdgeDstRect) + _RH(m_riteEdgeSrcRect);
+
+  _RMINX(m_fillerDstRect) = _RMINX(m_riteEdgeDstRect) - m_rangeLen;
+  _RMINY(m_fillerDstRect) = _RMINY(m_rectangle) + offset;
+  _RMAXX(m_fillerDstRect) = _RMINX(m_fillerDstRect) + m_rangeLen;
+  _RMAXY(m_fillerDstRect) = _RMINY(m_fillerDstRect) + _RH(m_riteEdgeSrcRect);
+
+  _RMINX(m_leftEdgeDstRect) = _RMINX(m_fillerDstRect) - _RW(m_leftEdgeSrcRect);
+  _RMINY(m_leftEdgeDstRect) = _RMINY(m_rectangle) + offset;
+  _RMAXX(m_leftEdgeDstRect) = _RMINX(m_leftEdgeDstRect) + _RW(m_leftEdgeSrcRect);
+  _RMAXY(m_leftEdgeDstRect) = _RMINY(m_leftEdgeDstRect) + _RH(m_leftEdgeSrcRect);
+
+   updateHandlePosition();
+}
+
+void GuiItemSlider::updateHandlePosition()
+{
+  unsigned gvalue=50;
+  unsigned hw = _RW(m_handleSrcRect) / 2;
+  unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
+
+  _RMINX(m_handleDstRect) = (gvalue - hw) + _RMINX(m_fillerDstRect);
+  _RMINY(m_handleDstRect) = _RMINY(m_rectangle) + offset;
+
+  _RMAXX(m_handleDstRect) = _RMINX(m_handleDstRect) + _RW(m_handleSrcRect);
+  _RMAXY(m_handleDstRect) = _RMINY(m_handleDstRect) + _RH(m_handleSrcRect);
+
+}
+
+void GuiItemSlider::setTheme(GuiTheme * theme)
+{
+  const XmlNode * root = theme->getNode("slider");
+#if 0
+<left-edge img="0" r="163,492,166,501" />
+<right-edge img="0" r="167,492,171,501" />
+<handle img="0" r="163,478,170,491" />
+<filler img="1" />
+#endif
+
+  const XmlNode * node;
+  unsigned idx;
+  std::string value;
+
+  if(!root)
+    return;
+
+  node = root->getChild("left-edge");
+  if(node) {
+    if(node->get("r",value)) 
+      Util::parseRect(value.c_str(),m_leftEdgeSrcRect);
+
+    if(node->get("img",idx)) 
+      m_leftEdgeImage = theme->getImage(idx);
+  }
+
+  node = root->getChild("right-edge");
+  if(node) {
+    if(node->get("r",value)) 
+      Util::parseRect(value.c_str(),m_riteEdgeSrcRect);
+
+    if(node->get("img",idx)) 
+      m_riteEdgeImage = theme->getImage(idx);
+  }
+
+  node = root->getChild("handle");
+  if(node) {
+    if(node->get("r",value)) 
+      Util::parseRect(value.c_str(),m_handleSrcRect);
+
+    if(node->get("img",idx)) 
+      m_handleImage = theme->getImage(idx);
+  }
+
+  node = root->getChild("filler");
+  if(node) {
+    if(node->get("img",idx)) 
+      m_fillerImage = theme->getImage(idx);
+  }
+}
+
+void GuiItemSlider::drawFocus() 
+{
+  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+  irr::video::SColor color(200,200,200,200);
+  irr::video::SColor c(100,100,100,255);
+  driver->draw2DRectangle(color,m_rectangle);
+}
+
+
 
 
