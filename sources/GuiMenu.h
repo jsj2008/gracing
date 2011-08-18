@@ -113,6 +113,8 @@ class IGuiMenuItem
 
     virtual void  onMouseClick(const GuiPoint & point) { };
     virtual void  onMouseMove(const GuiPoint & point) { };
+    virtual bool  onMouseLButton(bool down, const GuiPoint & point) { return false; };
+    virtual bool  onMouseRButton(bool down, const GuiPoint & point) { return false; };
 
   protected:
 
@@ -251,6 +253,7 @@ class GuiItemSlider : public IGuiMenuItem
     void drawFocus();
 
     void  onMouseMove(const GuiPoint & point);
+    bool  onMouseLButton(bool down, const GuiPoint & point);
 
 
   protected:
@@ -280,6 +283,10 @@ class GuiItemSlider : public IGuiMenuItem
     GuiImage * m_fillerImage;
     unsigned   m_rangeLen;
     GuiRect    m_fillerDstRect;
+
+    GuiPoint   m_lastMousePoint;
+    bool       m_draggingHandle;
+    unsigned   m_handleValue;
 };
 
 class GuiContainerPolicy
@@ -356,12 +363,15 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiContainerPolicy * m_policy;
 
     std::vector<IGuiMenuItem*> m_items;
+    IGuiMenuItem *             m_itemWhichCapturedMouse;
 
     GuiTheme *   m_theme;
 
     unsigned     m_focusedItem;
 
     bool         m_isVisible;
+
+    enum { m_invalidItemIndex=0xffff };
 };
 
 #endif

@@ -83,6 +83,8 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
   m_font= ResourceManager::getInstance()->getSystemFontBig();
   m_policy=new GuiContainerPolicy_GrowVertical();
 
+  m_itemWhichCapturedMouse=0;
+
   m_focusedItem = m_items.size();
 
   m_theme=new GuiTheme("theme-default.zip");
@@ -230,30 +232,45 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
   switch(MouseInput.Event) {
     case irr::EMIE_LMOUSE_PRESSED_DOWN:
       {
-#if 0
-      GM_LOG("mouse down button at %d,%d\n",
-          MouseInput.X,
-          MouseInput.Y);
-#endif
+        unsigned i;
+        GuiPoint pnt;
+        _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
+        i = pickupItemByPoint(pnt);
+        if(isItemIndexValid(i)) {
+          IGuiMenuItem * item = m_items[i];
+          if(item->onMouseLButton(true,pnt)) {
+            m_itemWhichCapturedMouse=item;
+          }
+        }
       }
-
       break;
 
     case irr::EMIE_LMOUSE_LEFT_UP:
-      {
+      if(m_itemWhichCapturedMouse) {
+        GuiPoint pnt;
+        _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
+        m_itemWhichCapturedMouse->onMouseLButton(false,pnt);
+        m_itemWhichCapturedMouse=0;
+      } else {
         unsigned i;
         GuiPoint pnt;
         _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
         i = pickupItemByPoint(pnt);
 
         if(isItemIndexValid(i)) {
-          m_items[i]->onMouseClick(pnt);
+          IGuiMenuItem * item = m_items[i];
+          item->onMouseLButton(false,pnt);
+          item->onMouseClick(pnt);
         }
       }
       break;
 
     case irr::EMIE_MOUSE_MOVED:
-      {
+      if(m_itemWhichCapturedMouse) {
+        GuiPoint pnt;
+        _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
+         m_itemWhichCapturedMouse->onMouseMove(pnt);
+      } else {
         GuiPoint pnt;
         _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
         // TODO: avoid double "selectItemByPoint" and "pickupItemByPoint"
@@ -263,7 +280,8 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
         i = pickupItemByPoint(pnt);
 
         if(isItemIndexValid(i)) {
-          m_items[i]->onMouseMove(pnt);
+          IGuiMenuItem * item = m_items[i];
+          item->onMouseMove(pnt);
         }
       }
       break;
@@ -686,13 +704,17 @@ GuiItemSlider::GuiItemSlider(const std::wstring & caption)
   m_rangeLen = defRangeLen;
   m_font= ResourceManager::getInstance()->getSystemFont();
   m_handleFocused=false;
+  m_draggingHandle=false;
+  m_handleValue=0;
 }
 
+#if 0
 void  GuiItemSlider::onMouseMove(const GuiPoint & pnt)
 {
   if(_PINR(pnt,m_handleDstRect)) 
     m_handleFocused = true;
 }
+#endif
 
 GuiDimension GuiItemSlider::getPreferredSize()
 {
@@ -721,21 +743,12 @@ void GuiItemSlider::draw()
 
   if(m_leftEdgeImage) 
     driver->draw2DImage (
-        m_leftEdgeImage,
-        m_leftEdgeDstRect,
-        m_leftEdgeSrcRect,
-        0,
-        0, //irr::video::SColor(255,255,255,255),
-        true);
-
+        m_leftEdgeImage, m_leftEdgeDstRect,
+        m_leftEdgeSrcRect, 0, 0, true); 
   if(m_leftEdgeImage) 
     driver->draw2DImage (
-        m_riteEdgeImage,
-        m_riteEdgeDstRect,
-        m_riteEdgeSrcRect,
-        0,
-        0, //irr::video::SColor(255,255,255,255),
-        true);
+        m_riteEdgeImage, m_riteEdgeDstRect,
+        m_riteEdgeSrcRect, 0, 0, true);
 
 
   if(m_fillerImage)
@@ -790,11 +803,11 @@ void GuiItemSlider::updateGeometry()
 
 void GuiItemSlider::updateHandlePosition()
 {
-  unsigned gvalue=50;
+  //unsigned gvalue=m_rangeLen / 2;
   unsigned hw = _RW(m_handleSrcRect) / 2;
   unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
 
-  _RMINX(m_handleDstRect) = (gvalue - hw) + _RMINX(m_fillerDstRect);
+  _RMINX(m_handleDstRect) = (m_handleValue - hw) + _RMINX(m_fillerDstRect);
   _RMINY(m_handleDstRect) = _RMINY(m_rectangle) + offset;
 
   _RMAXX(m_handleDstRect) = _RMINX(m_handleDstRect) + _RW(m_handleSrcRect);
@@ -851,6 +864,38 @@ void GuiItemSlider::setTheme(GuiTheme * theme)
     if(node->get("img",idx)) 
       m_fillerImage = theme->getImage(idx);
   }
+}
+
+void GuiItemSlider::onMouseMove(const GuiPoint & point) 
+{
+  if(m_draggingHandle) {
+    int dx = _X(point) - _X(m_lastMousePoint);
+
+    m_handleValue += dx;
+
+    m_lastMousePoint = point;
+
+    GM_LOG("moving handle\n");
+
+    if(m_handleValue <= 0) {
+      m_handleValue = 0;
+    } else if(m_handleValue >= m_rangeLen)
+      m_handleValue = m_rangeLen;
+
+    updateHandlePosition();
+  }
+}
+bool GuiItemSlider::onMouseLButton(bool down, const GuiPoint & point) 
+{
+  if(down && _PINR(point, m_handleDstRect)) {
+    m_lastMousePoint = point; 
+    m_draggingHandle = true;
+    return true;
+  } else {
+    GM_LOG("releasing mouse\n");
+    m_draggingHandle = false;
+  }
+  return false;
 }
 
 void GuiItemSlider::drawFocus() 
