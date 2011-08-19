@@ -230,7 +230,7 @@ int main(int argc, char ** av)
   GuiMenu * menu = new GuiMenu(device->getGUIEnvironment(),
     device->getGUIEnvironment()->getRootGUIElement(),0,rect);
 
-  menu->setVisible(true);
+  menu->setVisible(false);
   menu->setHasFrame(true);
 
   resmanager->getEventReceiver()->addListener(menu);

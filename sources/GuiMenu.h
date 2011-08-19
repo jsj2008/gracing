@@ -293,7 +293,6 @@ class GuiItemSlider : public IGuiMenuItem
     int        m_handleValue;
 
     double     m_minValue, m_maxValue;
-
 };
 
 class GuiContainerPolicy
