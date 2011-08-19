@@ -235,9 +235,14 @@ int main(int argc, char ** av)
 
   resmanager->getEventReceiver()->addListener(menu);
 
-  menu->addStaticText(L"start game");
-  menu->addCheckBox(L"sample 1 of check box");
-  menu->addSlider(L"slider");
+  menu->addStaticText(L"static text");
+  menu->addCheckBox(L"check box");
+
+
+  GuiItemSlider * sl;
+  sl=menu->addSlider(L"slider");
+  sl->setRange(0.,100.);
+
 
   GuiItemListBox * lb;
   lb=menu->addListBox(L"list box");

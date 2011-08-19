@@ -255,6 +255,10 @@ class GuiItemSlider : public IGuiMenuItem
     void  onMouseMove(const GuiPoint & point);
     bool  onMouseLButton(bool down, const GuiPoint & point);
 
+    inline void  setRange(double min, double max) { m_minValue = min; m_maxValue = max; }
+    inline void  getRange(double & min, double & max) { min = m_minValue; max = m_maxValue; }
+    double getValue();
+
 
   protected:
     void updateGeometry();
@@ -281,12 +285,15 @@ class GuiItemSlider : public IGuiMenuItem
     bool       m_handleFocused;
 
     GuiImage * m_fillerImage;
-    unsigned   m_rangeLen;
     GuiRect    m_fillerDstRect;
 
     GuiPoint   m_lastMousePoint;
     bool       m_draggingHandle;
-    unsigned   m_handleValue;
+    int        m_rangeLen;
+    int        m_handleValue;
+
+    double     m_minValue, m_maxValue;
+
 };
 
 class GuiContainerPolicy
@@ -370,6 +377,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     unsigned     m_focusedItem;
 
     bool         m_isVisible;
+
+    irr::video::ITexture* m_renderTarget;
 
     enum { m_invalidItemIndex=0xffff };
 };

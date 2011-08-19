@@ -94,6 +94,15 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
   _X(m_position)=0;
   _Y(m_position)=0;
 
+  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+  if (driver->queryFeature(irr::video::EVDF_RENDER_TO_TARGET)) {
+    m_renderTarget = driver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>(256,256), "RTT1");
+    //test->setMaterialTexture(0, rt); // set material of cube to render target
+
+    GM_LOG("is able to render to texture\n");
+  }
+  
+
   // tmp tmp tmp
   unsigned width;
   resman->getScreenWidth(width);
@@ -706,15 +715,9 @@ GuiItemSlider::GuiItemSlider(const std::wstring & caption)
   m_handleFocused=false;
   m_draggingHandle=false;
   m_handleValue=0;
+  m_minValue=0.;
+  m_maxValue=1.;
 }
-
-#if 0
-void  GuiItemSlider::onMouseMove(const GuiPoint & pnt)
-{
-  if(_PINR(pnt,m_handleDstRect)) 
-    m_handleFocused = true;
-}
-#endif
 
 GuiDimension GuiItemSlider::getPreferredSize()
 {
@@ -745,6 +748,7 @@ void GuiItemSlider::draw()
     driver->draw2DImage (
         m_leftEdgeImage, m_leftEdgeDstRect,
         m_leftEdgeSrcRect, 0, 0, true); 
+
   if(m_leftEdgeImage) 
     driver->draw2DImage (
         m_riteEdgeImage, m_riteEdgeDstRect,
@@ -763,12 +767,8 @@ void GuiItemSlider::draw()
 
   if(m_handleImage) 
     driver->draw2DImage (
-        m_handleImage,
-        m_handleDstRect,
-        m_handleSrcRect,
-        0,
-        0, //irr::video::SColor(255,255,255,255),
-        true);
+        m_handleImage, m_handleDstRect, m_handleSrcRect,
+        0, 0, true);
 }
 
 void GuiItemSlider::updateGeometry()
@@ -805,7 +805,7 @@ void GuiItemSlider::updateHandlePosition()
 {
   //unsigned gvalue=m_rangeLen / 2;
   unsigned hw = _RW(m_handleSrcRect) / 2;
-  unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
+  unsigned offset = (_RH(m_rectangle) - _RH(m_handleSrcRect)) / 2;
 
   _RMINX(m_handleDstRect) = (m_handleValue - hw) + _RMINX(m_fillerDstRect);
   _RMINY(m_handleDstRect) = _RMINY(m_rectangle) + offset;
@@ -818,12 +818,6 @@ void GuiItemSlider::updateHandlePosition()
 void GuiItemSlider::setTheme(GuiTheme * theme)
 {
   const XmlNode * root = theme->getNode("slider");
-#if 0
-<left-edge img="0" r="163,492,166,501" />
-<right-edge img="0" r="167,492,171,501" />
-<handle img="0" r="163,478,170,491" />
-<filler img="1" />
-#endif
 
   const XmlNode * node;
   unsigned idx;
@@ -875,12 +869,10 @@ void GuiItemSlider::onMouseMove(const GuiPoint & point)
 
     m_lastMousePoint = point;
 
-    GM_LOG("moving handle\n");
-
-    if(m_handleValue <= 0) {
+    if(m_handleValue < 0)
       m_handleValue = 0;
-    } else if(m_handleValue >= m_rangeLen)
-      m_handleValue = m_rangeLen;
+    else if(m_handleValue >= m_rangeLen)
+      m_handleValue = m_rangeLen - 1;
 
     updateHandlePosition();
   }
@@ -892,7 +884,6 @@ bool GuiItemSlider::onMouseLButton(bool down, const GuiPoint & point)
     m_draggingHandle = true;
     return true;
   } else {
-    GM_LOG("releasing mouse\n");
     m_draggingHandle = false;
   }
   return false;
@@ -904,6 +895,11 @@ void GuiItemSlider::drawFocus()
   irr::video::SColor color(200,200,200,200);
   irr::video::SColor c(100,100,100,255);
   driver->draw2DRectangle(color,m_rectangle);
+}
+
+double GuiItemSlider::getValue()
+{
+  return ((double)m_handleValue / (double)m_rangeLen) * (m_maxValue - m_minValue) + m_minValue;
 }
 
 
