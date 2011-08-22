@@ -10,7 +10,6 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiCronometer.cc \
         GuiCommunicator.cc \
         GuiCockpit.cc \
-        GuiMenu.cc \
         GuiFrame.cc \
         VehicleKeyboardController.cc \
         VehicleAutoController.cc \
@@ -18,5 +17,6 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         EventReceiver.cc \
         Race.cc \
         Util.cc \
-        XmlNode.cc  
+        XmlNode.cc \
+        GuiMenu.cc 
 

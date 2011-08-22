@@ -19,8 +19,10 @@
 #include <irrlicht.h>
 
 #include "XmlNode.h"
-#include "GuiFrame.h"
+//#include "GuiFrame.h"
 #include "EventReceiver.h"
+
+class  GuiFrame;
 
 /////////////////////////////////////////////////
 // irrlicht 'compatibility'
@@ -81,6 +83,8 @@ class IGuiMenuItem
 {
   public:
 
+    virtual void init(XmlNode * node)=0;
+
     virtual GuiDimension getPreferredSize()=0;
     virtual void setSize(const GuiDimension & dim) 
     { 
@@ -139,6 +143,12 @@ class IGuiMenuItem
     GuiRect      m_rectangle;
 };
 
+class GuiMenuItemFactory 
+{
+  public:
+    static IGuiMenuItem * build(XmlNode * node);
+};
+
 class GuiItemCheckBox : public IGuiMenuItem 
 {
   public:
@@ -146,6 +156,8 @@ class GuiItemCheckBox : public IGuiMenuItem
     GuiItemCheckBox(const wchar_t * caption);
 
     virtual void setTheme(GuiTheme * theme);
+
+    void init(XmlNode * node);
 
     GuiDimension getPreferredSize();
 
@@ -178,6 +190,8 @@ class GuiItemStaticText : public IGuiMenuItem
 
     virtual void setTheme(GuiTheme * theme);
 
+    void init(XmlNode *);
+
     GuiDimension getPreferredSize();
 
     void draw();
@@ -188,6 +202,7 @@ class GuiItemStaticText : public IGuiMenuItem
     GuiFont * m_font;
 };
 
+
 class GuiItemListBox : public IGuiMenuItem
 {
   public:
@@ -197,7 +212,11 @@ class GuiItemListBox : public IGuiMenuItem
 
     virtual void setTheme(GuiTheme * theme);
 
+    void init(XmlNode *);
+
     void addItem(const std::wstring & item);
+    void addItem(const std::string & item);
+
     void clearItems();
 
     void draw();
@@ -245,6 +264,8 @@ class GuiItemSlider : public IGuiMenuItem
     GuiDimension getPreferredSize();
 
     void draw();
+
+    void init(XmlNode *);
 
     void setTheme(GuiTheme * theme);
 
@@ -318,8 +339,9 @@ class GuiContainerPolicy_GrowHorizontal : public GuiContainerPolicy
       GuiDimension & dimension,
       std::vector<IGuiMenuItem *> & items);
 };
+
+/////////////////////////////////////////////////////////////
  
-// this is the container class !!
 class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 {
   public:
@@ -333,6 +355,9 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiItemListBox *    addListBox(const std::wstring & caption);
     GuiItemSlider *     addSlider(const std::wstring & caption);
 
+    void load(const std::string & xmlFileName);
+
+    void setGroup(const std::wstring & name);
 
     // position/size
     void centerOnTheScreen();
@@ -349,7 +374,6 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
 
     inline bool isItemIndexValid(unsigned i) { return i < m_items.size(); }
 
-
     inline void setVisible(bool visible) { m_isVisible = visible; }
     inline bool getVisible() { return m_isVisible; }
 
@@ -357,6 +381,30 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     inline bool getHasFrame() { return m_hasFrame; }
 
   private:
+    class GuiItemGroup 
+    {
+      public:
+        GuiItemGroup(XmlNode * xmlFileName);
+        GuiItemGroup(const std::wstring & name);
+
+        inline const std::wstring & getName() { return m_name; }
+
+        inline void fillVector(std::vector<IGuiMenuItem*> & items)
+        {
+          for(unsigned i=0; i<m_items.size(); i++)
+              items.push_back(m_items[i]);
+        }
+
+        inline void setTheme(GuiTheme * theme) 
+        {
+          for(unsigned i=0; i<m_items.size(); i++)
+            m_items[i]->setTheme(theme);
+        }
+
+      private:
+        std::wstring                m_name;
+        std::vector<IGuiMenuItem *> m_items;
+    };
 
     void refreshSize();
 
@@ -378,6 +426,10 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     bool         m_isVisible;
 
     irr::video::ITexture* m_renderTarget;
+
+    std::vector<GuiItemGroup *> m_groups;
+
+
 
     enum { m_invalidItemIndex=0xffff };
 };

@@ -25,6 +25,7 @@
 #include "gmlog.h"
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
+#include "GuiMenu.h"
 
 #define  DEFAULT_FONT       "droid-serif-32.xml"
 #define  DEFAULT_FONT_SMALL "droid-serif-24.xml"
@@ -221,6 +222,22 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   assert(m_fontSmall);
   GM_LOG("loading done font\n");
 
+  /////////////////////////////////
+  // load menus                  //
+  /////////////////////////////////
+  irr::core::rect<irr::s32> rect;
+  m_menu = new GuiMenu(device->getGUIEnvironment(),
+    device->getGUIEnvironment()->getRootGUIElement(),0,rect);
+  m_menu->setVisible(true);
+  m_menu->setHasFrame(true);
+  m_menu->load("menu.xml");
+  m_menu->setGroup(L"options");
+  m_menu->centerOnTheScreen();
+  getEventReceiver()->addListener(m_menu);
+
+  /////////////////////////////////
+  // load menus                  //
+  /////////////////////////////////
   loadVehicles();
 }
 
@@ -349,4 +366,15 @@ void ResourceManager::loadVehicles()
     vehicle->grab();
     m_vehicles.push_back(vehicle);
   }
+}
+
+void ResourceManager::showMenu(const std::wstring & name) 
+{
+  m_menu->setGroup(name);
+  m_menu->setVisible(true);
+}
+
+void ResourceManager::hideMenu()
+{
+  m_menu->setVisible(false);
 }

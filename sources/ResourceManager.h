@@ -28,6 +28,7 @@
 #include "EventReceiver.h"
 
 class XmlNode;
+class GuiMenu;
 
 class ResourceManager 
 {
@@ -68,15 +69,22 @@ class ResourceManager
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
 
+
+    /* singleton class access */
     inline irr::io::IFileSystem *     getFileSystem()  { return m_fileSystem; }
     inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
     inline PhyWorld *                 getPhyWorld()    { return m_world; }
            EventReceiver *            getEventReceiver();
 
+
+
     inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
 
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
+
+    void hideMenu();
+    void showMenu(const std::wstring & name);
 
   private:
     static ResourceManager * s_instance;
@@ -98,6 +106,8 @@ class ResourceManager
     std::string m_texturesDir;
 
     XmlNode *   m_configRoot;
+
+    GuiMenu *   m_menu;
 
     unsigned m_screenHeight;
     unsigned m_screenWidth;

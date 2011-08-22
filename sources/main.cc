@@ -225,33 +225,6 @@ int main(int argc, char ** av)
   bool autoplayer;
   ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
 
-  /* menu menu menu */
-  irr::core::rect<irr::s32> rect;
-  GuiMenu * menu = new GuiMenu(device->getGUIEnvironment(),
-    device->getGUIEnvironment()->getRootGUIElement(),0,rect);
-
-  menu->setVisible(false);
-  menu->setHasFrame(true);
-
-  resmanager->getEventReceiver()->addListener(menu);
-
-  menu->addStaticText(L"static text");
-  menu->addCheckBox(L"check box");
-
-
-  GuiItemSlider * sl;
-  sl=menu->addSlider(L"slider");
-  sl->setRange(0.,100.);
-
-
-  GuiItemListBox * lb;
-  lb=menu->addListBox(L"list box");
-  lb->addItem(L"item 1");
-  lb->addItem(L"item 2");
-  lb->addItem(L"item 3");
-  lb->addItem(L"item 4");
-  menu->centerOnTheScreen();
-  /* menu menu menu */
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
 
@@ -316,8 +289,14 @@ int main(int argc, char ** av)
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
         done=true;
 
-      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_O))
-        resmanager->getEventReceiver()->removeListener(menu);
+      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_L))
+        resmanager->showMenu(L"main");
+
+      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_K))
+        resmanager->showMenu(L"options");
+
+      if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_J))
+        resmanager->hideMenu();
 
       if (driver->getFPS() != lastFPS)
       {

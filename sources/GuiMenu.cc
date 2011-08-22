@@ -15,6 +15,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "GuiMenu.h"
+#include "GuiFrame.h"
 #include "Util.hh"
 
 #define MANIFEST_NAME "THEME"
@@ -26,9 +27,11 @@ GuiTheme::GuiTheme(const char * filename)
 
   irr::io::path mypath(respat.c_str());
 
-  fileSystem->addFileArchive(mypath);
+  bool res=fileSystem->addFileArchive(mypath);
 
-  bool res=ResourceManager::getInstance()->getFileSystem()->addFileArchive(mypath);
+  GM_LOG("loading theme from '%s'\n",mypath.c_str());
+
+  //bool res=ResourceManager::getInstance()->getFileSystem()->addFileArchive(mypath);
 
   if(!res) 
     return; // !!!
@@ -223,7 +226,6 @@ unsigned GuiMenu::pickupItemByPoint(const GuiPoint & point)
   unsigned i;
 
   for(i=0; i < m_items.size(); i++) {
-    //_X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
     if(m_items[i]->isPointInside(point))
       break;
   }
@@ -390,6 +392,10 @@ GuiDimension GuiItemStaticText::getPreferredSize()
   return m_font->getDimension(m_caption.c_str());
 }
 
+void GuiItemStaticText::init(XmlNode * node)
+{
+}
+
 void GuiItemStaticText::draw()
 {
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
@@ -440,6 +446,25 @@ GuiDimension GuiItemCheckBox::getPreferredSize()
   return fdim;
 }
 
+void GuiItemListBox::init(XmlNode * node)
+{
+  m_items.clear();
+
+  std::vector<XmlNode*> nodes;
+  node->getChildren("item",nodes);
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    addItem(nodes[i]->getText());
+  }
+}
+
+void GuiItemListBox::addItem(const std::string & sitem)
+{
+  std::wstring item(sitem.begin(),sitem.end());
+  m_selectedItem = m_items.size();
+  m_items.push_back(item);
+}
+
 void GuiItemListBox::addItem(const std::wstring & item)
 {
   m_selectedItem = m_items.size();
@@ -450,6 +475,10 @@ void GuiItemListBox::clearItems()
 {
   m_items.clear();
   m_selectedItem = 0xffff;
+}
+
+void GuiItemCheckBox::init(XmlNode * node)
+{
 }
 
 void GuiItemCheckBox::draw()
@@ -618,6 +647,10 @@ GuiItemListBox::GuiItemListBox(const std::wstring & caption)
   m_font = ResourceManager::getInstance()->getSystemFont();
   m_mouseOver = mouseOnNothing;
   m_selectedItem = 0xffff;
+
+
+  m_riteImage=0;
+  m_leftImage=0;
 }
 
 void GuiItemListBox::setTheme(GuiTheme * theme)
@@ -647,8 +680,6 @@ void GuiItemListBox::setTheme(GuiTheme * theme)
 
     if(riteNode->get("img",idx)) 
       m_riteImage = theme->getImage(idx);
-
-    _LOGRECT(m_riteSrcRect);
 
   }
 }
@@ -717,6 +748,13 @@ GuiItemSlider::GuiItemSlider(const std::wstring & caption)
   m_handleValue=0;
   m_minValue=0.;
   m_maxValue=1.;
+}
+
+void GuiItemSlider::init(XmlNode * node)
+{
+  node->get("min",m_minValue);
+  node->get("max",m_minValue);
+  // TODO: handle initial value
 }
 
 GuiDimension GuiItemSlider::getPreferredSize()
@@ -902,6 +940,113 @@ double GuiItemSlider::getValue()
   return ((double)m_handleValue / (double)m_rangeLen) * (m_maxValue - m_minValue) + m_minValue;
 }
 
+void GuiMenu::setGroup(const std::wstring & name)
+{
+  m_items.clear();
+  for(unsigned i=0; i<m_groups.size(); i++) 
+    if(m_groups[i]->getName() == name) {
+      m_groups[i]->fillVector(m_items);
+    }
 
+  refreshSize();
+}
+
+void GuiMenu::load(const std::string & xmlFileName)
+{
+  std::string respat=ResourceManager::getInstance()->getResourcePath() + xmlFileName;
+
+  irr::io::path mypath(respat.c_str());
+
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(mypath.c_str());
+
+  XmlNode * root=new XmlNode(xml);
+
+  if(!root || root->getName() != "menu") {
+    GM_LOG("invalid xml file\n");
+    return;
+  }
+
+  GM_LOG("*****************************\n");
+  GM_LOG("loading menu\n");
+  GM_LOG("*****************************\n");
+
+  std::vector<XmlNode*> nodes;
+  root->getChildren(nodes);
+  for(unsigned i=0; i<nodes.size(); i++) {
+    XmlNode * node=nodes[i];
+    if(node->getName() == "group") {
+      GuiItemGroup * group = new GuiItemGroup(node);
+      m_groups.push_back(group);
+      if(m_theme) 
+        group->setTheme(m_theme);
+    }
+  }
+  
+  xml->drop();
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+GuiMenu::GuiItemGroup::GuiItemGroup(XmlNode * root)
+{
+
+  m_name = L"noname";
+
+  if(!root || root->getName() != "group") {
+    GM_LOG("not a valid xml node\n");
+    return;
+  }
+
+  root->get("name",m_name);
+
+  std::vector<XmlNode*> nodes;
+  root->getChildren(nodes);
+
+  if(nodes.size() == 0) {
+    GM_LOG("no item in group\n");
+  }
+
+  for(unsigned i=0; i<nodes.size(); i++) {
+    XmlNode * node=nodes[i];
+    IGuiMenuItem * item=0;
+
+    item=GuiMenuItemFactory::build(node);
+
+    if(item) 
+      m_items.push_back(item);
+  }
+}
+  
+
+IGuiMenuItem * GuiMenuItemFactory::build(XmlNode * node)
+{
+  std::wstring caption;
+  IGuiMenuItem * item;
+
+  item=0;
+
+  if(!node->get("caption",caption))
+      caption=L"noname";
+
+  if(node->getName() == "listbox") 
+    item = new GuiItemListBox(caption);
+  else if(node->getName() == "static")
+    item = new GuiItemStaticText(caption);
+  else if(node->getName() == "checkbox")
+    item = new GuiItemCheckBox(caption);
+  else if(node->getName() == "slider") 
+    item = new GuiItemSlider(caption);
+
+  if(item)
+    item->init(node);
+
+  return item;
+}
+
+
+GuiMenu::GuiItemGroup::GuiItemGroup(const std::wstring & name)
+{
+  m_name = name;
+}
 
 

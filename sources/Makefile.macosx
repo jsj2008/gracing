@@ -54,7 +54,7 @@ src_fonts_dir=$(resources_dir)/gfx/fonts
 src_textures_dir=$(resources_dir)/gfx/textures
 src_themes_dir=$(resources_dir)/themes
 
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled)
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Igui
 
 
 #				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
@@ -72,7 +72,9 @@ $(target): $(objs)
 	@$(cplusplus) -o $(target) $(ldflags)  $(objs) config.o
 
 
-genconf: $(sources)
+genconf:  config.xml
+  
+config.xml : $(sources)
 	@$(copier) --cfg $(sources)
 	@echo "Compiling generated config.cc"
 	@$(cplusplus) -c config.cc $(ccflags)
@@ -92,6 +94,7 @@ copy_files:
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
 	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/themes/default/theme-default.zip $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/menu.xml $(tgt_res_dir)
 
 # GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)

@@ -122,6 +122,21 @@ XmlNode::~XmlNode()
   m_nodes.clear();
 }
 
+int XmlNode::get(const std::string &attribute, std::wstring & value) const
+{
+  if(m_attributes.size()==0) return 0;
+  std::map<std::string, core::stringw>::const_iterator o;
+  o = m_attributes.find(attribute);
+  if(o==m_attributes.end()) return 0;
+  //*value=core::stringc(o->second).c_str();
+
+  std::string vv=
+    std::string(core::stringc(o->second).c_str());
+
+  value=std::wstring(vv.begin(),vv.end());
+  return 1;
+}
+
 int XmlNode::get(const std::string &attribute, std::string & value) const
 {
   if(m_attributes.size()==0) return 0;
