@@ -19,10 +19,13 @@
 #include <irrlicht.h>
 
 #include "XmlNode.h"
-//#include "GuiFrame.h"
 #include "EventReceiver.h"
 
+#include <lunar.h>
+
 class  GuiFrame;
+class  GuiItemCheckBox;
+class  GuiItemStaticText;
 
 /////////////////////////////////////////////////
 // irrlicht 'compatibility'
@@ -149,58 +152,7 @@ class GuiMenuItemFactory
     static IGuiMenuItem * build(XmlNode * node);
 };
 
-class GuiItemCheckBox : public IGuiMenuItem 
-{
-  public:
-    GuiItemCheckBox(const std::wstring & caption);
-    GuiItemCheckBox(const wchar_t * caption);
 
-    virtual void setTheme(GuiTheme * theme);
-
-    void init(XmlNode * node);
-
-    GuiDimension getPreferredSize();
-
-    void draw();
-
-    virtual void onMouseClick(const GuiPoint & point);
-
-  protected:
-    virtual void updateGeometry();
-  
-  private:
-    GuiImage * m_checkerImage;
-    GuiRect    m_checkerSrcRect;
-    GuiRect    m_checkerDstRect;
-
-    GuiImage * m_boxImage;
-    GuiRect    m_boxSrcRect;
-    GuiRect    m_boxDstRect;
-
-    std::wstring m_caption;
-    bool        m_checked;
-    GuiFont *   m_font;
-};
-
-class GuiItemStaticText : public IGuiMenuItem
-{
-  public:
-    GuiItemStaticText(const std::wstring & caption);
-    GuiItemStaticText(const wchar_t * caption);
-
-    virtual void setTheme(GuiTheme * theme);
-
-    void init(XmlNode *);
-
-    GuiDimension getPreferredSize();
-
-    void draw();
-
-  private:
-    std::wstring m_caption;
-
-    GuiFont * m_font;
-};
 
 
 class GuiItemListBox : public IGuiMenuItem
@@ -348,12 +300,6 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiMenu(irr::gui::IGUIEnvironment* environment,
         irr::gui::IGUIElement* parent, irr::s32 id, 
         const irr::core::rect<irr::s32>& rectangle);
-
-    // elements building
-    GuiItemStaticText * addStaticText(const std::wstring & caption);
-    GuiItemCheckBox *   addCheckBox(const std::wstring & caption);
-    GuiItemListBox *    addListBox(const std::wstring & caption);
-    GuiItemSlider *     addSlider(const std::wstring & caption);
 
     void load(const std::string & xmlFileName);
 

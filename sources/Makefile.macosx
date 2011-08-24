@@ -10,10 +10,6 @@ irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -
 						-dylib_file \
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:\
 						/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib 
-#-arch i386 
-
-#-LGL \
-irr_libs=-lIrrlicht
 
 # bullet paths and libraries
 bt_home=/Users/gianni/MyLibraries/bullet-2.77
@@ -21,12 +17,6 @@ bt_build_home=/Users/gianni/MyLibraries/bullet-build
 bt_inc_dir=-I$(bt_home)/src
 bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
-
-
-# gui paths and libraries
-gui_home=/Users/gianni/MyLibraries/CEGUI-0.7.5
-gui_inc_dir=$(gui_home)/cegui/include
-gui_lib_dir=
 
 log_enabled=-DLOG_ENABLED
 
@@ -54,18 +44,25 @@ src_fonts_dir=$(resources_dir)/gfx/fonts
 src_textures_dir=$(resources_dir)/gfx/textures
 src_themes_dir=$(resources_dir)/themes
 
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Igui
+ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Ilua -Ilua/lua-5.1.4
 
 
 #				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
 # -DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
 				
-ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) \
+ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) lua/lua-5.1.4/src/liblua.a \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
 
 objs=$(subst .cc,.o,$(sources))
 
-all: genconf $(target) copy_files
+all: genconf subdirs $(target) copy_files
+
+
+subdirs: $(subdirs)
+
+
+$(subdirs):
+	make -C $@
 
 $(target): $(objs) 
 	@echo "Linking $(target)"
@@ -95,11 +92,13 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/themes/default/theme-default.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/menu.xml $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/menu.lua $(tgt_res_dir)
 
 # GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/frame.zip $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/background.png $(tgt_res_dir);
 # VEHICLES
 	@$(copier) --cpv --tgtdir $(tgt_vehicles_dir) --resdir $(src_vehicles_dir)  
 # TRACKS
@@ -116,38 +115,17 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
     
 
-#	@$(copier) --cp $(resources_dir)/gfx/font.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/title_font.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/title_font_2.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/title_font.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/digits.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/digits.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-64.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-64.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-32.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-32.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-24.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/impact-condensed-24.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/transuranium-64.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/transuranium-64.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-64.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-64.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-32.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-32.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-24.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/komika-24.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/braggadocio-64.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/braggadocio-64.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/greddario-64.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/greddario-64.png $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/braggadocio-32.xml $(tgt_res_dir)
-#	@$(copier) --cp $(resources_dir)/gfx/braggadocio-32.png $(tgt_res_dir)
-
-
-clean:
+clean: clean_subdirs
 	rm -f *.o
+	rm -f config.xml config.cc
 	rm -f $(target)
 	rm -fr $(tgt_dir)
+
+clean_subdirs:
+	for d in $(subdirs); do\
+	  make -C $$d clean;\
+	done
+  
 
 depend:
 	makedepend  -- $(ccflags) -- $(sources) -f depend.mak
@@ -157,4 +135,4 @@ testb:
   
 include depend.mak
 
-.PHONY: copy_files all clean depend tags genconf
+.PHONY: copy_files all clean depend tags genconf subdirs $(subdirs) clean_subdirs

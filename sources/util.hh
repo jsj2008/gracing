@@ -20,6 +20,8 @@
 #include <irrlicht.h>
 #include "gmlog.h"
 
+#define method(class, name) {#name, &class::name}
+
 //1 degree = 0.017453293 radiant 
 inline double rad2deg(double value)
 {

@@ -26,12 +26,17 @@
 #include "TestVehicle.h"
 #include "IrrDebugDrawer.h"
 #include "DataRecorder.h"
-#include "IPhaseHandler.h"
-#include "Race.h"
 #include "GUISpeedometer.h"
 #include "EventReceiver.h"
-#include "VehicleChooser.h"
 #include "GuiMenu.h"
+
+/* phase handlers */
+#include "IPhaseHandler.h"
+#include "Race.h"
+#include "VehicleChooser.h"
+#include "EmptyPhaseHandler.h"
+
+
 
 // vehicle controllers
 #include "VehicleKeyboardController.h"
@@ -236,12 +241,16 @@ int main(int argc, char ** av)
   unsigned long frameDuration = 1000 / glob_frameRate;
 
   // phase handlers
-  VehicleChooser * vehicleChooser;
-  Race *           race;
+  VehicleChooser *    vehicleChooser;
+  Race *              race;
+  EmptyPhaseHandler *  emptyPhaseHandler;
+
   IPhaseHandler *  currentPhaseHandler;
+
 
   vehicleChooser=new VehicleChooser(device,world);
   race = new Race(device,world);
+  emptyPhaseHandler=new EmptyPhaseHandler(device,world);
 
   currentPhaseHandler = 0;
 
@@ -272,7 +281,8 @@ int main(int argc, char ** av)
 
   // temp init !!!!!
   vehicleChooser->prepare(1,3,runningVehicles);
-  currentPhaseHandler= vehicleChooser;
+  //currentPhaseHandler= vehicleChooser;
+  currentPhaseHandler=emptyPhaseHandler;
 
   bool donePhase;
 

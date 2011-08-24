@@ -18,5 +18,11 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         Race.cc \
         Util.cc \
         XmlNode.cc \
-        GuiMenu.cc 
+        GuiMenu.cc \
+        GuiItemCheckBox.cc \
+        GuiItemStaticText.cc \
+        EmptyPhaseHandler.cc
+
+
+subdirs=lua
 

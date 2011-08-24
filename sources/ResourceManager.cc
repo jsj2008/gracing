@@ -18,6 +18,7 @@
 #include <string>
 #include <dirent.h>
 
+
 #include "ResourceManager.h"
 #include "XmlNode.h"
 #include "config.h"
@@ -26,6 +27,64 @@
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
 #include "GuiMenu.h"
+
+extern "C" {
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+}
+/////////////////////////////////////////////////////////////////////////////////
+class LuaBridge 
+{
+  public:
+
+    LuaBridge(lua_State * L) 
+    {
+      GM_LOG("building a lua bridge\n");
+    };
+
+    static const char *                    className;
+    static Lunar<LuaBridge>::RegType  methods[];
+
+
+    // lua callable function members
+    int log(lua_State * L)
+    {
+      const char * str;
+      if((str=luaL_checklstring(L,1,0))) {
+        GM_LOG("%s",str);
+      }
+      return 0;
+    }
+
+    int showMenu(lua_State * L)
+    {
+      const char * str;
+      if((str=luaL_checklstring(L,1,0))) {
+        ResourceManager::getInstance()->showMenu(str);
+      }
+      return 0;
+    }
+
+    int hideMenu(lua_State * L)
+    {
+      ResourceManager::getInstance()->hideMenu();
+      return 0;
+    }
+};
+
+const char* LuaBridge::className = "GRACING";
+Lunar<LuaBridge>::RegType LuaBridge::methods[] = 
+{
+  //{ "log", &LuaBridge::log },
+  method(LuaBridge, log),
+  method(LuaBridge, showMenu),
+  method(LuaBridge, hideMenu),
+  { 0,0 }
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
 
 #define  DEFAULT_FONT       "droid-serif-32.xml"
 #define  DEFAULT_FONT_SMALL "droid-serif-24.xml"
@@ -126,7 +185,10 @@ ResourceManager::ResourceManager()
 
   m_device->grab();
 
+  GM_LOG("** creating lua interpreter\n");
+  m_lua = lua_open();
 
+  Lunar<LuaBridge>::Register(m_lua);
 
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
@@ -231,7 +293,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_menu->setVisible(true);
   m_menu->setHasFrame(true);
   m_menu->load("menu.xml");
-  m_menu->setGroup(L"options");
+  m_menu->setGroup(L"main");
   m_menu->centerOnTheScreen();
   getEventReceiver()->addListener(m_menu);
 
@@ -374,7 +436,33 @@ void ResourceManager::showMenu(const std::wstring & name)
   m_menu->setVisible(true);
 }
 
+void ResourceManager::showMenu(const std::string & name) 
+{
+  std::wstring wname(name.begin(),name.end());
+  m_menu->setGroup(wname);
+  m_menu->setVisible(true);
+}
+
 void ResourceManager::hideMenu()
 {
   m_menu->setVisible(false);
 }
+
+////////////////////////////////////////////////////////////////////////////////////// LUA STUFF
+void ResourceManager::lua_doFile(const char * filename)
+{
+  std::string fn = filename;
+  std::string completePath = getResourcePath() + "/" + fn;
+
+  GM_LOG("executing file: '%s'\n",completePath.c_str());
+  if(luaL_dofile(m_lua,completePath.c_str()))
+    GM_LOG("%s\n", lua_tostring(m_lua, -1));
+}
+
+
+void ResourceManager::lua_doString(const char * script)
+{
+  if(luaL_dostring(m_lua,script))
+    GM_LOG("%s\n", lua_tostring(m_lua, -1));
+}
+

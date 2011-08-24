@@ -245,7 +245,6 @@ bool VehicleChooser::step()
 
   ResourceManager *  resman=ResourceManager::getInstance();
 
-
   unsigned width;
   resman->getScreenWidth(width);
   irr::gui::IGUIFont *  m_font=resman->getSystemFontBig();

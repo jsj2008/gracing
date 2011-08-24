@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <irrlicht.h>
 
+#include <lunar.h>
+
 #include "PhyWorld.h"
 #include "Vehicle.h"
 
@@ -36,15 +38,21 @@ class ResourceManager
 
     static inline ResourceManager * getInstance() { if(s_instance==0) s_instance=new ResourceManager(); return s_instance; }
 
-    irr::io::path createAbsoluteFilename(const std::string & fileName);
 
     void setDevice(irr::IrrlichtDevice *device);
 
+    /* path handling */
+    irr::io::path createAbsoluteFilename(const std::string & fileName);
     void getVehicleCompletePath(const char * vehicleName, std::string & path);
     void getTrackCompletePath(const char * trackName, std::string & path);
     void getConfigCompletePath(const char * filename, std::string & path);
     void getResourceCompletePath(const char * filename, std::string & path);
     void getTexturesCompletePath(const char * texturesName, std::string & path);
+    inline const std::string & getResourcePath() { return m_rootDir; }
+    inline irr::io::IXMLReaderUTF8 * createXMLReaderUTF8(const std::string & filename)
+    {
+      return m_fileSystem->createXMLReaderUTF8(filename.c_str());
+    }
 
 
     /* system font */
@@ -58,16 +66,7 @@ class ResourceManager
     bool cfgGet(const char * name, double value[3]);
     bool cfgGet(const char * name, unsigned & value);
     bool cfgGet(const char * name, std::string & value);
-
     bool cfgGet(const char * nodeName, const XmlNode * & node);
-
-    inline const std::string & getResourcePath() { return m_rootDir; }
-
-
-    inline irr::io::IXMLReaderUTF8 * createXMLReaderUTF8(const std::string & filename)
-    {
-      return m_fileSystem->createXMLReaderUTF8(filename.c_str());
-    }
 
 
     /* singleton class access */
@@ -75,6 +74,7 @@ class ResourceManager
     inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
     inline PhyWorld *                 getPhyWorld()    { return m_world; }
            EventReceiver *            getEventReceiver();
+    inline lua_State *                getLuaState()    { return m_lua; }
 
 
 
@@ -83,8 +83,14 @@ class ResourceManager
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
 
+    /* menu handling */
     void hideMenu();
     void showMenu(const std::wstring & name);
+    void showMenu(const std::string & name);
+
+    /* lua stuff */
+    void lua_doFile(const char * filename);
+    void lua_doString(const char * script);
 
   private:
     static ResourceManager * s_instance;
@@ -108,6 +114,8 @@ class ResourceManager
     XmlNode *   m_configRoot;
 
     GuiMenu *   m_menu;
+
+    lua_State * m_lua;
 
     unsigned m_screenHeight;
     unsigned m_screenWidth;

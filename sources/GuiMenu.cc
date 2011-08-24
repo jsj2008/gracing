@@ -17,6 +17,10 @@
 #include "GuiMenu.h"
 #include "GuiFrame.h"
 #include "Util.hh"
+#include "GuiItemCheckBox.h"
+#include "GuiItemStaticText.h"
+
+#include <lunar.h>
 
 #define MANIFEST_NAME "THEME"
 
@@ -301,68 +305,6 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
   }
 }
 
-GuiItemCheckBox * GuiMenu::addCheckBox(const std::wstring & caption)
-{
-  GuiItemCheckBox * st;
-
-  st = new GuiItemCheckBox(caption);
-
-  if(m_theme)
-    st->setTheme(m_theme);
-
-  m_items.push_back(st);
-  refreshSize();
-
-  m_focusedItem = m_items.size() - 1;
-
-  return st;
-}
-
-GuiItemSlider * GuiMenu::addSlider(const std::wstring & caption)
-{
-  GuiItemSlider * st;
-
-  st = new GuiItemSlider(caption);
-
-  if(m_theme)
-    st->setTheme(m_theme);
-
-  m_items.push_back(st);
-  refreshSize();
-
-  return st;
-}
-
-GuiItemStaticText * GuiMenu::addStaticText(const std::wstring & caption)
-{
-  GuiItemStaticText * st;
-
-  st = new GuiItemStaticText(caption);
-
-  if(m_theme)
-    st->setTheme(m_theme);
-
-  m_items.push_back(st);
-  refreshSize();
-
-  return st;
-}
-
-GuiItemListBox * GuiMenu::addListBox(const std::wstring & caption)
-{
-  GuiItemListBox * st;
-
-  st = new GuiItemListBox(caption);
-
-  if(m_theme)
-    st->setTheme(m_theme);
-
-  m_items.push_back(st);
-  refreshSize();
-
-  return st;
-}
-
 void GuiMenu::centerOnTheScreen()
 {
   unsigned width,height;
@@ -377,74 +319,9 @@ void GuiMenu::centerOnTheScreen()
 }
 
 ////////////////////////////////////////////////// GUI STATIC TEXT START
-GuiItemStaticText::GuiItemStaticText(const std::wstring & caption)
-{
-  m_caption = caption;
-  m_font = ResourceManager::getInstance()->getSystemFontSmall();
-
-  _X(m_position)=0;
-  _Y(m_position)=0;
-  setSize(m_font->getDimension(m_caption.c_str()));
-}
-
-GuiDimension GuiItemStaticText::getPreferredSize()
-{
-  return m_font->getDimension(m_caption.c_str());
-}
-
-void GuiItemStaticText::init(XmlNode * node)
-{
-}
-
-void GuiItemStaticText::draw()
-{
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
-}
-
-void GuiItemStaticText::setTheme(GuiTheme * theme)
-{
-  const XmlNode * node = theme->getNode("static-text");
-  std::string value;
-
-  if(node && node->get("font",value)) {
-    if(value == "big") 
-      m_font = ResourceManager::getInstance()->getSystemFontBig();
-    else if(value == "small") 
-      m_font = ResourceManager::getInstance()->getSystemFontSmall();
-    else if(value == "normal")
-      m_font = ResourceManager::getInstance()->getSystemFont();
-  }
-}
 ////////////////////////////////////////////////// GUI STATIC TEXT END
 
 
-GuiItemCheckBox::GuiItemCheckBox(const std::wstring & caption)
-{
-  m_caption=caption;
-  m_checked=false;
-  m_boxImage=0;
-  m_checkerImage=0;
-
-  m_font = ResourceManager::getInstance()->getSystemFont();
-}
-
-GuiDimension GuiItemCheckBox::getPreferredSize()
-{
-  GuiDimension fdim=m_font->getDimension(m_caption.c_str());
-
-  if(m_boxImage) {
-    GuiDimension bdim;
-    _W(bdim) = _RW(m_boxSrcRect);
-    _H(bdim) = _RH(m_boxSrcRect);
-
-    _W(fdim) += _W(bdim);
-
-    if(_H(fdim) < _H(bdim))
-      _H(fdim) = _H(bdim);
-  }
-
-  return fdim;
-}
 
 void GuiItemListBox::init(XmlNode * node)
 {
@@ -475,102 +352,6 @@ void GuiItemListBox::clearItems()
 {
   m_items.clear();
   m_selectedItem = 0xffff;
-}
-
-void GuiItemCheckBox::init(XmlNode * node)
-{
-}
-
-void GuiItemCheckBox::draw()
-{
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
-
-  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-
-  if(m_boxImage) {
-    driver->draw2DImage (
-        m_boxImage,
-        m_boxDstRect,
-        m_boxSrcRect,
-        0,
-        0, //irr::video::SColor(255,255,255,255),
-        true);
-  }
-
-  if(m_checked && m_checkerImage) {
-    driver->draw2DImage (
-        m_checkerImage,
-        //m_boxDstRect,
-        m_checkerDstRect,
-        m_checkerSrcRect,
-        0,
-        0, //irr::video::SColor(255,255,255,255),
-        true);
-  }
-
-}
-
-void GuiItemCheckBox::setTheme(GuiTheme * theme)
-{
-  const XmlNode * root = theme->getNode("checkbox");
-  std::string value;
-  unsigned idx;
-
-  if(!root) // no checkbox theme present
-    return;
-
-  const XmlNode * boxNode = root->getChild("box");
-
-  GuiRect  rect;
-  if(boxNode) { 
-    if(boxNode->get("r",value)) 
-      Util::parseRect(value.c_str(),m_boxSrcRect);
-
-    if(boxNode->get("img",idx)) 
-      m_boxImage = theme->getImage(idx);
-  }
-
-  const XmlNode * checkNode = root->getChild("check");
-
-  if(checkNode) {
-    if(checkNode->get("r",value)) 
-      Util::parseRect(value.c_str(),m_checkerSrcRect);
-
-    if(checkNode->get("img",idx)) 
-      m_checkerImage = theme->getImage(idx);
-  }
-
-  updateGeometry();
-}
-
-void GuiItemCheckBox::onMouseClick(const GuiPoint & pnt)
-{
-  m_checked = ! m_checked;
-}
-
-void GuiItemCheckBox::updateGeometry() 
-{
-  m_boxDstRect.UpperLeftCorner.X = 
-    m_rectangle.LowerRightCorner.X - _RW(m_boxSrcRect);
-
-  m_boxDstRect.UpperLeftCorner.Y = 
-    m_rectangle.UpperLeftCorner.Y;
-
-  m_boxDstRect.LowerRightCorner.X = 
-    m_boxDstRect.UpperLeftCorner.X + _RW(m_boxSrcRect);
-
-  m_boxDstRect.LowerRightCorner.Y = 
-    m_boxDstRect.UpperLeftCorner.Y + _RW(m_boxSrcRect);
-
-  m_checkerDstRect = m_boxDstRect;
-
-  unsigned delta=2;
-  _RMINX(m_boxDstRect) += delta;
-  _RMINY(m_boxDstRect) += delta;
-
-  _RMAXX(m_boxDstRect) -= delta;
-  _RMAXY(m_boxDstRect) -= delta;
-
 }
 
 void GuiItemListBox::updateGeometry()
@@ -979,6 +760,11 @@ void GuiMenu::load(const std::string & xmlFileName)
       m_groups.push_back(group);
       if(m_theme) 
         group->setTheme(m_theme);
+    } else if(node->getName() == "script") {
+      std::string scriptSource;
+      if(node->get("src",scriptSource)) {
+        ResourceManager::getInstance()->lua_doFile(scriptSource.c_str());
+      }
     }
   }
   
@@ -1030,9 +816,9 @@ IGuiMenuItem * GuiMenuItemFactory::build(XmlNode * node)
 
   if(node->getName() == "listbox") 
     item = new GuiItemListBox(caption);
-  else if(node->getName() == "static")
+  else if(node->getName() == STATICTEXT_CLASSNAME) 
     item = new GuiItemStaticText(caption);
-  else if(node->getName() == "checkbox")
+  else if(node->getName() == CHECKBOX_CLASSNAME) 
     item = new GuiItemCheckBox(caption);
   else if(node->getName() == "slider") 
     item = new GuiItemSlider(caption);
