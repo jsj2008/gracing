@@ -21,6 +21,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiMenu.cc \
         GuiItemCheckBox.cc \
         GuiItemStaticText.cc \
+        GuiItemListBox.cc \
         EmptyPhaseHandler.cc
 
 

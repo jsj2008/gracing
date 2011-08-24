@@ -29,9 +29,10 @@ Lunar<GuiItemStaticText>::RegType  GuiItemStaticText::methods[]=
 };
 
 GuiItemStaticText::GuiItemStaticText(const std::wstring & caption)
+  : IGuiMenuItem(STATICTEXT_CLASSNAME)
 {
   m_caption = caption;
-  m_font = ResourceManager::getInstance()->getSystemFontSmall();
+  //m_font = ResourceManager::getInstance()->getSystemFontSmall();
   m_onClick = "";
 
   _X(m_position)=0;
@@ -61,6 +62,7 @@ GuiDimension GuiItemStaticText::getPreferredSize()
 
 void GuiItemStaticText::init(XmlNode * node)
 {
+  IGuiMenuItem::init(node);
   node->get("onClick",m_onClick);
 }
 
@@ -69,20 +71,12 @@ void GuiItemStaticText::draw()
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
 }
 
+#if 0
 void GuiItemStaticText::setTheme(GuiTheme * theme)
 {
-  const XmlNode * node = theme->getNode("static");
-  std::string value;
-
-  if(node && node->get("font",value)) {
-    if(value == "big") 
-      m_font = ResourceManager::getInstance()->getSystemFontBig();
-    else if(value == "small") 
-      m_font = ResourceManager::getInstance()->getSystemFontSmall();
-    else if(value == "normal")
-      m_font = ResourceManager::getInstance()->getSystemFont();
-  }
+  IGuiMenuItem::setTheme(theme);
 }
+#endif
 
 void GuiItemStaticText::onMouseClick(const GuiPoint & point)
 {

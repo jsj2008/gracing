@@ -26,6 +26,7 @@
 class  GuiFrame;
 class  GuiItemCheckBox;
 class  GuiItemStaticText;
+class  GuiItemListBox;
 
 /////////////////////////////////////////////////
 // irrlicht 'compatibility'
@@ -35,7 +36,7 @@ typedef irr::core::dimension2d<irr::u32>  GuiDimension;
 typedef struct { GuiS32 x,y; }            GuiPoint;
 typedef irr::core::rect<irr::s32>         GuiRect;
 typedef irr::gui::IGUIFont                GuiFont;
-typedef irr::video::ITexture                GuiImage;
+typedef irr::video::ITexture              GuiImage;
 
 #define _X(pnt)   pnt.x
 #define _Y(pnt)   pnt.y
@@ -86,7 +87,9 @@ class IGuiMenuItem
 {
   public:
 
-    virtual void init(XmlNode * node)=0;
+    IGuiMenuItem(const char * className);
+
+    virtual void init(XmlNode * node);
 
     virtual GuiDimension getPreferredSize()=0;
     virtual void setSize(const GuiDimension & dim) 
@@ -106,7 +109,7 @@ class IGuiMenuItem
       updateRectangle();
     }
 
-    virtual void setTheme(GuiTheme * theme)=0;
+    virtual void setTheme(GuiTheme * theme);
 
     virtual void draw()=0;
 
@@ -122,6 +125,12 @@ class IGuiMenuItem
     virtual void  onMouseMove(const GuiPoint & point) { };
     virtual bool  onMouseLButton(bool down, const GuiPoint & point) { return false; };
     virtual bool  onMouseRButton(bool down, const GuiPoint & point) { return false; };
+
+    virtual bool  isSelectable() { return m_selectable; }
+    virtual void  setSelectable(bool s) { m_selectable=s; }
+
+  private:
+    std::string m_className;
 
   protected:
 
@@ -142,70 +151,15 @@ class IGuiMenuItem
     
     GuiDimension m_dimension;
     GuiPoint     m_position;
-
     GuiRect      m_rectangle;
+    bool         m_selectable;
+    GuiFont *    m_font;
 };
 
 class GuiMenuItemFactory 
 {
   public:
     static IGuiMenuItem * build(XmlNode * node);
-};
-
-
-
-
-class GuiItemListBox : public IGuiMenuItem
-{
-  public:
-    GuiItemListBox(const std::wstring & caption);
-
-    GuiDimension getPreferredSize();
-
-    virtual void setTheme(GuiTheme * theme);
-
-    void init(XmlNode *);
-
-    void addItem(const std::wstring & item);
-    void addItem(const std::string & item);
-
-    void clearItems();
-
-    void draw();
-
-    virtual bool selfDrawFocused() { return true; }
-    virtual void drawFocus();
-
-    virtual void  onMouseMove(const GuiPoint & point);
-    virtual void  onMouseClick(const GuiPoint & point);
-
-  protected:
-    virtual void updateGeometry();
-
-  private:
-    
-    unsigned getItemMaxWidth();
-
-    std::wstring               m_caption;
-    GuiFont *                  m_font;
-
-    GuiImage * m_riteImage;
-    GuiRect    m_riteSrcRect;
-    GuiRect    m_riteDstRect;
-
-    GuiImage * m_leftImage;
-    GuiRect    m_leftSrcRect;
-    GuiRect    m_leftDstRect;
-
-    GuiRect    m_itemDstRect;
-    std::vector<std::wstring>  m_items;
-    unsigned   m_selectedItem;
-
-    enum {
-      mouseOnNothing,
-      mouseOnLeftImage,
-      mouseOnRiteImage
-    } m_mouseOver;
 };
 
 class GuiItemSlider : public IGuiMenuItem
@@ -242,7 +196,6 @@ class GuiItemSlider : public IGuiMenuItem
 
 
     std::wstring m_caption;
-    GuiFont *    m_font;
 
     GuiImage * m_leftEdgeImage;
     GuiRect    m_leftEdgeSrcRect;
@@ -374,8 +327,6 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     irr::video::ITexture* m_renderTarget;
 
     std::vector<GuiItemGroup *> m_groups;
-
-
 
     enum { m_invalidItemIndex=0xffff };
 };

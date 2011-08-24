@@ -22,11 +22,9 @@
 class GuiItemStaticText : public IGuiMenuItem
 {
   public:
-    GuiItemStaticText(lua_State *) { assert(0); }
+    GuiItemStaticText(lua_State *) : IGuiMenuItem(STATICTEXT_CLASSNAME) { assert(0); }
     GuiItemStaticText(const std::wstring & caption);
     GuiItemStaticText(const wchar_t * caption);
-
-    virtual void setTheme(GuiTheme * theme);
 
     void init(XmlNode *);
 
@@ -46,8 +44,6 @@ class GuiItemStaticText : public IGuiMenuItem
     char m_luaName[m_luaNameSize];
 
     std::string m_onClick;
-
-    GuiFont * m_font;
 };
 
 #endif
