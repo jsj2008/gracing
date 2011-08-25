@@ -34,6 +34,7 @@ GuiItemStaticText::GuiItemStaticText(const std::wstring & caption)
   m_caption = caption;
   //m_font = ResourceManager::getInstance()->getSystemFontSmall();
   m_onClick = "";
+  m_center = false;
 
   _X(m_position)=0;
   _Y(m_position)=0;
@@ -48,7 +49,6 @@ GuiItemStaticText::GuiItemStaticText(const std::wstring & caption)
   }
 
   snprintf(m_luaName,m_luaNameSize,"%s%p",className,this);
-  
   int i=Lunar<GuiItemStaticText>::push(L,this);
   lua_pushstring(L, m_luaName);
   lua_pushvalue(L, i);
@@ -64,11 +64,12 @@ void GuiItemStaticText::init(XmlNode * node)
 {
   IGuiMenuItem::init(node);
   node->get("onClick",m_onClick);
+  node->get("center",m_center);
 }
 
 void GuiItemStaticText::draw()
 {
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),m_center,false);
 }
 
 #if 0

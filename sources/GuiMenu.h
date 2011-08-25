@@ -132,6 +132,7 @@ class IGuiMenuItem
   private:
     std::string m_className;
 
+
   protected:
 
     void updateRectangle()
@@ -140,7 +141,6 @@ class IGuiMenuItem
       m_rectangle.UpperLeftCorner.Y = _Y(m_position);
       m_rectangle.LowerRightCorner.X = _X(m_position) + _W(m_dimension);
       m_rectangle.LowerRightCorner.Y = _Y(m_position) + _H(m_dimension);
-
       updateGeometry();
     }
 
@@ -154,6 +154,9 @@ class IGuiMenuItem
     GuiRect      m_rectangle;
     bool         m_selectable;
     GuiFont *    m_font;
+
+    enum { m_luaNameSize=40 };
+    char m_luaName[m_luaNameSize];
 };
 
 class GuiMenuItemFactory 
@@ -162,64 +165,6 @@ class GuiMenuItemFactory
     static IGuiMenuItem * build(XmlNode * node);
 };
 
-class GuiItemSlider : public IGuiMenuItem
-{
-  public:
-    GuiItemSlider(const std::wstring & caption);
-
-    GuiDimension getPreferredSize();
-
-    void draw();
-
-    void init(XmlNode *);
-
-    void setTheme(GuiTheme * theme);
-
-    bool selfDrawFocused() { return true; }
-
-    void drawFocus();
-
-    void  onMouseMove(const GuiPoint & point);
-    bool  onMouseLButton(bool down, const GuiPoint & point);
-
-    inline void  setRange(double min, double max) { m_minValue = min; m_maxValue = max; }
-    inline void  getRange(double & min, double & max) { min = m_minValue; max = m_maxValue; }
-    double getValue();
-
-
-  protected:
-    void updateGeometry();
-
-  private:
-
-    void updateHandlePosition();
-
-
-    std::wstring m_caption;
-
-    GuiImage * m_leftEdgeImage;
-    GuiRect    m_leftEdgeSrcRect;
-    GuiRect    m_leftEdgeDstRect;
-
-    GuiImage * m_riteEdgeImage;
-    GuiRect    m_riteEdgeSrcRect;
-    GuiRect    m_riteEdgeDstRect;
-
-    GuiImage * m_handleImage;
-    GuiRect    m_handleSrcRect;
-    GuiRect    m_handleDstRect;
-    bool       m_handleFocused;
-
-    GuiImage * m_fillerImage;
-    GuiRect    m_fillerDstRect;
-
-    GuiPoint   m_lastMousePoint;
-    bool       m_draggingHandle;
-    int        m_rangeLen;
-    int        m_handleValue;
-
-    double     m_minValue, m_maxValue;
-};
 
 class GuiContainerPolicy
 {

@@ -32,8 +32,14 @@ extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-}
+} 
+
+
+extern bool globalDone;
+
 /////////////////////////////////////////////////////////////////////////////////
+// TODO: implement the "lua bridge" not as a class
+//       but simply as table of lua cfunctions
 class LuaBridge 
 {
   public:
@@ -71,6 +77,12 @@ class LuaBridge
       ResourceManager::getInstance()->hideMenu();
       return 0;
     }
+
+    int quit(lua_State * L)
+    {
+      globalDone = true;
+      return 0;
+    }
 };
 
 const char* LuaBridge::className = "GRACING";
@@ -80,6 +92,7 @@ Lunar<LuaBridge>::RegType LuaBridge::methods[] =
   method(LuaBridge, log),
   method(LuaBridge, showMenu),
   method(LuaBridge, hideMenu),
+  method(LuaBridge, quit),
   { 0,0 }
 };
 
@@ -187,6 +200,13 @@ ResourceManager::ResourceManager()
 
   GM_LOG("** creating lua interpreter\n");
   m_lua = lua_open();
+
+  luaopen_base(m_lua);
+  luaopen_string(m_lua);
+  luaopen_table(m_lua);
+  luaopen_math(m_lua);
+  //luaopen_io(m_lua); // dont know why it is not working
+  luaopen_debug(m_lua);
 
   Lunar<LuaBridge>::Register(m_lua);
 

@@ -109,8 +109,12 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
   return tot;
 }
 
+// TODO: eliminate two following variables
 bool stepMode=false;
 static bool doneStep=false;
+
+
+bool globalDone=false;
 
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
@@ -229,11 +233,9 @@ int main(int argc, char ** av)
 
   bool autoplayer;
   ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
-
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
 
 
-  bool done=false;
   int lastFPS=-1;
 
   unsigned long startFrameTime;
@@ -286,7 +288,9 @@ int main(int argc, char ** av)
 
   bool donePhase;
 
-  while(device->run() && !done) {
+  globalDone = false;
+
+  while(device->run() && !globalDone) {
     if(device->isWindowActive()) {
 
       startFrameTime=device->getTimer()->getRealTime();
@@ -297,7 +301,7 @@ int main(int argc, char ** av)
 
       /* temp keyboard handling part */
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
-        done=true;
+        globalDone=true;
 
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_L))
         resmanager->showMenu(L"main");

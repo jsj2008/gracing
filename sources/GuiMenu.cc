@@ -20,6 +20,7 @@
 #include "GuiItemCheckBox.h"
 #include "GuiItemListBox.h"
 #include "GuiItemStaticText.h"
+#include "GuiItemSlider.h"
 
 #include <lunar.h>
 
@@ -101,6 +102,27 @@ void IGuiMenuItem::setTheme(GuiTheme * theme)
 
 void IGuiMenuItem::init(XmlNode * node) 
 {
+  if(!node)
+    return;
+  std::string value;
+  if(node->get("font",value)) {
+    if(value == "big") 
+      m_font = ResourceManager::getInstance()->getSystemFontBig();
+    else if(value == "small") 
+      m_font = ResourceManager::getInstance()->getSystemFontSmall();
+    else if(value == "normal")
+      m_font = ResourceManager::getInstance()->getSystemFont();
+  }
+
+  node->get("selectable",m_selectable);
+
+  if(node->get("name",value)) {
+    lua_State * L = ResourceManager::getInstance()->getLuaState();
+    lua_pushstring(L,value.c_str());
+    lua_pushstring(L, m_luaName);
+    lua_gettable(L, LUA_GLOBALSINDEX);
+    lua_settable(L, LUA_GLOBALSINDEX);
+  }
 }
 
 GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
@@ -356,209 +378,6 @@ void GuiMenu::centerOnTheScreen()
 
 
 ///////////////////////////////////////
-GuiItemSlider::GuiItemSlider(const std::wstring & caption)
-  : IGuiMenuItem("slider")
-{
-  const unsigned defRangeLen=100;
-  m_caption = caption;
-  m_rangeLen = defRangeLen;
-  m_font= ResourceManager::getInstance()->getSystemFont();
-  m_handleFocused=false;
-  m_draggingHandle=false;
-  m_handleValue=0;
-  m_minValue=0.;
-  m_maxValue=1.;
-}
-
-void GuiItemSlider::init(XmlNode * node)
-{
-  node->get("min",m_minValue);
-  node->get("max",m_minValue);
-  // TODO: handle initial value
-}
-
-GuiDimension GuiItemSlider::getPreferredSize()
-{
-  GuiDimension dim;
-  GuiDimension idim;
-
-  if(m_font)
-   dim = m_font->getDimension(m_caption.c_str());
-
-  if(m_leftEdgeImage)  
-    _W(dim) += _RW(m_leftEdgeDstRect);
-
-  if(m_riteEdgeImage)  
-    _W(dim) += _RW(m_riteEdgeDstRect);
-
-  _W(dim) += m_rangeLen;
-
-  return dim;
-}
-
-void GuiItemSlider::draw()
-{
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
-
-  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-
-  if(m_leftEdgeImage) 
-    driver->draw2DImage (
-        m_leftEdgeImage, m_leftEdgeDstRect,
-        m_leftEdgeSrcRect, 0, 0, true); 
-
-  if(m_leftEdgeImage) 
-    driver->draw2DImage (
-        m_riteEdgeImage, m_riteEdgeDstRect,
-        m_riteEdgeSrcRect, 0, 0, true);
-
-
-  if(m_fillerImage)
-    Util::drawRectWithBackgroung(driver, 
-        m_fillerImage,m_fillerDstRect,true,0,0);
-
-  if(m_handleFocused) {
-    irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-    irr::video::SColor c(100,100,100,255);
-    driver->draw2DRectangle(c,m_handleDstRect);
-  }
-
-  if(m_handleImage) 
-    driver->draw2DImage (
-        m_handleImage, m_handleDstRect, m_handleSrcRect,
-        0, 0, true);
-}
-
-void GuiItemSlider::updateGeometry()
-{ 
-  unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
-
-  if(m_font) {
-    GuiDimension dim;
-    dim=m_font->getDimension(m_caption.c_str());
-    m_rangeLen = (_RW(m_rectangle) - _W(dim) - _RW(m_riteEdgeSrcRect) - _RW(m_leftEdgeSrcRect)) * 2 / 3;
-  } else {
-    m_rangeLen = 100;
-  }
-
-  _RMINX(m_riteEdgeDstRect) = _RMAXX(m_rectangle) - _RW(m_riteEdgeSrcRect);
-  _RMINY(m_riteEdgeDstRect) = _RMINY(m_rectangle) + offset;
-  _RMAXX(m_riteEdgeDstRect) = _RMINX(m_riteEdgeDstRect) + _RW(m_riteEdgeSrcRect);
-  _RMAXY(m_riteEdgeDstRect) = _RMINY(m_riteEdgeDstRect) + _RH(m_riteEdgeSrcRect);
-
-  _RMINX(m_fillerDstRect) = _RMINX(m_riteEdgeDstRect) - m_rangeLen;
-  _RMINY(m_fillerDstRect) = _RMINY(m_rectangle) + offset;
-  _RMAXX(m_fillerDstRect) = _RMINX(m_fillerDstRect) + m_rangeLen;
-  _RMAXY(m_fillerDstRect) = _RMINY(m_fillerDstRect) + _RH(m_riteEdgeSrcRect);
-
-  _RMINX(m_leftEdgeDstRect) = _RMINX(m_fillerDstRect) - _RW(m_leftEdgeSrcRect);
-  _RMINY(m_leftEdgeDstRect) = _RMINY(m_rectangle) + offset;
-  _RMAXX(m_leftEdgeDstRect) = _RMINX(m_leftEdgeDstRect) + _RW(m_leftEdgeSrcRect);
-  _RMAXY(m_leftEdgeDstRect) = _RMINY(m_leftEdgeDstRect) + _RH(m_leftEdgeSrcRect);
-
-   updateHandlePosition();
-}
-
-void GuiItemSlider::updateHandlePosition()
-{
-  //unsigned gvalue=m_rangeLen / 2;
-  unsigned hw = _RW(m_handleSrcRect) / 2;
-  unsigned offset = (_RH(m_rectangle) - _RH(m_handleSrcRect)) / 2;
-
-  _RMINX(m_handleDstRect) = (m_handleValue - hw) + _RMINX(m_fillerDstRect);
-  _RMINY(m_handleDstRect) = _RMINY(m_rectangle) + offset;
-
-  _RMAXX(m_handleDstRect) = _RMINX(m_handleDstRect) + _RW(m_handleSrcRect);
-  _RMAXY(m_handleDstRect) = _RMINY(m_handleDstRect) + _RH(m_handleSrcRect);
-
-}
-
-void GuiItemSlider::setTheme(GuiTheme * theme)
-{
-  const XmlNode * root = theme->getNode("slider");
-
-  const XmlNode * node;
-  unsigned idx;
-  std::string value;
-
-  if(!root)
-    return;
-
-  node = root->getChild("left-edge");
-  if(node) {
-    if(node->get("r",value)) 
-      Util::parseRect(value.c_str(),m_leftEdgeSrcRect);
-
-    if(node->get("img",idx)) 
-      m_leftEdgeImage = theme->getImage(idx);
-  }
-
-  node = root->getChild("right-edge");
-  if(node) {
-    if(node->get("r",value)) 
-      Util::parseRect(value.c_str(),m_riteEdgeSrcRect);
-
-    if(node->get("img",idx)) 
-      m_riteEdgeImage = theme->getImage(idx);
-  }
-
-  node = root->getChild("handle");
-  if(node) {
-    if(node->get("r",value)) 
-      Util::parseRect(value.c_str(),m_handleSrcRect);
-
-    if(node->get("img",idx)) 
-      m_handleImage = theme->getImage(idx);
-  }
-
-  node = root->getChild("filler");
-  if(node) {
-    if(node->get("img",idx)) 
-      m_fillerImage = theme->getImage(idx);
-  }
-}
-
-void GuiItemSlider::onMouseMove(const GuiPoint & point) 
-{
-  if(m_draggingHandle) {
-    int dx = _X(point) - _X(m_lastMousePoint);
-
-    m_handleValue += dx;
-
-    m_lastMousePoint = point;
-
-    if(m_handleValue < 0)
-      m_handleValue = 0;
-    else if(m_handleValue >= m_rangeLen)
-      m_handleValue = m_rangeLen - 1;
-
-    updateHandlePosition();
-  }
-}
-bool GuiItemSlider::onMouseLButton(bool down, const GuiPoint & point) 
-{
-  if(down && _PINR(point, m_handleDstRect)) {
-    m_lastMousePoint = point; 
-    m_draggingHandle = true;
-    return true;
-  } else {
-    m_draggingHandle = false;
-  }
-  return false;
-}
-
-void GuiItemSlider::drawFocus() 
-{
-  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-  irr::video::SColor color(200,200,200,200);
-  irr::video::SColor c(100,100,100,255);
-  driver->draw2DRectangle(color,m_rectangle);
-}
-
-double GuiItemSlider::getValue()
-{
-  return ((double)m_handleValue / (double)m_rangeLen) * (m_maxValue - m_minValue) + m_minValue;
-}
 
 void GuiMenu::setGroup(const std::wstring & name)
 {
@@ -659,7 +478,7 @@ IGuiMenuItem * GuiMenuItemFactory::build(XmlNode * node)
     item = new GuiItemStaticText(caption);
   else if(node->getName() == CHECKBOX_CLASSNAME) 
     item = new GuiItemCheckBox(caption);
-  else if(node->getName() == "slider") 
+  else if(node->getName() == SLIDER_CLASSNAME)
     item = new GuiItemSlider(caption);
 
   if(item)

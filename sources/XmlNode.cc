@@ -148,6 +148,22 @@ int XmlNode::get(const std::string &attribute, std::string & value) const
   return 1;
 }
 
+int XmlNode::get(const std::string &attribute, bool & value) const
+{
+  if(m_attributes.size()==0) return 0;
+  std::map<std::string, core::stringw>::const_iterator o;
+  o = m_attributes.find(attribute);
+  if(o==m_attributes.end()) return 0;
+  //*value=core::stringc(o->second).c_str();
+  core::stringc v=core::stringc(o->second);
+  if(v == "true" || v == "yes")
+    value=true;
+  else
+    value=false;
+  return 1;
+}
+
+
 int XmlNode::get(const std::string &attribute, btQuaternion & value) const
 {
   if(m_attributes.size()==0) return 0;

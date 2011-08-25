@@ -39,9 +39,8 @@ class GuiItemStaticText : public IGuiMenuItem
 
   private:
     std::wstring m_caption;
+    bool         m_center;
 
-    enum { m_luaNameSize=40 };
-    char m_luaName[m_luaNameSize];
 
     std::string m_onClick;
 };

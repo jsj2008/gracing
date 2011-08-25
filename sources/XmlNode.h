@@ -56,6 +56,8 @@ class XmlNode
     // get value as double
     int get(const std::string &attribute, double & value) const;
 
+    int get(const std::string &attribute, bool & value) const;
+
     int get(const std::string &attribute, int & value) const;
 
     int get(const std::string &attribute, unsigned & value) const;

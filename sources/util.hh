@@ -21,6 +21,7 @@
 #include "gmlog.h"
 
 #define method(class, name) {#name, &class::name}
+#define methodWithName(class, _method, name) {name, &class::_method}
 
 //1 degree = 0.017453293 radiant 
 inline double rad2deg(double value)

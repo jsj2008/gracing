@@ -51,22 +51,23 @@ void GuiItemListBox::clearItems()
 
 void GuiItemListBox::updateGeometry()
 {
-  _RMINX(m_riteDstRect) = _RMAXX(m_rectangle) - _RW(m_riteSrcRect);
-  _RMINY(m_riteDstRect) = _RMINY(m_rectangle);
-  _RMAXX(m_riteDstRect) = _RMINX(m_riteDstRect) + _RW(m_riteSrcRect);
-  _RMAXY(m_riteDstRect) = _RMINY(m_riteDstRect) + _RH(m_riteSrcRect);
+  _RMINX(m_rightButton.dstRect) = _RMAXX(m_rectangle) - _RW(m_rightButton.srcRect);
+  _RMINY(m_rightButton.dstRect) = _RMINY(m_rectangle);
+  _RMAXX(m_rightButton.dstRect) = _RMINX(m_rightButton.dstRect) + _RW(m_rightButton.srcRect);
+  _RMAXY(m_rightButton.dstRect) = _RMINY(m_rightButton.dstRect) + _RH(m_rightButton.srcRect);
 
-  _RMINX(m_itemDstRect) = _RMINX(m_riteDstRect) - getItemMaxWidth();
+  _RMINX(m_itemDstRect) = _RMINX(m_rightButton.dstRect) - getItemMaxWidth();
   _RMINY(m_itemDstRect) = _RMINY(m_rectangle);
-
   _RMAXX(m_itemDstRect) = _RMINX(m_itemDstRect) + getItemMaxWidth();
   _RMAXY(m_itemDstRect) = _RMAXY(m_rectangle);
 
-  //_RMINX(m_leftDstRect) = _RMINX(m_riteDstRect) - _RW(m_leftSrcRect) - getItemMaxWidth();
-  _RMINX(m_leftDstRect) = _RMINX(m_itemDstRect) - _RW(m_leftSrcRect);
-  _RMINY(m_leftDstRect) = _RMINY(m_rectangle);
-  _RMAXX(m_leftDstRect) = _RMINX(m_leftDstRect) + _RW(m_leftSrcRect);
-  _RMAXY(m_leftDstRect) = _RMINY(m_leftDstRect) + _RH(m_leftSrcRect);
+  _RMINX(m_leftButton.dstRect) = _RMINX(m_itemDstRect) - _RW(m_leftButton.srcRect);
+  _RMINY(m_leftButton.dstRect) = _RMINY(m_rectangle);
+  _RMAXX(m_leftButton.dstRect) = _RMINX(m_leftButton.dstRect) + _RW(m_leftButton.srcRect);
+  _RMAXY(m_leftButton.dstRect) = _RMINY(m_leftButton.dstRect) + _RH(m_leftButton.srcRect);
+
+  m_rightButtonHi.dstRect = m_rightButton.dstRect;
+  m_leftButtonHi.dstRect = m_leftButton.dstRect;
 }
 
 
@@ -79,11 +80,15 @@ void GuiItemListBox::drawFocus()
 
   switch(m_mouseOver) {
     case mouseOnRiteImage:
-      driver->draw2DRectangle(c,m_riteDstRect);
+      if(!m_rightButtonHi.image && m_highlightButtons)
+        driver->draw2DRectangle(c,m_rightButton.dstRect);
+      m_mustHighlight=true;
       break;
 
     case mouseOnLeftImage:
-      driver->draw2DRectangle(c,m_leftDstRect);
+      if(!m_leftButtonHi.image && m_highlightButtons)
+        driver->draw2DRectangle(c,m_leftButton.dstRect);
+      m_mustHighlight=true;
       break;
 
     case mouseOnNothing:
@@ -95,23 +100,23 @@ void GuiItemListBox::onMouseMove(const GuiPoint & pnt)
 {
   m_mouseOver = mouseOnNothing;
 
-  if(_PINR(pnt,m_leftDstRect)) 
+  if(_PINR(pnt,m_leftButton.dstRect)) 
     m_mouseOver = mouseOnLeftImage;
 
-  if(_PINR(pnt,m_riteDstRect))
+  if(_PINR(pnt,m_rightButton.dstRect))
     m_mouseOver = mouseOnRiteImage;
 }
 
 void GuiItemListBox::onMouseClick(const GuiPoint & pnt)
 {
-  if(_PINR(pnt,m_leftDstRect)) {
+  if(_PINR(pnt,m_leftButton.dstRect)) {
     if(m_selectedItem == 0)
       m_selectedItem = m_items.size() - 1;
     else
       m_selectedItem --;
   }
 
-  if(_PINR(pnt,m_riteDstRect)) {
+  if(_PINR(pnt,m_rightButton.dstRect)) {
     m_selectedItem ++;
     m_selectedItem %= m_items.size();
   }
@@ -121,47 +126,35 @@ GuiItemListBox::GuiItemListBox(const std::wstring & caption)
     : IGuiMenuItem("listbox")
 {
   m_caption = caption;
-  //m_font = ResourceManager::getInstance()->getSystemFont();
   m_mouseOver = mouseOnNothing;
   m_selectedItem = 0xffff;
 
-
-  m_riteImage=0;
-  m_leftImage=0;
+  m_highlightButtons=true;
 }
 
 void GuiItemListBox::setTheme(GuiTheme * theme)
 {
-
 	IGuiMenuItem::setTheme(theme);
 
   const XmlNode * root = theme->getNode("listbox");
   std::string value;
-  unsigned idx;
 
   if(!root) // no checkbox theme present
     return;
 
-  const XmlNode * leftNode = root->getChild("left");
+  const XmlNode * node;
+ 
+  node = root->getChild("left");
+  m_leftButton.init(theme,node);
 
-  if(leftNode) { 
-    if(leftNode->get("r",value)) 
-      Util::parseRect(value.c_str(),m_leftSrcRect);
+  node = root->getChild("right");
+  m_rightButton.init(theme,node);
 
-    if(leftNode->get("img",idx)) 
-      m_leftImage = theme->getImage(idx);
-  }
+  node = root->getChild("right-highlight");
+  m_rightButtonHi.init(theme,node);
 
-  const XmlNode * riteNode = root->getChild("right");
-
-  if(riteNode) { 
-    if(riteNode->get("r",value)) 
-      Util::parseRect(value.c_str(),m_riteSrcRect);
-
-    if(riteNode->get("img",idx)) 
-      m_riteImage = theme->getImage(idx);
-
-  }
+  node = root->getChild("left-highlight");
+  m_leftButtonHi.init(theme,node);
 }
 
 unsigned GuiItemListBox::getItemMaxWidth()
@@ -191,27 +184,18 @@ void GuiItemListBox::draw()
 {
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
 
-  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-
   if(m_selectedItem < m_items.size()) 
      m_font->draw(m_items[m_selectedItem].c_str(),m_itemDstRect,irr::video::SColor(255,255,255,255),true,false);
 
+  if(m_mouseOver == mouseOnLeftImage  && m_leftButtonHi.image && m_mustHighlight)
+    m_leftButtonHi.draw();
+  else
+    m_leftButton.draw();
 
-  if(m_riteImage) 
-    driver->draw2DImage (
-        m_riteImage,
-        m_riteDstRect,
-        m_riteSrcRect,
-        0,
-        0,
-        true);
+  if(m_mouseOver == mouseOnRiteImage  && m_rightButtonHi.image && m_mustHighlight) 
+    m_rightButtonHi.draw();
+  else
+    m_rightButton.draw();
 
-  if(m_leftImage) 
-    driver->draw2DImage (
-        m_leftImage,
-        m_leftDstRect,
-        m_leftSrcRect,
-        0,
-        0,
-        true);
+  m_mustHighlight=false;
 }
