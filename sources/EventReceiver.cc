@@ -37,6 +37,8 @@ bool EventReceiver::OnEvent(const SEvent& event)
         KeysPressed--;
     }
     KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+    for(unsigned i=0; i< m_listeners.size(); i++) 
+      m_listeners[i]->keyboardEvent(event.KeyInput);
   } else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
     if( event.MouseInput.X >= 0 && event.MouseInput.Y >= 0 ) 
       for(unsigned i=0; i< m_listeners.size(); i++) 

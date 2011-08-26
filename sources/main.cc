@@ -113,15 +113,12 @@ static int dumpNode(irr::scene::ISceneNode * node,int level=0)
 bool stepMode=false;
 static bool doneStep=false;
 
-
 bool globalDone=false;
-
 
 CFG_PARAM_BOOL(glob_enableDebug)=false;
 CFG_PARAM_BOOL(glob_enableShadows)=false;
 CFG_PARAM_BOOL(glob_enableFullScreen)=false;
 CFG_PARAM_BOOL(glob_enableVSync)=false;
-
 
 #ifdef __WIN32__
 #include <Windows.h>

@@ -37,8 +37,6 @@ GuiTheme::GuiTheme(const char * filename)
 
   GM_LOG("loading theme from '%s'\n",mypath.c_str());
 
-  //bool res=ResourceManager::getInstance()->getFileSystem()->addFileArchive(mypath);
-
   if(!res) 
     return; // !!!
 
@@ -141,7 +139,7 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
 
   m_itemWhichCapturedMouse=0;
 
-  m_focusedItem = m_items.size();
+  m_focusedItem = 0xffff; // m_items.size();
 
   m_theme=new GuiTheme("theme-default.zip");
 
@@ -295,6 +293,82 @@ void GuiMenu::selectItemByPoint(const GuiPoint & point)
     m_focusedItem = m_items.size();
 }
 
+void GuiMenu::selectNext()
+{
+  if(m_items.size() == 0)
+    return;
+  unsigned startFrom;
+  if(isItemIndexValid(m_focusedItem)) {
+    startFrom = m_focusedItem + 1;
+    startFrom %= m_items.size();
+  } else 
+    startFrom=0;
+
+  unsigned i;
+  for( i=startFrom; ;  ) {
+    if(m_items[i]->isSelectable())
+      break;
+    i++; i%=m_items.size();
+    if( i == startFrom)
+      break;
+  }
+
+  if(m_items[i]->isSelectable())
+    m_focusedItem = i;
+}
+
+void GuiMenu::selectPrev()
+{
+  int startFrom;
+  if(m_items.size() == 0)
+    return;
+
+  if(isItemIndexValid(m_focusedItem)) {
+    if(m_focusedItem == 0) 
+      startFrom = m_items.size() - 1;
+    else
+      startFrom = m_focusedItem - 1;
+  } else 
+    startFrom=0;
+
+  int i;
+  for(i=startFrom; ; )  {
+    if(m_items[i]->isSelectable())
+      break;
+    if(i==0) i=m_items.size()-1; else i--;
+  }
+
+  if(m_items[i]->isSelectable()) 
+    m_focusedItem = i;
+}
+
+void GuiMenu::keyboardEvent(const irr::SEvent::SKeyInput & keyInput)
+{
+  switch(keyInput.Key) {
+    case irr::KEY_UP:
+      if(!keyInput.PressedDown)
+        selectPrev();
+      break;
+
+    case irr::KEY_DOWN:
+      if(!keyInput.PressedDown)
+        selectNext();
+      break;
+
+    default:
+      if(keyInput.PressedDown) {
+        if(isItemIndexValid(m_focusedItem))
+          m_items[m_focusedItem]->onKeyDown(keyInput);
+      } else {
+        if(isItemIndexValid(m_focusedItem)) {
+          m_items[m_focusedItem]->onKeyUp(keyInput);
+          m_items[m_focusedItem]->onKeyClick(keyInput);
+        } 
+      }
+      break;
+  }
+}
+
 void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
 {
   switch(MouseInput.Event) {
@@ -371,12 +445,6 @@ void GuiMenu::centerOnTheScreen()
   refreshSize();
 }
 
-////////////////////////////////////////////////// GUI STATIC TEXT START
-////////////////////////////////////////////////// GUI STATIC TEXT END
-
-
-
-
 ///////////////////////////////////////
 
 void GuiMenu::setGroup(const std::wstring & name)
@@ -386,6 +454,8 @@ void GuiMenu::setGroup(const std::wstring & name)
     if(m_groups[i]->getName() == name) {
       m_groups[i]->fillVector(m_items);
     }
+
+  m_focusedItem = m_items.size();
 
   refreshSize();
 }

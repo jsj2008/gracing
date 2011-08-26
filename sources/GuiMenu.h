@@ -126,6 +126,16 @@ class IGuiMenuItem
     virtual bool  onMouseLButton(bool down, const GuiPoint & point) { return false; };
     virtual bool  onMouseRButton(bool down, const GuiPoint & point) { return false; };
 
+    // TODO: to preserve a little of indipendence of the gui 
+    //       subsystem, the api interface of the gui items
+    //       should not name explicitely the irrlicht
+    //       structures.
+    //       nevertheless of the 'onKeyClick' the rule is
+    //       not accomplished.
+    virtual void  onKeyClick(const irr::SEvent::SKeyInput & event) {  };
+    virtual void  onKeyUp(const irr::SEvent::SKeyInput & event) {  };
+    virtual void  onKeyDown(const irr::SEvent::SKeyInput & event) {  };
+
     virtual bool  isSelectable() { return m_selectable; }
     virtual void  setSelectable(bool s) { m_selectable=s; }
 
@@ -134,6 +144,21 @@ class IGuiMenuItem
 
 
   protected:
+
+    inline void executeCode(const char * code)
+    {
+      if(code[0]) {
+        lua_State * L = ResourceManager::getInstance()->getLuaState();
+        lua_pushliteral(L, "self");
+        lua_pushstring(L, m_luaName);
+        lua_gettable(L, LUA_GLOBALSINDEX);
+        lua_settable(L, LUA_GLOBALSINDEX);
+
+        ResourceManager::getInstance()->lua_doString(code);
+      }
+    }
+    
+
 
     void updateRectangle()
     {
@@ -206,7 +231,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     // position/size
     void centerOnTheScreen();
 
-    void mouseEvent(const irr::SEvent::SMouseInput & MouseInput);
+    void mouseEvent(const irr::SEvent::SMouseInput & mouseInput);
+    void keyboardEvent(const irr::SEvent::SKeyInput & keyInput);
 
     void draw();
 
@@ -225,6 +251,9 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     inline bool getHasFrame() { return m_hasFrame; }
 
   private:
+    void selectNext();
+    void selectPrev();
+
     class GuiItemGroup 
     {
       public:

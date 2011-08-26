@@ -23,6 +23,7 @@ class IEventListener
 {
   public:
     virtual void mouseEvent(const irr::SEvent::SMouseInput & MouseInput) { }
+    virtual void keyboardEvent(const irr::SEvent::SKeyInput & KeyInput) { }
 };
 
 // TODO: probably this should be called

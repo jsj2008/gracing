@@ -46,7 +46,7 @@ class LuaBridge
 
     LuaBridge(lua_State * L) 
     {
-      GM_LOG("building a lua bridge\n");
+      // ~??~ //
     };
 
     static const char *                    className;
@@ -67,7 +67,7 @@ class LuaBridge
     {
       const char * str;
       if((str=luaL_checklstring(L,1,0))) {
-        ResourceManager::getInstance()->showMenu(str);
+        ResourceManager::getInstance()->showMenu(str,true);
       }
       return 0;
     }
@@ -450,16 +450,20 @@ void ResourceManager::loadVehicles()
   }
 }
 
-void ResourceManager::showMenu(const std::wstring & name) 
+void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen) 
 {
   m_menu->setGroup(name);
+  if(centerOnTheScreen)
+    m_menu->centerOnTheScreen();
   m_menu->setVisible(true);
 }
 
-void ResourceManager::showMenu(const std::string & name) 
+void ResourceManager::showMenu(const std::string & name,bool centerOnTheScreen) 
 {
   std::wstring wname(name.begin(),name.end());
   m_menu->setGroup(wname);
+  if(centerOnTheScreen)
+    m_menu->centerOnTheScreen();
   m_menu->setVisible(true);
 }
 

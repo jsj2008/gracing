@@ -43,6 +43,9 @@ class GuiItemSlider : public IGuiMenuItem
     bool  onMouseLButton(bool down, const GuiPoint & point);
     void  onMouseClick(const GuiPoint & point);
 
+    void  onKeyDown(const irr::SEvent::SKeyInput & keyinput);
+    void  onKeyUp(const irr::SEvent::SKeyInput & keyinput);
+
     inline void  getRange(double & min, double & max) { min = m_minValue; max = m_maxValue; }
     void         setRange(double min, double max);
 
@@ -88,7 +91,9 @@ class GuiItemSlider : public IGuiMenuItem
 
     GuiPoint   m_lastMousePoint;
     bool       m_draggingHandle;
+    int        m_movingHandleWithKeyDirection;
     int        m_rangeLen;
+    bool       m_rangeLenFixed;
     int        m_handleValue;
 
     double     m_minValue, m_maxValue;

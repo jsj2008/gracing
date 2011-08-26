@@ -71,7 +71,6 @@ void GuiItemSlider::setValue(double value)
   if(value < m_minValue || value > m_maxValue)
     return;
 
-  //m_handleValue = m_rangeLen * (value - m_minValue) / (m_maxValue - m_minValue) ;
   m_handleValue = EXT2INT(value);
   updateHandlePosition();
 }
@@ -101,6 +100,8 @@ GuiItemSlider::GuiItemSlider(const std::wstring & caption)
   m_handleValue=0;
   m_minValue=0.;
   m_maxValue=1.;
+  m_rangeLenFixed=false;
+  m_movingHandleWithKeyDirection=0;
 }
 
 void GuiItemSlider::init(XmlNode * node)
@@ -108,6 +109,10 @@ void GuiItemSlider::init(XmlNode * node)
   IGuiMenuItem::init(node);
   node->get("min",m_minValue);
   node->get("max",m_minValue);
+  if(node->get("width",m_rangeLen))
+    m_rangeLenFixed=true;
+  else
+    m_rangeLenFixed=false;
   node->get("onChange",m_onChange);
   // TODO: handle initial value
 }
@@ -133,6 +138,11 @@ GuiDimension GuiItemSlider::getPreferredSize()
 
 void GuiItemSlider::draw()
 {
+  if(m_movingHandleWithKeyDirection) {
+    m_handleValue+=m_movingHandleWithKeyDirection;
+    updateHandlePosition();
+    executeCode(m_onChange.c_str());
+  }
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
 
   irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
@@ -168,13 +178,13 @@ void GuiItemSlider::updateGeometry()
 { 
   unsigned offset = (_RH(m_rectangle) - _RH(m_riteEdgeSrcRect)) / 2;
 
-  if(m_font) {
+  if(m_font && !m_rangeLenFixed) {
     GuiDimension dim;
     dim=m_font->getDimension(m_caption.c_str());
     m_rangeLen = (_RW(m_rectangle) - _W(dim) - _RW(m_riteEdgeSrcRect) - _RW(m_leftEdgeSrcRect)) * 2 / 3;
-  } else {
+  } /*else {
     m_rangeLen = 100;
-  }
+  }*/
 
   _RMINX(m_riteEdgeDstRect) = _RMAXX(m_rectangle) - _RW(m_riteEdgeSrcRect);
   _RMINY(m_riteEdgeDstRect) = _RMINY(m_rectangle) + offset;
@@ -247,10 +257,10 @@ void GuiItemSlider::setTheme(GuiTheme * theme)
   }
 
   node = root->getChild("filler");
-  if(node) {
+  if(node) 
     if(node->get("img",idx)) 
       m_fillerImage = theme->getImage(idx);
-  }
+  
 }
 
 void GuiItemSlider::onMouseMove(const GuiPoint & point) 
@@ -275,7 +285,6 @@ void GuiItemSlider::onMouseMove(const GuiPoint & point)
       lua_pushstring(L, m_luaName);
       lua_gettable(L, LUA_GLOBALSINDEX);
       lua_settable(L, LUA_GLOBALSINDEX);
-
       ResourceManager::getInstance()->lua_doString(m_onChange.c_str());
     }
   }
@@ -292,10 +301,31 @@ void GuiItemSlider::onMouseClick(const GuiPoint & point)
       lua_pushstring(L, m_luaName);
       lua_gettable(L, LUA_GLOBALSINDEX);
       lua_settable(L, LUA_GLOBALSINDEX);
-
       ResourceManager::getInstance()->lua_doString(m_onChange.c_str());
     }
   }
+}
+
+void  GuiItemSlider::onKeyUp(const irr::SEvent::SKeyInput & keyinput)
+{
+  m_movingHandleWithKeyDirection=0;
+}
+
+void  GuiItemSlider::onKeyDown(const irr::SEvent::SKeyInput & keyinput)    
+{
+  switch(keyinput.Key) {
+    case irr::KEY_LEFT:
+      m_movingHandleWithKeyDirection=-1;
+      break;
+
+    case irr::KEY_RIGHT:
+      m_movingHandleWithKeyDirection=+1;
+      break;
+
+    default:
+      break;
+  }
+  
 }
 
 bool GuiItemSlider::onMouseLButton(bool down, const GuiPoint & point) 
@@ -304,9 +334,8 @@ bool GuiItemSlider::onMouseLButton(bool down, const GuiPoint & point)
     m_lastMousePoint = point; 
     m_draggingHandle = true;
     return true;
-  } else {
+  } else 
     m_draggingHandle = false;
-  }
   return false;
 }
 

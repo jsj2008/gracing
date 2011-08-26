@@ -85,8 +85,8 @@ class ResourceManager
 
     /* menu handling */
     void hideMenu();
-    void showMenu(const std::wstring & name);
-    void showMenu(const std::string & name);
+    void showMenu(const std::wstring & name,bool centerOnTheScreen=false);
+    void showMenu(const std::string & name,bool centerOnTheScreen=false);
 
     /* lua stuff */
     void lua_doFile(const char * filename);

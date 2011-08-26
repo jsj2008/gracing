@@ -72,24 +72,15 @@ void GuiItemStaticText::draw()
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),m_center,false);
 }
 
-#if 0
-void GuiItemStaticText::setTheme(GuiTheme * theme)
-{
-  IGuiMenuItem::setTheme(theme);
-}
-#endif
 
 void GuiItemStaticText::onMouseClick(const GuiPoint & point)
 {
-  if(m_onClick != "")  {
-    lua_State * L = ResourceManager::getInstance()->getLuaState();
-    lua_pushliteral(L, "self");
-    lua_pushstring(L, m_luaName);
-    lua_gettable(L, LUA_GLOBALSINDEX);
-    lua_settable(L, LUA_GLOBALSINDEX);
+  executeCode(m_onClick.c_str());
+}
 
-    ResourceManager::getInstance()->lua_doString(m_onClick.c_str());
-  }
+void GuiItemStaticText::onKeyClick(const irr::SEvent::SKeyInput & event) 
+{
+  executeCode(m_onClick.c_str());
 }
 
 

@@ -36,6 +36,7 @@ class GuiItemStaticText : public IGuiMenuItem
     static Lunar<GuiItemStaticText>::RegType  methods[];
 
     virtual void onMouseClick(const GuiPoint & point);
+    void onKeyClick(const irr::SEvent::SKeyInput & event);
 
   private:
     std::wstring m_caption;

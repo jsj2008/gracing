@@ -24,6 +24,7 @@
 class GuiItemListBox : public IGuiMenuItem
 {
   public:
+    GuiItemListBox(lua_State * L) : IGuiMenuItem(LISTBOX_CLASSNAME) { assert(0); }
     GuiItemListBox(const std::wstring & caption);
 
     GuiDimension getPreferredSize();
@@ -32,8 +33,11 @@ class GuiItemListBox : public IGuiMenuItem
 
     void init(XmlNode *);
 
-    void addItem(const std::wstring & item);
-    void addItem(const std::string & item);
+    void addItem(const std::wstring & item,bool selected=false);
+    void addItem(const std::string & item,bool selected=false);
+
+    int getValue();
+    void setValue(unsigned value);
 
     void clearItems();
 
@@ -44,6 +48,13 @@ class GuiItemListBox : public IGuiMenuItem
 
     virtual void  onMouseMove(const GuiPoint & point);
     virtual void  onMouseClick(const GuiPoint & point);
+    virtual void  onKeyClick(const irr::SEvent::SKeyInput & keyinput);
+
+    static const char * className;
+    static Lunar<GuiItemListBox>::RegType  methods[];
+
+    int lgetvalue(lua_State *);
+    int lsetvalue(lua_State *);
 
   protected:
     virtual void updateGeometry();
@@ -51,6 +62,8 @@ class GuiItemListBox : public IGuiMenuItem
   private:
     
     unsigned getItemMaxWidth();
+    void     selectNextItem();
+    void     selectPrevItem();
 
     std::wstring               m_caption;
 
@@ -91,11 +104,16 @@ class GuiItemListBox : public IGuiMenuItem
     ImgElement m_leftButtonHi;
     bool       m_highlightButtons;
     bool       m_mustHighlight;
+    bool       m_itemWidthFixed;
+    unsigned   m_itemWidth;
+
 
 
     GuiRect    m_itemDstRect;
     std::vector<std::wstring>  m_items;
     unsigned   m_selectedItem;
+
+    std::string m_onChange;
 
 
     enum {

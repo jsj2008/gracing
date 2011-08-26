@@ -18,30 +18,72 @@
 #include "GuiItemListBox.h"
 #include "Util.hh"
 
+static bool registered=false;
+const char * GuiItemListBox::className = LISTBOX_CLASSNAME;
+Lunar<GuiItemListBox>::RegType  GuiItemListBox::methods[]= 
+{
+  methodWithName(GuiItemListBox, lgetvalue, "getvalue"),
+  methodWithName(GuiItemListBox, lsetvalue, "setvalue"),
+  { 0,0 }
+};
+
+
+int GuiItemListBox::lgetvalue(lua_State * L)
+{
+  lua_pushnumber(L,getValue());
+  return 1;
+}
+
+int GuiItemListBox::lsetvalue(lua_State * L)
+{
+  int value=(int)luaL_checknumber(L,1);
+  setValue(value);
+  return 0;
+}
+
 void GuiItemListBox::init(XmlNode * node)
 {
+  IGuiMenuItem::init(node);
   m_items.clear();
+
+  node->get("onChange",m_onChange);
 
   std::vector<XmlNode*> nodes;
   node->getChildren("item",nodes);
 
+  if(node->get("itemWidth",m_itemWidth))
+    m_itemWidthFixed=true;
+  else
+    m_itemWidthFixed=false;
+
   for(unsigned i=0; i<nodes.size(); i++) {
-    addItem(nodes[i]->getText());
+    bool selected=false;
+    node->get("selected",selected);
+    addItem(nodes[i]->getText(),selected);
   }
 }
 
-void GuiItemListBox::addItem(const std::string & sitem)
+
+void GuiItemListBox::addItem(const std::string & sitem, bool selected)
 {
   std::wstring item(sitem.begin(),sitem.end());
-  m_selectedItem = m_items.size();
+  if(selected) {
+    m_selectedItem = m_items.size();
+    GM_LOG("selecting %d\n",m_selectedItem);
+  }
   m_items.push_back(item);
 }
 
-void GuiItemListBox::addItem(const std::wstring & item)
+
+void GuiItemListBox::addItem(const std::wstring & item,bool selected)
 {
-  m_selectedItem = m_items.size();
+  if(selected) {
+    m_selectedItem = m_items.size();
+    GM_LOG("selecting %d\n",m_selectedItem);
+  }
   m_items.push_back(item);
 }
+
 
 void GuiItemListBox::clearItems()
 {
@@ -49,22 +91,30 @@ void GuiItemListBox::clearItems()
   m_selectedItem = 0xffff;
 }
 
+
 void GuiItemListBox::updateGeometry()
 {
-  _RMINX(m_rightButton.dstRect) = _RMAXX(m_rectangle) - _RW(m_rightButton.srcRect);
+  _RMINX(m_rightButton.dstRect) = _RMAXX(m_rectangle) - 
+                                  _RW(m_rightButton.srcRect);
   _RMINY(m_rightButton.dstRect) = _RMINY(m_rectangle);
-  _RMAXX(m_rightButton.dstRect) = _RMINX(m_rightButton.dstRect) + _RW(m_rightButton.srcRect);
-  _RMAXY(m_rightButton.dstRect) = _RMINY(m_rightButton.dstRect) + _RH(m_rightButton.srcRect);
+  _RMAXX(m_rightButton.dstRect) = _RMINX(m_rightButton.dstRect) + 
+                                   _RW(m_rightButton.srcRect);
+  _RMAXY(m_rightButton.dstRect) = _RMINY(m_rightButton.dstRect) + 
+                                  _RH(m_rightButton.srcRect);
 
-  _RMINX(m_itemDstRect) = _RMINX(m_rightButton.dstRect) - getItemMaxWidth();
+  _RMINX(m_itemDstRect) = _RMINX(m_rightButton.dstRect) - 
+                           getItemMaxWidth();
   _RMINY(m_itemDstRect) = _RMINY(m_rectangle);
   _RMAXX(m_itemDstRect) = _RMINX(m_itemDstRect) + getItemMaxWidth();
   _RMAXY(m_itemDstRect) = _RMAXY(m_rectangle);
 
-  _RMINX(m_leftButton.dstRect) = _RMINX(m_itemDstRect) - _RW(m_leftButton.srcRect);
+  _RMINX(m_leftButton.dstRect) = _RMINX(m_itemDstRect) - 
+                                 _RW(m_leftButton.srcRect);
   _RMINY(m_leftButton.dstRect) = _RMINY(m_rectangle);
-  _RMAXX(m_leftButton.dstRect) = _RMINX(m_leftButton.dstRect) + _RW(m_leftButton.srcRect);
-  _RMAXY(m_leftButton.dstRect) = _RMINY(m_leftButton.dstRect) + _RH(m_leftButton.srcRect);
+  _RMAXX(m_leftButton.dstRect) = _RMINX(m_leftButton.dstRect) + 
+                                 _RW(m_leftButton.srcRect);
+  _RMAXY(m_leftButton.dstRect) = _RMINY(m_leftButton.dstRect) + 
+                                 _RH(m_leftButton.srcRect);
 
   m_rightButtonHi.dstRect = m_rightButton.dstRect;
   m_leftButtonHi.dstRect = m_leftButton.dstRect;
@@ -73,7 +123,8 @@ void GuiItemListBox::updateGeometry()
 
 void GuiItemListBox::drawFocus()
 {
-  irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+  irr::video::IVideoDriver * driver = 
+                      ResourceManager::getInstance()->getVideoDriver();
   irr::video::SColor color(200,200,200,200);
   irr::video::SColor c(100,100,100,255);
   driver->draw2DRectangle(color,m_rectangle);
@@ -96,6 +147,41 @@ void GuiItemListBox::drawFocus()
   }
 }
 
+
+void  GuiItemListBox::selectNextItem()
+{
+  m_selectedItem ++;
+  m_selectedItem %= m_items.size();
+  executeCode(m_onChange.c_str());
+}
+
+
+void  GuiItemListBox::selectPrevItem()
+{
+  if(m_selectedItem == 0)
+    m_selectedItem = m_items.size() - 1;
+  else
+    m_selectedItem --;
+  executeCode(m_onChange.c_str());
+}
+
+void  GuiItemListBox::onKeyClick(const irr::SEvent::SKeyInput & keyinput)
+{
+  switch(keyinput.Key) 
+  {
+    case irr::KEY_LEFT:
+      selectPrevItem();
+      break;
+
+    case irr::KEY_RIGHT:
+      selectNextItem();
+      break;
+
+    default:
+      break;
+  }
+}
+
 void GuiItemListBox::onMouseMove(const GuiPoint & pnt)
 {
   m_mouseOver = mouseOnNothing;
@@ -109,17 +195,11 @@ void GuiItemListBox::onMouseMove(const GuiPoint & pnt)
 
 void GuiItemListBox::onMouseClick(const GuiPoint & pnt)
 {
-  if(_PINR(pnt,m_leftButton.dstRect)) {
-    if(m_selectedItem == 0)
-      m_selectedItem = m_items.size() - 1;
-    else
-      m_selectedItem --;
-  }
+  if(_PINR(pnt,m_leftButton.dstRect)) 
+    selectPrevItem();
 
-  if(_PINR(pnt,m_rightButton.dstRect)) {
-    m_selectedItem ++;
-    m_selectedItem %= m_items.size();
-  }
+  if(_PINR(pnt,m_rightButton.dstRect)) 
+    selectNextItem();
 }
 
 GuiItemListBox::GuiItemListBox(const std::wstring & caption)
@@ -127,9 +207,27 @@ GuiItemListBox::GuiItemListBox(const std::wstring & caption)
 {
   m_caption = caption;
   m_mouseOver = mouseOnNothing;
-  m_selectedItem = 0xffff;
+  m_selectedItem = 0;
 
   m_highlightButtons=true;
+
+  m_itemWidthFixed=false;
+  m_itemWidth=0;
+  m_onChange="";
+
+  lua_State * L = ResourceManager::getInstance()->getLuaState();
+
+  if(!registered) {
+    registered=false;
+    Lunar<GuiItemListBox>::Register(L);
+  }
+
+  snprintf(m_luaName,m_luaNameSize,"%s%p",LISTBOX_CLASSNAME,this);
+  
+  int i=Lunar<GuiItemListBox>::push(L,this);
+  lua_pushstring(L, m_luaName);
+  lua_pushvalue(L, i);
+  lua_settable(L, LUA_GLOBALSINDEX);
 }
 
 void GuiItemListBox::setTheme(GuiTheme * theme)
@@ -159,6 +257,8 @@ void GuiItemListBox::setTheme(GuiTheme * theme)
 
 unsigned GuiItemListBox::getItemMaxWidth()
 {
+  if(m_itemWidthFixed)
+    return m_itemWidth;
   GuiDimension idim;
   unsigned width=0;
   for(unsigned i=0; i < m_items.size(); i++) {
@@ -198,4 +298,15 @@ void GuiItemListBox::draw()
     m_rightButton.draw();
 
   m_mustHighlight=false;
+}
+
+int GuiItemListBox::getValue()
+{
+  return m_selectedItem;
+}
+
+void GuiItemListBox::setValue(unsigned value)
+{
+  if(value >= 0 && value < m_items.size())
+    m_selectedItem = value;
 }
