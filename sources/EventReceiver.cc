@@ -43,9 +43,11 @@ bool EventReceiver::OnEvent(const SEvent& event)
     if( event.MouseInput.X >= 0 && event.MouseInput.Y >= 0 ) 
       for(unsigned i=0; i< m_listeners.size(); i++) 
         m_listeners[i]->mouseEvent(event.MouseInput);
-
+  } else if( event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
+      for(unsigned i=0; i< m_listeners.size(); i++) 
+        m_listeners[i]->joystickEvent(event.JoystickEvent);
   }
-
+ 
   assert(KeysPressed >= 0);
   return false;
 }

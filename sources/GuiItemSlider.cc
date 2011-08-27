@@ -140,6 +140,11 @@ void GuiItemSlider::draw()
 {
   if(m_movingHandleWithKeyDirection) {
     m_handleValue+=m_movingHandleWithKeyDirection;
+    if(m_handleValue < 0)
+      m_handleValue = 0;
+
+    if(m_handleValue >= m_rangeLen)
+      m_handleValue = m_rangeLen-1;
     updateHandlePosition();
     executeCode(m_onChange.c_str());
   }

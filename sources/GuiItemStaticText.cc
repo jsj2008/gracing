@@ -80,7 +80,8 @@ void GuiItemStaticText::onMouseClick(const GuiPoint & point)
 
 void GuiItemStaticText::onKeyClick(const irr::SEvent::SKeyInput & event) 
 {
-  executeCode(m_onClick.c_str());
+  if(event.Key == irr::KEY_RETURN)
+    executeCode(m_onClick.c_str());
 }
 
 

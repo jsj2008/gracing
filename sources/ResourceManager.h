@@ -21,11 +21,10 @@
 #include <vector>
 #include <stdlib.h>
 #include <irrlicht.h>
-
 #include <lunar.h>
-
 #include "PhyWorld.h"
 #include "Vehicle.h"
+#include "JoystickInterface.h"
 
 #include "EventReceiver.h"
 
@@ -37,7 +36,6 @@ class ResourceManager
   public:
 
     static inline ResourceManager * getInstance() { if(s_instance==0) s_instance=new ResourceManager(); return s_instance; }
-
 
     void setDevice(irr::IrrlichtDevice *device);
 
@@ -75,7 +73,7 @@ class ResourceManager
     inline PhyWorld *                 getPhyWorld()    { return m_world; }
            EventReceiver *            getEventReceiver();
     inline lua_State *                getLuaState()    { return m_lua; }
-
+    inline irr::IrrlichtDevice *      getDevice()      { return m_device; }
 
 
     inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
@@ -100,8 +98,7 @@ class ResourceManager
 
     void loadVehicles();
 
-
-
+    JoystickInterface *    m_joystickInterface;
     irr::IrrlichtDevice *  m_device;
     irr::io::IFileSystem * m_fileSystem;
     PhyWorld *             m_world;// = PhyWorld::buildMe();

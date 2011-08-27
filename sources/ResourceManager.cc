@@ -36,65 +36,71 @@ extern "C" {
 
 
 extern bool globalDone;
-
-/////////////////////////////////////////////////////////////////////////////////
-// TODO: implement the "lua bridge" not as a class
-//       but simply as table of lua cfunctions
-class LuaBridge 
+    
+int log(lua_State * L)
 {
-  public:
+  const char * str;
+  if((str=luaL_checklstring(L,1,0))) {
+    GM_LOG("%s",str);
+  }
+  return 0;
+}
 
-    LuaBridge(lua_State * L) 
-    {
-      // ~??~ //
-    };
-
-    static const char *                    className;
-    static Lunar<LuaBridge>::RegType  methods[];
-
-
-    // lua callable function members
-    int log(lua_State * L)
-    {
-      const char * str;
-      if((str=luaL_checklstring(L,1,0))) {
-        GM_LOG("%s",str);
-      }
-      return 0;
-    }
-
-    int showMenu(lua_State * L)
-    {
-      const char * str;
-      if((str=luaL_checklstring(L,1,0))) {
-        ResourceManager::getInstance()->showMenu(str,true);
-      }
-      return 0;
-    }
-
-    int hideMenu(lua_State * L)
-    {
-      ResourceManager::getInstance()->hideMenu();
-      return 0;
-    }
-
-    int quit(lua_State * L)
-    {
-      globalDone = true;
-      return 0;
-    }
-};
-
-const char* LuaBridge::className = "GRACING";
-Lunar<LuaBridge>::RegType LuaBridge::methods[] = 
+int showMenu(lua_State * L)
 {
-  //{ "log", &LuaBridge::log },
-  method(LuaBridge, log),
-  method(LuaBridge, showMenu),
-  method(LuaBridge, hideMenu),
-  method(LuaBridge, quit),
+  const char * str;
+  if((str=luaL_checklstring(L,1,0))) {
+    ResourceManager::getInstance()->showMenu(str,true);
+  }
+  return 0;
+}
+
+int hideMenu(lua_State * L)
+{
+  ResourceManager::getInstance()->hideMenu();
+  return 0;
+}
+
+int quit(lua_State * L)
+{
+  globalDone = true;
+  return 0;
+}
+
+struct embFunctions_s {
+  const char * n;
+  int (*f)(lua_State*);
+} embFunctions[] =
+{
+  { "log",log },
+  { "showMenu", showMenu },
+  { "hideMenu", hideMenu },
+  { "quit", quit },
   { 0,0 }
 };
+
+static int registerLua(lua_State * L)
+{
+  lua_newtable(L);
+  int table=lua_gettop(L);
+
+  lua_pushstring(L, "GR");
+  lua_pushvalue(L, table);
+  lua_settable(L, LUA_GLOBALSINDEX);
+
+
+  for(int i=0; embFunctions[i].n; i++) {
+    lua_pushstring(L, embFunctions[i].n);
+    lua_pushcfunction(L, embFunctions[i].f);
+    lua_settable(L,table);
+  }
+
+  lua_pop(L,1);
+
+  return 0;
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -201,6 +207,7 @@ ResourceManager::ResourceManager()
   GM_LOG("** creating lua interpreter\n");
   m_lua = lua_open();
 
+
   luaopen_base(m_lua);
   luaopen_string(m_lua);
   luaopen_table(m_lua);
@@ -208,7 +215,9 @@ ResourceManager::ResourceManager()
   //luaopen_io(m_lua); // dont know why it is not working
   luaopen_debug(m_lua);
 
-  Lunar<LuaBridge>::Register(m_lua);
+  registerLua(m_lua);
+
+  //Lunar<LuaBridge>::Register(m_lua);
 
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
@@ -268,6 +277,9 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
   m_texturesDir = m_rootDir + std::string("/Textures/");
 
+  m_joystickInterface=JoystickInterface::build(m_device);
+  g_eventReceiver.addListener(m_joystickInterface);
+
   irr::scene::ISceneManager* smgr = device->getSceneManager();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
   smgr->addExternalMeshLoader(mloader);
@@ -309,7 +321,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   /////////////////////////////////
   irr::core::rect<irr::s32> rect;
   m_menu = new GuiMenu(device->getGUIEnvironment(),
-    device->getGUIEnvironment()->getRootGUIElement(),0,rect);
+      device->getGUIEnvironment()->getRootGUIElement(),0,rect);
   m_menu->setVisible(true);
   m_menu->setHasFrame(true);
   m_menu->load("menu.xml");

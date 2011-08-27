@@ -23,7 +23,8 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiItemStaticText.cc \
         GuiItemListBox.cc \
         GuiItemSlider.cc \
-        EmptyPhaseHandler.cc
+        EmptyPhaseHandler.cc \
+        JoystickInterface.cc
 
 
 subdirs=lua

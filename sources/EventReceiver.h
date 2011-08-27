@@ -24,6 +24,7 @@ class IEventListener
   public:
     virtual void mouseEvent(const irr::SEvent::SMouseInput & MouseInput) { }
     virtual void keyboardEvent(const irr::SEvent::SKeyInput & KeyInput) { }
+    virtual void joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent) { }
 };
 
 // TODO: probably this should be called
