@@ -32,6 +32,17 @@ struct SVehicleParameters
 class IVehicleController
 {
   public: 
+    enum VehicleAction
+    {
+      va_steerLeft=0,
+      va_steerRigth,
+      va_accelerate,
+      va_decelerate,
+      va_brake,
+
+      va_undefined,
+      va_numActions
+    };
     virtual void init(
         const std::vector<btVector3> & controlPoints,
         const btVector3 vehicleForward,
@@ -41,6 +52,9 @@ class IVehicleController
         const SVehicleParameters &     vehicleParameters,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)=0;
+
+    static const char * getActionString(unsigned actionId);
+    unsigned getActionId(const char * name);
 };
 
 #endif

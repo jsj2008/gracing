@@ -27,6 +27,7 @@
 #include "EventReceiver.h"
 #include "CCrisMeshFileLoader.h"
 #include "GuiMenu.h"
+#include "JoystickInterface.h"
 
 extern "C" {
 #include "lua.h"
@@ -277,9 +278,27 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
   m_texturesDir = m_rootDir + std::string("/Textures/");
 
-  m_joystickInterface=JoystickInterface::build(m_device);
-  g_eventReceiver.addListener(m_joystickInterface);
+  
+  ///////////////////
+  // input devices //
+  ///////////////////
 
+  // - joystick(s)
+  core::array<SJoystickInfo> devices;
+  JoystickInterface *    joystickInterface;
+  if(device->activateJoysticks(devices)) 
+    for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
+      joystickInterface=new JoystickInterface(m_device,devices[joystick]);
+      g_eventReceiver.addListener(joystickInterface); // <- ??
+      m_inputDevices.push_back(joystickInterface);
+      
+    }
+
+
+
+  /////////////////////////
+  // custom mesh loaders // 
+  /////////////////////////
   irr::scene::ISceneManager* smgr = device->getSceneManager();
   CCrisMeshFileLoader * mloader=new CCrisMeshFileLoader(smgr,device->getFileSystem());
   smgr->addExternalMeshLoader(mloader);

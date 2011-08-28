@@ -19,86 +19,197 @@
 #include "ResourceManager.h"
 
 using namespace irr;
+enum {
+  ac_none,
+  ac_button,
+  ac_axis
+};
 
-static JoystickInterface *        instance=0;
-static core::array<SJoystickInfo> devices;
 
-JoystickInterface * JoystickInterface::build(irr::IrrlichtDevice * device)
+//////////////////////////////////////////////////////////////////////////////////////////////
+class Joystick : public IVehicleController, public IEventListener
 {
-  if(instance==0) 
-    instance = new JoystickInterface(device);
+  public: 
+  struct ConfigElement
+  {
+    unsigned   action;
+    JoystickInterface::JoystickAction  joyact;
 
-  return instance;
+    ConfigElement() {
+      action = ac_none;
+      joyact.type = ac_none;
+    }
+  };
+ 
+  ConfigElement m_actions[va_numActions];
+  bool          m_controllingVehicle;
+
+  Joystick()
+  {
+    m_controllingVehicle=false;
+  };
+
+  void setAction(VehicleAction vaction,
+      unsigned type,
+      bool     analog,
+      int      index,
+      int      value)
+  {
+    if(vaction < va_numActions) {
+      m_actions[vaction].action = vaction;
+      m_actions[vaction].joyact.type = type;
+      m_actions[vaction].joyact.analog = analog;
+      m_actions[vaction].joyact.index = index;
+      m_actions[vaction].joyact.value = value;
+    }
+  }
+
+  void debugDumpActions()
+  {
+    for(unsigned i=0; i < va_numActions; i++) {
+      char buffer[128];
+      JoystickInterface::getActionString(buffer,128,m_actions[i].joyact);
+      GM_LOG("  '%s' -> %s\n",IVehicleController::getActionString(i),buffer);
+    }
+  }
+
+  void updateCommands(
+    const SVehicleParameters &    parameters,
+    const std::vector<btVector3> & controlPoints,
+    IVehicle::VehicleCommands &    commands)
+  {
+  }
+
+  void joystickEvent(const JoystickInterface::JoystickEvent & joystickEvent)
+  {
+    if(m_controllingVehicle) {
+    } else { // working for gui
+
+    }
+  }
+
+
+};
+//////////////////////////////////////////////////////////////////////////////////////////////
+JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo & device)
+{
+  m_name = device.Name.c_str();
+  m_idJoystick = device.Joystick;
+
+
+  // build default configuration:
+  Joystick * joy;
+  joy = new Joystick();
+  GM_LOG("************** ACTIONS *********\n");
+  joy->debugDumpActions();
 }
 
-JoystickInterface::JoystickInterface(irr::IrrlichtDevice * device)
+std::string  JoystickInterface::getName()
 {
-  if(device->activateJoysticks(devices)) {
-    GM_LOG("Joystick support is enabled and %d sticks are prenset\n",devices.size());
+  return m_name;
+}
 
-    for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
-      GM_LOG("Joystick %d:", joystick);
-      GM_LOG("\tName: '%s''\n",devices[joystick].Name.c_str());
-      GM_LOG("\tAxes: %d\n",devices[joystick].Axes);
-      GM_LOG("\tButtons: %d\n",devices[joystick].Buttons);
+unsigned JoystickInterface::getNumController()
+{
+  return 0;
+}
 
-      GM_LOG("\tHat is: ");
+IVehicleController * JoystickInterface::getController(unsigned)
+{
+  return 0;
+}
 
-      switch(devices[joystick].PovHat) {
-        case SJoystickInfo::POV_HAT_PRESENT:
-          GM_LOG("present\n");
-          break;
+void JoystickInterface::getActionString(char * buffer, int bufferSize, 
+    JoystickAction & action)
+{
+  const char * digital;
+  switch(action.type) {
+    case ac_button:
+      snprintf(buffer,bufferSize,"button %d %s",
+          action.index,
+          action.value==1 ? "pressed" : "release");
+      break;
+    case ac_axis:
+      if(!action.analog)
+        digital="(digital)";
+      else
+        digital="";
 
-        case SJoystickInfo::POV_HAT_ABSENT:
-          GM_LOG("absent\n");
-          break;
-
-        case SJoystickInfo::POV_HAT_UNKNOWN:
-        default:
-          GM_LOG("unknown\n");
-          break;
-      }
-    }
-  } else {
-    GM_LOG("Joystick support is not enabled\n");
+      if(action.value > 0)
+        snprintf(buffer,bufferSize,"axis %d up %s",action.index,digital);
+      else
+        snprintf(buffer,bufferSize,"axis %d down %s",action.index,digital);
+      break;
+    case ac_none:
+    default:
+      snprintf(buffer,bufferSize,"not set");
+      break;
   }
 }
 
-bool JoystickInterface::checkAxis(const irr::SEvent::SJoystickEvent & joystickEvent,unsigned axis)
+bool JoystickInterface::checkAxis(const JoystickEvent & joystickEvent,
+                                  unsigned axis, irr::s16 & value)
 {
   assert(axis < irr::SEvent::SJoystickEvent::NUMBER_OF_AXES);
 
   if(joystickEvent.Axis[axis] != m_axisPrevValues[axis]) {
-    GM_LOG("a joystick event: %d on axis %d\n",joystickEvent.Axis[axis],axis);
     m_axisPrevValues[axis]=joystickEvent.Axis[axis];
+    value = joystickEvent.Axis[axis];
     return true;
   }
   return false;
 }
 
 #define ibp(_s,_b)   ((_s) & (1 << (_b)))
-bool JoystickInterface::checkButton(const irr::SEvent::SJoystickEvent & joystickEvent,unsigned button)
+bool JoystickInterface::checkButton(const JoystickEvent & joystickEvent,unsigned button,bool & pressed)
 {
   assert(button < irr::SEvent::SJoystickEvent::NUMBER_OF_BUTTONS);
 
-  unsigned mask = 1 << button;
   bool s=ibp(joystickEvent.ButtonStates,button);
 
   if(s != m_buttonsPrevValues[button]) {
-    GM_LOG("a joystick event on button %d\n",button);
     m_buttonsPrevValues[button]=s;
+    pressed=s;
     return true;
   }
   return false;
 }
 
-
-void JoystickInterface::joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent)
+bool JoystickInterface::getAction(
+    JoystickAction & action, 
+    const JoystickEvent & event)
 {
-  for(unsigned i=0; i < irr::SEvent::SJoystickEvent::NUMBER_OF_AXES; i++)
-    checkAxis(joystickEvent,i);
+  for(unsigned i=0; i < irr::SEvent::SJoystickEvent::NUMBER_OF_AXES; i++) {
+    irr::s16 value;
+    if(checkAxis(event,i,value)) {
+      action.type = ac_axis;
+      action.index = i;
+      action.analog = false;
+      action.value = value;
+      return true;
+    }
+  }
 
-  for(unsigned i=0; i < irr::SEvent::SJoystickEvent::NUMBER_OF_BUTTONS; i++)
-    checkButton(joystickEvent,i);
+  for(unsigned i=0; i < irr::SEvent::SJoystickEvent::NUMBER_OF_BUTTONS; i++) {
+    bool pressed;
+    if(checkButton(event,i,pressed)) {
+      action.type = ac_button;
+      action.index = i;
+      action.analog = false;
+      action.value = pressed? 0:1;
+      return true;
+    }
+  }
+  return false;
+}
+
+void JoystickInterface::joystickEvent(const JoystickEvent & joystickEvent)
+{
+  JoystickAction action;
+  if(getAction(action,joystickEvent)) {
+    char buffer[128];
+    getActionString(buffer,128,action);
+    GM_LOG("joystick action: %s\n",buffer);
+  }
 }
 

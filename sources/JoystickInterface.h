@@ -17,21 +17,46 @@
 #ifndef JOYSTICKINTERFACE_H
 #define JOYSTICKINTERFACE_H
 #include "EventReceiver.h"
+#include "IDeviceInterface.h"
 
-class JoystickInterface : public IEventListener
+
+class JoystickInterface : public IEventListener, public IDeviceInterface
 {
   public:
 
+    JoystickInterface(irr::IrrlichtDevice *, const irr::SJoystickInfo & device);
+
+    //////////////////////////////
+    // Event Listener
     virtual void joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent);
 
+
+    //////////////////////////////
+    // Device Interface
+    virtual std::string          getName();
+    virtual unsigned             getNumController();
+    virtual IVehicleController * getController(unsigned);
+
   private:
-    JoystickInterface(irr::IrrlichtDevice *);
+    friend class Joystick;
+    struct JoystickAction {
+      int  type;
+      bool analog;
+      int  index;
+      int  value;
+    };
 
-    friend class ResourceManager;
-    static JoystickInterface * build(irr::IrrlichtDevice * device);
+    typedef irr::SEvent::SJoystickEvent  JoystickEvent;
 
-    bool checkAxis(const irr::SEvent::SJoystickEvent & joystickEvent,unsigned axis);
-    bool checkButton(const irr::SEvent::SJoystickEvent & joystickEvent,unsigned button);
+    irr::u8     m_idJoystick;
+    std::string m_name;
+    unsigned    m_numControllers;
+
+    bool        checkAxis(const JoystickEvent & joystickEvent,unsigned axis,irr::s16 & value);
+    bool        checkButton(const JoystickEvent & joystickEvent,unsigned button,bool & pressed);
+
+    bool        getAction(JoystickAction & action, const JoystickEvent & event);
+    static void getActionString(char * buffer, int bufferSize, JoystickAction & action);
 
     irr::s16  m_axisPrevValues[irr::SEvent::SJoystickEvent::NUMBER_OF_AXES];
     bool      m_buttonsPrevValues[irr::SEvent::SJoystickEvent::NUMBER_OF_BUTTONS];

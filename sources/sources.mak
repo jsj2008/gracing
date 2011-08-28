@@ -24,6 +24,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiItemListBox.cc \
         GuiItemSlider.cc \
         EmptyPhaseHandler.cc \
+        IVehicleController.cc \
         JoystickInterface.cc
 
 

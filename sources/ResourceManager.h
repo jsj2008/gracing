@@ -24,7 +24,8 @@
 #include <lunar.h>
 #include "PhyWorld.h"
 #include "Vehicle.h"
-#include "JoystickInterface.h"
+
+#include "IDeviceInterface.h"
 
 #include "EventReceiver.h"
 
@@ -94,11 +95,12 @@ class ResourceManager
     static ResourceManager * s_instance;
     ResourceManager();
 
+    std::vector<IDeviceInterface *> m_inputDevices;
+
     void loadConfig(const std::string & filename);
 
     void loadVehicles();
 
-    JoystickInterface *    m_joystickInterface;
     irr::IrrlichtDevice *  m_device;
     irr::io::IFileSystem * m_fileSystem;
     PhyWorld *             m_world;// = PhyWorld::buildMe();

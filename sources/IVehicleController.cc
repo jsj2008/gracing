@@ -14,22 +14,31 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#ifndef IVEHICLE_KEYBOARD_CONTROLLER_H
-#define IVEHICLE_KEYBOARD_CONTROLLER_H
-#include "IVehicleController.h"
-#include "EventReceiver.h"
-#include <irrlicht.h>
 
-class VehicleKeyboardController : public IVehicleController
+#include "IVehicleController.h"
+
+static const char * actionNames[IVehicleController::va_numActions]=
 {
-  public: 
-    VehicleKeyboardController(EventReceiver * receiver);
-    virtual void updateCommands(
-        const SVehicleParameters  &    vehicleParameters,
-        const std::vector<btVector3> & controlPoints,
-        IVehicle::VehicleCommands &    commands);
-  private:
-    EventReceiver * m_eventReceiver;
+  "steer left",
+  "steer right",
+  "accelerate",
+  "decelerate",
+  "brake",
+  "undefined"
 };
 
-#endif
+const char * IVehicleController::getActionString(unsigned actionId)
+{
+  if(actionId < va_numActions) 
+    return actionNames[actionId];
+  return "undefined";
+}
+
+unsigned IVehicleController::getActionId(const char * name)
+{
+  for(unsigned i=0; i<va_numActions; i++) 
+    if(strcmp(name,actionNames[i])==0)
+      return i;
+
+  return va_numActions;
+}
