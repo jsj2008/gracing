@@ -25,6 +25,9 @@ enum {
   ac_axis
 };
 
+#define AXIS_UP_THRESHOLD     32000
+#define AXIS_DOWN_THRESHOLD  -32000
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 class Joystick : public IVehicleController, public IEventListener
@@ -43,13 +46,28 @@ class Joystick : public IVehicleController, public IEventListener
  
   ConfigElement m_actions[va_numActions];
   bool          m_controllingVehicle;
+  JoystickInterface * m_owner;
 
-  Joystick()
+  // gui actions
+  enum 
+  {
+    ga_up=0,
+    ga_down,
+    ga_left,
+    ga_right,
+    ga_enter,
+    ga_numGuiActions
+  };
+  ConfigElement m_guiActions[ga_numGuiActions];
+  
+
+  Joystick(JoystickInterface * i)
   {
     m_controllingVehicle=false;
+    m_owner=i;
   };
 
-  void setAction(VehicleAction vaction,
+  void setAction(unsigned vaction,
       unsigned type,
       bool     analog,
       int      index,
@@ -61,7 +79,40 @@ class Joystick : public IVehicleController, public IEventListener
       m_actions[vaction].joyact.analog = analog;
       m_actions[vaction].joyact.index = index;
       m_actions[vaction].joyact.value = value;
+      return;
     }
+  }
+
+  void setGuiAction(unsigned gaction,
+      unsigned type,
+      bool     analog,
+      int      index,
+      int      value)
+  { 
+    if(gaction < ga_numGuiActions) {
+      m_guiActions[gaction].action = gaction;
+      m_guiActions[gaction].joyact.type = type;
+      m_guiActions[gaction].joyact.analog = analog;
+      m_guiActions[gaction].joyact.index = index;
+      m_guiActions[gaction].joyact.value = value;
+      return;
+    }
+  }
+
+  bool checkAction(ConfigElement el, const JoystickInterface::JoystickEvent & event)
+  {
+    switch(el.joyact.type)
+    {
+      case ac_button:
+        break;
+      case ac_axis:
+        if(el.joyact.analog) {
+        } else {
+        }
+        break;
+    }
+
+    return false;
   }
 
   void debugDumpActions()
@@ -80,15 +131,18 @@ class Joystick : public IVehicleController, public IEventListener
   {
   }
 
-  void joystickEvent(const JoystickInterface::JoystickEvent & joystickEvent)
+  void joystickEvent(const JoystickInterface::JoystickEvent & event)
   {
     if(m_controllingVehicle) {
     } else { // working for gui
 
+      // check up direction
+      ConfigElement & el=m_guiActions[ga_up];
+    
+      checkAction(el,event);
+
     }
   }
-
-
 };
 //////////////////////////////////////////////////////////////////////////////////////////////
 JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo & device)
@@ -99,7 +153,12 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
 
   // build default configuration:
   Joystick * joy;
-  joy = new Joystick();
+  joy = new Joystick(this);
+  joy->setGuiAction(Joystick::ga_up,ac_axis,false,3,1);
+  joy->setGuiAction(Joystick::ga_down,ac_axis,false,3,0);
+  joy->setGuiAction(Joystick::ga_left,ac_axis,false,2,0);
+  joy->setGuiAction(Joystick::ga_right,ac_axis,false,2,1);
+
   GM_LOG("************** ACTIONS *********\n");
   joy->debugDumpActions();
 }
@@ -119,10 +178,10 @@ IVehicleController * JoystickInterface::getController(unsigned)
   return 0;
 }
 
-void JoystickInterface::getActionString(char * buffer, int bufferSize, 
+void JoystickInterface::getActionString(char * buffer, 
+    int bufferSize, 
     JoystickAction & action)
 {
-  const char * digital;
   switch(action.type) {
     case ac_button:
       snprintf(buffer,bufferSize,"button %d %s",
@@ -130,15 +189,16 @@ void JoystickInterface::getActionString(char * buffer, int bufferSize,
           action.value==1 ? "pressed" : "release");
       break;
     case ac_axis:
-      if(!action.analog)
-        digital="(digital)";
-      else
-        digital="";
-
-      if(action.value > 0)
-        snprintf(buffer,bufferSize,"axis %d up %s",action.index,digital);
-      else
-        snprintf(buffer,bufferSize,"axis %d down %s",action.index,digital);
+      if(action.analog)
+        snprintf(buffer,bufferSize,"axis %d value: %d",action.index,action.value);
+      else {
+        if(action.value > AXIS_UP_THRESHOLD)
+          snprintf(buffer,bufferSize,"axis %d pressed up",action.index);
+        else if(action.value < AXIS_DOWN_THRESHOLD)
+          snprintf(buffer,bufferSize,"axis %d pressed down",action.index);
+        else
+          snprintf(buffer,bufferSize,"axis %d released",action.index);
+      }
       break;
     case ac_none:
     default:
@@ -175,6 +235,7 @@ bool JoystickInterface::checkButton(const JoystickEvent & joystickEvent,unsigned
   return false;
 }
 
+
 bool JoystickInterface::getAction(
     JoystickAction & action, 
     const JoystickEvent & event)
@@ -196,7 +257,7 @@ bool JoystickInterface::getAction(
       action.type = ac_button;
       action.index = i;
       action.analog = false;
-      action.value = pressed? 0:1;
+      action.value = pressed? 1:0;
       return true;
     }
   }

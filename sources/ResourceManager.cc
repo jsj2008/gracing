@@ -29,6 +29,11 @@
 #include "GuiMenu.h"
 #include "JoystickInterface.h"
 
+/* phase handlers */
+#include "IPhaseHandler.h"
+#include "Race.h"
+#include "VehicleChooser.h"
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -37,6 +42,8 @@ extern "C" {
 
 
 extern bool globalDone;
+
+
     
 int log(lua_State * L)
 {
@@ -352,6 +359,15 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   // load menus                  //
   /////////////////////////////////
   loadVehicles();
+
+  /////////////////////////////////
+  // phase handlers menus       //
+  /////////////////////////////////
+  PhyWorld * m_world = ResourceManager::getInstance()->getPhyWorld(); 
+  m_phaseHandlers[pa_vehicleChooser]=new VehicleChooser(device,m_world);
+  m_phaseHandlers[pa_race] = new Race(device,m_world);
+  m_phaseHandlers[pa_empty] = new EmptyPhaseHandler(device,m_world);
+  m_currentPhaseHandler = m_phaseHandlers[pa_empty];
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -521,3 +537,39 @@ void ResourceManager::lua_doString(const char * script)
     GM_LOG("%s\n", lua_tostring(m_lua, -1));
 }
 
+
+void ResourceManager::stepPhaseHandler() { 
+  bool done;
+  done=m_currentPhaseHandler->step();
+
+  if(done) {
+    if(m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
+      m_phaseHandlers[pa_race]->unprepare();
+      m_phaseHandlers[pa_vehicleChooser]->prepare(1,3,runningVehicles);
+      m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
+    } else if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {
+      m_phaseHandlers[pa_vehicleChooser]->unprepare();
+      // start the race
+
+      const std::vector<IVehicle*> & vehicles=getVehiclesList();
+      assert(vehicles.size() >= 4);
+
+#if 0
+      race->setTrack(thetrack);
+
+      if(autoplayer) 
+        race->addVehicle(vehicles[runningVehicles[0]],
+            new VehicleAutoController(),
+            vehicles[runningVehicles[0]]->getName().c_str(),true);
+      else
+        race->addVehicle(vehicles[runningVehicles[0]],
+            new VehicleKeyboardController(resmanager->getEventReceiver()), 
+            vehicles[runningVehicles[0]]->getName().c_str(),true);
+
+      race->restart();
+
+      currentPhaseHandler = race;
+#endif
+    }
+  }
+}

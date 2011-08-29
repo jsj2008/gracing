@@ -22,12 +22,12 @@
 #include <stdlib.h>
 #include <irrlicht.h>
 #include <lunar.h>
+
 #include "PhyWorld.h"
 #include "Vehicle.h"
-
 #include "IDeviceInterface.h"
-
 #include "EventReceiver.h"
+#include "EmptyPhaseHandler.h"
 
 class XmlNode;
 class GuiMenu;
@@ -39,6 +39,8 @@ class ResourceManager
     static inline ResourceManager * getInstance() { if(s_instance==0) s_instance=new ResourceManager(); return s_instance; }
 
     void setDevice(irr::IrrlichtDevice *device);
+
+    void  stepPhaseHandler(); 
 
     /* path handling */
     irr::io::path createAbsoluteFilename(const std::string & fileName);
@@ -72,7 +74,7 @@ class ResourceManager
     inline irr::io::IFileSystem *     getFileSystem()  { return m_fileSystem; }
     inline irr::video::IVideoDriver * getVideoDriver() { return m_device->getVideoDriver(); }
     inline PhyWorld *                 getPhyWorld()    { return m_world; }
-           EventReceiver *            getEventReceiver();
+    EventReceiver *                   getEventReceiver(); // TODO: dont remenber why this is not inlined
     inline lua_State *                getLuaState()    { return m_lua; }
     inline irr::IrrlichtDevice *      getDevice()      { return m_device; }
 
@@ -123,8 +125,19 @@ class ResourceManager
     irr::gui::IGUIFont *  m_font;
     irr::gui::IGUIFont *  m_fontSmall;
     irr::gui::IGUIFont *  m_fontBig;
-    
+
     std::vector<IVehicle*> m_vehicles;
+
+    enum {
+      pa_race=0,
+      pa_vehicleChooser=1,
+      pa_empty=2,
+
+      pa_numPhaseHandlers
+    };
+
+    IPhaseHandler *  m_phaseHandlers[pa_numPhaseHandlers];
+    IPhaseHandler *  m_currentPhaseHandler;
 };
 
 #endif

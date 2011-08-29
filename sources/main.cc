@@ -30,13 +30,6 @@
 #include "EventReceiver.h"
 #include "GuiMenu.h"
 
-/* phase handlers */
-#include "IPhaseHandler.h"
-#include "Race.h"
-#include "VehicleChooser.h"
-#include "EmptyPhaseHandler.h"
-
-
 
 // vehicle controllers
 #include "VehicleKeyboardController.h"
@@ -197,7 +190,8 @@ int main(int argc, char ** av)
   device->setWindowCaption(L"gracing - rosco-p");
 
   IVideoDriver* driver = device->getVideoDriver();
-  PhyWorld * world = ResourceManager::getInstance()->getPhyWorld(); 
+
+  PhyWorld * world=ResourceManager::getInstance()->getPhyWorld();
 
   if(glob_enableDebug) {
     debugDrawer= new IrrDebugDrawer(driver);
@@ -239,6 +233,7 @@ int main(int argc, char ** av)
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / glob_frameRate;
 
+#if 0
   // phase handlers
   VehicleChooser *    vehicleChooser;
   Race *              race;
@@ -246,12 +241,11 @@ int main(int argc, char ** av)
 
   IPhaseHandler *  currentPhaseHandler;
 
-
   vehicleChooser=new VehicleChooser(device,world);
   race = new Race(device,world);
   emptyPhaseHandler=new EmptyPhaseHandler(device,world);
-
   currentPhaseHandler = 0;
+
 
 
 #define START_CHOOSER 1
@@ -280,10 +274,9 @@ int main(int argc, char ** av)
 
   // temp init !!!!!
   vehicleChooser->prepare(1,3,runningVehicles);
-  //currentPhaseHandler= vehicleChooser;
   currentPhaseHandler=emptyPhaseHandler;
 
-  bool donePhase;
+#endif
 
   globalDone = false;
 
@@ -293,7 +286,7 @@ int main(int argc, char ** av)
       startFrameTime=device->getTimer()->getRealTime();
       if(!stepMode || !doneStep) {
         doneStep=true;
-        donePhase=currentPhaseHandler->step();
+        resmanager->stepPhaseHandler();
       }
 
       /* temp keyboard handling part */
@@ -318,6 +311,7 @@ int main(int argc, char ** av)
         device->setWindowCaption(tmp.c_str());
       }
 
+#if 0
       if(donePhase) {
         if(currentPhaseHandler == race) {
           race->unprepare();
@@ -346,6 +340,7 @@ int main(int argc, char ** av)
           currentPhaseHandler = race;
         }
       }
+#endif
       endFrameTime=device->getTimer()->getRealTime();
       unsigned long dt = (endFrameTime - startFrameTime);
       if(dt < frameDuration) {

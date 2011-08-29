@@ -1,0 +1,23 @@
+bugs/problems list:
+
+- non è gestita la trasparenza delle texture (!!!!)
+- quando la macchina "corre troppo forte" le ruote flickerano. // CORRETTO
+- non tutte le track di tuxracing vengono esportate correttamente
+
+-----------------------------------------------
+
+attivita
+
+- implementare (finalemente) corsa:
+  - far funzionare lo "start.track"   OK!
+  - implementare una classe che gestisce la corsa: PARZ
+    - setta track
+    - setta num vehicles
+    - corri la corsa
+    - gestisce il "wrong way"
+
+  - implementare una classe che gestisce la scelta
+    della track
+  - implementare una classe che gestisce la scelta
+    del vhiecle
+

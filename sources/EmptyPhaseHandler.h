@@ -14,6 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#ifndef EMPTYPHASEHANDLER_H
+#define EMPTYPHASEHANDLER_H
 #include "IPhaseHandler.h"
 
 class EmptyPhaseHandler : public IPhaseHandler
@@ -28,3 +30,4 @@ class EmptyPhaseHandler : public IPhaseHandler
     irr::core::rect<irr::s32>  m_dstRect;
     irr::core::rect<irr::s32>  m_srcRect;
 };
+#endif
