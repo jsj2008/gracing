@@ -70,7 +70,10 @@ VehicleChooser::VehicleChooser(irr::IrrlichtDevice * device,
   assert(res);
 }
 
-void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsigned * vehiclesListPtr)
+void VehicleChooser::prepare(
+    unsigned nHumanVehicles, 
+    unsigned TotVehicles, 
+    unsigned * vehiclesListPtr)
 {
   assert(nHumanVehicles == 1);
 
@@ -79,6 +82,7 @@ void VehicleChooser::prepare(unsigned nHumanVehicles, unsigned TotVehicles, unsi
   const std::vector<IVehicle*> & vehicles=
     ResourceManager::getInstance()->getVehiclesList();
 
+  assert(TotVehicles <= vehicles.size());
   assert(m_shownVehicles <= vehicles.size());
 
   double offset=0.;
@@ -227,9 +231,16 @@ bool VehicleChooser::step()
     }
     m_choosenVehicles[0]=m_infos[m_vehicleIndex].index;
 
-    for(unsigned i=1,idx=0; i < m_totChooseableVehicles; i++)
-      if(idx != m_infos[m_vehicleIndex].index) 
-          m_choosenVehicles[i] = idx++;
+    GM_LOG("[0] vehicle %d\n", m_infos[m_vehicleIndex].index);
+
+    for(unsigned i=1,idx=0; i < m_totChooseableVehicles; i++) {
+      while(idx == m_infos[m_vehicleIndex].index) {
+        assert(idx < ResourceManager::getInstance()->getVehiclesList().size());
+        idx++;
+      }
+      GM_LOG("[%d] vehicle %d\n",i,idx);
+      m_choosenVehicles[i] = idx++;
+    }
 
     done=true;
   }

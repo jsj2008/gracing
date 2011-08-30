@@ -596,7 +596,7 @@ void Race::lapTriggered(void * userdata)
 
 void Race::recalcVehicleVehiclesStartPositions()
 {
-  const double vehicleSpace=3.;
+  const double vehicleSpace=2.;
   double thlen=(m_nVehicles-1)*vehicleSpace*.5;
   double angle=m_track->getStartRotation();
 

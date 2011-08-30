@@ -323,14 +323,10 @@ main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheel
 main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 main.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-main.o: JoystickInterface.h EventReceiver.h Track.hh XmlNode.h
+main.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+main.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh XmlNode.h
 main.o: CameraDataManager.hh util.hh TestVehicle.h IrrDebugDrawer.h
-main.o: DataRecorder.h GUISpeedometer.h GuiMenu.h IPhaseHandler.h Race.h
-main.o: IVehicleController.h VehicleCameraAnimator.h Tweening.h
-main.o: GuiReadySetGo.h GuiCronometer.h GuiCommunicator.h GuiFrame.h
-main.o: GuiCockpit.h VehicleChooser.h EmptyPhaseHandler.h
-main.o: VehicleKeyboardController.h VehicleNullController.h
-main.o: VehicleAutoController.h
+main.o: DataRecorder.h GUISpeedometer.h GuiMenu.h
 Track.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 Track.o: /usr/include/stdio.h /usr/include/_types.h /usr/include/sys/_types.h
 Track.o: /usr/include/machine/_types.h /usr/include/i386/_types.h
@@ -654,11 +650,11 @@ Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWhee
 Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Track.o: IVehicle.h CompoundSceneNode.h INumberOutput.h XmlNode.h
-Track.o: ResourceManager.h lua/lunar.h Vehicle.h JoystickInterface.h
-Track.o: EventReceiver.h CameraDataManager.hh util.hh Util.hh Race.h
-Track.o: IPhaseHandler.h IVehicleController.h VehicleCameraAnimator.h
-Track.o: Tweening.h GuiReadySetGo.h GuiCronometer.h GuiCommunicator.h
-Track.o: GuiFrame.h GuiCockpit.h
+Track.o: ResourceManager.h lua/lunar.h Vehicle.h IDeviceInterface.h
+Track.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
+Track.o: IPhaseHandler.h CameraDataManager.hh util.hh Util.hh Race.h
+Track.o: VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h GuiCronometer.h
+Track.o: GuiCommunicator.h GuiFrame.h GuiCockpit.h
 CCrisMeshFileLoader.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
 CCrisMeshFileLoader.o: /usr/include/stdio.h /usr/include/_types.h
 CCrisMeshFileLoader.o: /usr/include/sys/_types.h /usr/include/sys/cdefs.h
@@ -1622,8 +1618,9 @@ Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWh
 Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Vehicle.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h util.hh
-Vehicle.o: XmlNode.h ResourceManager.h lua/lunar.h JoystickInterface.h
-Vehicle.o: EventReceiver.h
+Vehicle.o: XmlNode.h ResourceManager.h lua/lunar.h IDeviceInterface.h
+Vehicle.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
+Vehicle.o: IPhaseHandler.h Track.hh CameraDataManager.hh
 IrrMotionState.o: IrrMotionState.h
 IrrMotionState.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 IrrMotionState.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -2275,8 +2272,14 @@ ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehi
 ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 ResourceManager.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-ResourceManager.o: INumberOutput.h JoystickInterface.h EventReceiver.h
-ResourceManager.o: XmlNode.h util.hh CCrisMeshFileLoader.h GuiMenu.h
+ResourceManager.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+ResourceManager.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+ResourceManager.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
+ResourceManager.o: CCrisMeshFileLoader.h GuiMenu.h JoystickInterface.h Race.h
+ResourceManager.o: VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h
+ResourceManager.o: GuiCronometer.h GuiCommunicator.h GuiFrame.h GuiCockpit.h
+ResourceManager.o: VehicleChooser.h VehicleKeyboardController.h
+ResourceManager.o: VehicleNullController.h VehicleAutoController.h
 VehicleCameraAnimator.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleCameraAnimator.o: gmlog.h /usr/include/stdio.h /usr/include/_types.h
 VehicleCameraAnimator.o: /usr/include/sys/_types.h
@@ -3269,7 +3272,9 @@ GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehic
 GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GUISpeedometer.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GUISpeedometer.o: INumberOutput.h JoystickInterface.h EventReceiver.h
+GUISpeedometer.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GUISpeedometer.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+GUISpeedometer.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
 GUISpeedometer.o: GUISpeedometer.h
 GuiReadySetGo.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 GuiReadySetGo.o: /usr/include/stdio.h /usr/include/_types.h
@@ -3596,7 +3601,9 @@ GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicl
 GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiReadySetGo.o: Vehicle.h IVehicle.h CompoundSceneNode.h INumberOutput.h
-GuiReadySetGo.o: JoystickInterface.h EventReceiver.h
+GuiReadySetGo.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+GuiReadySetGo.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh XmlNode.h
+GuiReadySetGo.o: CameraDataManager.hh util.hh
 GuiCronometer.o: ResourceManager.h /usr/include/stdlib.h
 GuiCronometer.o: /usr/include/Availability.h
 GuiCronometer.o: /usr/include/AvailabilityInternal.h /usr/include/_types.h
@@ -3924,8 +3931,9 @@ GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicl
 GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCronometer.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCronometer.o: INumberOutput.h JoystickInterface.h EventReceiver.h
-GuiCronometer.o: GuiCronometer.h
+GuiCronometer.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GuiCronometer.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiCronometer.o: XmlNode.h CameraDataManager.hh util.hh GuiCronometer.h
 GuiCommunicator.o: /usr/include/stdarg.h GuiCommunicator.h
 GuiCommunicator.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiCommunicator.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -4253,7 +4261,9 @@ GuiCommunicator.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dyna
 GuiCommunicator.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCommunicator.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiCommunicator.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCommunicator.o: INumberOutput.h JoystickInterface.h EventReceiver.h
+GuiCommunicator.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GuiCommunicator.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+GuiCommunicator.o: Track.hh CameraDataManager.hh util.hh
 GuiCockpit.o: ResourceManager.h /usr/include/stdlib.h
 GuiCockpit.o: /usr/include/Availability.h /usr/include/AvailabilityInternal.h
 GuiCockpit.o: /usr/include/_types.h /usr/include/sys/_types.h
@@ -4578,8 +4588,9 @@ GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/b
 GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCockpit.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCockpit.o: INumberOutput.h JoystickInterface.h EventReceiver.h XmlNode.h
-GuiCockpit.o: Util.hh GuiCockpit.h
+GuiCockpit.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GuiCockpit.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiCockpit.o: XmlNode.h CameraDataManager.hh util.hh Util.hh GuiCockpit.h
 GuiFrame.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 GuiFrame.o: /usr/include/stdio.h /usr/include/_types.h
 GuiFrame.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
@@ -4903,8 +4914,9 @@ GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btW
 GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiFrame.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
-GuiFrame.o: IVehicle.h CompoundSceneNode.h INumberOutput.h
-GuiFrame.o: JoystickInterface.h EventReceiver.h util.hh
+GuiFrame.o: IVehicle.h CompoundSceneNode.h INumberOutput.h IDeviceInterface.h
+GuiFrame.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
+GuiFrame.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
 VehicleKeyboardController.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleKeyboardController.o: EventReceiver.h
 VehicleKeyboardController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -5580,7 +5592,9 @@ VehicleAutoController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewF
 VehicleAutoController.o: gmlog.h INumberOutput.h PhyWorld.h config.h
 VehicleAutoController.o: EventReceiver.h Util.hh GuiCommunicator.h GuiFrame.h
 VehicleAutoController.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
-VehicleAutoController.o: JoystickInterface.h
+VehicleAutoController.o: IDeviceInterface.h EmptyPhaseHandler.h
+VehicleAutoController.o: IPhaseHandler.h Track.hh CameraDataManager.hh
+VehicleAutoController.o: util.hh
 VehicleChooser.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleChooser.o: VehicleChooser.h
 VehicleChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -5908,7 +5922,9 @@ VehicleChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynam
 VehicleChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 VehicleChooser.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
 VehicleChooser.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
-VehicleChooser.o: JoystickInterface.h EventReceiver.h Tweening.h util.hh
+VehicleChooser.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+VehicleChooser.o: EmptyPhaseHandler.h Track.hh CameraDataManager.hh util.hh
+VehicleChooser.o: Tweening.h
 EventReceiver.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 EventReceiver.o: EventReceiver.h
 EventReceiver.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -6438,10 +6454,10 @@ Race.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActi
 Race.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Race.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
 Race.o: IVehicleController.h Track.hh XmlNode.h ResourceManager.h lua/lunar.h
-Race.o: Vehicle.h JoystickInterface.h EventReceiver.h CameraDataManager.hh
-Race.o: util.hh VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h
-Race.o: GuiCronometer.h GuiCommunicator.h GuiFrame.h GuiCockpit.h
-Race.o: IrrDebugDrawer.h
+Race.o: Vehicle.h IDeviceInterface.h EventReceiver.h EmptyPhaseHandler.h
+Race.o: CameraDataManager.hh util.hh VehicleCameraAnimator.h Tweening.h
+Race.o: GuiReadySetGo.h GuiCronometer.h GuiCommunicator.h GuiFrame.h
+Race.o: GuiCockpit.h IrrDebugDrawer.h
 Util.o: util.hh /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 Util.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
 Util.o: /usr/include/stdio.h /usr/include/_types.h /usr/include/sys/_types.h
@@ -6765,8 +6781,9 @@ Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheel
 Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Util.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
-Util.o: IVehicle.h CompoundSceneNode.h INumberOutput.h JoystickInterface.h
-Util.o: EventReceiver.h
+Util.o: IVehicle.h CompoundSceneNode.h INumberOutput.h IDeviceInterface.h
+Util.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
+Util.o: IPhaseHandler.h Track.hh CameraDataManager.hh
 XmlNode.o: XmlNode.h
 XmlNode.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 XmlNode.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7091,7 +7108,9 @@ XmlNode.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btA
 XmlNode.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 XmlNode.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 XmlNode.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-XmlNode.o: JoystickInterface.h EventReceiver.h util.hh
+XmlNode.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+XmlNode.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
+XmlNode.o: util.hh
 GuiMenu.o: GuiMenu.h
 GuiMenu.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiMenu.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7417,9 +7436,10 @@ GuiMenu.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btA
 GuiMenu.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiMenu.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiMenu.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiMenu.o: JoystickInterface.h EventReceiver.h GuiFrame.h Util.hh
-GuiMenu.o: GuiItemCheckBox.h GuiItemListBox.h GuiItemStaticText.h
-GuiMenu.o: GuiItemSlider.h
+GuiMenu.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+GuiMenu.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
+GuiMenu.o: util.hh GuiFrame.h Util.hh GuiItemCheckBox.h GuiItemListBox.h
+GuiMenu.o: GuiItemStaticText.h GuiItemSlider.h
 GuiItemCheckBox.o: GuiMenu.h
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7748,8 +7768,10 @@ GuiItemCheckBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dyna
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemCheckBox.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiItemCheckBox.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiItemCheckBox.o: INumberOutput.h JoystickInterface.h EventReceiver.h
-GuiItemCheckBox.o: GuiItemCheckBox.h Util.hh
+GuiItemCheckBox.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GuiItemCheckBox.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+GuiItemCheckBox.o: Track.hh CameraDataManager.hh util.hh GuiItemCheckBox.h
+GuiItemCheckBox.o: Util.hh
 GuiItemStaticText.o: GuiMenu.h
 GuiItemStaticText.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemStaticText.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -8080,7 +8102,9 @@ GuiItemStaticText.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dy
 GuiItemStaticText.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemStaticText.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiItemStaticText.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiItemStaticText.o: INumberOutput.h JoystickInterface.h EventReceiver.h
+GuiItemStaticText.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
+GuiItemStaticText.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+GuiItemStaticText.o: Track.hh CameraDataManager.hh util.hh
 GuiItemStaticText.o: GuiItemStaticText.h
 GuiItemListBox.o: GuiItemListBox.h GuiMenu.h
 GuiItemListBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -8409,7 +8433,9 @@ GuiItemListBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynam
 GuiItemListBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemListBox.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiItemListBox.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiItemListBox.o: JoystickInterface.h EventReceiver.h Util.hh
+GuiItemListBox.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+GuiItemListBox.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiItemListBox.o: CameraDataManager.hh util.hh Util.hh
 GuiItemSlider.o: GuiItemSlider.h GuiMenu.h
 GuiItemSlider.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemSlider.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -8737,7 +8763,9 @@ GuiItemSlider.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynami
 GuiItemSlider.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemSlider.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiItemSlider.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiItemSlider.o: JoystickInterface.h EventReceiver.h Util.hh
+GuiItemSlider.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+GuiItemSlider.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiItemSlider.o: CameraDataManager.hh util.hh Util.hh
 EmptyPhaseHandler.o: EmptyPhaseHandler.h IPhaseHandler.h
 EmptyPhaseHandler.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 EmptyPhaseHandler.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -9068,7 +9096,339 @@ EmptyPhaseHandler.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dy
 EmptyPhaseHandler.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 EmptyPhaseHandler.o: ResourceManager.h lua/lunar.h Vehicle.h IVehicle.h
 EmptyPhaseHandler.o: CompoundSceneNode.h gmlog.h INumberOutput.h
-EmptyPhaseHandler.o: JoystickInterface.h EventReceiver.h
+EmptyPhaseHandler.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
+EmptyPhaseHandler.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
+IVehicleController.o: IVehicleController.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+IVehicleController.o: /usr/include/math.h
+IVehicleController.o: /usr/include/architecture/i386/math.h
+IVehicleController.o: /usr/include/sys/cdefs.h /usr/include/stdlib.h
+IVehicleController.o: /usr/include/Availability.h
+IVehicleController.o: /usr/include/AvailabilityInternal.h
+IVehicleController.o: /usr/include/_types.h /usr/include/sys/_types.h
+IVehicleController.o: /usr/include/machine/_types.h
+IVehicleController.o: /usr/include/i386/_types.h /usr/include/sys/wait.h
+IVehicleController.o: /usr/include/sys/signal.h
+IVehicleController.o: /usr/include/sys/appleapiopts.h
+IVehicleController.o: /usr/include/machine/signal.h
+IVehicleController.o: /usr/include/i386/signal.h /usr/include/i386/_structs.h
+IVehicleController.o: /usr/include/sys/_structs.h /usr/include/sys/resource.h
+IVehicleController.o: /usr/include/machine/endian.h
+IVehicleController.o: /usr/include/i386/endian.h /usr/include/sys/_endian.h
+IVehicleController.o: /usr/include/libkern/_OSByteOrder.h
+IVehicleController.o: /usr/include/libkern/i386/_OSByteOrder.h
+IVehicleController.o: /usr/include/alloca.h /usr/include/machine/types.h
+IVehicleController.o: /usr/include/i386/types.h /usr/include/float.h
+IVehicleController.o: /usr/include/assert.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuadWord.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDispatcher.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btPersistentManifold.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransformUtil.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btManifoldResult.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCallback.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btPolyhedralConvexShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexInternalShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionMargin.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAabbUtil2.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btSphereShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCylinderShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConeShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConcaveShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleCallback.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexHullShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStridingMeshInterface.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btOptimizedBvh.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btQuantizedBvh.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleInfoMap.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btSerializer.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btStackAlloc.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+IVehicleController.o: /usr/include/memory.h /usr/include/string.h
+IVehicleController.o: /usr/include/secure/_string.h
+IVehicleController.o: /usr/include/secure/_common.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCompoundShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTetrahedronShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btEmptyShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btMultiSphereShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btUniformScalingShape.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionConfiguration.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btSimpleBroadphase.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btAxisSweep3.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvt.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btMultiSapBroadphase.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btDefaultMotionState.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuickprof.h
+IVehicleController.o: /usr/include/stdio.h /usr/include/secure/_stdio.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btIDebugDraw.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDynamicsWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btContinuousDynamicsWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btSimpleDynamicsWorld.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btJacobianEntry.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHingeConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConeTwistConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSliderConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btUniversalConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHinge2Constraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConstraintSolver.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btRaycastVehicle.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
+IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+IVehicleController.o: IVehicle.h CompoundSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/aabbox3d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMath.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrTypes.h
+IVehicleController.o: /usr/include/wchar.h /usr/include/stdarg.h
+IVehicleController.o: /usr/include/time.h /usr/include/_structs.h
+IVehicleController.o: /usr/include/_wctype.h /usr/include/ctype.h
+IVehicleController.o: /usr/include/runetype.h /usr/include/limits.h
+IVehicleController.o: /usr/include/machine/limits.h
+IVehicleController.o: /usr/include/i386/limits.h /usr/include/i386/_limits.h
+IVehicleController.o: /usr/include/sys/syslimits.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/plane3d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector3d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line3d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CDynamicMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDynamicMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReferenceCounted.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterial.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SColor.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/matrix4.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector2d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/dimension2d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/rect.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/position2d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrString.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrAllocator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrArray.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/heapsort.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialFlags.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterialLayer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/S3DVertex.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexIndex.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EHardwareBufferFlags.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EPrimitiveTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVertexBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IIndexBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CVertexBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CIndexBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/coreutil.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/path.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ECullingTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDebugSceneTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverFeatures.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIAlignment.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIElementTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMeshWriterEnums.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMessageBoxFlags.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeAnimatorTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ETerrainElements.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/fast_atof.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD2.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD3.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3Shader.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileSystem.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLReader.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrXML.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileArchive.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReadFile.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileList.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoDriver.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITexture.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImage.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/triangle3d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SExposedVideoData.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/quaternion.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributeExchangingObject.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IEventReceiver.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILogger.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/Keycodes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITriangleSelector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrList.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line2d.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EAttributes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBoneSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardTextSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICameraSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICursorControl.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDummyTransformationSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGeometryCreator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGPUProgrammingServices.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EShaderTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIButton.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElement.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUICheckBox.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIColorSelectDialog.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIComboBox.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIContextMenu.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEditBox.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElementFactory.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEnvironment.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISkin.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFileOpenDialog.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFont.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFontBitmap.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImage.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIInOutFader.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIListBox.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIMeshViewer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIScrollBar.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpinBox.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpriteBank.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIStaticText.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITabControl.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITable.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIToolbar.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIWindow.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITreeView.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImageList.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageLoader.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageWriter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SLight.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRenderer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRendererServices.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshCache.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshLoader.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshManipulator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexManipulator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshWriter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMetaTriangleSelector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IOSOperator.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSystemSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAnimatedMeshSceneNodeEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SParticle.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleBoxEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleCylinderEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleMeshEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRingEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSphereEmitter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAttractionAffector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAffector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleFadeOutAffector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleGravityAffector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRotationAffector.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3LevelMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrlichtDevice.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDeviceTypes.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoModeList.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITimer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMap.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneCollisionManager.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneManager.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SceneParameters.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISkinnedMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSkinMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraFPS.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraMaya.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCollisionResponse.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorFactory.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeFactory.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneUserDataSerializer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShaderConstantSetCallBack.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShadowVolumeSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITerrainSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITextSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVolumeLightSceneNode.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IWriteFile.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLWriter.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightManager.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SAnimatedMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SIrrCreationParameters.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SKeyMap.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMesh.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferLightMap.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferTangents.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
+IVehicleController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
+IVehicleController.o: gmlog.h INumberOutput.h PhyWorld.h config.h
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
 JoystickInterface.o: /usr/include/stdio.h /usr/include/_types.h
@@ -9273,8 +9633,8 @@ JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffe
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferTangents.h
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
-JoystickInterface.o: JoystickInterface.h ResourceManager.h lua/lunar.h
-JoystickInterface.o: PhyWorld.h config.h
+JoystickInterface.o: JoystickInterface.h EventReceiver.h IDeviceInterface.h
+JoystickInterface.o: IVehicleController.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
@@ -9397,5 +9757,7 @@ JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Ve
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
-JoystickInterface.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-JoystickInterface.o: INumberOutput.h EventReceiver.h
+JoystickInterface.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
+JoystickInterface.o: PhyWorld.h config.h ResourceManager.h lua/lunar.h
+JoystickInterface.o: Vehicle.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+JoystickInterface.o: XmlNode.h CameraDataManager.hh util.hh

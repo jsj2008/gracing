@@ -75,7 +75,7 @@ class Race : public  IPhaseHandler
 
     inline void setLapNumber(unsigned n) { m_totalLaps=n; }
 
-    enum { max_vehicles=3 };
+    enum { max_vehicles=4 };
 
     struct VehicleInfo {
       IVehicle *           vehicle;
