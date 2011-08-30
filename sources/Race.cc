@@ -308,7 +308,7 @@ bool Race::step()
 
     case rs_paused:
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
-      m_communicator->show("PAUSED");
+      //m_communicator->show("PAUSED");
       m_sceneManager->drawAll();
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
@@ -389,7 +389,7 @@ bool Race::updateKeyboard()
   if(erec->OneShotKey(irr::KEY_KEY_C)) 
     restart();
 
-  if(erec->OneShotKey(irr::KEY_KEY_P)) 
+  if(erec->OneShotKey(irr::KEY_ESCAPE)) 
     togglePause();
 
   if(erec->OneShotKey(irr::KEY_KEY_Q)) {
@@ -454,6 +454,8 @@ bool Race::gotoState(unsigned state)
       if(m_status != rs_started)
         return false;
       m_cockpit->pause();
+      m_communicator->unshow();
+      ResourceManager::getInstance()->showMenu("in-game");
       m_status=rs_paused;
       break;
     case rs_finished:
@@ -503,6 +505,7 @@ bool Race::gotoState(unsigned state)
       if(m_status==rs_paused) {
         m_status=rs_started;
         m_cockpit->unpause();
+        ResourceManager::getInstance()->hideMenu();
       } else if(m_status==rs_readySetGo) {
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_rank[i]=i;
@@ -655,8 +658,9 @@ void Race::togglePause()
   if(m_status==rs_paused) {
     m_communicator->unshow();
     gotoState(rs_started);
-  } else if(m_status==rs_started)  
-    gotoState(rs_paused);
+  } else if(m_status==rs_started)  {
+    gotoState(rs_paused); 
+  }
 }
 
 int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)

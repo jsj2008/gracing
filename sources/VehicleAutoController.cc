@@ -20,13 +20,17 @@
 
 #include "GuiCommunicator.h"
 extern GuiCommunicator * TEMP_communicator;
+#ifdef DEBUG_AUTO_CONTROLLER
 #define SHOW(fmt,...) do { if(TEMP_communicator) TEMP_communicator->show(fmt, ## __VA_ARGS__); } while(0)
 #define ADD(fmt,...) do { if(TEMP_communicator) TEMP_communicator->add(true,fmt, ## __VA_ARGS__); } while(0)
+#else 
+#define SHOW(fmt,...) 
+#define ADD(fmt,...) 
+#endif
 
 CFG_PARAM_D(glob_autocontrolAngleEpsilon)=.2;
 CFG_PARAM_D(glob_autocontrolAngleBraking)=.5;
 CFG_PARAM_D(glob_autocontrolDistance)=4.0;
-
 
 VehicleAutoController::VehicleAutoController()
 {
@@ -68,14 +72,11 @@ void VehicleAutoController::updateCommands(
 
   const char * steering;
 
-
   steering = "none";
-  //if(dot < 0.)  {
   if(dot < -glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
     steering = "rite";
   }
-  //if(dot > 0.) {
   if(dot > glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerLeft;
     steering = "left";
@@ -85,11 +86,7 @@ void VehicleAutoController::updateCommands(
      dot < - glob_autocontrolAngleBraking ) {
     commands.throttling = -1.;
   }
-
-
-  //SHOW("f:%d,s:%s,d:%2.2f,d:%2.2f",m_currentIndex,steering,dist,dist2);
   SHOW("s:%s,sp:%2.3f",steering,parameters.vehicleSpeed);
-
 }
 
 void VehicleAutoController::init(
@@ -98,19 +95,12 @@ void VehicleAutoController::init(
         const btVector3 startPosition)
 {
   unsigned size=0;
-
   size=controlPoints.size();
-
-#if 0
-  GM_LOG("** initting auto controller **\n");
-#endif
   double bestDistance=1000000.;
   unsigned bestDistanceIndex=0xffff;
   for(unsigned i=0; i<size; i++) {
     const btVector3 & cpnt = controlPoints[i];
-
     double dist =  (cpnt - startPosition).length();
-
     if(dist < bestDistance) {
       bestDistance = dist;
       bestDistanceIndex = i;

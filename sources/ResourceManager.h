@@ -92,6 +92,7 @@ class ResourceManager
     void showMenu(const std::string & name,bool centerOnTheScreen=false);
 
     void startRace(unsigned humanVehicles, unsigned totVehicles);
+    inline void endRace()  { m_mustEndRace=true; }
 
     /* lua stuff */
     void lua_doFile(const char * filename);
@@ -150,8 +151,10 @@ class ResourceManager
     unsigned   m_totVehicles;
     enum       { m_max_vehicles=4 };
     unsigned   m_choosenVehicles[m_max_vehicles];
-    bool       m_mustStartRace;
     Track *    m_track;
+
+    bool       m_mustStartRace;
+    bool       m_mustEndRace;
 };
 
 #endif

@@ -288,8 +288,10 @@ int main(int argc, char ** av)
       }
 
       /* temp keyboard handling part */
+#if 0
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_ESCAPE))
         globalDone=true;
+#endif
 
       if(resmanager->getEventReceiver()->IsKeyDown(irr::KEY_KEY_L))
         resmanager->showMenu(L"main");

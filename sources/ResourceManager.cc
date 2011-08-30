@@ -76,6 +76,12 @@ int showMenu(lua_State * L)
   return 0;
 }
 
+int endRace(lua_State * L)
+{
+  ResourceManager::getInstance()->endRace();
+  return 0;
+}
+
 int hideMenu(lua_State * L)
 {
   ResourceManager::getInstance()->hideMenu();
@@ -97,6 +103,7 @@ struct embFunctions_s {
   { "showMenu", showMenu },
   { "hideMenu", hideMenu },
   { "startRace", startRace },
+  { "endRace", endRace },
   { "quit", quit },
   { 0,0 }
 };
@@ -586,8 +593,9 @@ void ResourceManager::startRace(unsigned humanVehicles, unsigned totVehicles)
 }
 
 void ResourceManager::stepPhaseHandler() { 
+  // TODO: this function is very very very very ugly!
+  //       dont like any thing in it!
   bool done;
-  done=m_currentPhaseHandler->step();
 
   if(m_mustStartRace) {
     m_mustStartRace = false;
@@ -596,7 +604,14 @@ void ResourceManager::stepPhaseHandler() {
     static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
                                  m_humanVehicles,m_totVehicles,m_choosenVehicles);
     m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
-  } else if(done) {
+    return;
+  } 
+
+  
+  
+  done=m_currentPhaseHandler->step();
+
+  if(done || m_mustEndRace) {
     if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {
 
       m_currentPhaseHandler->unprepare();
@@ -622,6 +637,12 @@ void ResourceManager::stepPhaseHandler() {
       static_cast<Race*>(m_phaseHandlers[pa_race])->restart();
       m_currentPhaseHandler = m_phaseHandlers[pa_race];
       GM_LOG("staring race\n");
+    } else if(m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
+      m_mustEndRace = false;
+      m_phaseHandlers[pa_race]->unprepare();
+      m_currentPhaseHandler = m_phaseHandlers[pa_empty];
+      showMenu("main");
     }
+
   }
 }
