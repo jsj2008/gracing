@@ -49,6 +49,12 @@ class EventReceiver : public irr::IEventReceiver
       m_listeners.push_back(lstnr);
     }
 
+    inline void resetOneShotKey()
+    {
+      for(unsigned i=0; i<irr::KEY_KEY_CODES_COUNT; i++)
+        OneShotKeyIsDown[i]=false;
+    }
+
     inline bool removeListener(IEventListener * lstnr)
     {
       std::vector<IEventListener*>::iterator it;

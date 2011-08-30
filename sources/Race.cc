@@ -605,7 +605,9 @@ void Race::recalcVehicleVehiclesStartPositions()
     zp = cos(angle) * zp;
 
     m_vehicles[i].startPosition.X = m_track->getStartPosition().X + xp;
-    m_vehicles[i].startPosition.Y = m_track->getStartPosition().Y ;
+    m_vehicles[i].startPosition.Y = m_vehicles[i].vehicle->getRestHeight();
+     // m_track->getStartPosition().Y ;
+
     m_vehicles[i].startPosition.Z = m_track->getStartPosition().Z + zp;
     m_vehicles[i].startRotation=m_track->getStartRotation();
   }

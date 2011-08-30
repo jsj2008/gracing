@@ -31,10 +31,6 @@
 #include "GuiMenu.h"
 
 
-// vehicle controllers
-#include "VehicleKeyboardController.h"
-#include "VehicleNullController.h"
-#include "VehicleAutoController.h"
 
 
 using namespace irr;
@@ -200,6 +196,7 @@ int main(int argc, char ** av)
   }
 
 
+#if 0
   Track * thetrack=0;
 
   // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
@@ -221,6 +218,7 @@ int main(int argc, char ** av)
 
   if(!thetrack) 
     thetrack=new Track(device,world,"farm.zip");
+#endif
 
   bool autoplayer;
   ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);

@@ -41,7 +41,7 @@ class IPhaseHandler /*: public irr::IEventReceiver*/
       return false;
     }
 
-    //virtual void prepare() { }
+    virtual void unprepare() { };
 
   protected:
     irr::IrrlichtDevice  *      m_device;

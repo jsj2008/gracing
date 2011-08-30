@@ -34,6 +34,11 @@
 #include "Race.h"
 #include "VehicleChooser.h"
 
+// vehicle controllers
+#include "VehicleKeyboardController.h"
+#include "VehicleNullController.h"
+#include "VehicleAutoController.h"
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -42,15 +47,23 @@ extern "C" {
 
 
 extern bool globalDone;
+static EventReceiver g_eventReceiver;
 
-
-    
 int log(lua_State * L)
 {
   const char * str;
   if((str=luaL_checklstring(L,1,0))) {
     GM_LOG("%s",str);
   }
+  return 0;
+}
+
+int startRace(lua_State * L)
+{
+  unsigned hum,tot;
+  hum=luaL_checknumber(L,1);
+  tot=luaL_checknumber(L,2);
+  ResourceManager::getInstance()->startRace(hum,tot);
   return 0;
 }
 
@@ -83,6 +96,7 @@ struct embFunctions_s {
   { "log",log },
   { "showMenu", showMenu },
   { "hideMenu", hideMenu },
+  { "startRace", startRace },
   { "quit", quit },
   { 0,0 }
 };
@@ -121,7 +135,6 @@ static int registerLua(lua_State * L)
 #ifdef __APPLE__
 #  include <CoreFoundation/CoreFoundation.h>
 
-static EventReceiver g_eventReceiver;
 
 CFG_PARAM_UINT(glob_screenWidth)=800;
 CFG_PARAM_UINT(glob_screenHeight)=600;
@@ -234,6 +247,13 @@ ResourceManager::ResourceManager()
   ///////////////////////////////////////
   m_screenWidth=glob_screenWidth;
   m_screenHeight=glob_screenHeight;
+
+  m_humanVehicles=1;
+  m_totVehicles=4;
+  m_mustStartRace=false;
+  //{ m_max_vehicles=4 };
+  //unsigned   m_choosenVehicles[m_max_vehicles];
+
 }
 
 void ResourceManager::loadConfig(const std::string & filename)
@@ -363,11 +383,29 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   /////////////////////////////////
   // phase handlers menus       //
   /////////////////////////////////
-  PhyWorld * m_world = ResourceManager::getInstance()->getPhyWorld(); 
   m_phaseHandlers[pa_vehicleChooser]=new VehicleChooser(device,m_world);
   m_phaseHandlers[pa_race] = new Race(device,m_world);
   m_phaseHandlers[pa_empty] = new EmptyPhaseHandler(device,m_world);
   m_currentPhaseHandler = m_phaseHandlers[pa_empty];
+
+  const XmlNode * defaultTrack;
+  cfgGet("default-track",defaultTrack);
+
+  if(defaultTrack) {
+    std::string name;
+    defaultTrack->get("name",name);
+    m_track=new Track(m_device,m_world,name.c_str());
+    GM_LOG("got the default track %s!!!!\n",name.c_str());
+  }
+
+  //thetrack=new Track(device,world,"farm.zip");
+  //thetrack=new Track(device,world,"devtrack.zip");
+  //thetrack=new Track(device,world,"tuxtollway.zip");
+  //thetrack=new Track(device,world,"jungle.zip");
+  //thetrack=new Track(device,world,"beach.zip");
+
+  if(!m_track) 
+    m_track=new Track(m_device,m_world,"farm.zip");
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -502,6 +540,7 @@ void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen
   m_menu->setGroup(name);
   if(centerOnTheScreen)
     m_menu->centerOnTheScreen();
+  g_eventReceiver.resetOneShotKey();
   m_menu->setVisible(true);
 }
 
@@ -511,11 +550,13 @@ void ResourceManager::showMenu(const std::string & name,bool centerOnTheScreen)
   m_menu->setGroup(wname);
   if(centerOnTheScreen)
     m_menu->centerOnTheScreen();
+  g_eventReceiver.resetOneShotKey();
   m_menu->setVisible(true);
 }
 
 void ResourceManager::hideMenu()
 {
+  g_eventReceiver.resetOneShotKey();
   m_menu->setVisible(false);
 }
 
@@ -537,39 +578,50 @@ void ResourceManager::lua_doString(const char * script)
     GM_LOG("%s\n", lua_tostring(m_lua, -1));
 }
 
+void ResourceManager::startRace(unsigned humanVehicles, unsigned totVehicles)
+{
+  m_mustStartRace=true;
+  m_humanVehicles=humanVehicles;
+  m_totVehicles=totVehicles;
+}
 
 void ResourceManager::stepPhaseHandler() { 
   bool done;
   done=m_currentPhaseHandler->step();
 
-  if(done) {
-    if(m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
-      m_phaseHandlers[pa_race]->unprepare();
-      m_phaseHandlers[pa_vehicleChooser]->prepare(1,3,runningVehicles);
-      m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
-    } else if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {
-      m_phaseHandlers[pa_vehicleChooser]->unprepare();
-      // start the race
+  if(m_mustStartRace) {
+    m_mustStartRace = false;
+    m_humanVehicles=1;
+    hideMenu();
+    static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
+                                 m_humanVehicles,m_totVehicles,m_choosenVehicles);
+    m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
+  } else if(done) {
+    if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {
+
+      m_currentPhaseHandler->unprepare();
+
+      static_cast<Race*>(m_phaseHandlers[pa_race])->setTrack(m_track);
 
       const std::vector<IVehicle*> & vehicles=getVehiclesList();
       assert(vehicles.size() >= 4);
 
-#if 0
-      race->setTrack(thetrack);
-
-      if(autoplayer) 
-        race->addVehicle(vehicles[runningVehicles[0]],
-            new VehicleAutoController(),
-            vehicles[runningVehicles[0]]->getName().c_str(),true);
-      else
-        race->addVehicle(vehicles[runningVehicles[0]],
-            new VehicleKeyboardController(resmanager->getEventReceiver()), 
-            vehicles[runningVehicles[0]]->getName().c_str(),true);
-
-      race->restart();
-
-      currentPhaseHandler = race;
-#endif
+      for(unsigned i=0; i < m_totVehicles; i++) {
+        GM_LOG("adding vehicle '%s'\n",
+              vehicles[m_choosenVehicles[i]]->getName().c_str());
+        if(i < m_humanVehicles) 
+          static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(vehicles[m_choosenVehicles[i]],
+              new VehicleKeyboardController(getEventReceiver()), 
+              vehicles[m_choosenVehicles[i]]->getName().c_str(),true);
+        else
+          static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
+              vehicles[m_choosenVehicles[i]],
+              new VehicleAutoController(),
+              vehicles[m_choosenVehicles[i]]->getName().c_str(),false);
+      }
+      static_cast<Race*>(m_phaseHandlers[pa_race])->restart();
+      m_currentPhaseHandler = m_phaseHandlers[pa_race];
+      GM_LOG("staring race\n");
     }
   }
 }

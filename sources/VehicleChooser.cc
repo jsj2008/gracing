@@ -226,6 +226,11 @@ bool VehicleChooser::step()
       m_infos[i].vehicle->unuse(IVehicle::USE_GRAPHICS);
     }
     m_choosenVehicles[0]=m_infos[m_vehicleIndex].index;
+
+    for(unsigned i=1,idx=0; i < m_totChooseableVehicles; i++)
+      if(idx != m_infos[m_vehicleIndex].index) 
+          m_choosenVehicles[i] = idx++;
+
     done=true;
   }
 

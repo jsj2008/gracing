@@ -28,9 +28,11 @@
 #include "IDeviceInterface.h"
 #include "EventReceiver.h"
 #include "EmptyPhaseHandler.h"
+#include "Track.hh"
 
 class XmlNode;
 class GuiMenu;
+class Track;
 
 class ResourceManager 
 {
@@ -89,6 +91,8 @@ class ResourceManager
     void showMenu(const std::wstring & name,bool centerOnTheScreen=false);
     void showMenu(const std::string & name,bool centerOnTheScreen=false);
 
+    void startRace(unsigned humanVehicles, unsigned totVehicles);
+
     /* lua stuff */
     void lua_doFile(const char * filename);
     void lua_doString(const char * script);
@@ -138,6 +142,16 @@ class ResourceManager
 
     IPhaseHandler *  m_phaseHandlers[pa_numPhaseHandlers];
     IPhaseHandler *  m_currentPhaseHandler;
+
+    //////////////////////
+    // game description //
+    //////////////////////
+    unsigned   m_humanVehicles;
+    unsigned   m_totVehicles;
+    enum       { m_max_vehicles=4 };
+    unsigned   m_choosenVehicles[m_max_vehicles];
+    bool       m_mustStartRace;
+    Track *    m_track;
 };
 
 #endif

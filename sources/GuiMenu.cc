@@ -344,6 +344,8 @@ void GuiMenu::selectPrev()
 
 void GuiMenu::keyboardEvent(const irr::SEvent::SKeyInput & keyInput)
 {
+  if(!m_isVisible)
+    return;
   switch(keyInput.Key) {
     case irr::KEY_UP:
       if(!keyInput.PressedDown)
@@ -371,6 +373,8 @@ void GuiMenu::keyboardEvent(const irr::SEvent::SKeyInput & keyInput)
 
 void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
 {
+  if(!m_isVisible)
+    return;
   switch(MouseInput.Event) {
     case irr::EMIE_LMOUSE_PRESSED_DOWN:
       {
