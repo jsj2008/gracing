@@ -93,6 +93,7 @@ class ResourceManager
 
     void startRace(unsigned humanVehicles, unsigned totVehicles);
     inline void endRace()  { m_mustEndRace=true; }
+    inline void resumeRace() { m_mustResumeRace=true; }
 
     /* lua stuff */
     void lua_doFile(const char * filename);
@@ -155,6 +156,7 @@ class ResourceManager
 
     bool       m_mustStartRace;
     bool       m_mustEndRace;
+    bool       m_mustResumeRace;
 };
 
 #endif

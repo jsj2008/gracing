@@ -66,9 +66,7 @@ void VehicleAutoController::updateCommands(
 
   double dot = parameters.vehicleRightDirection.dot( dir );
 
-  static unsigned cnt=0;
-  if(cnt ++ % 2 == 0)
-    commands.throttling = 1.;
+  commands.throttling = 1.;
 
   const char * steering;
 

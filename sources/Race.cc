@@ -94,11 +94,18 @@ static unsigned initVehicleControlPoint(
   iMin=0;
   min=(controlPoints[iMin]-position).length2();
 
-  for(unsigned i=1; i < controlPoints.size(); i++) 
-    if((dis=(controlPoints[i]-position).length2()) < min) {
+  for(unsigned i=1; i < controlPoints.size(); i++) {
+    bool good;
+    double posInSegment;
+    posInSegment=distanceVehicleControlPoint(i,position,controlPoints);
+    good = (posInSegment <= 1.) && (posInSegment >= 0);
+    //GM_LOG("Control point %d distance: %f, good: %s\n",i,d,good?"yes":"no");
+    if(((dis=(controlPoints[i]-position).length2()) < min) && good) {
       min=dis;
       iMin=i;
     }
+  }
+
 
   return iMin;
 }
@@ -190,7 +197,7 @@ void Race::updateVehiclesInfo()
 
     vpar.vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
     vpar.vehicleRightDirection = vinfo.vehicle->getChassisRightDirection();
-    vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
+    vehiclePosition = vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
     vpar.vehicleSpeed = vinfo.vehicle->getSpeed();
 
 
@@ -201,7 +208,6 @@ void Race::updateVehiclesInfo()
 
     double newDist;
 
-
     if(evolveVehicleControlPoint(
           vinfo.controlPointIndex,
           vehiclePosition,
@@ -209,6 +215,7 @@ void Race::updateVehiclesInfo()
     {
       if(vinfo.controlPointIndex == controlPoints.size()-1) 
         vinfo.waitingForLapTrigger=true;
+
       newDist=
         distanceVehicleControlPoint(
             vinfo.controlPointIndex,
@@ -333,7 +340,9 @@ bool Race::step()
       // update cockpit
       m_cockpit->setRank(
           m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
-      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+      //m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
+      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
+            m_vehicles[m_followedVehicleIndex].controlPointIndex);
 #if 0
       m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
           m_vehicles[m_followedVehicleIndex].controlPointIndex);
@@ -389,8 +398,10 @@ bool Race::updateKeyboard()
   if(erec->OneShotKey(irr::KEY_KEY_C)) 
     restart();
 
-  if(erec->OneShotKey(irr::KEY_ESCAPE)) 
+  if(erec->OneShotKey(irr::KEY_ESCAPE))  {
+    GM_LOG("toggling pause\n");
     togglePause();
+  }
 
   if(erec->OneShotKey(irr::KEY_KEY_Q)) {
     ret=true;
@@ -587,7 +598,7 @@ void Race::lapTriggered(void * userdata)
     vinfo->lapNumber++;
     if(vinfo->index==m_followedVehicleIndex) {
       m_communicator->show("lap %d",vinfo->lapNumber+1);
-      //m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
+      m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
     }
     if(vinfo->lapNumber == m_totalLaps) 
       vehicleFinished(*vinfo);
@@ -656,9 +667,11 @@ void Race::vehicleFinished(VehicleInfo & vinfo)
 void Race::togglePause()
 {
   if(m_status==rs_paused) {
+    GM_LOG("unpausing\n");
     m_communicator->unshow();
     gotoState(rs_started);
   } else if(m_status==rs_started)  {
+    GM_LOG("pausing\n");
     gotoState(rs_paused); 
   }
 }

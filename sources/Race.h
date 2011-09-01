@@ -65,6 +65,7 @@ class Race : public  IPhaseHandler
 
     /* callback for lap trigger */
     void lapTriggered(void * userdata);
+    void togglePause();
 
   private:
 
@@ -134,7 +135,6 @@ class Race : public  IPhaseHandler
     void followNextVehicle();
 
     // util
-    void togglePause();
     bool updateKeyboard();
     void updateRanking();
 

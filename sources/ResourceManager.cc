@@ -82,6 +82,13 @@ int endRace(lua_State * L)
   return 0;
 }
 
+int resumeRace(lua_State * L)
+{
+  ResourceManager::getInstance()->hideMenu();
+  ResourceManager::getInstance()->resumeRace();
+  return 0;
+}
+
 int hideMenu(lua_State * L)
 {
   ResourceManager::getInstance()->hideMenu();
@@ -104,6 +111,7 @@ struct embFunctions_s {
   { "hideMenu", hideMenu },
   { "startRace", startRace },
   { "endRace", endRace },
+  { "resumeRace", resumeRace },
   { "quit", quit },
   { 0,0 }
 };
@@ -258,6 +266,8 @@ ResourceManager::ResourceManager()
   m_humanVehicles=1;
   m_totVehicles=4;
   m_mustStartRace=false;
+  m_mustResumeRace=false;
+  m_mustEndRace=false;
   //{ m_max_vehicles=4 };
   //unsigned   m_choosenVehicles[m_max_vehicles];
 
@@ -595,6 +605,11 @@ void ResourceManager::startRace(unsigned humanVehicles, unsigned totVehicles)
 void ResourceManager::stepPhaseHandler() { 
   // TODO: this function is very very very very ugly!
   //       dont like any thing in it!
+  //      
+  //       for example, the general policy used
+  //       to serve 'lua' requests (startRace, endRace,....)
+  //       is to set a flag related to the operation to do.
+  //       this is __VERY__ ugly.
   bool done;
 
   if(m_mustStartRace) {
@@ -608,6 +623,11 @@ void ResourceManager::stepPhaseHandler() {
   } 
 
   
+  if(m_mustResumeRace && m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
+    static_cast<Race*>(m_currentPhaseHandler)->togglePause();
+    m_mustResumeRace=false;
+  }
+    
   
   done=m_currentPhaseHandler->step();
 
@@ -646,3 +666,4 @@ void ResourceManager::stepPhaseHandler() {
 
   }
 }
+
