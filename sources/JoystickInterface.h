@@ -20,7 +20,7 @@
 #include "IDeviceInterface.h"
 
 
-class JoystickInterface : public IEventListener, public IDeviceInterface
+class JoystickInterface : public IEventListener /*, public IDeviceInterface*/
 {
   public:
 
@@ -28,7 +28,7 @@ class JoystickInterface : public IEventListener, public IDeviceInterface
 
     //////////////////////////////
     // Event Listener
-    virtual void joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent);
+    //virtual void joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent);
 
 
     //////////////////////////////

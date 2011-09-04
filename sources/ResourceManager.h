@@ -56,6 +56,10 @@ class ResourceManager
     {
       return m_fileSystem->createXMLReaderUTF8(filename.c_str());
     }
+    inline irr::io::IXMLWriter * createXMLWriter(const std::string & filename)
+    {
+      return m_fileSystem->createXMLWriter(filename.c_str());
+    }
 
 
     /* system font */
@@ -71,6 +75,9 @@ class ResourceManager
     bool cfgGet(const char * name, std::string & value);
     bool cfgGet(const char * nodeName, const XmlNode * & node);
 
+    void saveConfig();
+
+
 
     /* singleton class access */
     inline irr::io::IFileSystem *     getFileSystem()  { return m_fileSystem; }
@@ -79,6 +86,7 @@ class ResourceManager
     EventReceiver *                   getEventReceiver(); // TODO: dont remenber why this is not inlined
     inline lua_State *                getLuaState()    { return m_lua; }
     inline irr::IrrlichtDevice *      getDevice()      { return m_device; }
+    inline irr::gui::IGUIEnvironment *getGuiEnv()      { return m_device->getGUIEnvironment(); }
 
 
     inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
@@ -106,6 +114,7 @@ class ResourceManager
     std::vector<IDeviceInterface *> m_inputDevices;
 
     void loadConfig(const std::string & filename);
+    void saveConfig(const std::string & filename);
 
     void loadVehicles();
 

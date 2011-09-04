@@ -28,6 +28,10 @@ class VehicleKeyboardController : public IVehicleController
         const SVehicleParameters  &    vehicleParameters,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands);
+
+
+    void        startControlVehicle() { }
+    void        stopControlVehicle()  { }
   private:
     EventReceiver * m_eventReceiver;
 };

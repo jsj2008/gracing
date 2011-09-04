@@ -104,6 +104,9 @@ XmlNode * Track::loadXml(const char * filename)
 
   irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
 
+  if(!xml)
+    return 0;
+
   node=new XmlNode(xml);
   assert(node && node->getName() == "track"); // TODO: this must not be an assert!!!
 

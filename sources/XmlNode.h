@@ -77,6 +77,9 @@ class XmlNode
     // get value as a bullet 3d vector
     int get(const std::string &attribute, btVector3 & value) const;
 
+    void save(const std::string & filename) const;
+    void save(FILE * f) const;
+
 
   private:
 

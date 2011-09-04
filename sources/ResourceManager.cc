@@ -255,6 +255,7 @@ ResourceManager::ResourceManager()
 
   //Lunar<LuaBridge>::Register(m_lua);
 
+  GM_LOG("loading config--------------------------------------------------\n");
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
   loadConfig(configFilename);
@@ -281,6 +282,11 @@ void ResourceManager::loadConfig(const std::string & filename)
     return;
 
   ConfigInit::initGlobVariables(this);
+}
+
+void ResourceManager::saveConfig(const std::string & filename)
+{
+  m_configRoot->save(filename);
 }
 
 void ResourceManager::getTrackCompletePath(const char * trackName, std::string & path)
@@ -333,9 +339,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   if(device->activateJoysticks(devices)) 
     for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
       joystickInterface=new JoystickInterface(m_device,devices[joystick]);
-      g_eventReceiver.addListener(joystickInterface); // <- ??
-      m_inputDevices.push_back(joystickInterface);
-      
+      //g_eventReceiver.addListener(joystickInterface); // <- ??
+      //m_inputDevices.push_back(joystickInterface);
     }
 
 
@@ -423,6 +428,13 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   if(!m_track) 
     m_track=new Track(m_device,m_world,"farm.zip");
+}
+
+void ResourceManager::saveConfig()
+{
+  std::string configFilename;
+  getConfigCompletePath("config.xml",configFilename);
+  saveConfig(configFilename);
 }
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -614,7 +626,6 @@ void ResourceManager::stepPhaseHandler() {
 
   if(m_mustStartRace) {
     m_mustStartRace = false;
-    m_humanVehicles=1;
     hideMenu();
     static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
                                  m_humanVehicles,m_totVehicles,m_choosenVehicles);
@@ -663,7 +674,6 @@ void ResourceManager::stepPhaseHandler() {
       m_currentPhaseHandler = m_phaseHandlers[pa_empty];
       showMenu("main");
     }
-
   }
 }
 

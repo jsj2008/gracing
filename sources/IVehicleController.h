@@ -54,7 +54,10 @@ class IVehicleController
         IVehicle::VehicleCommands &    commands)=0;
 
     static const char * getActionString(unsigned actionId);
-    unsigned getActionId(const char * name);
+    unsigned            getActionId(const char * name);
+
+    virtual void        startControlVehicle()=0;
+    virtual void        stopControlVehicle()=0;
 };
 
 #endif

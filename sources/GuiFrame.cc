@@ -59,6 +59,9 @@ GuiFrame::GuiFrame(const irr::core::rect<irr::s32> &rectangle)
   XmlNode * root=new XmlNode(xml);
   load(root);
 
+  res=resmanager->getFileSystem()->removeFileArchive(resmanager->getFileSystem()->getAbsolutePath(mypath));
+  assert(res);
+
   adjustPositions();
 }
 

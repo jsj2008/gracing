@@ -5,6 +5,7 @@
 
 using namespace irr;
 
+ 
 XmlNode::XmlNode(io::IXMLReaderUTF8 *xml)
 {
     while(xml->getNodeType()!=io::EXN_ELEMENT && xml->read());
@@ -49,15 +50,14 @@ XmlNode::XmlNode(const std::string &filename, ResourceManager * resmanager)
     }   // switch
   }   // while
 
-  xml->drop();
+  //xml->drop();
+  delete xml;
 }   // XMLNode
 
 void XmlNode::readXML(io::IXMLReaderUTF8 *xml)
 {
   m_name = std::string(core::stringc(xml->getNodeName()).c_str());
   m_text = "";
-
-  //GM_LOG("name: '%s'\n",m_name.c_str());
 
   for(unsigned int i=0; i<xml->getAttributeCount(); i++) {
     std::string   name  = core::stringc(xml->getAttributeName(i)).c_str();
@@ -229,7 +229,6 @@ int XmlNode::get(const std::string &attribute, unsigned & value) const
   o = m_attributes.find(attribute);
   if(o==m_attributes.end()) return 0;
   value=atoi(core::stringc(o->second).c_str());
-  //*value=core::stringc(o->second).c_str();
   return 1;
 }
 
@@ -240,7 +239,6 @@ int XmlNode::get(const std::string &attribute, double & value) const
   o = m_attributes.find(attribute);
   if(o==m_attributes.end()) return 0;
   value=irr::core::fast_atof(core::stringc(o->second).c_str());
-  //*value=core::stringc(o->second).c_str();
   return 1;
 }
 
@@ -255,32 +253,47 @@ int XmlNode::get(const std::string &attribute, irr::core::vector2d<irr::s32> &va
   return 1;
 }
 
-#if 0
-int XmlNode::get(const std::string &attribute, core::vector2df *value) const
+// dont know why can write an xml with IXMLWriter and read it back
+// IXMLReader.
+// so i'm using a plain "FILE *" to write the xml.
+//void XmlNode::save(io::IXMLWriter * xmlWriter)  const
+void XmlNode::save(FILE * xml) const
 {
-    std::string s = "";
-    if(!get(attribute, &s)) return 0;
+  bool empty;
 
-    //std::vector<std::string> v = StringUtils::split(s,' ');
-    //Util::parseVector2d(s.c_str(), *value);
-#if 0
-    if(v.size()!=2) return 0;
-    value->X = (float)atof(v[0].c_str());
-    value->Y = (float)atof(v[1].c_str());
-#endif
-    return 1;
-}   // get(vector2df)
+  empty=m_nodes.size()==0 && m_text == "";
 
+  fprintf(xml,"<%s",m_name.c_str());
+  // TODO: write attributes
 
-int XmlNode::get(const std::string &attribute, core::vector3df *value) const
-{
-#if 0
-    Vec3 xyz;
-    if(!get(attribute, &xyz)) return 0;
+  std::map<std::string, irr::core::stringw>::const_iterator it;
+  for(it=m_attributes.begin(); it != m_attributes.end(); it++) {
+    fprintf(xml,"%s=\"%s\" ",it->first.c_str(),core::stringc(it->second).c_str());
+  }
 
-    *value = xyz.toIrrVector();
-#endif
-    return 1;
-}   // get(vector3df)
-#endif
+  if(empty) 
+    fprintf(xml,"/>\n");
+  else if(m_nodes.size()) 
+    fprintf(xml,">\n");
+  else
+    fprintf(xml,">");
+
+  for(unsigned i=0; i < m_nodes.size(); i++) 
+    m_nodes[i]->save(xml);
+
+  // write the 'text' only if the node has no children
+  if(m_nodes.size() == 0) 
+    fprintf(xml,"%s",m_text.c_str());
+
+  if(!empty)
+    fprintf(xml,"</%s>\n",m_name.c_str());
+}
+
+void XmlNode::save(const std::string & filename) const {
+  FILE * xml=fopen(filename.c_str(),"w");
+  if(!xml)
+    return;
+  save(xml);
+  fclose(xml);
+}
 

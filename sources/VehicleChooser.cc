@@ -75,7 +75,7 @@ void VehicleChooser::prepare(
     unsigned TotVehicles, 
     unsigned * vehiclesListPtr)
 {
-  assert(nHumanVehicles == 1);
+  //assert(nHumanVehicles == 1);
 
   m_angle=0.;
 
