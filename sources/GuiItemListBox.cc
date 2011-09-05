@@ -61,6 +61,13 @@ void GuiItemListBox::init(XmlNode * node)
     node->get("selected",selected);
     addItem(nodes[i]->getText(),selected);
   }
+
+  if(m_boundCfgName != "") {
+    unsigned value;
+    if(ResourceManager::getInstance()->cfgGet(m_boundCfgName.c_str(),value)) {
+      setValue(value);
+    }
+  }
 }
 
 
@@ -153,6 +160,8 @@ void  GuiItemListBox::selectNextItem()
   m_selectedItem ++;
   m_selectedItem %= m_items.size();
   executeCode(m_onChange.c_str());
+  if(m_boundCfgName != "") 
+      ResourceManager::getInstance()->cfgSet(m_boundCfgName.c_str(),m_selectedItem);
 }
 
 
@@ -163,6 +172,8 @@ void  GuiItemListBox::selectPrevItem()
   else
     m_selectedItem --;
   executeCode(m_onChange.c_str());
+  if(m_boundCfgName != "") 
+      ResourceManager::getInstance()->cfgSet(m_boundCfgName.c_str(),m_selectedItem);
 }
 
 void  GuiItemListBox::onKeyClick(const irr::SEvent::SKeyInput & keyinput)

@@ -128,6 +128,41 @@ struct embFunctions_s {
   { 0,0 }
 };
 
+// TODO: please decide where to put the following funciton
+static XmlNode * runPath(const char * path, XmlNode * root,bool create=false)
+{
+  char buffer[1024];
+  char * ptr;
+  char * namePtr;
+  strncpy(buffer,path,1024);
+  ptr=buffer;
+
+  //GM_LOG("getting node from path '%s'\n",path);
+
+  XmlNode * father=root;
+  XmlNode * node;
+
+  while(*ptr) {
+    namePtr=ptr;
+    for( ; *ptr && *ptr != '/'; ptr++) 
+      ;
+    *ptr=0;
+    //GM_LOG("  getting node '%s'\n",namePtr);
+    node = father->getChild(namePtr);
+    if(!node) {
+      if(create)
+        node=father->addChild(namePtr);
+      else
+        return 0;
+    }
+    assert(node);
+    father=node;
+    ptr++;
+  }
+
+  return node;
+}
+
 static int registerLua(lua_State * L)
 {
   lua_newtable(L);
@@ -275,7 +310,7 @@ ResourceManager::ResourceManager()
   ///////////////////////////////////////
   m_screenWidth=glob_screenWidth;
   m_screenHeight=glob_screenHeight;
-
+  
   m_humanVehicles=1;
   m_totVehicles=4;
   m_mustStartRace=false;
@@ -370,8 +405,10 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   // system font
   std::string fontName; 
+  GM_LOG("suka\n");
   if(!cfgGet("system-font",fontName)) 
     fontName = DEFAULT_FONT;
+  GM_LOG("suka 2 '%s'\n",fontName.c_str());
   irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
   std::string fontPath = getResourcePath() + "/" + fontName;
   m_font = guienv->getFont(fontPath.c_str());
@@ -449,12 +486,15 @@ void ResourceManager::saveConfig()
   saveConfig(configFilename);
 }
 
+
+
 bool ResourceManager::cfgGet(const char * name, bool & value)
 {
   if(!m_configRoot)
     return false;
 
-  const XmlNode * node=m_configRoot->getChild(name);
+  //const XmlNode * node=m_configRoot->getChild(name);
+  const XmlNode * node=runPath(name,m_configRoot);
 
   if(!node) 
     return false;
@@ -485,7 +525,8 @@ bool ResourceManager::cfgGet(const char * name, std::string & value)
   if(!m_configRoot)
     return false;
 
-  const XmlNode * node=m_configRoot->getChild(name);
+  //const XmlNode * node=m_configRoot->getChild(name);
+  const XmlNode * node=runPath(name,m_configRoot);
 
   if(!node) 
     return false;
@@ -502,7 +543,8 @@ bool ResourceManager::cfgGet(const char * name, unsigned & value)
   if(!m_configRoot)
     return false;
 
-  const XmlNode * node=m_configRoot->getChild(name);
+  //const XmlNode * node=m_configRoot->getChild(name);
+  const XmlNode * node=runPath(name,m_configRoot);
 
   if(!node) 
     return false;
@@ -518,7 +560,8 @@ bool ResourceManager::cfgGet(const char * name, double & value)
   if(!m_configRoot)
     return false;
 
-  const XmlNode * node=m_configRoot->getChild(name);
+  //const XmlNode * node=m_configRoot->getChild(name);
+  const XmlNode * node=runPath(name,m_configRoot);
 
   if(!node) 
     return false;
@@ -534,7 +577,8 @@ bool ResourceManager::cfgGet(const char * name, double value[3])
   if(!m_configRoot)
     return false;
 
-  const XmlNode * node=m_configRoot->getChild(name);
+  //const XmlNode * node=m_configRoot->getChild(name);
+  const XmlNode * node=runPath(name,m_configRoot);
 
   if(!node) 
     return false;
@@ -689,34 +733,19 @@ void ResourceManager::stepPhaseHandler() {
   }
 }
 
+bool ResourceManager::cfgSet(const char * name, unsigned value)
+{
+  char buffer[64];
+  snprintf(buffer,64,"%d",value);
+  return cfgSet(name,value);
+}
+
 bool ResourceManager::cfgSet(const char * name, const char * value)
 {
   XmlNode * node;
-
-  char buffer[1024];
-  char * ptr;
-  char * namePtr;
-  bool mustRestore;
-  strncpy(buffer,name,1024);
-  ptr=buffer;
-
-  GM_LOG("setting '%s'='%s'\n",name,value);
-
-  while(*ptr) {
-    namePtr=ptr;
-    for( ; *ptr && *ptr != '/'; ptr++) 
-      ;
-    *ptr=0;
-    GM_LOG("  getting node '%s'\n",namePtr);
-    node = m_configRoot->getChild(namePtr);
-    if(!node) 
-      node=m_configRoot->addChild(namePtr);
-    assert(node);
-    ptr++;
-  }
-
+  node=runPath(name,m_configRoot,true);
+  assert(node);
   node->setText(value);
-  GM_LOG("done\n");
 
   return true;
 }
