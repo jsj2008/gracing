@@ -12,6 +12,11 @@ XmlNode::XmlNode(io::IXMLReaderUTF8 *xml)
     readXML(xml);
 }   // XMLNode
 
+XmlNode::XmlNode(const char * name)
+{
+  m_name=name;
+}
+
 
 XmlNode::XmlNode(const std::string &filename, ResourceManager * resmanager)
 {
@@ -101,7 +106,7 @@ const void XmlNode::getChildren(const std::string &s, std::vector<XmlNode*>& out
   }
 }   
 
-const XmlNode *XmlNode::getChild(const std::string &s) const
+/*const*/ XmlNode *XmlNode::getChild(const std::string &s) const
 {
   for(unsigned int i=0; i<m_nodes.size(); i++) {
     if(m_nodes[i]->getName()==s) return m_nodes[i];
@@ -128,7 +133,6 @@ int XmlNode::get(const std::string &attribute, std::wstring & value) const
   std::map<std::string, core::stringw>::const_iterator o;
   o = m_attributes.find(attribute);
   if(o==m_attributes.end()) return 0;
-  //*value=core::stringc(o->second).c_str();
 
   std::string vv=
     std::string(core::stringc(o->second).c_str());
@@ -297,3 +301,11 @@ void XmlNode::save(const std::string & filename) const {
   fclose(xml);
 }
 
+XmlNode * XmlNode::addChild(const char * name)
+{
+  XmlNode * child=new XmlNode(name);
+
+  m_nodes.push_back(child);
+
+  return child;
+}

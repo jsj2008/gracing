@@ -75,6 +75,8 @@ class ResourceManager
     bool cfgGet(const char * name, std::string & value);
     bool cfgGet(const char * nodeName, const XmlNode * & node);
 
+    bool cfgSet(const char * name, const char * value);
+
     void saveConfig();
 
 

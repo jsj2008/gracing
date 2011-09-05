@@ -114,7 +114,13 @@ void GuiItemSlider::init(XmlNode * node)
   else
     m_rangeLenFixed=false;
   node->get("onChange",m_onChange);
-  // TODO: handle initial value
+  
+  if(m_boundCfgName != "") {
+    double v;
+    if(ResourceManager::getInstance()->cfgGet(m_boundCfgName.c_str(),v)) {
+      setValue(v);
+    }
+  }
 }
 
 GuiDimension GuiItemSlider::getPreferredSize()
@@ -146,6 +152,9 @@ void GuiItemSlider::draw()
     if(m_handleValue >= m_rangeLen)
       m_handleValue = m_rangeLen-1;
     updateHandlePosition();
+
+
+
     executeCode(m_onChange.c_str());
   }
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
@@ -211,6 +220,14 @@ void GuiItemSlider::updateGeometry()
 
 void GuiItemSlider::updateHandlePosition()
 {
+
+  if(m_boundCfgName != "") {
+    double v=getValue();
+    char buffer[32];
+    snprintf(buffer,32,"%f",v);
+    ResourceManager::getInstance()->cfgSet(m_boundCfgName.c_str(),buffer);
+  }
+
   //unsigned gvalue=m_rangeLen / 2;
   unsigned hw = _RW(m_handleSrcRect) / 2;
   unsigned offset = (_RH(m_rectangle) - _RH(m_handleSrcRect)) / 2;

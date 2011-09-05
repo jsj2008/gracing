@@ -101,6 +101,17 @@ int quit(lua_State * L)
   return 0;
 }
 
+int setConfig(lua_State * L) {
+  const char * key;
+  const char * value;
+  bool  res=false;
+  if((key=luaL_checklstring(L,1,0)) && (value=luaL_checklstring(L,2,0))) {
+    res=ResourceManager::getInstance()->cfgSet(key,value);
+  }
+  lua_pushboolean(L,res);
+  return 1;
+}
+
 struct embFunctions_s {
   const char * n;
   int (*f)(lua_State*);
@@ -113,6 +124,7 @@ struct embFunctions_s {
   { "endRace", endRace },
   { "resumeRace", resumeRace },
   { "quit", quit },
+  { "setConfig", setConfig },
   { 0,0 }
 };
 
@@ -677,3 +689,34 @@ void ResourceManager::stepPhaseHandler() {
   }
 }
 
+bool ResourceManager::cfgSet(const char * name, const char * value)
+{
+  XmlNode * node;
+
+  char buffer[1024];
+  char * ptr;
+  char * namePtr;
+  bool mustRestore;
+  strncpy(buffer,name,1024);
+  ptr=buffer;
+
+  GM_LOG("setting '%s'='%s'\n",name,value);
+
+  while(*ptr) {
+    namePtr=ptr;
+    for( ; *ptr && *ptr != '/'; ptr++) 
+      ;
+    *ptr=0;
+    GM_LOG("  getting node '%s'\n",namePtr);
+    node = m_configRoot->getChild(namePtr);
+    if(!node) 
+      node=m_configRoot->addChild(namePtr);
+    assert(node);
+    ptr++;
+  }
+
+  node->setText(value);
+  GM_LOG("done\n");
+
+  return true;
+}

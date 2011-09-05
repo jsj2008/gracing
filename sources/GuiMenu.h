@@ -157,8 +157,6 @@ class IGuiMenuItem
         ResourceManager::getInstance()->lua_doString(code);
       }
     }
-    
-
 
     void updateRectangle()
     {
@@ -182,6 +180,7 @@ class IGuiMenuItem
 
     enum { m_luaNameSize=40 };
     char m_luaName[m_luaNameSize];
+    std::string m_boundCfgName;
 };
 
 class GuiMenuItemFactory 

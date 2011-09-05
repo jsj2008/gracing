@@ -24,8 +24,17 @@ const char * GuiItemCheckBox::className = CHECKBOX_CLASSNAME;
 Lunar<GuiItemCheckBox>::RegType  GuiItemCheckBox::methods[]= 
 {
   method(GuiItemCheckBox, getValue),
+  method(GuiItemCheckBox, setValue),
   { 0, 0 }
 };
+
+int GuiItemCheckBox::setValue(lua_State *L)
+{
+  int value;
+  value=luaL_checkinteger(L,1);
+  m_checked=value;
+  return 0;
+}
 
 int GuiItemCheckBox::getValue(lua_State *L)
 {
@@ -82,6 +91,9 @@ void GuiItemCheckBox::init(XmlNode * node)
 {
   IGuiMenuItem::init(node);
   node->get("onChange",m_onChange);
+
+  if(m_boundCfgName != "") 
+    ResourceManager::getInstance()->cfgGet(m_boundCfgName.c_str(),m_checked);
 }
 
 void GuiItemCheckBox::draw()
@@ -151,18 +163,9 @@ void GuiItemCheckBox::setTheme(GuiTheme * theme)
 void GuiItemCheckBox::onMouseClick(const GuiPoint & pnt)
 {
   m_checked = ! m_checked;
+  if(m_boundCfgName != "") 
+      ResourceManager::getInstance()->cfgSet(m_boundCfgName.c_str(),m_checked?"true":"false");
   executeCode(m_onChange.c_str());
-#if 0
-  if(m_onChange != "")  {
-    lua_State * L = ResourceManager::getInstance()->getLuaState();
-    lua_pushliteral(L, "self");
-    lua_pushstring(L, m_luaName);
-    lua_gettable(L, LUA_GLOBALSINDEX);
-    lua_settable(L, LUA_GLOBALSINDEX);
-
-    ResourceManager::getInstance()->lua_doString(m_onChange.c_str());
-  }
-#endif
 }
 
 void GuiItemCheckBox::onKeyClick(const irr::SEvent::SKeyInput & event)

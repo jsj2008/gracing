@@ -40,13 +40,15 @@ class XmlNode
     const void getChildren(std::vector<XmlNode*>& out) const;
 
     /* get first child with a given name */
-    const XmlNode * getChild(const std::string &s) const;
+    /*const*/ XmlNode * getChild(const std::string &s) const;
 
     /* get name of this node */
     const std::string &getName() const {return m_name; }
 
     /* get text of this node */
     const std::string &getText() const {return m_text; }
+
+    void setText(const char * text) { m_text=text; }
 
     // get value as string
     int get(const std::string &attribute,std::string & value) const;
@@ -80,8 +82,11 @@ class XmlNode
     void save(const std::string & filename) const;
     void save(FILE * f) const;
 
+    XmlNode * addChild(const char * name);
 
   private:
+
+    XmlNode(const char * name);
 
     void readXML(irr::io::IXMLReaderUTF8 * xml);
     std::string m_name;

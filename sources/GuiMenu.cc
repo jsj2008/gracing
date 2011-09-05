@@ -114,12 +114,18 @@ void IGuiMenuItem::init(XmlNode * node)
 
   node->get("selectable",m_selectable);
 
+  // create a lua var with name from xml
   if(node->get("name",value)) {
     lua_State * L = ResourceManager::getInstance()->getLuaState();
     lua_pushstring(L,value.c_str());
     lua_pushstring(L, m_luaName);
     lua_gettable(L, LUA_GLOBALSINDEX);
     lua_settable(L, LUA_GLOBALSINDEX);
+  }
+
+  // create a bind with config value
+  if(node->get("bindConfig",value)) {
+    m_boundCfgName=value;
   }
 }
 

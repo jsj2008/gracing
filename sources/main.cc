@@ -311,36 +311,6 @@ int main(int argc, char ** av)
         device->setWindowCaption(tmp.c_str());
       }
 
-#if 0
-      if(donePhase) {
-        if(currentPhaseHandler == race) {
-          race->unprepare();
-          vehicleChooser->prepare(1,3,runningVehicles);
-          currentPhaseHandler= vehicleChooser;
-        } else if(currentPhaseHandler == vehicleChooser) {
-          vehicleChooser->unprepare();
-          // start the race
-          const std::vector<IVehicle*> & vehicles=
-            resmanager->getVehiclesList();
-          assert(vehicles.size() >= 4);
-
-          race->setTrack(thetrack);
-
-          if(autoplayer) 
-            race->addVehicle(vehicles[runningVehicles[0]],
-                new VehicleAutoController(),
-                vehicles[runningVehicles[0]]->getName().c_str(),true);
-          else
-            race->addVehicle(vehicles[runningVehicles[0]],
-                new VehicleKeyboardController(resmanager->getEventReceiver()), 
-                vehicles[runningVehicles[0]]->getName().c_str(),true);
-
-          race->restart();
-
-          currentPhaseHandler = race;
-        }
-      }
-#endif
       endFrameTime=device->getTimer()->getRealTime();
       unsigned long dt = (endFrameTime - startFrameTime);
       if(dt < frameDuration) {
@@ -350,6 +320,10 @@ int main(int argc, char ** av)
       device->yield();
     }
   }
+
+  GM_LOG("saving configuration\n");
+  ResourceManager::getInstance()->saveConfig();
+  GM_LOG("done saving configuration\n");
 }
 
 

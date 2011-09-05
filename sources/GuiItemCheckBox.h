@@ -41,6 +41,7 @@ class GuiItemCheckBox : public IGuiMenuItem
     static Lunar<GuiItemCheckBox>::RegType  methods[];
 
     int getValue(lua_State *);
+    int setValue(lua_State * L);
 
   protected:
     virtual void updateGeometry();
