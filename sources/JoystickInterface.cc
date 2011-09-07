@@ -319,3 +319,31 @@ void JoystickInterface::getActionString(char * buffer,
   }
 }
 
+void JoystickInterface::setConfiguration(XmlNode * node)
+{
+}
+
+void JoystickInterface::getConfiguration(XmlNode * root)
+{
+#if 0
+  std::vector<XmlNode*> nodes;
+  root->deleteAllChildren();
+
+  for(unsigned i=0; i<m_controllers.size(); i++) {
+    VehicleKeyboardController * controller=
+      static_cast<VehicleKeyboardController *>(m_controllers[i]);
+    XmlNode * node = root->addChild("device");
+    
+    for(unsigned i=0; i < IVehicleController::va_numActions; i++) {
+      XmlNode * act=node->addChild("action");
+
+      act->set("action",i);
+      act->set("code",controller->getKeyForAction(i));
+      std::string descr;
+
+      getActionDescription(descr,i,controller->getKeyForAction(i));
+      act->set("descr",descr);
+    }
+  }
+#endif
+}

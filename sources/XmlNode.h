@@ -41,6 +41,7 @@ class XmlNode
 
     /* get first child with a given name */
     /*const*/ XmlNode * getChild(const std::string &s) const;
+    XmlNode * getChildByAttr(const std::string & attrName, const std::string & attrValue);
 
     /* get name of this node */
     const std::string &getName() const {return m_name; }
@@ -79,12 +80,18 @@ class XmlNode
     // get value as a bullet 3d vector
     int get(const std::string &attribute, btVector3 & value) const;
 
+    void set(const std::string & attribute, unsigned v);
+    void set(const std::string & attribute, const std::string & value);
+
     void save(const std::string & filename) const;
-    void save(FILE * f) const;
+    
+    void deleteAllChildren();
 
     XmlNode * addChild(const char * name);
 
   private:
+
+    void save(FILE * f,unsigned indentWidth=0) const;
 
     XmlNode(const char * name);
 

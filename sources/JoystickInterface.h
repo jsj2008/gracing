@@ -20,16 +20,15 @@
 #include "IDeviceInterface.h"
 
 
-class JoystickInterface : public IEventListener /*, public IDeviceInterface*/
+class JoystickInterface : public IEventListener , public IDeviceInterface
 {
   public:
 
     JoystickInterface(irr::IrrlichtDevice *, const irr::SJoystickInfo & device);
 
-    //////////////////////////////
-    // Event Listener
-    //virtual void joystickEvent(const irr::SEvent::SJoystickEvent & joystickEvent);
 
+    virtual void setConfiguration(XmlNode * node);
+    virtual void getConfiguration(XmlNode * node);
 
     //////////////////////////////
     // Device Interface

@@ -17,6 +17,7 @@
 #ifndef IDEVICEINTERFACE_H
 #define IDEVICEINTERFACE_H
 
+#include "XmlNode.h"
 #include "IVehicleController.h"
 
 class IDeviceInterface
@@ -25,5 +26,10 @@ class IDeviceInterface
     virtual std::string          getName()=0;
     virtual unsigned             getNumController()=0;
     virtual IVehicleController * getController(unsigned)=0;
+
+    virtual void setConfiguration(XmlNode * node)=0;
+    virtual void getConfiguration(XmlNode * node)=0;
+
+    virtual ~IDeviceInterface()  { }
 };
 #endif

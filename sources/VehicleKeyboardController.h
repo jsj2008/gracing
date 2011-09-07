@@ -18,22 +18,26 @@
 #define IVEHICLE_KEYBOARD_CONTROLLER_H
 #include "IVehicleController.h"
 #include "EventReceiver.h"
+#include "IDeviceInterface.h"
 #include <irrlicht.h>
 
-class VehicleKeyboardController : public IVehicleController
+
+class KeyboardInterface : public IDeviceInterface
 {
-  public: 
-    VehicleKeyboardController(EventReceiver * receiver);
-    virtual void updateCommands(
-        const SVehicleParameters  &    vehicleParameters,
-        const std::vector<btVector3> & controlPoints,
-        IVehicle::VehicleCommands &    commands);
+  public:
+    KeyboardInterface(EventReceiver *);
+    ~KeyboardInterface();
 
+    virtual std::string          getName();
+    virtual unsigned             getNumController();
+    virtual IVehicleController * getController(unsigned);
 
-    void        startControlVehicle() { }
-    void        stopControlVehicle()  { }
+    virtual void setConfiguration(XmlNode * node);
+    virtual void getConfiguration(XmlNode * node);
+
   private:
-    EventReceiver * m_eventReceiver;
+    std::vector<IVehicleController*>  m_controllers;
+    void getActionDescription(std::string & descr, unsigned action, unsigned keycode );
 };
 
 #endif

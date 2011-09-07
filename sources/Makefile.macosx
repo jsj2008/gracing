@@ -71,7 +71,7 @@ $(target): $(objs)
 
 genconf:  config.xml
   
-config.xml : $(sources)
+config.xml : $(sources) uconfig.xml
 	@$(copier) --cfg $(sources)
 	@echo "Compiling generated config.cc"
 	@$(cplusplus) -c config.cc $(ccflags)

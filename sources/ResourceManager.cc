@@ -310,6 +310,33 @@ ResourceManager::ResourceManager()
   ///////////////////////////////////////
   m_screenWidth=glob_screenWidth;
   m_screenHeight=glob_screenHeight;
+
+  unsigned screenResolution=0;
+
+  if(cfgGet("video/resolution",screenResolution)) {
+    switch(screenResolution) {
+      case 0:
+        m_screenWidth=800;
+        m_screenHeight=600;
+      break;
+      case 1:
+        m_screenWidth=1024;
+        m_screenHeight=600;
+      break;
+      case 2:
+        m_screenWidth=1024;
+        m_screenHeight=768;
+      break;
+      case 3:
+        m_screenWidth=1152;
+        m_screenHeight=720;
+      break;
+      case 4:
+        m_screenWidth=1280;
+        m_screenHeight=800;
+      break;
+    }
+  }
   
   m_humanVehicles=1;
   m_totVehicles=4;
@@ -333,6 +360,31 @@ void ResourceManager::loadConfig(const std::string & filename)
 
 void ResourceManager::saveConfig(const std::string & filename)
 {
+  // get configuration from device interfaces
+  XmlNode * devicesRoot;
+
+  devicesRoot = m_configRoot->getChild("input-devices");
+  if(!devicesRoot) {
+    devicesRoot = m_configRoot->addChild("input-devices");
+  }
+
+  for(unsigned i=0; i<m_inputDevices.size(); i++) {
+    IDeviceInterface * device=m_inputDevices[i];
+    XmlNode * node;
+    std::string name;
+    name=device->getName();
+    node=devicesRoot->getChildByAttr("name",name);
+    if(!node) {
+      node=devicesRoot->addChild("device");
+      node->set("name",name);
+    }
+
+    device->getConfiguration(node);
+  }
+
+
+  
+
   m_configRoot->save(filename);
 }
 
@@ -380,15 +432,37 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   // input devices //
   ///////////////////
 
+  // - keyboard
+  KeyboardInterface * keyboardInterface;
+  keyboardInterface = new KeyboardInterface(&g_eventReceiver);
+  m_inputDevices.push_back(keyboardInterface);
+
+
   // - joystick(s)
   core::array<SJoystickInfo> devices;
   JoystickInterface *    joystickInterface;
   if(device->activateJoysticks(devices)) 
     for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
       joystickInterface=new JoystickInterface(m_device,devices[joystick]);
-      //g_eventReceiver.addListener(joystickInterface); // <- ??
-      //m_inputDevices.push_back(joystickInterface);
+      m_inputDevices.push_back(joystickInterface);
     }
+
+  assert(m_inputDevices.size() > 0);
+  assert(m_inputDevices[0]->getNumController() >= 2);
+
+  // set the configuration for the input devices
+  XmlNode * inputDevicesNode;
+  const char * id="input-devices";
+  inputDevicesNode=m_configRoot->getChild(id);
+  if(inputDevicesNode) {
+    for(unsigned i=0; i < m_inputDevices.size(); i++) {
+      IDeviceInterface * di=m_inputDevices[i];
+      XmlNode * node=inputDevicesNode->getChildByAttr("name",di->getName());
+      if(node) 
+        di->setConfiguration(node);
+    }
+  }
+  
 
 
 
@@ -713,7 +787,7 @@ void ResourceManager::stepPhaseHandler() {
               vehicles[m_choosenVehicles[i]]->getName().c_str());
         if(i < m_humanVehicles) 
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(vehicles[m_choosenVehicles[i]],
-              new VehicleKeyboardController(getEventReceiver()), 
+              m_inputDevices[0]->getController(0),
               vehicles[m_choosenVehicles[i]]->getName().c_str(),true);
         else
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
@@ -737,7 +811,7 @@ bool ResourceManager::cfgSet(const char * name, unsigned value)
 {
   char buffer[64];
   snprintf(buffer,64,"%d",value);
-  return cfgSet(name,value);
+  return cfgSet(name,buffer);
 }
 
 bool ResourceManager::cfgSet(const char * name, const char * value)

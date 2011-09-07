@@ -171,9 +171,14 @@ int main(int argc, char ** av)
   resmanager->getScreenHeight(screenHeight);
   resmanager->getScreenWidth(screenWidth);
 
+  bool fullscreen=glob_enableFullScreen;
+
+  resmanager->cfgGet("video/fullscreen",fullscreen);
+
+
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 24,
-        glob_enableFullScreen,
+        fullscreen,
         glob_enableShadows, 
         glob_enableVSync,
         resmanager->getEventReceiver()); 

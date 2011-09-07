@@ -6,4 +6,10 @@
 
 </input-devices>
 
+<video>
+<resolution>0</resolution>
+<fullscreen>false</fullscreen>
+</video>
 
+<input-devices>
+</input-devices>

@@ -35,7 +35,7 @@ class IVehicleController
     enum VehicleAction
     {
       va_steerLeft=0,
-      va_steerRigth,
+      va_steerRight,
       va_accelerate,
       va_decelerate,
       va_brake,

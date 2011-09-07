@@ -25,7 +25,6 @@
 
 #include "PhyWorld.h"
 #include "Vehicle.h"
-#include "IDeviceInterface.h"
 #include "EventReceiver.h"
 #include "EmptyPhaseHandler.h"
 #include "Track.hh"
@@ -33,6 +32,7 @@
 class XmlNode;
 class GuiMenu;
 class Track;
+class IDeviceInterface;
 
 class ResourceManager 
 {

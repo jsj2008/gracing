@@ -106,6 +106,18 @@ const void XmlNode::getChildren(const std::string &s, std::vector<XmlNode*>& out
   }
 }   
 
+XmlNode * XmlNode::getChildByAttr(const std::string & attrName, const std::string & attrValue)
+{
+  for(unsigned i=0; i<m_nodes.size(); i++) {
+    XmlNode * node=m_nodes[i];
+    std::string value;
+    if(node->get(attrName,value) && value == attrValue) {
+      return node;
+    }
+  }
+  return 0;
+}
+
 /*const*/ XmlNode *XmlNode::getChild(const std::string &s) const
 {
   for(unsigned int i=0; i<m_nodes.size(); i++) {
@@ -126,6 +138,7 @@ XmlNode::~XmlNode()
     delete m_nodes[i];
   m_nodes.clear();
 }
+
 
 int XmlNode::get(const std::string &attribute, std::wstring & value) const
 {
@@ -261,19 +274,22 @@ int XmlNode::get(const std::string &attribute, irr::core::vector2d<irr::s32> &va
 // IXMLReader.
 // so i'm using a plain "FILE *" to write the xml.
 //void XmlNode::save(io::IXMLWriter * xmlWriter)  const
-void XmlNode::save(FILE * xml) const
+void XmlNode::save(FILE * xml,unsigned indentWidth) const
 {
   bool empty;
 
   empty=m_nodes.size()==0 && m_text == "";
 
+  for(unsigned i=0; i<indentWidth; i++) 
+    fprintf(xml,"  ");
+  
   fprintf(xml,"<%s",m_name.c_str());
   // TODO: write attributes
 
   std::map<std::string, irr::core::stringw>::const_iterator it;
-  for(it=m_attributes.begin(); it != m_attributes.end(); it++) {
+  if(m_attributes.size()) fprintf(xml," ");
+  for(it=m_attributes.begin(); it != m_attributes.end(); it++) 
     fprintf(xml,"%s=\"%s\" ",it->first.c_str(),core::stringc(it->second).c_str());
-  }
 
   if(empty) 
     fprintf(xml,"/>\n");
@@ -283,14 +299,18 @@ void XmlNode::save(FILE * xml) const
     fprintf(xml,">");
 
   for(unsigned i=0; i < m_nodes.size(); i++) 
-    m_nodes[i]->save(xml);
+    m_nodes[i]->save(xml,indentWidth+1);
 
   // write the 'text' only if the node has no children
   if(m_nodes.size() == 0) 
     fprintf(xml,"%s",m_text.c_str());
 
-  if(!empty)
+  if(!empty) {
+    if(m_nodes.size()) 
+      for(unsigned i=0; i<indentWidth; i++) 
+        fprintf(xml,"  ");
     fprintf(xml,"</%s>\n",m_name.c_str());
+  }
 }
 
 void XmlNode::save(const std::string & filename) const {
@@ -309,3 +329,24 @@ XmlNode * XmlNode::addChild(const char * name)
 
   return child;
 }
+
+void XmlNode::deleteAllChildren()
+{
+  for(unsigned i=0; i<m_nodes.size(); i++) 
+    delete m_nodes[i];
+  m_nodes.clear();
+}
+
+void XmlNode::set(const std::string & attribute, unsigned v)
+{
+  char buffer[64];
+  snprintf(buffer,64,"%d",v);
+
+  m_attributes[attribute]=buffer;
+}
+
+void XmlNode::set(const std::string & attribute, const std::string & value)
+{
+  m_attributes[attribute]=value.c_str();
+}
+
