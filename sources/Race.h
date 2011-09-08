@@ -67,6 +67,8 @@ class Race : public  IPhaseHandler
     void lapTriggered(void * userdata);
     void togglePause();
 
+    void setTwoCamerasSplitType(bool vertical);
+
   private:
 
     unsigned m_debugFlags;
@@ -75,6 +77,27 @@ class Race : public  IPhaseHandler
   
 
     inline void setLapNumber(unsigned n) { m_totalLaps=n; }
+
+#ifdef ONLY_1_CAM
+    VehicleCameraAnimator *        m_cameraAnim;
+    irr::scene::ICameraSceneNode * m_camera;
+    unsigned                       m_followedVehicleIndex;
+    enum { invalidVehicleIndex = 0xffff };
+    GuiCockpit *      m_cockpit;
+#endif
+
+    struct VehicleInfo;
+    struct CameraData {
+      VehicleCameraAnimator *        cameraAnim;
+      irr::scene::ICameraSceneNode * camera;
+      GuiCockpit *                   cockpit;
+      irr::core::rect<irr::s32>      viewport;
+
+      CameraData(const VehicleInfo &, irr::IrrlichtDevice *);
+      ~CameraData();
+    };
+
+    
 
     enum { max_vehicles=4 };
 
@@ -137,17 +160,23 @@ class Race : public  IPhaseHandler
     // util
     bool updateKeyboard();
     void updateRanking();
+    void updateCamerasViewPort();
+    void drawScene();
 
+    // status handling
     bool gotoState(unsigned state);
 
     struct VehicleInfo m_vehicles[max_vehicles];
     unsigned           m_rank[max_vehicles];
     unsigned           m_nVehicles;
 
-    GuiReadySetGo *   m_readySetGo;
-    //GuiCronometer *   m_cronometer;
+    enum { max_cameras=4 };
+    CameraData *      m_cameraData[max_cameras];
+    unsigned          m_nCameras;
+    unsigned          m_splitType;
 
-    GuiCockpit *      m_cockpit;
+    GuiReadySetGo *   m_readySetGo;
+
     GuiCommunicator * m_communicator;
 
     unsigned          m_status;
@@ -157,11 +186,6 @@ class Race : public  IPhaseHandler
     unsigned          m_nFinishedVehicles;
 
     unsigned          m_firstControlPoint;
-
-    VehicleCameraAnimator *        m_cameraAnim;
-    irr::scene::ICameraSceneNode * m_camera;
-    unsigned                       m_followedVehicleIndex;
-    enum { invalidVehicleIndex = 0xffff };
 
     irr::IrrlichtDevice *          m_device;
 };

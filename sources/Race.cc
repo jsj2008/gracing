@@ -144,12 +144,18 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   assert(m_communicator);
 
   m_nVehicles=0;
+  m_nCameras=0;
   m_track=0;
   m_totalLaps=3;
-  m_camera = 0;
   m_device = device;
+  m_splitType=0;
+
+#ifdef ONLY_1_CAM
+  m_camera = 0;
   m_cameraAnim = 0;
   m_followedVehicleIndex=invalidVehicleIndex;
+#endif
+
 
   // cock pit!!
   unsigned sw,sh;
@@ -159,8 +165,11 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   px1=5;     py1=sh-height;
   px2=px1+width;
   py2=py1+height;
+
+#ifdef ONLY_1_CAM
   m_cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
       irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
+#endif
 
   m_status=rs_notRunning;
   //restart();
@@ -231,8 +240,10 @@ void Race::updateVehiclesInfo()
 
 
       if(newDist > vinfo.ctrlPntDistance + WRONG_WAY_EPSILON) {
+#if 0
         if(!vinfo.wrongWay && m_followedVehicleIndex == vinfo.index && m_status == rs_started)
           m_communicator->show("Wrong way");
+#endif
         vinfo.wrongWay=true;
       } else {
         vinfo.wrongWay=false;
@@ -291,6 +302,13 @@ void Race::updateVehiclesInfo()
 bool Race::step()
 {
   bool ret=false;
+  
+  unsigned width,height;
+  ResourceManager::getInstance()->getScreenHeight(height);
+  ResourceManager::getInstance()->getScreenWidth(width);
+  irr::core::rect<irr::s32> wholeScreenViewPort=
+      irr::core::rect<irr::s32>(0,0,width,height);
+
   EventReceiver * erec=ResourceManager::getInstance()->getEventReceiver();
   // status handling
   switch(m_status) {
@@ -307,7 +325,6 @@ bool Race::step()
       m_world->debugDrawWorld();
       m_driver->endScene();
       if(erec->IsAnyKeyDown()) {
-        GM_LOG("SUKKA SUKKA SUKKA\n");
         ret=true;
         m_status=rs_notRunning;
       }
@@ -338,22 +355,23 @@ bool Race::step()
       updateRanking();
 
       // update cockpit
+#ifdef ONLY_1_CAM
       m_cockpit->setRank(
           m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
-      //m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
-      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
-            m_vehicles[m_followedVehicleIndex].controlPointIndex);
-#if 0
       m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
           m_vehicles[m_followedVehicleIndex].controlPointIndex);
 #endif
-      ///////////////////////
 
-
+      m_driver->setViewPort(wholeScreenViewPort);
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       ret=updateKeyboard();
       updateVehiclesInfo();
-      m_sceneManager->drawAll();
+
+      drawScene();
+
+      m_driver->setViewPort(wholeScreenViewPort);
+
+
       m_world->step();
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
@@ -363,6 +381,16 @@ bool Race::step()
       break;
   }
   return ret;
+}
+
+void Race::drawScene()
+{
+  for(unsigned i=0; i<m_nCameras; i++) {
+    CameraData * cd=m_cameraData[i];
+    m_driver->setViewPort(cd->viewport);
+    m_sceneManager->setActiveCamera(cd->camera);
+    m_sceneManager->drawAll();
+  }
 }
 
 void Race::updateRanking()
@@ -415,6 +443,7 @@ bool Race::updateKeyboard()
   }
 #endif
 
+#ifdef ONLY_1_CAM
   if(erec->OneShotKey(irr::KEY_TAB)) {
     GM_LOG("changing camera\n");
     m_cameraAnim->nextCameraType();
@@ -432,12 +461,15 @@ bool Race::updateKeyboard()
   if(erec->IsKeyDown(irr::KEY_KEY_A))
     m_cameraAnim->moveXY(CAMERA_STEP,0.);
 
-
   if(erec->IsKeyDown(irr::KEY_KEY_S)) 
     m_cameraAnim->moveXY(-CAMERA_STEP,0.);
+#endif
+
+
   return ret;
 }
 
+#if 0
 void Race::followNextVehicle()
 {
   assert(m_followedVehicleIndex != invalidVehicleIndex);
@@ -454,8 +486,8 @@ void Race::followNextVehicle()
   //m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,m_totalLaps);
   GM_LOG("following next vehicle: '%s' rank: %d\n",m_vehicles[m_followedVehicleIndex].name.c_str(),
                 m_vehicles[m_followedVehicleIndex].rank);
-
 }
+#endif
 
 
 bool Race::gotoState(unsigned state)
@@ -464,14 +496,18 @@ bool Race::gotoState(unsigned state)
     case rs_paused:
       if(m_status != rs_started)
         return false;
+#if ONLY_1_CAM
       m_cockpit->pause();
+#endif
       m_communicator->unshow();
       ResourceManager::getInstance()->showMenu("in-game");
       m_status=rs_paused;
       break;
     case rs_finished:
       m_communicator->show("race rank");
+#if ONLY_1_CAM
       m_cockpit->stop();
+#endif
       for(unsigned i=0; i < m_nVehicles; i++) {
        VehicleInfo & vinfo=m_vehicles[m_rank[i]];
        m_communicator->add(false,"[%d] %s",i+1,vinfo.name.c_str());
@@ -507,15 +543,19 @@ bool Race::gotoState(unsigned state)
       }
       // reset gui controls
       m_readySetGo->restart();
+#if ONLY_1_CAM
       m_cockpit->stop();
       m_cockpit->setVisible(true);
+#endif
       m_status=rs_readySetGo;
       m_nFinishedVehicles=0;
       break;
     case rs_started:
       if(m_status==rs_paused) {
         m_status=rs_started;
+#if ONLY_1_CAM
         m_cockpit->unpause();
+#endif
         ResourceManager::getInstance()->hideMenu();
       } else if(m_status==rs_readySetGo) {
         for(unsigned i=0; i<m_nVehicles; i++) 
@@ -523,7 +563,9 @@ bool Race::gotoState(unsigned state)
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_vehicles[i].vehicle->setEnableControls(true);
         m_status=rs_started;
+#if ONLY_1_CAM
         m_cockpit->start();
+#endif 
 
         for(unsigned i=0; i<m_nVehicles; i++) {
           VehicleInfo & vinfo = m_vehicles[i];
@@ -561,11 +603,14 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     m_vehicles[m_nVehicles].name=name;
   }
 
-  //m_sceneManager->getRootSceneNode()->addChild(vehicle);
-  //vehicle->reset(m_track->getStartPosition(),m_track->getStartRotation());
-  //m_track->registerLapCallback(this, vehicle, &(m_vehicles[m_nVehicles]));
+  if(followed || true) {
+    assert(m_nCameras < max_cameras);
 
-  if(followed) {
+    m_cameraData[m_nCameras]= new CameraData(m_vehicles[m_nVehicles],m_device);
+    m_nCameras++;
+    updateCamerasViewPort();
+
+#if ONLY_1_CAM
     if(m_cameraAnim)
       m_cameraAnim->drop();
 
@@ -580,6 +625,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     m_followedVehicleIndex = m_nVehicles;
     vehicle->setSpeedOMeter(m_cockpit);
     //m_cockpit->setLap(1,m_totalLaps);
+#endif
   }
 
   m_nVehicles++;
@@ -589,6 +635,31 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
   return true;
 }
 
+void Race::updateCamerasViewPort()
+{
+  unsigned width,height;
+  ResourceManager::getInstance()->getScreenHeight(height);
+  ResourceManager::getInstance()->getScreenWidth(width);
+  if(m_nCameras==1) {
+    // one camera -> whole screen
+    m_cameraData[0]->viewport=irr::core::rect<irr::s32>(0,0,width,height);
+  } else if(m_nCameras==2) {
+    if(m_splitType == 0) { // vertical
+      m_cameraData[0]->viewport = 
+          irr::core::rect<irr::s32>(0,0,width/2,height);
+      m_cameraData[1]->viewport = 
+          irr::core::rect<irr::s32>(1+width/2,0,width,height);
+    } else { // horizontal
+      m_cameraData[0]->viewport = 
+          irr::core::rect<irr::s32>(0,0,width,height/2);
+      m_cameraData[1]->viewport = 
+          irr::core::rect<irr::s32>(0,1+height+1,width,height);
+    }
+  } else {
+    assert(0 && "Not implemented");
+  }
+}
+
 void Race::lapTriggered(void * userdata)
 {
   VehicleInfo * vinfo=(VehicleInfo*)userdata;
@@ -596,10 +667,12 @@ void Race::lapTriggered(void * userdata)
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
     vinfo->lapNumber++;
+#if ONLY_1_CAM
     if(vinfo->index==m_followedVehicleIndex) {
       m_communicator->show("lap %d",vinfo->lapNumber+1);
       m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
     }
+#endif
     if(vinfo->lapNumber == m_totalLaps) 
       vehicleFinished(*vinfo);
   }
@@ -705,13 +778,6 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
     return 1;
   }
 
-
-#if 0
-  static int ufo=0;
-  if(a.index == 1 )
-    GM_LOG("%d zogna %d: %f '%s'  %d: %f\n",ufo++,a.index,a.ctrlPntDistance,a.name.c_str(),b.index,b.ctrlPntDistance);
-#endif
-
   if( a.ctrlPntDistance <  b.ctrlPntDistance )
     return -1;
 
@@ -724,13 +790,45 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
 void Race::unprepare()
 {
   m_track->unload();
+#if ONLY_1_CAM
   m_camera->remove();
   m_camera->drop();
   m_camera=0;
   m_cockpit->setVisible(false);
+#endif
+  for(unsigned i=0; i<m_nCameras; i++) {
+    delete m_cameraData[i];
+  }
+
+  m_nCameras=0;
   for(unsigned i=0; i<m_nVehicles; i++) {
     VehicleInfo & vinfo=m_vehicles[i];
     vinfo.vehicle->unuse(IVehicle::USE_PHYSICS|IVehicle::USE_GRAPHICS);
   }
   m_nVehicles=0;
+}
+
+
+Race::CameraData::CameraData(const VehicleInfo & vinfo, irr::IrrlichtDevice * device)
+{
+  // TODO: handle cockpit !!!
+  cameraAnim=new
+    VehicleCameraAnimator(vinfo.vehicle);
+  camera = device->getSceneManager()->addCameraSceneNode();
+  camera->grab();
+  camera->addAnimator(cameraAnim);
+
+  unsigned width,height;
+  ResourceManager::getInstance()->getScreenHeight(height);
+  ResourceManager::getInstance()->getScreenWidth(width);
+
+  viewport=irr::core::rect<irr::s32>(0,0,width,height);
+}
+
+Race::CameraData::~CameraData()
+{
+  camera->remove();
+  camera->drop();
+  cameraAnim->drop();
+  delete cockpit;
 }
