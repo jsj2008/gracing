@@ -106,6 +106,8 @@ class ResourceManager
     inline void endRace()  { m_mustEndRace=true; }
     inline void resumeRace() { m_mustResumeRace=true; }
 
+    void setSplitScreenModality(int l);
+
     /* lua stuff */
     void lua_doFile(const char * filename);
     void lua_doString(const char * script);

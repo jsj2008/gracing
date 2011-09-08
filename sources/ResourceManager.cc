@@ -112,6 +112,14 @@ int setConfig(lua_State * L) {
   return 1;
 }
 
+int setSplitScreenModality(lua_State * L) {
+  int l;
+  l=luaL_checknumber(L,2);
+  ResourceManager::getInstance()->setSplitScreenModality(l);
+  return 0;
+}
+
+
 struct embFunctions_s {
   const char * n;
   int (*f)(lua_State*);
@@ -125,6 +133,7 @@ struct embFunctions_s {
   { "resumeRace", resumeRace },
   { "quit", quit },
   { "setConfig", setConfig },
+  { "setSplitScreenMode", setSplitScreenModality },
   { 0,0 }
 };
 
@@ -346,6 +355,11 @@ ResourceManager::ResourceManager()
   //{ m_max_vehicles=4 };
   //unsigned   m_choosenVehicles[m_max_vehicles];
 
+}
+
+void ResourceManager::setSplitScreenModality(int l)
+{
+  static_cast<Race*>(m_phaseHandlers[pa_race])->setSplitModality(l);
 }
 
 void ResourceManager::loadConfig(const std::string & filename)

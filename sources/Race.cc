@@ -306,8 +306,6 @@ bool Race::step()
   unsigned width,height;
   ResourceManager::getInstance()->getScreenHeight(height);
   ResourceManager::getInstance()->getScreenWidth(width);
-  irr::core::rect<irr::s32> wholeScreenViewPort=
-      irr::core::rect<irr::s32>(0,0,width,height);
 
   EventReceiver * erec=ResourceManager::getInstance()->getEventReceiver();
   // status handling
@@ -319,7 +317,7 @@ bool Race::step()
     case rs_finished:
       m_communicator->refreshTime();
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
-      m_sceneManager->drawAll();
+      drawScene();
       m_guiEnv->drawAll();
       m_world->step();
       m_world->debugDrawWorld();
@@ -331,9 +329,9 @@ bool Race::step()
       break;
 
     case rs_paused:
+      m_driver->setViewPort(m_wholeScreenViewPort);
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
-      //m_communicator->show("PAUSED");
-      m_sceneManager->drawAll();
+      drawScene();
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
       m_driver->endScene();
@@ -343,9 +341,10 @@ bool Race::step()
       if(m_readySetGo->isEnded()) {
         gotoState(rs_started);
       }
+      m_driver->setViewPort(m_wholeScreenViewPort);
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       updateVehiclesInfo();
-      m_sceneManager->drawAll();
+      drawScene();
       m_world->step();
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
@@ -353,25 +352,11 @@ bool Race::step()
       break;
     case rs_started:
       updateRanking();
-
-      // update cockpit
-#ifdef ONLY_1_CAM
-      m_cockpit->setRank(
-          m_vehicles[m_followedVehicleIndex].rank+1,m_nVehicles);
-      m_cockpit->setLap(m_vehicles[m_followedVehicleIndex].lapNumber+1,
-          m_vehicles[m_followedVehicleIndex].controlPointIndex);
-#endif
-
-      m_driver->setViewPort(wholeScreenViewPort);
+      m_driver->setViewPort(m_wholeScreenViewPort);
       m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
       ret=updateKeyboard();
       updateVehiclesInfo();
-
       drawScene();
-
-      m_driver->setViewPort(wholeScreenViewPort);
-
-
       m_world->step();
       m_guiEnv->drawAll();
       m_world->debugDrawWorld();
@@ -391,6 +376,7 @@ void Race::drawScene()
     m_sceneManager->setActiveCamera(cd->camera);
     m_sceneManager->drawAll();
   }
+  m_driver->setViewPort(m_wholeScreenViewPort);
 }
 
 void Race::updateRanking()
@@ -640,20 +626,31 @@ void Race::updateCamerasViewPort()
   unsigned width,height;
   ResourceManager::getInstance()->getScreenHeight(height);
   ResourceManager::getInstance()->getScreenWidth(width);
+  m_wholeScreenViewPort=irr::core::rect<irr::s32>(0,0,width,height);
+
   if(m_nCameras==1) {
     // one camera -> whole screen
-    m_cameraData[0]->viewport=irr::core::rect<irr::s32>(0,0,width,height);
+    //m_cameraData[0]->viewport=irr::core::rect<irr::s32>(0,0,width,height);
+    m_cameraData[0]->setViewPort(0,0,width,height);
   } else if(m_nCameras==2) {
     if(m_splitType == 0) { // vertical
+#if 0
       m_cameraData[0]->viewport = 
           irr::core::rect<irr::s32>(0,0,width/2,height);
       m_cameraData[1]->viewport = 
           irr::core::rect<irr::s32>(1+width/2,0,width,height);
+#endif
+      m_cameraData[0]->setViewPort(0,0,width/2,height);
+      m_cameraData[1]->setViewPort(1+width/2,0,width,height);
     } else { // horizontal
+#if 0
       m_cameraData[0]->viewport = 
           irr::core::rect<irr::s32>(0,0,width,height/2);
       m_cameraData[1]->viewport = 
           irr::core::rect<irr::s32>(0,1+height+1,width,height);
+#endif
+      m_cameraData[0]->setViewPort(0,0,width,height/2);
+      m_cameraData[1]->setViewPort(0,1+height+1,width,height);
     }
   } else {
     assert(0 && "Not implemented");
@@ -787,15 +784,15 @@ int Race::vehicleInfoCmp(const VehicleInfo & a, const VehicleInfo & b)
   return 0;
 }
 
+void Race::setSplitModality(int modality)
+{
+  m_splitType=modality;
+  updateCamerasViewPort();
+}
+
 void Race::unprepare()
 {
   m_track->unload();
-#if ONLY_1_CAM
-  m_camera->remove();
-  m_camera->drop();
-  m_camera=0;
-  m_cockpit->setVisible(false);
-#endif
   for(unsigned i=0; i<m_nCameras; i++) {
     delete m_cameraData[i];
   }
@@ -825,10 +822,24 @@ Race::CameraData::CameraData(const VehicleInfo & vinfo, irr::IrrlichtDevice * de
   viewport=irr::core::rect<irr::s32>(0,0,width,height);
 }
 
+void Race::CameraData::setViewPort(const irr::core::rect<irr::s32> & _viewport)
+{
+  viewport = _viewport;
+  irr::f32 aspectRatio = (irr::f32)viewport.getWidth() / (irr::f32)viewport.getHeight();
+  camera->setAspectRatio(aspectRatio);
+}
+
+void Race::CameraData::setViewPort(irr::s32 x1, irr::s32 y1, irr::s32 x2, irr::s32 y2)
+{
+  setViewPort(irr::core::rect<irr::s32>(x1,y1,x2,y2));
+}
+
+
+
 Race::CameraData::~CameraData()
 {
   camera->remove();
   camera->drop();
   cameraAnim->drop();
-  delete cockpit;
+  //delete cockpit;
 }

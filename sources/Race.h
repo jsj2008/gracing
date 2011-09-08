@@ -66,8 +66,7 @@ class Race : public  IPhaseHandler
     /* callback for lap trigger */
     void lapTriggered(void * userdata);
     void togglePause();
-
-    void setTwoCamerasSplitType(bool vertical);
+    void setSplitModality(int modality);
 
   private:
 
@@ -78,14 +77,6 @@ class Race : public  IPhaseHandler
 
     inline void setLapNumber(unsigned n) { m_totalLaps=n; }
 
-#ifdef ONLY_1_CAM
-    VehicleCameraAnimator *        m_cameraAnim;
-    irr::scene::ICameraSceneNode * m_camera;
-    unsigned                       m_followedVehicleIndex;
-    enum { invalidVehicleIndex = 0xffff };
-    GuiCockpit *      m_cockpit;
-#endif
-
     struct VehicleInfo;
     struct CameraData {
       VehicleCameraAnimator *        cameraAnim;
@@ -95,6 +86,8 @@ class Race : public  IPhaseHandler
 
       CameraData(const VehicleInfo &, irr::IrrlichtDevice *);
       ~CameraData();
+      void setViewPort(const irr::core::rect<irr::s32> & viewport);
+      void setViewPort(irr::s32 x1, irr::s32 y1, irr::s32 x2, irr::s32 y2);
     };
 
     
@@ -188,6 +181,8 @@ class Race : public  IPhaseHandler
     unsigned          m_firstControlPoint;
 
     irr::IrrlichtDevice *          m_device;
+
+    irr::core::rect<irr::s32> m_wholeScreenViewPort;
 };
 
 
