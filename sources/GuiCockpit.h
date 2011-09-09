@@ -39,6 +39,8 @@ class GuiCockpit : public  INumberOutput, public irr::gui::IGUIElement
     inline void setLap(unsigned lap, unsigned totalLaps) { m_lap=lap; m_totalLaps=totalLaps; }
     inline void setRank(unsigned rank, unsigned totRank) { m_rank=rank; m_totRank=totRank; }
 
+    void setPosition(irr::s32 posX, irr::s32 posY);
+
   private:
 
     void drawString(const char *, const irr::core::vector2d<irr::s32> &);

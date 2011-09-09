@@ -526,12 +526,14 @@ bool Race::gotoState(unsigned state)
         m_track->registerLapCallback(this, 
             m_vehicles[i].vehicle, 
             &(m_vehicles[i]));
+        if(m_vehicles[i].cameraData) {
+          m_vehicles[i].cameraData->cockpit->stop();
+          m_vehicles[i].cameraData->cockpit->setVisible(true);
+        }
       }
       // reset gui controls
       m_readySetGo->restart();
 #if ONLY_1_CAM
-      m_cockpit->stop();
-      m_cockpit->setVisible(true);
 #endif
       m_status=rs_readySetGo;
       m_nFinishedVehicles=0;
@@ -581,6 +583,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
   m_vehicles[m_nVehicles].vehicle->setEnableControls(false);
   m_vehicles[m_nVehicles].waitingForLapTrigger=false;
   m_vehicles[m_nVehicles].controller=controller;
+  m_vehicles[m_nVehicles].cameraData=0;
   if(!name) {
     char buffer[32];
     snprintf(buffer,32,"vehicle %d",m_nVehicles);
@@ -590,28 +593,17 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
   }
 
   if(followed || true) {
+    CameraData * cameraData;
     assert(m_nCameras < max_cameras);
 
-    m_cameraData[m_nCameras]= new CameraData(m_vehicles[m_nVehicles],m_device);
+    cameraData = new CameraData(m_vehicles[m_nVehicles],m_guiEnv,m_device);
+    m_cameraData[m_nCameras] = cameraData;
+    m_vehicles[m_nVehicles].cameraData=cameraData;
+    vehicle->setSpeedOMeter(cameraData->cockpit);
+    cameraData->cockpit->setLap(1,m_totalLaps);
+
     m_nCameras++;
     updateCamerasViewPort();
-
-#if ONLY_1_CAM
-    if(m_cameraAnim)
-      m_cameraAnim->drop();
-
-    if(m_camera)
-      m_camera->drop();
-
-    m_cameraAnim=new
-      VehicleCameraAnimator(vehicle);
-    m_camera = m_device->getSceneManager()->addCameraSceneNode();
-    m_camera->grab();
-    m_camera->addAnimator(m_cameraAnim);
-    m_followedVehicleIndex = m_nVehicles;
-    vehicle->setSpeedOMeter(m_cockpit);
-    //m_cockpit->setLap(1,m_totalLaps);
-#endif
   }
 
   m_nVehicles++;
@@ -630,25 +622,12 @@ void Race::updateCamerasViewPort()
 
   if(m_nCameras==1) {
     // one camera -> whole screen
-    //m_cameraData[0]->viewport=irr::core::rect<irr::s32>(0,0,width,height);
     m_cameraData[0]->setViewPort(0,0,width,height);
   } else if(m_nCameras==2) {
     if(m_splitType == 0) { // vertical
-#if 0
-      m_cameraData[0]->viewport = 
-          irr::core::rect<irr::s32>(0,0,width/2,height);
-      m_cameraData[1]->viewport = 
-          irr::core::rect<irr::s32>(1+width/2,0,width,height);
-#endif
       m_cameraData[0]->setViewPort(0,0,width/2,height);
       m_cameraData[1]->setViewPort(1+width/2,0,width,height);
     } else { // horizontal
-#if 0
-      m_cameraData[0]->viewport = 
-          irr::core::rect<irr::s32>(0,0,width,height/2);
-      m_cameraData[1]->viewport = 
-          irr::core::rect<irr::s32>(0,1+height+1,width,height);
-#endif
       m_cameraData[0]->setViewPort(0,0,width,height/2);
       m_cameraData[1]->setViewPort(0,1+height+1,width,height);
     }
@@ -806,7 +785,10 @@ void Race::unprepare()
 }
 
 
-Race::CameraData::CameraData(const VehicleInfo & vinfo, irr::IrrlichtDevice * device)
+Race::CameraData::CameraData(
+    const VehicleInfo & vinfo, 
+    irr::gui::IGUIEnvironment * guiEnv,
+    irr::IrrlichtDevice * device)
 {
   // TODO: handle cockpit !!!
   cameraAnim=new
@@ -822,14 +804,37 @@ Race::CameraData::CameraData(const VehicleInfo & vinfo, irr::IrrlichtDevice * de
   ResourceManager::getInstance()->getScreenWidth(width);
 
   viewport=irr::core::rect<irr::s32>(0,0,width,height);
+
+  irr::s32 px1,px2,py1,py2;
+  px1=1024-width;     py1=(576-height)/2-50;
+  px2=px1+width;
+  py2=py1+height;
+
+  cockpit = new GuiCockpit(
+      guiEnv,
+      guiEnv->getRootGUIElement(),
+      3,
+      irr::core::rect<irr::s32>(px1,py1,px2,py2),
+      device->getTimer());
+  cockpit->grab();
+  vinfo.vehicle->setSpeedOMeter(cockpit);
 }
+
 
 void Race::CameraData::setViewPort(const irr::core::rect<irr::s32> & _viewport)
 {
   viewport = _viewport;
   irr::f32 aspectRatio = (irr::f32)viewport.getWidth() / (irr::f32)viewport.getHeight();
   camera->setAspectRatio(aspectRatio);
+
+  if(cockpit)  {
+    irr::s32 px,py;
+    px=viewport.UpperLeftCorner.X;
+    py=viewport.UpperLeftCorner.Y;
+    cockpit->setPosition(px,py);
+  }
 }
+
 
 void Race::CameraData::setViewPort(irr::s32 x1, irr::s32 y1, irr::s32 x2, irr::s32 y2)
 {
@@ -837,11 +842,13 @@ void Race::CameraData::setViewPort(irr::s32 x1, irr::s32 y1, irr::s32 x2, irr::s
 }
 
 
-
 Race::CameraData::~CameraData()
 {
   camera->remove();
   camera->drop();
   cameraAnim->drop();
-  delete cockpit;
+  cockpit->drop();
+  camera=0;
+  cameraAnim=0;
+  cockpit=0;
 }

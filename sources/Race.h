@@ -84,7 +84,7 @@ class Race : public  IPhaseHandler
       GuiCockpit *                   cockpit;
       irr::core::rect<irr::s32>      viewport;
 
-      CameraData(const VehicleInfo &, irr::IrrlichtDevice *);
+      CameraData(const VehicleInfo &, irr::gui::IGUIEnvironment *, irr::IrrlichtDevice *);
       ~CameraData();
       void setViewPort(const irr::core::rect<irr::s32> & viewport);
       void setViewPort(irr::s32 x1, irr::s32 y1, irr::s32 x2, irr::s32 y2);
@@ -136,6 +136,8 @@ class Race : public  IPhaseHandler
       std::string          name;
 
       unsigned             rank;
+
+      CameraData *         cameraData;
 
     };
 
