@@ -49,7 +49,8 @@ class JoystickInterface : public IEventListener , public IDeviceInterface
 
     irr::u8     m_idJoystick;
     std::string m_name;
-    unsigned    m_numControllers;
+
+    std::vector<IVehicleController *>    m_controllers;
 
     bool        checkAxis(const JoystickEvent & joystickEvent,unsigned axis,irr::s16 & value);
     bool        checkButton(const JoystickEvent & joystickEvent,unsigned button,bool & pressed);

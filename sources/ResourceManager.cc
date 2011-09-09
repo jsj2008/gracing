@@ -796,12 +796,19 @@ void ResourceManager::stepPhaseHandler() {
       const std::vector<IVehicle*> & vehicles=getVehiclesList();
       assert(vehicles.size() >= 4);
 
+      IVehicleController * controller;
+
+      // TODO: handle multiple players
+      controller=m_inputDevices[0]->getController(0);
+      if(m_inputDevices.size() > 1) 
+        controller=m_inputDevices[1]->getController(0);
+
       for(unsigned i=0; i < m_totVehicles; i++) {
         GM_LOG("adding vehicle '%s'\n",
               vehicles[m_choosenVehicles[i]]->getName().c_str());
         if(i < m_humanVehicles) 
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(vehicles[m_choosenVehicles[i]],
-              m_inputDevices[0]->getController(0),
+              controller,
               vehicles[m_choosenVehicles[i]]->getName().c_str(),true);
         else
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(

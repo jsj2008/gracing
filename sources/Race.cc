@@ -815,6 +815,8 @@ Race::CameraData::CameraData(const VehicleInfo & vinfo, irr::IrrlichtDevice * de
   camera->grab();
   camera->addAnimator(cameraAnim);
 
+  cockpit=0;
+
   unsigned width,height;
   ResourceManager::getInstance()->getScreenHeight(height);
   ResourceManager::getInstance()->getScreenWidth(width);
@@ -841,5 +843,5 @@ Race::CameraData::~CameraData()
   camera->remove();
   camera->drop();
   cameraAnim->drop();
-  //delete cockpit;
+  delete cockpit;
 }

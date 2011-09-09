@@ -83,6 +83,13 @@ class Joystick : public IVehicleController, public IEventListener
       m_controllingVehicle=false;
     }
 
+    virtual void init(
+        const std::vector<btVector3> & controlPoints,
+        const btVector3 vehicleForward,
+        const btVector3 startPosition) 
+    { 
+      startControlVehicle();
+    };
 
     Joystick(JoystickInterface * owner)
     {
@@ -127,7 +134,6 @@ class Joystick : public IVehicleController, public IEventListener
         int      index,
         int      value)
     { 
-
       if(type ==  ac_axis && value == 0 && index >= 0 && index < naxes) {
         m_guiAxisDownAction[index]=gaction;
       } else if(type == ac_axis && value == 1 && index >=0 && index < naxes) {
@@ -180,6 +186,66 @@ class Joystick : public IVehicleController, public IEventListener
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)
     {
+      // accelerate
+      JoystickInterface::JoystickAction  & ac=
+          m_actions[va_accelerate].joyact;
+      switch(ac.type) {
+        case ac_axis:
+          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
+            commands.throttling=1.f;
+          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
+            commands.throttling=1.f;
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index])
+            commands.throttling=1.f;
+          break;
+      }
+
+      // decelerate
+      ac=m_actions[va_decelerate].joyact;
+      switch(ac.type) {
+        case ac_axis:
+          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
+            commands.throttling=-1.f;
+          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
+            commands.throttling=-1.f;
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index])
+            commands.throttling=1.f;
+          break;
+      }
+
+      // steer left
+      ac=m_actions[va_steerLeft].joyact;
+      switch(ac.type) {
+        case ac_axis:
+          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
+            commands.steering=IVehicle::VehicleCommands::steerLeft;
+          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
+            commands.steering=IVehicle::VehicleCommands::steerLeft;
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index])
+            commands.steering=IVehicle::VehicleCommands::steerLeft;
+          break;
+      }
+
+      // steer right
+      ac=m_actions[va_steerRight].joyact;
+      switch(ac.type) {
+        case ac_axis:
+          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
+            commands.steering=IVehicle::VehicleCommands::steerRite;
+          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
+            commands.steering=IVehicle::VehicleCommands::steerRite;
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index])
+            commands.steering=IVehicle::VehicleCommands::steerRite;
+          break;
+      }
     }
 
     void generateAction(irr::s16 action, bool pressed)
@@ -243,9 +309,15 @@ class Joystick : public IVehicleController, public IEventListener
 
     void joystickEvent(const JoystickInterface::JoystickEvent & event)
     {
-      if(m_controllingVehicle) {
-      } else {
+      if(!m_controllingVehicle) {
         joystickEventGui(event);
+      } else {
+        bool dummyBool;
+        irr::s16 dummyS16;
+        for(unsigned i=0; i<nbuttons; i++) 
+          checkButton(event,i,dummyBool);
+        for(unsigned i=0; i<naxes; i++)
+          checkAxis(event,i,dummyS16);
       }
     }
 
@@ -263,11 +335,20 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
   // build default configuration:
   Joystick * joy;
   joy = new Joystick(this);
+  m_controllers.push_back(joy);
+
   joy->setGuiAction(Joystick::ga_up,ac_axis,false,3,0);
   joy->setGuiAction(Joystick::ga_down,ac_axis,false,3,1);
   joy->setGuiAction(Joystick::ga_left,ac_axis,false,2,0);
   joy->setGuiAction(Joystick::ga_right,ac_axis,false,2,1);
   joy->setGuiAction(Joystick::ga_enter,ac_button,false,2,0);
+
+  //joy->setAction(IVehicleController::va_accelerate,ac_axis,false,3,0);
+  joy->setAction(IVehicleController::va_accelerate,ac_button,false,2,0);
+  joy->setAction(IVehicleController::va_decelerate,ac_button,false,1,0);
+  joy->setAction(IVehicleController::va_steerLeft,ac_axis,false,2,0);
+  joy->setAction(IVehicleController::va_steerRight,ac_axis,false,2,1);
+
   
   ResourceManager::getInstance()->getEventReceiver()->addListener(joy);
 
@@ -285,8 +366,10 @@ unsigned JoystickInterface::getNumController()
   return 0;
 }
 
-IVehicleController * JoystickInterface::getController(unsigned)
+IVehicleController * JoystickInterface::getController(unsigned index)
 {
+  if(index < m_controllers.size())
+    return m_controllers[index];
   return 0;
 }
 
