@@ -586,7 +586,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     m_vehicles[m_nVehicles].name=name;
   }
 
-  if(followed || true) {
+  if(followed) {
     CameraData * cameraData;
     assert(m_nCameras < max_cameras);
 

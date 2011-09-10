@@ -33,6 +33,7 @@ class XmlNode;
 class GuiMenu;
 class Track;
 class IDeviceInterface;
+class IVehicleController;
 
 class ResourceManager 
 {
@@ -117,6 +118,7 @@ class ResourceManager
     ResourceManager();
 
     std::vector<IDeviceInterface *> m_inputDevices;
+    std::vector<IVehicleController *> m_controllers;
 
     void loadConfig(const std::string & filename);
     void saveConfig(const std::string & filename);

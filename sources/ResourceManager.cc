@@ -459,10 +459,16 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
     for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
       joystickInterface=new JoystickInterface(m_device,devices[joystick]);
       m_inputDevices.push_back(joystickInterface);
+      for(u32 i = 0; i < joystickInterface->getNumController(); i++) 
+        m_controllers.push_back(joystickInterface->getController(i));
     }
 
-  assert(m_inputDevices.size() > 0);
-  assert(m_inputDevices[0]->getNumController() >= 2);
+  for(u32 i = 0; i < keyboardInterface->getNumController(); i++) 
+    m_controllers.push_back(keyboardInterface->getController(i));
+
+  // this can be asserted due
+  // to the presence of the keyboard interface !!
+  assert(m_controllers.size() >= 2);
 
   // set the configuration for the input devices
   XmlNode * inputDevicesNode;
@@ -795,20 +801,16 @@ void ResourceManager::stepPhaseHandler() {
 
       const std::vector<IVehicle*> & vehicles=getVehiclesList();
       assert(vehicles.size() >= 4);
+      assert(m_controllers.size() >= m_humanVehicles);
 
-      IVehicleController * controller;
-
-      // TODO: handle multiple players
-      controller=m_inputDevices[0]->getController(0);
-      if(m_inputDevices.size() > 1) 
-        controller=m_inputDevices[1]->getController(0);
+      unsigned totController=0;
 
       for(unsigned i=0; i < m_totVehicles; i++) {
         GM_LOG("adding vehicle '%s'\n",
               vehicles[m_choosenVehicles[i]]->getName().c_str());
         if(i < m_humanVehicles) 
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(vehicles[m_choosenVehicles[i]],
-              controller,
+              m_controllers[totController++],
               vehicles[m_choosenVehicles[i]]->getName().c_str(),true);
         else
           static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
