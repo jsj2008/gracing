@@ -597,6 +597,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     cameraData->cockpit->setLap(1,m_totalLaps);
 
     m_nCameras++;
+    ResourceManager::getInstance()->cfgGet("video/splitconfig",m_splitType);
     updateCamerasViewPort();
   }
 
@@ -623,7 +624,7 @@ void Race::updateCamerasViewPort()
       m_cameraData[1]->setViewPort(1+width/2,0,width,height);
     } else { // horizontal
       m_cameraData[0]->setViewPort(0,0,width,height/2);
-      m_cameraData[1]->setViewPort(0,1+height+1,width,height);
+      m_cameraData[1]->setViewPort(0,1+height/2,width,height);
     }
   } else {
     assert(0 && "Not implemented");
