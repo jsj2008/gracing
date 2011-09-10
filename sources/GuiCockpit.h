@@ -57,6 +57,13 @@ class GuiCockpit : public  INumberOutput, public irr::gui::IGUIElement
     irr::core::vector2d<irr::s32>       m_handCenter;
     irr::core::vector2d<irr::s32>       m_handPosition;
 
+
+
+    irr::core::vector2d<irr::s32>       m_handMovedCenter;
+    irr::core::vector2d<irr::s32>       m_timerMovedPosition;
+    irr::core::vector2d<irr::s32>       m_lapMovedPosition;
+    irr::core::vector2d<irr::s32>       m_rankMovedPosition;
+
     irr::core::rect<irr::s32>           m_digitsRect[11];
     irr::s32                            m_digitsTexture[11];
     bool                                m_digitsPresence[11];

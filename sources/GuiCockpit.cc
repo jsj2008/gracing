@@ -133,16 +133,7 @@ GuiCockpit::GuiCockpit(
     assert(m_digitsPresence[i]);
   }
 
-  AbsoluteRect.LowerRightCorner.X = AbsoluteRect.UpperLeftCorner.X + 200;
-  AbsoluteRect.LowerRightCorner.Y = AbsoluteRect.UpperLeftCorner.Y + 115;
-
-  m_handDstRect.UpperLeftCorner = AbsoluteRect.UpperLeftCorner + m_handPosition - m_handCenter;
-  m_handDstRect.LowerRightCorner = m_handDstRect.UpperLeftCorner + m_handRect.getWidth();
-
-  m_handCenter += m_handDstRect.UpperLeftCorner;
-  m_timerPosition += AbsoluteRect.UpperLeftCorner;
-  m_lapPosition += AbsoluteRect.UpperLeftCorner;
-  m_rankPosition += AbsoluteRect.UpperLeftCorner;
+  setPosition(0,0);
 
   res=resmanager->getFileSystem()->removeFileArchive(resmanager->getFileSystem()->getAbsolutePath(mypath));
 
@@ -162,17 +153,13 @@ void GuiCockpit::setPosition(irr::s32 posX, irr::s32 posY)
   AbsoluteRect.LowerRightCorner.X = AbsoluteRect.UpperLeftCorner.X + 200;
   AbsoluteRect.LowerRightCorner.Y = AbsoluteRect.UpperLeftCorner.Y + 115;
 
-
   m_handDstRect.UpperLeftCorner = AbsoluteRect.UpperLeftCorner + m_handPosition - m_handCenter;
   m_handDstRect.LowerRightCorner = m_handDstRect.UpperLeftCorner + m_handRect.getWidth();
 
-#if 0
-  m_handCenter += m_handDstRect.UpperLeftCorner;
-  m_timerPosition += AbsoluteRect.UpperLeftCorner;
-  m_lapPosition += AbsoluteRect.UpperLeftCorner;
-  m_rankPosition += AbsoluteRect.UpperLeftCorner;
-#endif
-
+  m_handMovedCenter = m_handDstRect.UpperLeftCorner + m_handCenter;
+  m_timerMovedPosition = m_timerPosition + AbsoluteRect.UpperLeftCorner;
+  m_lapMovedPosition = m_lapPosition + AbsoluteRect.UpperLeftCorner;
+  m_rankMovedPosition = m_rankPosition + AbsoluteRect.UpperLeftCorner;
 }
 
 GuiCockpit::~GuiCockpit()
@@ -242,7 +229,7 @@ void GuiCockpit::draw()
     m_textures[m_handTidx],
     m_handRect,
     m_handDstRect.UpperLeftCorner,
-    m_handCenter,
+    m_handMovedCenter,
     angle,
     irr::core::vector2df(1.,1.),  // scale
     true,
@@ -268,15 +255,15 @@ void GuiCockpit::draw()
   s=s % 60;
 
   snprintf(buffer,64,"%02d:%02d:%02d",m,s,cs);
-  drawString(buffer,m_timerPosition);
+  drawString(buffer,m_timerMovedPosition);
 
   // draw lap
   snprintf(buffer,64,"%02d:%02d",m_lap,m_totalLaps);
-  drawString(buffer,m_lapPosition);
+  drawString(buffer,m_lapMovedPosition);
 
   // draw rank
   snprintf(buffer,64,"%02d:%02d",m_rank,m_totRank);
-  drawString(buffer,m_rankPosition);
+  drawString(buffer,m_rankMovedPosition);
 }
 
 void GuiCockpit::unpause()

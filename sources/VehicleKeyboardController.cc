@@ -311,7 +311,6 @@ VehicleKeyboardController::VehicleKeyboardController(EventReceiver * receiver)
 void VehicleKeyboardController::setKeyForAction(unsigned action, unsigned key)
 {
   if(action < va_numActions) {
-    GM_LOG("setting action for: %d,%d\n",action,key);
     m_keyForAction[action]=(irr::EKEY_CODE)key;
   }
 }

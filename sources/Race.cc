@@ -337,6 +337,7 @@ bool Race::step()
       m_driver->endScene();
       ret=updateKeyboard();
       break;
+
     case rs_readySetGo:
       if(m_readySetGo->isEnded()) {
         gotoState(rs_started);
@@ -350,6 +351,7 @@ bool Race::step()
       m_world->debugDrawWorld();
       m_driver->endScene();
       break;
+
     case rs_started:
       updateRanking();
       m_driver->setViewPort(m_wholeScreenViewPort);
@@ -422,13 +424,6 @@ bool Race::updateKeyboard()
     m_status=rs_notRunning;
   }
 
-#if 0
-  if(erec->OneShotKey(irr::KEY_TAB)) {
-    GM_LOG("changing vehicle\n");
-    followNextVehicle();
-  }
-#endif
-
 #ifdef ONLY_1_CAM
   if(erec->OneShotKey(irr::KEY_TAB)) {
     GM_LOG("changing camera\n");
@@ -482,21 +477,23 @@ bool Race::gotoState(unsigned state)
     case rs_paused:
       if(m_status != rs_started)
         return false;
-#if ONLY_1_CAM
-      m_cockpit->pause();
-#endif
+      for(unsigned i=0; i<m_nVehicles; i++) {
+        CameraData * cd=m_vehicles[i].cameraData;
+        if(cd) cd->cockpit->pause();
+      }
       m_communicator->unshow();
       ResourceManager::getInstance()->showMenu("in-game");
       m_status=rs_paused;
       break;
     case rs_finished:
       m_communicator->show("race rank");
-#if ONLY_1_CAM
-      m_cockpit->stop();
-#endif
+      for(unsigned i=0; i<m_nVehicles; i++) {
+        CameraData * cd=m_vehicles[i].cameraData;
+        if(cd) cd->cockpit->stop();
+      }
       for(unsigned i=0; i < m_nVehicles; i++) {
-       VehicleInfo & vinfo=m_vehicles[m_rank[i]];
-       m_communicator->add(false,"[%d] %s",i+1,vinfo.name.c_str());
+        VehicleInfo & vinfo=m_vehicles[m_rank[i]];
+        m_communicator->add(false,"[%d] %s",i+1,vinfo.name.c_str());
       }
       m_status=rs_finished;
       break;
@@ -533,17 +530,16 @@ bool Race::gotoState(unsigned state)
       }
       // reset gui controls
       m_readySetGo->restart();
-#if ONLY_1_CAM
-#endif
       m_status=rs_readySetGo;
       m_nFinishedVehicles=0;
       break;
     case rs_started:
       if(m_status==rs_paused) {
         m_status=rs_started;
-#if ONLY_1_CAM
-        m_cockpit->unpause();
-#endif
+        for(unsigned i=0; i<m_nVehicles; i++) {
+          CameraData * cd=m_vehicles[i].cameraData;
+          if(cd) cd->cockpit->unpause();
+        }
         ResourceManager::getInstance()->hideMenu();
       } else if(m_status==rs_readySetGo) {
         for(unsigned i=0; i<m_nVehicles; i++) 
@@ -551,11 +547,9 @@ bool Race::gotoState(unsigned state)
         for(unsigned i=0; i<m_nVehicles; i++) 
           m_vehicles[i].vehicle->setEnableControls(true);
         m_status=rs_started;
-#if ONLY_1_CAM
-        m_cockpit->start();
-#endif 
-
         for(unsigned i=0; i<m_nVehicles; i++) {
+          CameraData * cd=m_vehicles[i].cameraData;
+          if(cd) cd->cockpit->start();
           VehicleInfo & vinfo = m_vehicles[i];
           const std::vector<btVector3> & controlPoints=m_track->getControlPoints();
           btVector3 vehicleDirection = vinfo.vehicle->getChassisForwardDirection();
@@ -772,16 +766,17 @@ void Race::setSplitModality(int modality)
 void Race::unprepare()
 {
   m_track->unload();
-  for(unsigned i=0; i<m_nCameras; i++) {
-    delete m_cameraData[i];
-  }
 
-  m_nCameras=0;
   for(unsigned i=0; i<m_nVehicles; i++) {
     VehicleInfo & vinfo=m_vehicles[i];
     vinfo.vehicle->unuse(IVehicle::USE_PHYSICS|IVehicle::USE_GRAPHICS);
   }
   m_nVehicles=0;
+
+  for(unsigned i=0; i<m_nCameras; i++) {
+    delete m_cameraData[i];
+  }
+  m_nCameras=0;
 }
 
 
@@ -790,7 +785,6 @@ Race::CameraData::CameraData(
     irr::gui::IGUIEnvironment * guiEnv,
     irr::IrrlichtDevice * device)
 {
-  // TODO: handle cockpit !!!
   cameraAnim=new
     VehicleCameraAnimator(vinfo.vehicle);
   camera = device->getSceneManager()->addCameraSceneNode();
@@ -830,7 +824,7 @@ void Race::CameraData::setViewPort(const irr::core::rect<irr::s32> & _viewport)
   if(cockpit)  {
     irr::s32 px,py;
     px=viewport.UpperLeftCorner.X;
-    py=viewport.UpperLeftCorner.Y;
+    py=viewport.LowerRightCorner.Y - 120; // TODO: ...
     cockpit->setPosition(px,py);
   }
 }
@@ -847,6 +841,7 @@ Race::CameraData::~CameraData()
   camera->remove();
   camera->drop();
   cameraAnim->drop();
+  cockpit->remove();
   cockpit->drop();
   camera=0;
   cameraAnim=0;
