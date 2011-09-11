@@ -100,6 +100,20 @@ class Joystick : public IVehicleController, public IEventListener
       clearGuiActions();
     };
 
+    void getAction(unsigned vaction,
+        unsigned & type,
+        bool     & analog,
+        int      & index,
+        int      & value)
+    {
+      if(vaction < va_numActions) {
+        type=m_actions[vaction].joyact.type;
+        analog=m_actions[vaction].joyact.analog;
+        index=m_actions[vaction].joyact.index;
+        value=m_actions[vaction].joyact.value;
+      }
+    }
+
     void setAction(unsigned vaction,
         unsigned type,
         bool     analog,
@@ -112,7 +126,6 @@ class Joystick : public IVehicleController, public IEventListener
         m_actions[vaction].joyact.analog = analog;
         m_actions[vaction].joyact.index = index;
         m_actions[vaction].joyact.value = value;
-        return;
       }
     }
 
@@ -408,6 +421,28 @@ void JoystickInterface::setConfiguration(XmlNode * node)
 
 void JoystickInterface::getConfiguration(XmlNode * root)
 {
+  root->deleteAllChildren();
+  
+
+  for(unsigned i=0; i< m_controllers.size(); i++) {
+    Joystick * joystick=
+      static_cast<Joystick*>(m_controllers[i]);
+    XmlNode * node=root->addChild("device");
+
+    for(unsigned j=0; j < IVehicleController::va_numActions; j++) {
+      XmlNode * act=node->addChild("action");
+      act->set("action",i);
+      unsigned type;
+      bool     analog;
+      int      index;
+      int      value;
+      joystick->getAction(i,type,analog,index,value);
+      act->set("type",type);
+      act->set("analog",analog);
+      act->set("index",index);
+      act->set("value",value);
+    }
+  }
 #if 0
   std::vector<XmlNode*> nodes;
   root->deleteAllChildren();

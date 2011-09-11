@@ -720,6 +720,7 @@ void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen
   if(centerOnTheScreen)
     m_menu->centerOnTheScreen();
   g_eventReceiver.resetOneShotKey();
+  m_menu->getParent()->bringToFront(m_menu);
   m_menu->setVisible(true);
 }
 
