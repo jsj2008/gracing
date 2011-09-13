@@ -111,6 +111,9 @@ XmlNode * XmlNode::getChildByAttr(const std::string & attrName, const std::strin
   for(unsigned i=0; i<m_nodes.size(); i++) {
     XmlNode * node=m_nodes[i];
     std::string value;
+    if(node->get(attrName,value)) {
+      GM_LOG("node with '%s'='%s'\n",attrName.c_str(),value.c_str());
+    }
     if(node->get(attrName,value) && value == attrValue) {
       return node;
     }

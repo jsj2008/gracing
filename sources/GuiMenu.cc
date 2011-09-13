@@ -19,6 +19,7 @@
 #include "Util.hh"
 #include "GuiItemCheckBox.h"
 #include "GuiItemListBox.h"
+#include "GuiItemListBoxEx.h"
 #include "GuiItemStaticText.h"
 #include "GuiItemSlider.h"
 
@@ -303,6 +304,11 @@ void GuiMenu::selectNext()
 {
   if(m_items.size() == 0)
     return;
+
+  if(isItemIndexValid(m_focusedItem) && 
+      m_items[m_focusedItem]->retainFocus())
+    return;
+
   unsigned startFrom;
   if(isItemIndexValid(m_focusedItem)) {
     startFrom = m_focusedItem + 1;
@@ -327,6 +333,10 @@ void GuiMenu::selectPrev()
 {
   int startFrom;
   if(m_items.size() == 0)
+    return;
+
+  if(isItemIndexValid(m_focusedItem) && 
+      m_items[m_focusedItem]->retainFocus())
     return;
 
   if(isItemIndexValid(m_focusedItem)) {
@@ -362,8 +372,11 @@ void GuiMenu::keyboardEvent(const irr::SEvent::SKeyInput & keyInput)
       if(!keyInput.PressedDown)
         selectNext();
       break;
-
     default:
+      break;
+  }
+
+  //  default:
       if(keyInput.PressedDown) {
         if(isItemIndexValid(m_focusedItem))
           m_items[m_focusedItem]->onKeyDown(keyInput);
@@ -373,8 +386,7 @@ void GuiMenu::keyboardEvent(const irr::SEvent::SKeyInput & keyInput)
           m_items[m_focusedItem]->onKeyClick(keyInput);
         } 
       }
-      break;
-  }
+   //   break;
 }
 
 void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
@@ -425,9 +437,22 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
       } else {
         GuiPoint pnt;
         _X(pnt) = MouseInput.X; _Y(pnt) = MouseInput.Y;
-        // TODO: avoid double "selectItemByPoint" and "pickupItemByPoint"
+        unsigned focused=m_focusedItem;
         selectItemByPoint(pnt);
 
+        if(focused != m_focusedItem && isItemIndexValid(focused)) {
+          IGuiMenuItem * item = m_items[focused];
+          item->onMouseLeave(pnt);
+        }
+
+        if(isItemIndexValid(m_focusedItem)) {
+          IGuiMenuItem * item = m_items[m_focusedItem];
+          if(m_focusedItem != focused)
+            item->onMouseEnter(pnt);
+          item->onMouseMove(pnt);
+        }
+
+#if 0
         unsigned i;
         i = pickupItemByPoint(pnt);
 
@@ -435,6 +460,7 @@ void GuiMenu::mouseEvent(const irr::SEvent::SMouseInput & MouseInput)
           IGuiMenuItem * item = m_items[i];
           item->onMouseMove(pnt);
         }
+#endif
       }
       break;
     default:
@@ -554,6 +580,8 @@ IGuiMenuItem * GuiMenuItemFactory::build(XmlNode * node)
 
   if(node->getName() == LISTBOX_CLASSNAME)
     item = new GuiItemListBox(caption);
+  if(node->getName() == LISTBOXEX_CLASSNAME)
+    item = new GuiItemListBoxEx(caption);
   else if(node->getName() == STATICTEXT_CLASSNAME) 
     item = new GuiItemStaticText(caption);
   else if(node->getName() == CHECKBOX_CLASSNAME) 

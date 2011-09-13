@@ -117,10 +117,14 @@ class IGuiMenuItem
 
     virtual void drawFocus() { }
 
+    virtual bool retainFocus() { return false; }
+
     virtual GuiRect getRectangle() { return m_rectangle; }
 
     virtual bool isPointInside(const GuiPoint & point) { return _PINR(point,m_rectangle); }
 
+    virtual void  onMouseEnter(const GuiPoint & point) { };
+    virtual void  onMouseLeave(const GuiPoint & point) { };
     virtual void  onMouseClick(const GuiPoint & point) { };
     virtual void  onMouseMove(const GuiPoint & point) { };
     virtual bool  onMouseLButton(bool down, const GuiPoint & point) { return false; };

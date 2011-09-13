@@ -76,10 +76,12 @@ class Joystick : public IVehicleController, public IEventListener
     int      m_guiAxisMustReleaseKey[naxes];
     irr::s16 m_guiButtonAction[nbuttons];
 
-    void startControlVehicle() {
+    void startControlVehicle()
+    {
       m_controllingVehicle=true;
     }
-    void stopControlVehicle()  { 
+    void stopControlVehicle()
+    { 
       m_controllingVehicle=false;
     }
 
@@ -97,8 +99,15 @@ class Joystick : public IVehicleController, public IEventListener
       m_owner=owner;
       for(unsigned i=0; i<naxes; i++) 
         m_guiAxisMustRelease[i]=false;
+      clearActions();
       clearGuiActions();
+      ResourceManager::getInstance()->getEventReceiver()->addListener(this);
     };
+
+    ~Joystick()
+    {
+      ResourceManager::getInstance()->getEventReceiver()->removeListener(this);
+    }
 
     void getAction(unsigned vaction,
         unsigned & type,
@@ -129,6 +138,13 @@ class Joystick : public IVehicleController, public IEventListener
       }
     }
 
+    void clearActions()
+    {
+      for(unsigned i=0; i<va_numActions; i++) {
+        memset(&m_actions[i],0,sizeof(m_actions[i]));
+      }
+    }
+
     void clearGuiActions()
     {
       for(unsigned i=0; i<naxes; i++) {
@@ -147,6 +163,8 @@ class Joystick : public IVehicleController, public IEventListener
         int      index,
         int      value)
     { 
+      GM_LOG("action: %d, type: %d,analog:%d, index:%d, value:%d\n",
+          gaction,type,analog,index,value);
       if(type ==  ac_axis && value == 0 && index >= 0 && index < naxes) {
         m_guiAxisDownAction[index]=gaction;
       } else if(type == ac_axis && value == 1 && index >=0 && index < naxes) {
@@ -154,6 +172,42 @@ class Joystick : public IVehicleController, public IEventListener
       } else if(type == ac_button && index >0 && index < nbuttons) {
         m_guiButtonAction[index]=gaction;
       }
+    }
+
+    void getGuiAction(unsigned gaction,
+        unsigned & type,
+        bool     & analog,
+        int      & index,
+        int      & value)
+    {
+      type = 0;
+      value = 0;
+      index = 0;
+      analog = 0;
+      for(unsigned i=0; i<naxes; i++) {
+        if(m_guiAxisDownAction[i] == (int)gaction) {
+          type = ac_axis;
+          value = 0;
+          analog = 0;
+          index = i;
+          return;
+        }
+        if(m_guiAxisUpAction[i] == (int)gaction) {
+          type = ac_axis;
+          value = 1;
+          analog = 0;
+          index = i;
+          return;
+        }
+        if(m_guiButtonAction[i] == (int)gaction) {
+          type = ac_button;
+          value = 0;
+          index = i;
+          analog = 0;
+          return;
+        }
+      }
+
     }
 
     #define ibp(_s,_b)   ((_s) & (1 << (_b)))
@@ -346,6 +400,7 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
   m_idJoystick = device.Joystick;
 
   // build default configuration:
+#if 0
   Joystick * joy;
   joy = new Joystick(this);
   m_controllers.push_back(joy);
@@ -361,12 +416,9 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
   joy->setAction(IVehicleController::va_decelerate,ac_button,false,1,0);
   joy->setAction(IVehicleController::va_steerLeft,ac_axis,false,2,0);
   joy->setAction(IVehicleController::va_steerRight,ac_axis,false,2,1);
-
-  
-  ResourceManager::getInstance()->getEventReceiver()->addListener(joy);
-
   GM_LOG("************** ACTIONS *********\n");
   joy->debugDumpActions();
+#endif
 }
 
 std::string  JoystickInterface::getName()
@@ -415,14 +467,59 @@ void JoystickInterface::getActionString(char * buffer,
   }
 }
 
-void JoystickInterface::setConfiguration(XmlNode * node)
+void JoystickInterface::setConfiguration(XmlNode * root)
 {
+  std::vector<XmlNode*> devices;
+  unsigned type;
+  bool     analog;
+  int      index;
+  unsigned code;
+  int      value;
+
+  for(unsigned i=0; i<m_controllers.size(); i++) {
+    delete m_controllers[i];
+  }
+  m_controllers.clear();
+
+  root->getChildren("device",devices);
+  for(unsigned i=0; i<devices.size(); i++) {
+    Joystick * joy= new Joystick(this);
+    m_controllers.push_back(joy);
+    std::vector<XmlNode*> actions;
+    devices[i]->getChildren("action",actions);
+    for(unsigned j=0; j<actions.size(); j++) {
+      XmlNode * act=actions[j];
+      act->get("code",code);
+      act->get("type",type);
+      act->get("analog",analog);
+      act->get("index",index);
+      act->get("value",value);
+      joy->setAction(code,type,analog,index,value);
+    }
+    actions.clear();
+    devices[i]->getChildren("action",actions);
+    for(unsigned j=0; j<actions.size(); j++) {
+      XmlNode * act=actions[j];
+      act->get("code",code);
+      act->get("type",type);
+      act->get("analog",analog);
+      act->get("index",index);
+      act->get("value",value);
+      joy->setGuiAction(code,type,analog,index,value);
+    }
+    GM_LOG("************** ACTIONS *********\n");
+    joy->debugDumpActions();
+  }
 }
+
 
 void JoystickInterface::getConfiguration(XmlNode * root)
 {
   root->deleteAllChildren();
-  
+  unsigned type;
+  bool     analog;
+  int      index;
+  int      value;
 
   for(unsigned i=0; i< m_controllers.size(); i++) {
     Joystick * joystick=
@@ -431,37 +528,41 @@ void JoystickInterface::getConfiguration(XmlNode * root)
 
     for(unsigned j=0; j < IVehicleController::va_numActions; j++) {
       XmlNode * act=node->addChild("action");
-      act->set("action",i);
-      unsigned type;
-      bool     analog;
-      int      index;
-      int      value;
-      joystick->getAction(i,type,analog,index,value);
+      joystick->getAction(j,type,analog,index,value);
+      act->set("code",j);
+      act->set("type",type);
+      act->set("analog",analog);
+      act->set("index",index);
+      act->set("value",value);
+    }
+
+    for(unsigned j=0; j < Joystick::ga_numGuiActions; j++) {
+      XmlNode * act=node->addChild("gui-action");
+      joystick->getGuiAction(j,type,analog,index,value);
+      act->set("code",j);
       act->set("type",type);
       act->set("analog",analog);
       act->set("index",index);
       act->set("value",value);
     }
   }
-#if 0
-  std::vector<XmlNode*> nodes;
-  root->deleteAllChildren();
-
-  for(unsigned i=0; i<m_controllers.size(); i++) {
-    VehicleKeyboardController * controller=
-      static_cast<VehicleKeyboardController *>(m_controllers[i]);
-    XmlNode * node = root->addChild("device");
-    
-    for(unsigned i=0; i < IVehicleController::va_numActions; i++) {
-      XmlNode * act=node->addChild("action");
-
-      act->set("action",i);
-      act->set("code",controller->getKeyForAction(i));
-      std::string descr;
-
-      getActionDescription(descr,i,controller->getKeyForAction(i));
-      act->set("descr",descr);
-    }
-  }
-#endif
 }
+
+
+#if 0
+action: 1, type: 2,analog:0, index:3, value:0
+action: 2, type: 2,analog:0, index:3, value:1
+action: 3, type: 2,analog:0, index:2, value:0
+action: 4, type: 2,analog:0, index:2, value:1
+action: 5, type: 1,analog:0, index:2, value:0
+
+
+action: 0, type: 2,analog:0, index:2, value:0
+action: 1, type: 2,analog:0, index:2, value:1
+action: 2, type: 1,analog:0, index:2, value:0
+action: 3, type: 1,analog:0, index:1, value:0
+action: 4, type: 0,analog:0, index:0, value:0
+action: 5, type: 0,analog:0, index:0, value:0
+
+#endif
+

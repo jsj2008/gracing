@@ -101,6 +101,25 @@ int quit(lua_State * L)
   return 0;
 }
 
+int getInputDevices(lua_State * L) 
+{
+  //const char * el[] = { "uno", "due", "tre", "quatro", "cinque" };
+  lua_newtable(L);
+
+  int tb=lua_gettop(L);
+
+  std::vector<std::string> list;
+
+  ResourceManager::getInstance()->getInputDeviceList(list);
+
+  for(unsigned i=0; i < list.size(); i++) {
+    lua_pushnumber(L, i);
+    lua_pushstring(L, list[i].c_str()) ; //el[i]);
+    lua_settable(L,tb);
+  }
+  return 1;
+}
+
 int setConfig(lua_State * L) {
   const char * key;
   const char * value;
@@ -134,6 +153,7 @@ struct embFunctions_s {
   { "quit", quit },
   { "setConfig", setConfig },
   { "setSplitScreenMode", setSplitScreenModality },
+  { "getInputDevices", getInputDevices },
   { 0,0 }
 };
 
@@ -180,7 +200,6 @@ static int registerLua(lua_State * L)
   lua_pushstring(L, "GR");
   lua_pushvalue(L, table);
   lua_settable(L, LUA_GLOBALSINDEX);
-
 
   for(int i=0; embFunctions[i].n; i++) {
     lua_pushstring(L, embFunctions[i].n);
@@ -477,14 +496,16 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   if(inputDevicesNode) {
     for(unsigned i=0; i < m_inputDevices.size(); i++) {
       IDeviceInterface * di=m_inputDevices[i];
+      GM_LOG("looking for configuration for '%s':",di->getName().c_str());
       XmlNode * node=inputDevicesNode->getChildByAttr("name",di->getName());
-      if(node) 
+      if(node) {
         di->setConfiguration(node);
+        GM_LOG("found\n");
+      } else {
+        GM_LOG("not found\n");
+      }
     }
   }
-  
-
-
 
   /////////////////////////
   // custom mesh loaders // 
@@ -499,10 +520,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   // system font
   std::string fontName; 
-  GM_LOG("suka\n");
   if(!cfgGet("system-font",fontName)) 
     fontName = DEFAULT_FONT;
-  GM_LOG("suka 2 '%s'\n",fontName.c_str());
   irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
   std::string fontPath = getResourcePath() + "/" + fontName;
   m_font = guienv->getFont(fontPath.c_str());
@@ -846,4 +865,12 @@ bool ResourceManager::cfgSet(const char * name, const char * value)
   node->setText(value);
 
   return true;
+}
+
+void ResourceManager::getInputDeviceList(std::vector<std::string> & list)
+{
+  list.clear();
+  for(unsigned i=0; i < m_inputDevices.size(); i++) {
+    list.push_back(m_inputDevices[i]->getName());
+  }
 }
