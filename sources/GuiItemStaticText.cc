@@ -25,8 +25,21 @@ static bool registered=false;
 const char * GuiItemStaticText::className = STATICTEXT_CLASSNAME;
 Lunar<GuiItemStaticText>::RegType  GuiItemStaticText::methods[]= 
 {
-  { 0, 0}
+  methodWithName(GuiItemStaticText, lsetcaption, "setCaption"),
+  {0, 0}
 };
+
+int GuiItemStaticText::lsetcaption(lua_State * L)
+{
+  const char * cap;
+  if((cap=luaL_checkstring(L,1))) {
+    std::string c=cap;
+    std::wstring item(c.begin(),c.end());
+    m_caption=item;
+  }
+  return 0;
+}
+
 
 GuiItemStaticText::GuiItemStaticText(const std::wstring & caption)
   : IGuiMenuItem(STATICTEXT_CLASSNAME)

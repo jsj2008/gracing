@@ -306,7 +306,7 @@ void GuiMenu::selectNext()
     return;
 
   if(isItemIndexValid(m_focusedItem) && 
-      m_items[m_focusedItem]->retainFocus())
+      m_items[m_focusedItem]->retainFocusGoingNext())
     return;
 
   unsigned startFrom;
@@ -336,7 +336,7 @@ void GuiMenu::selectPrev()
     return;
 
   if(isItemIndexValid(m_focusedItem) && 
-      m_items[m_focusedItem]->retainFocus())
+      m_items[m_focusedItem]->retainFocusGoingPrev())
     return;
 
   if(isItemIndexValid(m_focusedItem)) {

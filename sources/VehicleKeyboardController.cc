@@ -411,6 +411,7 @@ void KeyboardInterface::setConfiguration(XmlNode * root)
         controller->setKeyForAction(action,code);
     }
   }
+  GM_LOG("\n\n\n\nnum controllers: %d\n\n\n\n\n",m_controllers.size());
 }
 void KeyboardInterface::getActionDescription(std::string & descr, unsigned action, unsigned keycode )
 {

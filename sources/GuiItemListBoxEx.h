@@ -50,16 +50,20 @@ class GuiItemListBoxEx : public IGuiMenuItem
     virtual void  onMouseLeave(const GuiPoint & point);
     virtual void  onMouseEnter(const GuiPoint & point);
     virtual void  onKeyClick(const irr::SEvent::SKeyInput & keyinput);
-    virtual bool  retainFocus();
+    virtual bool retainFocusGoingNext();
+    virtual bool retainFocusGoingPrev();
 
     static const char * className;
     static Lunar<GuiItemListBoxEx>::RegType  methods[];
 
     int lgetvalue(lua_State *);
+    int lgetitemlabel(lua_State * L);
     int lsetvalue(lua_State *);
     int ladditem(lua_State *);
     int lappenditem(lua_State *);
     int lclearitems(lua_State *);
+
+    void selectItem(unsigned);
 
   protected:
     virtual void updateGeometry();

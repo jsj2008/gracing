@@ -117,7 +117,8 @@ class IGuiMenuItem
 
     virtual void drawFocus() { }
 
-    virtual bool retainFocus() { return false; }
+    virtual bool retainFocusGoingNext() { return false; }
+    virtual bool retainFocusGoingPrev() { return false; }
 
     virtual GuiRect getRectangle() { return m_rectangle; }
 

@@ -80,6 +80,7 @@ class ResourceManager
     bool cfgSet(const char * name, unsigned value);
 
     void getInputDeviceList(std::vector<std::string> & list);
+    unsigned getInputDeviceNumControllers(unsigned);
 
     void saveConfig();
 

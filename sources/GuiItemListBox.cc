@@ -24,8 +24,25 @@ Lunar<GuiItemListBox>::RegType  GuiItemListBox::methods[]=
 {
   methodWithName(GuiItemListBox, lgetvalue, "getvalue"),
   methodWithName(GuiItemListBox, lsetvalue, "setvalue"),
+  methodWithName(GuiItemListBox, lclearItems, "clearItems"),
+  methodWithName(GuiItemListBox, laddItem, "addItem"),
   { 0,0 }
 };
+
+
+int GuiItemListBox::lclearItems(lua_State * L)
+{
+  m_items.clear();
+  return 0;
+}
+
+int GuiItemListBox::laddItem(lua_State * L)
+{
+  const char * str;
+  if((str=luaL_checkstring(L,1)))
+    addItem(str);
+  return 0;
+}
 
 
 int GuiItemListBox::lgetvalue(lua_State * L)
@@ -157,6 +174,8 @@ void GuiItemListBox::drawFocus()
 
 void  GuiItemListBox::selectNextItem()
 {
+  if(!m_items.size())
+    return;
   m_selectedItem ++;
   m_selectedItem %= m_items.size();
   executeCode(m_onChange.c_str());
@@ -167,6 +186,8 @@ void  GuiItemListBox::selectNextItem()
 
 void  GuiItemListBox::selectPrevItem()
 {
+  if(!m_items.size())
+    return;
   if(m_selectedItem == 0)
     m_selectedItem = m_items.size() - 1;
   else

@@ -38,6 +38,7 @@ class GuiItemStaticText : public IGuiMenuItem
     virtual void onMouseClick(const GuiPoint & point);
     void onKeyClick(const irr::SEvent::SKeyInput & event);
 
+    int lsetcaption(lua_State * L);
   private:
     std::wstring m_caption;
     bool         m_center;

@@ -55,6 +55,8 @@ class GuiItemListBox : public IGuiMenuItem
 
     int lgetvalue(lua_State *);
     int lsetvalue(lua_State *);
+    int lclearItems(lua_State *);
+    int laddItem(lua_State *);
 
   protected:
     virtual void updateGeometry();

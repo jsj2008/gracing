@@ -94,6 +94,10 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/menu.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/menu.lua $(tgt_res_dir)
 
+# DEBUG COPY OF THE EXECUTABLE
+	@$(copier) --cp $(target) $(tgt_dir)/
+
+
 # GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)

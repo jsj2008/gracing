@@ -103,7 +103,6 @@ int quit(lua_State * L)
 
 int getInputDevices(lua_State * L) 
 {
-  //const char * el[] = { "uno", "due", "tre", "quatro", "cinque" };
   lua_newtable(L);
 
   int tb=lua_gettop(L);
@@ -117,6 +116,16 @@ int getInputDevices(lua_State * L)
     lua_pushstring(L, list[i].c_str()) ; //el[i]);
     lua_settable(L,tb);
   }
+  return 1;
+}
+
+int getInputDeviceNumControllers(lua_State * L)
+{
+  int deviceId;
+  deviceId=luaL_checkinteger(L,1);
+  unsigned numControllers=
+      ResourceManager::getInstance()->getInputDeviceNumControllers(deviceId);
+  lua_pushnumber(L,numControllers);
   return 1;
 }
 
@@ -154,6 +163,7 @@ struct embFunctions_s {
   { "setConfig", setConfig },
   { "setSplitScreenMode", setSplitScreenModality },
   { "getInputDevices", getInputDevices },
+  { "getInputDeviceNumControllers", getInputDeviceNumControllers },
   { 0,0 }
 };
 
@@ -421,15 +431,18 @@ void ResourceManager::saveConfig(const std::string & filename)
   m_configRoot->save(filename);
 }
 
+
 void ResourceManager::getTrackCompletePath(const char * trackName, std::string & path)
 {
   path=m_trackDir + std::string(trackName);
 }
 
+
 void ResourceManager::getVehicleCompletePath(const char * vehicleName, std::string & path)
 {    
   path=m_vehicleDir + std::string(vehicleName);
 }
+
 
 void ResourceManager::getTexturesCompletePath(const char * texturesName, std::string & path)
 {    
@@ -442,10 +455,12 @@ void ResourceManager::getConfigCompletePath(const char * filename, std::string &
   path=m_rootDir + std::string(filename);
 }
 
+
 void ResourceManager::getResourceCompletePath(const char * filename, std::string & path)
 {
   path=m_rootDir + std::string(filename);
 }
+
 
 void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 {
@@ -470,7 +485,6 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   keyboardInterface = new KeyboardInterface(&g_eventReceiver);
   m_inputDevices.push_back(keyboardInterface);
 
-
   // - joystick(s)
   core::array<SJoystickInfo> devices;
   JoystickInterface *    joystickInterface;
@@ -481,6 +495,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
       for(u32 i = 0; i < joystickInterface->getNumController(); i++) 
         m_controllers.push_back(joystickInterface->getController(i));
     }
+
 
   for(u32 i = 0; i < keyboardInterface->getNumController(); i++) 
     m_controllers.push_back(keyboardInterface->getController(i));
@@ -592,13 +607,13 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
     m_track=new Track(m_device,m_world,"farm.zip");
 }
 
+
 void ResourceManager::saveConfig()
 {
   std::string configFilename;
   getConfigCompletePath("config.xml",configFilename);
   saveConfig(configFilename);
 }
-
 
 
 bool ResourceManager::cfgGet(const char * name, bool & value)
@@ -623,6 +638,7 @@ bool ResourceManager::cfgGet(const char * name, bool & value)
   return true;
 }
 
+
 bool ResourceManager::cfgGet(const char * nodeName, const XmlNode * & node)
 {
   if(!m_configRoot)
@@ -632,6 +648,7 @@ bool ResourceManager::cfgGet(const char * nodeName, const XmlNode * & node)
 
   return (node);
 }
+
 
 bool ResourceManager::cfgGet(const char * name, std::string & value)
 {
@@ -651,6 +668,7 @@ bool ResourceManager::cfgGet(const char * name, std::string & value)
   return true;
 }
 
+
 bool ResourceManager::cfgGet(const char * name, unsigned & value)
 {
   if(!m_configRoot)
@@ -667,6 +685,7 @@ bool ResourceManager::cfgGet(const char * name, unsigned & value)
   value=Util::parseUnsigned(text.c_str());
   return true;
 }
+
 
 bool ResourceManager::cfgGet(const char * name, double & value)
 {
@@ -685,6 +704,7 @@ bool ResourceManager::cfgGet(const char * name, double & value)
   return true;
 }
 
+
 bool ResourceManager::cfgGet(const char * name, double value[3])
 {
   if(!m_configRoot)
@@ -702,10 +722,12 @@ bool ResourceManager::cfgGet(const char * name, double value[3])
   return true;
 }
 
+
 EventReceiver * ResourceManager::getEventReceiver()
 {
   return &g_eventReceiver;
 }
+
     
 void ResourceManager::loadVehicles()
 {
@@ -733,6 +755,7 @@ void ResourceManager::loadVehicles()
   }
 }
 
+
 void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen) 
 {
   m_menu->setGroup(name);
@@ -743,6 +766,7 @@ void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen
   m_menu->setVisible(true);
 }
 
+
 void ResourceManager::showMenu(const std::string & name,bool centerOnTheScreen) 
 {
   std::wstring wname(name.begin(),name.end());
@@ -752,6 +776,7 @@ void ResourceManager::showMenu(const std::string & name,bool centerOnTheScreen)
   g_eventReceiver.resetOneShotKey();
   m_menu->setVisible(true);
 }
+
 
 void ResourceManager::hideMenu()
 {
@@ -777,12 +802,14 @@ void ResourceManager::lua_doString(const char * script)
     GM_LOG("%s\n", lua_tostring(m_lua, -1));
 }
 
+
 void ResourceManager::startRace(unsigned humanVehicles, unsigned totVehicles)
 {
   m_mustStartRace=true;
   m_humanVehicles=humanVehicles;
   m_totVehicles=totVehicles;
 }
+
 
 void ResourceManager::stepPhaseHandler() { 
   // TODO: this function is very very very very ugly!
@@ -850,12 +877,14 @@ void ResourceManager::stepPhaseHandler() {
   }
 }
 
+
 bool ResourceManager::cfgSet(const char * name, unsigned value)
 {
   char buffer[64];
   snprintf(buffer,64,"%d",value);
   return cfgSet(name,buffer);
 }
+
 
 bool ResourceManager::cfgSet(const char * name, const char * value)
 {
@@ -866,6 +895,24 @@ bool ResourceManager::cfgSet(const char * name, const char * value)
 
   return true;
 }
+
+
+unsigned ResourceManager::getInputDeviceNumControllers(unsigned deviceIdx)
+{
+  GM_LOG("------------------------------\n");
+  for(unsigned i=0; i<m_inputDevices.size(); i++) {
+    GM_LOG("[%02d] '%s'\n",i,m_inputDevices[i]->getName().c_str());
+  }
+  GM_LOG("------------------------------\n");
+
+  if(deviceIdx < m_inputDevices.size()) {
+    unsigned num;
+    num = m_inputDevices[deviceIdx]->getNumController();
+    return num;
+  }
+  return 0;
+}
+
 
 void ResourceManager::getInputDeviceList(std::vector<std::string> & list)
 {
