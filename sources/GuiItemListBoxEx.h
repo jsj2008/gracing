@@ -77,38 +77,6 @@ class GuiItemListBoxEx : public IGuiMenuItem
 
     std::wstring               m_caption;
 
-    struct ImgElement
-    {
-      GuiImage * image;
-      GuiRect    srcRect;
-      GuiRect    dstRect;
-
-      ImgElement() { image=0; }
-
-      inline void draw()
-      {
-        irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
-        if(image) 
-          driver->draw2DImage (
-              image, dstRect, srcRect,
-              0, 0, true);
-      }
-
-      inline void init(GuiTheme * theme, const XmlNode * node)
-      {
-        if(!node)
-          return;
-        std::string value;
-        unsigned idx;
-        if(node->get("r",value)) 
-          Util::parseRect(value.c_str(),srcRect);
-
-        if(node->get("img",idx)) 
-          image = theme->getImage(idx);
-      }
-    };
-
-
     GuiRect    m_listDstRect;
     std::vector<std::wstring>  m_items;
     std::vector<GuiRect>       m_itemsRect;
@@ -120,5 +88,6 @@ class GuiItemListBoxEx : public IGuiMenuItem
 
     std::string m_onChange;
 
+    FrameElement m_frameElement;
 };
 #endif

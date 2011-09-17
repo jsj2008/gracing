@@ -24,7 +24,6 @@ static const char * actionNames[IVehicleController::va_numActions]=
   "accelerate",
   "decelerate",
   "brake",
-  "undefined"
 };
 
 const char * IVehicleController::getActionString(unsigned actionId)
@@ -34,6 +33,7 @@ const char * IVehicleController::getActionString(unsigned actionId)
   return "undefined";
 }
 
+#if 0
 unsigned IVehicleController::getActionId(const char * name)
 {
   for(unsigned i=0; i<va_numActions; i++) 
@@ -42,3 +42,4 @@ unsigned IVehicleController::getActionId(const char * name)
 
   return va_numActions;
 }
+#endif

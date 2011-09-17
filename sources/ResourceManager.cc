@@ -119,6 +119,31 @@ int getInputDevices(lua_State * L)
   return 1;
 }
 
+int getActionsList(lua_State * L)
+{
+
+  unsigned deviceId;
+  unsigned controllerId;
+
+  deviceId=luaL_checkinteger(L,1);
+  controllerId=luaL_checkinteger(L,2);
+
+  lua_newtable(L);
+
+  int tb=lua_gettop(L);
+
+  std::vector<std::string> list;
+
+  ResourceManager::getInstance()->getControllerActions(deviceId,controllerId,list);
+
+  for(unsigned i=0; i < list.size(); i++) {
+    lua_pushnumber(L, i+1);
+    lua_pushstring(L, list[i].c_str()) ; 
+    lua_settable(L,tb);
+  }
+  return 1;
+}
+
 int getInputDeviceNumControllers(lua_State * L)
 {
   int deviceId;
@@ -164,6 +189,7 @@ struct embFunctions_s {
   { "setSplitScreenMode", setSplitScreenModality },
   { "getInputDevices", getInputDevices },
   { "getInputDeviceNumControllers", getInputDeviceNumControllers },
+  { "getActionsForController",getActionsList },
   { 0,0 }
 };
 
@@ -570,7 +596,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_menu->setVisible(true);
   m_menu->setHasFrame(true);
   m_menu->load("menu.xml");
-  m_menu->setGroup(L"main");
+  //m_menu->setGroup(L"main");
+  m_menu->setGroup(L"options");
   m_menu->centerOnTheScreen();
   getEventReceiver()->addListener(m_menu);
 
@@ -580,7 +607,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   loadVehicles();
 
   /////////////////////////////////
-  // phase handlers menus       //
+  // phase handlers menus        //
   /////////////////////////////////
   m_phaseHandlers[pa_vehicleChooser]=new VehicleChooser(device,m_world);
   m_phaseHandlers[pa_race] = new Race(device,m_world);
@@ -901,7 +928,8 @@ unsigned ResourceManager::getInputDeviceNumControllers(unsigned deviceIdx)
 {
   GM_LOG("------------------------------\n");
   for(unsigned i=0; i<m_inputDevices.size(); i++) {
-    GM_LOG("[%02d] '%s'\n",i,m_inputDevices[i]->getName().c_str());
+    GM_LOG("[% 2d] '%s', controllers: %d\n",i,m_inputDevices[i]->getName().c_str(),
+        m_inputDevices[i]->getNumController());
   }
   GM_LOG("------------------------------\n");
 
@@ -919,5 +947,24 @@ void ResourceManager::getInputDeviceList(std::vector<std::string> & list)
   list.clear();
   for(unsigned i=0; i < m_inputDevices.size(); i++) {
     list.push_back(m_inputDevices[i]->getName());
+  }
+}
+
+void ResourceManager::getControllerActions(unsigned deviceId, unsigned controllerId,
+    std::vector<std::string> & list)
+{
+  if(deviceId < m_inputDevices.size() && 
+     controllerId < m_inputDevices[deviceId]->getNumController())
+  {
+    IVehicleController * controller=
+      m_inputDevices[deviceId]->getController(controllerId);
+    list.clear();
+    unsigned numActions=controller->getNumActions();
+    for(unsigned i=0; i<numActions; i++) {
+      std::string actName;
+      controller->getActionSettingString(i,actName);
+      GM_LOG("[%d] '%s'\n",i,actName.c_str());
+      list.push_back(actName);
+    }
   }
 }

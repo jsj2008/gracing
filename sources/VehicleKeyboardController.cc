@@ -295,6 +295,8 @@ class VehicleKeyboardController : public IVehicleController
 
     void        setKeyForAction(unsigned action, unsigned key);
     unsigned    getKeyForAction(unsigned action);
+    virtual void getActionSettingString(unsigned actionId, std::string & outString);
+    unsigned    getNumActions();
 
   private:
     EventReceiver * m_eventReceiver;
@@ -307,12 +309,31 @@ VehicleKeyboardController::VehicleKeyboardController(EventReceiver * receiver)
   for(unsigned i=0; i<va_numActions; i++) m_keyForAction[i]=(irr::EKEY_CODE)0;
 }
 
+void VehicleKeyboardController::getActionSettingString(unsigned actionId, std::string & outString)
+{
+  const char * base=getActionString(actionId);
+  unsigned keycode=getKeyForAction(actionId);
+  char  buffer[128];
+  const char * kk;
+  if(keycode < 256)
+    kk=keyDescr[keycode];
+  else
+    kk=NOT_DEFINED;
+  snprintf(buffer,128,"%s %s",base,kk);
+  outString = buffer;
+}
+
 
 void VehicleKeyboardController::setKeyForAction(unsigned action, unsigned key)
 {
   if(action < va_numActions) {
     m_keyForAction[action]=(irr::EKEY_CODE)key;
   }
+}
+
+unsigned VehicleKeyboardController::getNumActions()
+{
+  return va_numActions;
 }
 
 unsigned VehicleKeyboardController::getKeyForAction(unsigned action)
@@ -328,22 +349,18 @@ void VehicleKeyboardController::updateCommands(
    IVehicle::VehicleCommands &    commands)
 {
   assert(m_eventReceiver);
-  //if(m_eventReceiver->IsKeyDown(irr::KEY_UP)) {
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_accelerate])) {
     commands.throttling=1.;
   }
 
-  //if(m_eventReceiver->IsKeyDown(irr::KEY_DOWN)) {
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_decelerate])) {
     commands.throttling=-1.;
   }
 
-  //if(m_eventReceiver->IsKeyDown(irr::KEY_LEFT)) {
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerLeft])) {
     commands.steering=IVehicle::VehicleCommands::steerLeft;
   }
 
-  //if(m_eventReceiver->IsKeyDown(irr::KEY_RIGHT)) {
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerRight])) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
   }
@@ -384,6 +401,8 @@ unsigned KeyboardInterface::getNumController()
   return m_controllers.size();
 }
 
+
+
 IVehicleController * KeyboardInterface::getController(unsigned i)
 {
   if(i < m_controllers.size()) 
@@ -411,8 +430,9 @@ void KeyboardInterface::setConfiguration(XmlNode * root)
         controller->setKeyForAction(action,code);
     }
   }
-  GM_LOG("\n\n\n\nnum controllers: %d\n\n\n\n\n",m_controllers.size());
 }
+
+
 void KeyboardInterface::getActionDescription(std::string & descr, unsigned action, unsigned keycode )
 {
   char buffer[128];

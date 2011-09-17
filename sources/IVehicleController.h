@@ -40,7 +40,6 @@ class IVehicleController
       va_decelerate,
       va_brake,
 
-      va_undefined,
       va_numActions
     };
     virtual void init(
@@ -53,8 +52,9 @@ class IVehicleController
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)=0;
 
-    static const char * getActionString(unsigned actionId);
-    unsigned            getActionId(const char * name);
+    static const char *  getActionString(unsigned actionId);
+    virtual void getActionSettingString(unsigned actionId, std::string & outString) { outString = ""; }
+    virtual unsigned     getNumActions() { return 0; }
 
     virtual void        startControlVehicle()=0;
     virtual void        stopControlVehicle()=0;

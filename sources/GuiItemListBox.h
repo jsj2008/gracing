@@ -69,6 +69,7 @@ class GuiItemListBox : public IGuiMenuItem
 
     std::wstring               m_caption;
 
+#if 0
     struct ImgElement
     {
       GuiImage * image;
@@ -98,7 +99,42 @@ class GuiItemListBox : public IGuiMenuItem
         if(node->get("img",idx)) 
           image = theme->getImage(idx);
       }
+
+      inline void updateDstFromTopLeft(float x, float y)
+      {
+        _RMINX(dstRect) = x;
+        _RMINY(dstRect) = y;
+        _RMAXX(dstRect) = _RMINX(dstRect) + _RW(srcRect);
+        _RMAXY(dstRect) = _RMINY(dstRect) + _RH(srcRect);
+      }
+
+      inline void updateDstFromTopRight(float x, float y)
+      {
+        _RMAXX(dstRect) = x;
+        _RMINY(dstRect) = y;
+
+        _RMINX(dstRect) = _RMAXX(dstRect) - _RW(srcRect);
+        _RMAXY(dstRect) = _RMINY(dstRect) + _RH(srcRect);
+      }
+
+      inline void updateDstFromBottomLeft(float x, float y)
+      {
+        _RMINX(dstRect) = x;
+        _RMAXY(dstRect) = y;
+
+        _RMAXX(dstRect) = _RMINX(dstRect) + _RW(srcRect);
+        _RMINY(dstRect) = _RMAXY(dstRect) - _RH(srcRect);
+      }
+
+      inline void updateDstFromBottomRight(float x, float y)
+      {
+        _RMAXX(dstRect) = x;
+        _RMAXY(dstRect) = y;
+        _RMINX(dstRect) = _RMAXX(dstRect) - _RW(srcRect);
+        _RMINY(dstRect) = _RMAXY(dstRect) - _RH(srcRect);
+      }
     };
+#endif
 
     ImgElement m_rightButton;
     ImgElement m_leftButton;

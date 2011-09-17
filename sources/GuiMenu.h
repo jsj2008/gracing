@@ -83,6 +83,135 @@ class GuiTheme
     XmlNode *              m_root;
 };
 
+struct ImgElement
+{
+  GuiImage * image;
+  GuiRect    srcRect;
+  GuiRect    dstRect;
+
+  ImgElement() { image=0; }
+
+  inline void draw()
+  {
+    irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
+    if(image) 
+      driver->draw2DImage (
+          image, dstRect, srcRect,
+          0, 0, true);
+  }
+
+  inline void init(GuiTheme * theme, const XmlNode * node)
+  {
+    if(!node)
+      return;
+    std::string value;
+    unsigned idx;
+    if(node->get("r",value)) 
+      Util::parseRect(value.c_str(),srcRect);
+
+    if(node->get("img",idx)) 
+      image = theme->getImage(idx);
+  }
+
+  inline void updateDstFromTopLeft(float x, float y)
+  {
+    _RMINX(dstRect) = x;
+    _RMINY(dstRect) = y;
+    _RMAXX(dstRect) = _RMINX(dstRect) + _RW(srcRect);
+    _RMAXY(dstRect) = _RMINY(dstRect) + _RH(srcRect);
+  }
+
+  inline void updateDstFromTopRight(float x, float y)
+  {
+    _RMAXX(dstRect) = x;
+    _RMINY(dstRect) = y;
+
+    _RMINX(dstRect) = _RMAXX(dstRect) - _RW(srcRect);
+    _RMAXY(dstRect) = _RMINY(dstRect) + _RH(srcRect);
+  }
+
+  inline void updateDstFromBottomLeft(float x, float y)
+  {
+    _RMINX(dstRect) = x;
+    _RMAXY(dstRect) = y;
+
+    _RMAXX(dstRect) = _RMINX(dstRect) + _RW(srcRect);
+    _RMINY(dstRect) = _RMAXY(dstRect) - _RH(srcRect);
+  }
+
+  inline void updateDstFromBottomRight(float x, float y)
+  {
+    _RMAXX(dstRect) = x;
+    _RMAXY(dstRect) = y;
+    _RMINX(dstRect) = _RMAXX(dstRect) - _RW(srcRect);
+    _RMINY(dstRect) = _RMAXY(dstRect) - _RH(srcRect);
+  }
+};
+
+struct FrameElement
+{
+  ImgElement topLeftCorner;
+  ImgElement topRightCorner;
+  ImgElement bottomLeftCorner;
+  ImgElement bottomRightCorner;
+  ImgElement topBorder;
+  ImgElement bottomBorder;
+  ImgElement leftBorder;
+  ImgElement rightBorder;
+
+  FrameElement() { }
+
+  inline void init(GuiTheme * theme, const XmlNode * root)
+  {
+    if(!root)
+      return;
+    XmlNode * node;
+    node = root->getChild("top-left");
+GM_LOG("------------------------------%p\n",node);
+    topLeftCorner.init(theme,node);
+    node = root->getChild("top-right");
+    topRightCorner.init(theme,node);
+    node = root->getChild("bottom-left");
+    bottomLeftCorner.init(theme,node);
+    node = root->getChild("bottom-right");
+    bottomRightCorner.init(theme,node);
+
+#if 0
+    node = root->getChild("top");
+    topBorder.init(theme,node);
+    node = root->getChild("bottom");
+    bottomBorder.init(theme,node);
+    node = root->getChild("right");
+    rightBorder.init(theme,node);
+    node = root->getChild("left");
+    leftBorder.init(theme,node);
+#endif
+  }
+
+  inline void updateGeometry(const GuiRect & rectangle) 
+  {
+    topLeftCorner.updateDstFromTopLeft(_RMINX(rectangle),_RMINY(rectangle));
+    topRightCorner.updateDstFromTopRight(_RMAXX(rectangle),_RMINY(rectangle));
+    bottomLeftCorner.updateDstFromBottomLeft(_RMINX(rectangle),_RMAXY(rectangle));
+    bottomRightCorner.updateDstFromBottomRight(_RMAXX(rectangle),_RMAXY(rectangle));
+  
+#if 0
+    _RMINX(topBorder.dstRect) = _RMAXX(topLeftCorner.dstRect);
+    _RMAXX(topBorder.dstRect) = _RMINX(topRightCorner.dstRect);
+    _RMINY(topBorder.dstRect) = _RMINY(rectangle);
+    _RMAXY(topBorder.dstRect) = _RMINY(rectangle) + _RH(topBorder.dstRect);
+#endif
+  }
+
+  inline void draw()
+  {
+    topLeftCorner.draw();
+    topRightCorner.draw();
+    bottomLeftCorner.draw();
+    bottomRightCorner.draw();
+  }
+};
+
 class IGuiMenuItem 
 {
   public:

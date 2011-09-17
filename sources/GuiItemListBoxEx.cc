@@ -141,6 +141,7 @@ void GuiItemListBoxEx::updateGeometry()
   _RMAXX(m_listDstRect) = _RMAXX(m_rectangle);
   _RMAXY(m_listDstRect) = _RMAXY(m_rectangle);
 
+  m_frameElement.updateGeometry(m_listDstRect);
 
   GuiDimension dim2;
   GuiRect rect=m_listDstRect;
@@ -316,11 +317,16 @@ void GuiItemListBoxEx::setTheme(GuiTheme * theme)
 {
 	IGuiMenuItem::setTheme(theme);
 
-  const XmlNode * root = theme->getNode("listbox");
-  std::string value;
+  const XmlNode * root = theme->getNode(LISTBOXEX_CLASSNAME);
 
-  if(!root) // no checkbox theme present
+  if(!root) 
     return;
+
+  XmlNode * node;
+
+  node=root->getChild("items-frame");
+  m_frameElement.init(theme,root);
+
 }
 
 unsigned GuiItemListBoxEx::getItemMaxWidth()
@@ -360,6 +366,8 @@ void GuiItemListBoxEx::draw()
   m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
   irr::video::SColor color(100,100,200,200);
   irr::video::SColor color2(200,200,200,200);
+
+  m_frameElement.draw();
 
   driver->draw2DRectangle(color,m_listDstRect);
   for(unsigned i=0; i<m_visibleItems; i++) {

@@ -91,20 +91,16 @@ void GuiItemListBox::init(XmlNode * node)
 void GuiItemListBox::addItem(const std::string & sitem, bool selected)
 {
   std::wstring item(sitem.begin(),sitem.end());
-  if(selected) {
+  if(selected) 
     m_selectedItem = m_items.size();
-    GM_LOG("selecting %d\n",m_selectedItem);
-  }
   m_items.push_back(item);
 }
 
 
 void GuiItemListBox::addItem(const std::wstring & item,bool selected)
 {
-  if(selected) {
+  if(selected) 
     m_selectedItem = m_items.size();
-    GM_LOG("selecting %d\n",m_selectedItem);
-  }
   m_items.push_back(item);
 }
 
