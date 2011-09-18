@@ -88,8 +88,9 @@ struct ImgElement
   GuiImage * image;
   GuiRect    srcRect;
   GuiRect    dstRect;
+  GuiPoint   offset;
 
-  ImgElement() { image=0; }
+  ImgElement() { image=0; _X(offset)=0; _Y(offset)=0; }
 
   inline void draw()
   {
@@ -111,6 +112,10 @@ struct ImgElement
 
     if(node->get("img",idx)) 
       image = theme->getImage(idx);
+
+    if(node->get("offset",value)) {
+      Util::parsePoint(value.c_str(),_X(offset),_Y(offset));
+    }
   }
 
   inline void updateDstFromTopLeft(float x, float y)
@@ -159,15 +164,18 @@ struct FrameElement
   ImgElement leftBorder;
   ImgElement rightBorder;
 
+  GuiRect    internalRect;
+  GuiRect    externalRect;
+
   FrameElement() { }
 
   inline void init(GuiTheme * theme, const XmlNode * root)
   {
     if(!root)
       return;
+
     XmlNode * node;
     node = root->getChild("top-left");
-GM_LOG("------------------------------%p\n",node);
     topLeftCorner.init(theme,node);
     node = root->getChild("top-right");
     topRightCorner.init(theme,node);
@@ -176,7 +184,6 @@ GM_LOG("------------------------------%p\n",node);
     node = root->getChild("bottom-right");
     bottomRightCorner.init(theme,node);
 
-#if 0
     node = root->getChild("top");
     topBorder.init(theme,node);
     node = root->getChild("bottom");
@@ -185,22 +192,41 @@ GM_LOG("------------------------------%p\n",node);
     rightBorder.init(theme,node);
     node = root->getChild("left");
     leftBorder.init(theme,node);
-#endif
   }
 
-  inline void updateGeometry(const GuiRect & rectangle) 
+  inline void updateGeometry(const GuiRect & externalRect) 
   {
-    topLeftCorner.updateDstFromTopLeft(_RMINX(rectangle),_RMINY(rectangle));
-    topRightCorner.updateDstFromTopRight(_RMAXX(rectangle),_RMINY(rectangle));
-    bottomLeftCorner.updateDstFromBottomLeft(_RMINX(rectangle),_RMAXY(rectangle));
-    bottomRightCorner.updateDstFromBottomRight(_RMAXX(rectangle),_RMAXY(rectangle));
+    topLeftCorner.updateDstFromTopLeft(_RMINX(externalRect),_RMINY(externalRect));
+    topRightCorner.updateDstFromTopRight(_RMAXX(externalRect),_RMINY(externalRect));
+    bottomLeftCorner.updateDstFromBottomLeft(_RMINX(externalRect),_RMAXY(externalRect));
+    bottomRightCorner.updateDstFromBottomRight(_RMAXX(externalRect),_RMAXY(externalRect));
   
-#if 0
     _RMINX(topBorder.dstRect) = _RMAXX(topLeftCorner.dstRect);
     _RMAXX(topBorder.dstRect) = _RMINX(topRightCorner.dstRect);
-    _RMINY(topBorder.dstRect) = _RMINY(rectangle);
-    _RMAXY(topBorder.dstRect) = _RMINY(rectangle) + _RH(topBorder.dstRect);
-#endif
+    _RMINY(topBorder.dstRect) = _RMINY(externalRect);
+    _RMAXY(topBorder.dstRect) = _RMINY(externalRect) + _RH(topBorder.srcRect);
+
+    _RMINX(bottomBorder.dstRect) = _RMAXX(bottomLeftCorner.dstRect);
+    _RMAXX(bottomBorder.dstRect) = _RMINX(bottomRightCorner.dstRect);
+    _RMINY(bottomBorder.dstRect) = _RMAXY(externalRect) - _RH(bottomBorder.srcRect);
+    _RMAXY(bottomBorder.dstRect) = _RMAXY(externalRect); 
+
+    _RMINX(leftBorder.dstRect) = _RMINX(externalRect);
+    _RMAXX(leftBorder.dstRect) = _RMINX(externalRect) + _RW(leftBorder.srcRect);
+    _RMINY(leftBorder.dstRect) = _RMAXY(topLeftCorner.dstRect);
+    _RMAXY(leftBorder.dstRect) = _RMINY(bottomLeftCorner.dstRect);
+
+    _RMINX(rightBorder.dstRect) = _RMAXX(externalRect) - _RW(leftBorder.srcRect);
+    _RMAXX(rightBorder.dstRect) = _RMAXX(externalRect);
+    _RMINY(rightBorder.dstRect) = _RMAXY(topRightCorner.dstRect);
+    _RMAXY(rightBorder.dstRect) = _RMINY(bottomRightCorner.dstRect);
+
+    this->externalRect = externalRect;
+
+    _RMINX(internalRect) = _RMINX(externalRect) + _RW(leftBorder.dstRect);
+    _RMAXX(internalRect) = _RMAXX(externalRect) - _RW(rightBorder.dstRect);
+    _RMINY(internalRect) = _RMINY(externalRect) + _RH(topBorder.dstRect);
+    _RMAXY(internalRect) = _RMAXY(externalRect) - _RH(bottomBorder.dstRect);
   }
 
   inline void draw()
@@ -209,6 +235,11 @@ GM_LOG("------------------------------%p\n",node);
     topRightCorner.draw();
     bottomLeftCorner.draw();
     bottomRightCorner.draw();
+
+    topBorder.draw();
+    bottomBorder.draw();
+    rightBorder.draw();
+    leftBorder.draw();
   }
 };
 

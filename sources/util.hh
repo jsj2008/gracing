@@ -130,6 +130,10 @@ class Util
       vec.Y=readDouble(file);
     }
 
+    static inline void parsePoint(const char * str, irr::s32 & x, irr::s32 & y)
+    {
+    }
+
     static inline void parseVector(const char * str, irr::core::vector2d<irr::s32>& vect) 
     {
       const irr::u32 WORD_BUFFER_LENGTH = 256;

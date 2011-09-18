@@ -325,7 +325,7 @@ void GuiItemListBoxEx::setTheme(GuiTheme * theme)
   XmlNode * node;
 
   node=root->getChild("items-frame");
-  m_frameElement.init(theme,root);
+  m_frameElement.init(theme,node);
 
 }
 
