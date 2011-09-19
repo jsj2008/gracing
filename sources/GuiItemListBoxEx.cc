@@ -89,6 +89,7 @@ void GuiItemListBoxEx::init(XmlNode * node)
   m_items.clear();
 
   node->get("onChange",m_onChange);
+  node->get("visibleItems",m_visibleItems);
 
   std::vector<XmlNode*> nodes;
   node->getChildren("item",nodes);
@@ -98,6 +99,7 @@ void GuiItemListBoxEx::init(XmlNode * node)
     node->get("selected",selected);
     addItem(nodes[i]->getText(),selected);
   }
+
 
   if(m_boundCfgName != "") {
     unsigned value;
@@ -142,6 +144,8 @@ void GuiItemListBoxEx::updateGeometry()
   _RMAXY(m_listDstRect) = _RMAXY(m_rectangle);
 
   m_frameElement.updateGeometry(m_listDstRect);
+
+  m_listDstRect = m_frameElement.internalRect;
 
   GuiDimension dim2;
   GuiRect rect=m_listDstRect;

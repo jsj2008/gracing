@@ -112,7 +112,7 @@ int getInputDevices(lua_State * L)
   ResourceManager::getInstance()->getInputDeviceList(list);
 
   for(unsigned i=0; i < list.size(); i++) {
-    lua_pushnumber(L, i);
+    lua_pushnumber(L, i+1);
     lua_pushstring(L, list[i].c_str()) ; //el[i]);
     lua_settable(L,tb);
   }
