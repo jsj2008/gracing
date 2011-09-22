@@ -66,6 +66,16 @@ class EventReceiver : public irr::IEventReceiver
       return false;
     }
 
+    inline void grabEvents(IEventListener * lstnr)
+    {
+      m_grabingListener=lstnr;
+    }
+
+    inline void ungrabEvents()
+    {
+      m_grabingListener=0;
+    }
+
   private:
     // We use this array to store the current state of each key
     bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
@@ -73,5 +83,6 @@ class EventReceiver : public irr::IEventReceiver
     int  KeysPressed;
 
     std::vector<IEventListener*>  m_listeners;
+    IEventListener *               m_grabingListener;
 };
 #endif

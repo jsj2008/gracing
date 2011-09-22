@@ -27,6 +27,7 @@ struct SVehicleParameters
   btVector3 vehicleRightDirection;
   btVector3 vehiclePosition;
   double    vehicleSpeed;
+
 };
 
 class IVehicleController
@@ -40,24 +41,38 @@ class IVehicleController
       va_decelerate,
       va_brake,
 
+      va_changeCamera,
+      va_cameraUp,
+      va_cameraDown,
+
+      va_action1,
+      va_action2,
+      va_action3,
+
       va_numActions
     };
     virtual void init(
         const std::vector<btVector3> & controlPoints,
         const btVector3 vehicleForward,
-        const btVector3 startPosition) { };
+        const btVector3 startPosition) {  };
 
     virtual void updateCommands(
         const SVehicleParameters &     vehicleParameters,
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)=0;
 
-    static const char *  getActionString(unsigned actionId);
-    virtual void getActionSettingString(unsigned actionId, std::string & outString) { outString = ""; }
+    static const char *  getActionDefaultString(unsigned actionId);
+    const char *         getActionString(unsigned actionId) { return getActionDefaultString(actionId); }
+    virtual void         getActionSettingString(unsigned actionId, 
+                                    std::string & outString) { outString = ""; }
     virtual unsigned     getNumActions() { return 0; }
 
     virtual void        startControlVehicle()=0;
     virtual void        stopControlVehicle()=0;
+
+    virtual void        startLearnAction(unsigned actionId) { };
+    virtual void        stopLearnAction() { };
+    virtual bool        isLearningAction() { return false; }
 };
 
 #endif

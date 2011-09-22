@@ -280,7 +280,7 @@ static const char * keyDescr[256]={
   /* 0xfe */ "OEM_CLEAR",
   /* 0xff */ NOT_DEFINED
 };
-class VehicleKeyboardController : public IVehicleController
+class VehicleKeyboardController : public IVehicleController /*, public IEventListener*/
 {
   public: 
     VehicleKeyboardController(EventReceiver * receiver);
@@ -293,13 +293,19 @@ class VehicleKeyboardController : public IVehicleController
     void        startControlVehicle() { }
     void        stopControlVehicle()  { }
 
-    void        setKeyForAction(unsigned action, unsigned key);
-    unsigned    getKeyForAction(unsigned action);
-    virtual void getActionSettingString(unsigned actionId, std::string & outString);
-    unsigned    getNumActions();
+    void          setKeyForAction(unsigned action, unsigned key);
+    unsigned      getKeyForAction(unsigned action);
+    virtual void  getActionSettingString(unsigned actionId, std::string & outString);
+    unsigned      getNumActions();
+    virtual void  startLearnAction(unsigned actionId);
+    virtual void  stopLearnAction();
+    void          keyboardEvent(const irr::SEvent::SKeyInput & KeyInput);
+    virtual bool  isLearningAction() { return m_learningAction; }
 
   private:
     EventReceiver * m_eventReceiver;
+    bool            m_learningAction;
+    unsigned        m_whichAction;
 
     irr::EKEY_CODE m_keyForAction[va_numActions];
 };
@@ -307,11 +313,25 @@ VehicleKeyboardController::VehicleKeyboardController(EventReceiver * receiver)
 {
   m_eventReceiver=receiver;
   for(unsigned i=0; i<va_numActions; i++) m_keyForAction[i]=(irr::EKEY_CODE)0;
+  m_learningAction=false;
 }
+
+void  VehicleKeyboardController::startLearnAction(unsigned actionId) 
+{ 
+  m_learningAction=true;
+  m_whichAction=actionId;
+  //m_eventReceiver->grabEvents(this);
+};
+
+void  VehicleKeyboardController::stopLearnAction()
+{
+  m_learningAction=false;
+  m_eventReceiver->ungrabEvents();
+};
 
 void VehicleKeyboardController::getActionSettingString(unsigned actionId, std::string & outString)
 {
-  const char * base=getActionString(actionId);
+  const char * base=getActionDefaultString(actionId);
   unsigned keycode=getKeyForAction(actionId);
   char  buffer[128];
   const char * kk;
@@ -330,6 +350,17 @@ void VehicleKeyboardController::setKeyForAction(unsigned action, unsigned key)
     m_keyForAction[action]=(irr::EKEY_CODE)key;
   }
 }
+
+
+void VehicleKeyboardController::keyboardEvent(const irr::SEvent::SKeyInput & keyInput) 
+{
+  if(!keyInput.PressedDown && keyInput.Key < 256 && m_learningAction) {
+    m_keyForAction[m_whichAction]=keyInput.Key;
+    GM_LOG("pressed: '%s'\n",keyDescr[keyInput.Key]);
+    stopLearnAction();
+  }
+}
+
 
 unsigned VehicleKeyboardController::getNumActions()
 {
@@ -364,6 +395,15 @@ void VehicleKeyboardController::updateCommands(
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerRight])) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
   }
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_changeCamera])) 
+    commands.changeCamera=true;
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_cameraUp]))
+    commands.cameraUp=true;
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_cameraDown]))
+    commands.cameraDown=true;
 }
 
 KeyboardInterface::KeyboardInterface(EventReceiver * er)
@@ -443,7 +483,7 @@ void KeyboardInterface::getActionDescription(std::string & descr, unsigned actio
     kk=NOT_DEFINED;
 
   snprintf(buffer,128,"%s %s",
-      IVehicleController::getActionString(action),kk);
+      IVehicleController::getActionDefaultString(action),kk);
 
   descr=buffer;
 }

@@ -73,6 +73,10 @@ class IVehicle : public CompoundSceneNode
       steerRite,
       steerNone
     }        steering;
+
+    bool      changeCamera;
+    bool      cameraUp;
+    bool      cameraDown;
   } m_vehicleCommands;
 
   virtual void             setEnableControls(bool enable)=0;

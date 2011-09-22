@@ -209,11 +209,23 @@ void Race::updateVehiclesInfo()
     vehiclePosition = vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
     vpar.vehicleSpeed = vinfo.vehicle->getSpeed();
 
-
     vinfo.controller->updateCommands(
         vpar,
         controlPoints,
         vinfo.vehicle->getVehicleCommands());
+
+////////////////////////////////////////////////////////////
+    if(vinfo.cameraData) {
+      IVehicle::VehicleCommands & cmds=vinfo.vehicle->getVehicleCommands();
+    
+      if(vinfo.waitChangeCamera && cmds.changeCamera) {
+        vinfo.cameraData->cameraAnim->nextCameraType();
+        vinfo.waitChangeCamera=false;
+      } else {
+        vinfo.waitChangeCamera=true;
+      }
+    }
+////////////////////////////////////////////////////////////
 
     double newDist;
 
@@ -567,6 +579,7 @@ bool Race::addVehicle(IVehicle * vehicle,IVehicleController * controller,
     bool followed)
 
 {
+  assert(controller);
   if(m_nVehicles == max_vehicles)
     return false;
   if(m_track == 0)

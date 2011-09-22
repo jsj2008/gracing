@@ -323,9 +323,8 @@ main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheel
 main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 main.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 main.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-main.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-main.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh XmlNode.h
-main.o: CameraDataManager.hh util.hh TestVehicle.h IrrDebugDrawer.h
+main.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+main.o: XmlNode.h CameraDataManager.hh util.hh TestVehicle.h IrrDebugDrawer.h
 main.o: DataRecorder.h GUISpeedometer.h GuiMenu.h
 Track.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 Track.o: /usr/include/stdio.h /usr/include/_types.h /usr/include/sys/_types.h
@@ -650,11 +649,11 @@ Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWhee
 Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Track.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Track.o: IVehicle.h CompoundSceneNode.h INumberOutput.h XmlNode.h
-Track.o: ResourceManager.h lua/lunar.h Vehicle.h IDeviceInterface.h
-Track.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
-Track.o: IPhaseHandler.h CameraDataManager.hh util.hh Util.hh Race.h
-Track.o: VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h GuiCronometer.h
-Track.o: GuiCommunicator.h GuiFrame.h GuiCockpit.h
+Track.o: ResourceManager.h lua/lunar.h Vehicle.h EventReceiver.h
+Track.o: EmptyPhaseHandler.h IPhaseHandler.h CameraDataManager.hh util.hh
+Track.o: Util.hh Race.h IVehicleController.h VehicleCameraAnimator.h
+Track.o: Tweening.h GuiReadySetGo.h GuiCronometer.h GuiCommunicator.h
+Track.o: GuiFrame.h GuiCockpit.h
 CCrisMeshFileLoader.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
 CCrisMeshFileLoader.o: /usr/include/stdio.h /usr/include/_types.h
 CCrisMeshFileLoader.o: /usr/include/sys/_types.h /usr/include/sys/cdefs.h
@@ -1618,9 +1617,8 @@ Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWh
 Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Vehicle.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Vehicle.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h util.hh
-Vehicle.o: XmlNode.h ResourceManager.h lua/lunar.h IDeviceInterface.h
-Vehicle.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
-Vehicle.o: IPhaseHandler.h Track.hh CameraDataManager.hh
+Vehicle.o: XmlNode.h ResourceManager.h lua/lunar.h EventReceiver.h
+Vehicle.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
 IrrMotionState.o: IrrMotionState.h
 IrrMotionState.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 IrrMotionState.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -2272,14 +2270,15 @@ ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehi
 ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 ResourceManager.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 ResourceManager.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-ResourceManager.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-ResourceManager.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
-ResourceManager.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
-ResourceManager.o: CCrisMeshFileLoader.h GuiMenu.h JoystickInterface.h Race.h
-ResourceManager.o: VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h
-ResourceManager.o: GuiCronometer.h GuiCommunicator.h GuiFrame.h GuiCockpit.h
-ResourceManager.o: VehicleChooser.h VehicleKeyboardController.h
-ResourceManager.o: VehicleNullController.h VehicleAutoController.h
+ResourceManager.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+ResourceManager.o: IPhaseHandler.h Track.hh XmlNode.h CameraDataManager.hh
+ResourceManager.o: util.hh CCrisMeshFileLoader.h GuiMenu.h
+ResourceManager.o: JoystickInterface.h IDeviceInterface.h
+ResourceManager.o: IVehicleController.h Race.h VehicleCameraAnimator.h
+ResourceManager.o: Tweening.h GuiReadySetGo.h GuiCronometer.h
+ResourceManager.o: GuiCommunicator.h GuiFrame.h GuiCockpit.h VehicleChooser.h
+ResourceManager.o: VehicleKeyboardController.h VehicleNullController.h
+ResourceManager.o: VehicleAutoController.h
 VehicleCameraAnimator.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleCameraAnimator.o: gmlog.h /usr/include/stdio.h /usr/include/_types.h
 VehicleCameraAnimator.o: /usr/include/sys/_types.h
@@ -3272,10 +3271,9 @@ GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehic
 GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GUISpeedometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GUISpeedometer.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GUISpeedometer.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GUISpeedometer.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
-GUISpeedometer.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
-GUISpeedometer.o: GUISpeedometer.h
+GUISpeedometer.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GUISpeedometer.o: IPhaseHandler.h Track.hh XmlNode.h CameraDataManager.hh
+GUISpeedometer.o: util.hh GUISpeedometer.h
 GuiReadySetGo.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 GuiReadySetGo.o: /usr/include/stdio.h /usr/include/_types.h
 GuiReadySetGo.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
@@ -3601,9 +3599,8 @@ GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicl
 GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiReadySetGo.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiReadySetGo.o: Vehicle.h IVehicle.h CompoundSceneNode.h INumberOutput.h
-GuiReadySetGo.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-GuiReadySetGo.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh XmlNode.h
-GuiReadySetGo.o: CameraDataManager.hh util.hh
+GuiReadySetGo.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiReadySetGo.o: XmlNode.h CameraDataManager.hh util.hh
 GuiCronometer.o: ResourceManager.h /usr/include/stdlib.h
 GuiCronometer.o: /usr/include/Availability.h
 GuiCronometer.o: /usr/include/AvailabilityInternal.h /usr/include/_types.h
@@ -3931,9 +3928,9 @@ GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicl
 GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiCronometer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCronometer.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCronometer.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GuiCronometer.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
-GuiCronometer.o: XmlNode.h CameraDataManager.hh util.hh GuiCronometer.h
+GuiCronometer.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiCronometer.o: IPhaseHandler.h Track.hh XmlNode.h CameraDataManager.hh
+GuiCronometer.o: util.hh GuiCronometer.h
 GuiCommunicator.o: /usr/include/stdarg.h GuiCommunicator.h
 GuiCommunicator.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiCommunicator.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -4261,9 +4258,8 @@ GuiCommunicator.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dyna
 GuiCommunicator.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCommunicator.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiCommunicator.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCommunicator.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GuiCommunicator.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
-GuiCommunicator.o: Track.hh CameraDataManager.hh util.hh
+GuiCommunicator.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiCommunicator.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
 GuiCockpit.o: ResourceManager.h /usr/include/stdlib.h
 GuiCockpit.o: /usr/include/Availability.h /usr/include/AvailabilityInternal.h
 GuiCockpit.o: /usr/include/_types.h /usr/include/sys/_types.h
@@ -4588,9 +4584,9 @@ GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/b
 GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiCockpit.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiCockpit.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiCockpit.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GuiCockpit.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
-GuiCockpit.o: XmlNode.h CameraDataManager.hh util.hh Util.hh GuiCockpit.h
+GuiCockpit.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiCockpit.o: IPhaseHandler.h Track.hh XmlNode.h CameraDataManager.hh util.hh
+GuiCockpit.o: Util.hh GuiCockpit.h
 GuiFrame.o: /usr/include/assert.h /usr/include/sys/cdefs.h gmlog.h
 GuiFrame.o: /usr/include/stdio.h /usr/include/_types.h
 GuiFrame.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
@@ -4914,9 +4910,9 @@ GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btW
 GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 GuiFrame.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiFrame.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
-GuiFrame.o: IVehicle.h CompoundSceneNode.h INumberOutput.h IDeviceInterface.h
-GuiFrame.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
-GuiFrame.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
+GuiFrame.o: IVehicle.h CompoundSceneNode.h INumberOutput.h EventReceiver.h
+GuiFrame.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
+GuiFrame.o: util.hh
 VehicleKeyboardController.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleKeyboardController.o: EventReceiver.h
 VehicleKeyboardController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -5255,6 +5251,10 @@ VehicleKeyboardController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDyn
 VehicleKeyboardController.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 VehicleKeyboardController.o: IVehicle.h CompoundSceneNode.h gmlog.h
 VehicleKeyboardController.o: INumberOutput.h PhyWorld.h config.h
+VehicleKeyboardController.o: IDeviceInterface.h XmlNode.h ResourceManager.h
+VehicleKeyboardController.o: lua/lunar.h Vehicle.h EmptyPhaseHandler.h
+VehicleKeyboardController.o: IPhaseHandler.h Track.hh CameraDataManager.hh
+VehicleKeyboardController.o: util.hh
 VehicleAutoController.o: VehicleAutoController.h IVehicleController.h
 VehicleAutoController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
 VehicleAutoController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
@@ -5592,9 +5592,8 @@ VehicleAutoController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewF
 VehicleAutoController.o: gmlog.h INumberOutput.h PhyWorld.h config.h
 VehicleAutoController.o: EventReceiver.h Util.hh GuiCommunicator.h GuiFrame.h
 VehicleAutoController.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
-VehicleAutoController.o: IDeviceInterface.h EmptyPhaseHandler.h
-VehicleAutoController.o: IPhaseHandler.h Track.hh CameraDataManager.hh
-VehicleAutoController.o: util.hh
+VehicleAutoController.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+VehicleAutoController.o: CameraDataManager.hh util.hh
 VehicleChooser.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleChooser.o: VehicleChooser.h
 VehicleChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -5922,9 +5921,8 @@ VehicleChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynam
 VehicleChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 VehicleChooser.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
 VehicleChooser.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
-VehicleChooser.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-VehicleChooser.o: EmptyPhaseHandler.h Track.hh CameraDataManager.hh util.hh
-VehicleChooser.o: Tweening.h
+VehicleChooser.o: EventReceiver.h EmptyPhaseHandler.h Track.hh
+VehicleChooser.o: CameraDataManager.hh util.hh Tweening.h
 EventReceiver.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 EventReceiver.o: EventReceiver.h
 EventReceiver.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -6454,10 +6452,10 @@ Race.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActi
 Race.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Race.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
 Race.o: IVehicleController.h Track.hh XmlNode.h ResourceManager.h lua/lunar.h
-Race.o: Vehicle.h IDeviceInterface.h EventReceiver.h EmptyPhaseHandler.h
-Race.o: CameraDataManager.hh util.hh VehicleCameraAnimator.h Tweening.h
-Race.o: GuiReadySetGo.h GuiCronometer.h GuiCommunicator.h GuiFrame.h
-Race.o: GuiCockpit.h IrrDebugDrawer.h
+Race.o: Vehicle.h EventReceiver.h EmptyPhaseHandler.h CameraDataManager.hh
+Race.o: util.hh VehicleCameraAnimator.h Tweening.h GuiReadySetGo.h
+Race.o: GuiCronometer.h GuiCommunicator.h GuiFrame.h GuiCockpit.h
+Race.o: IrrDebugDrawer.h
 Util.o: util.hh /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 Util.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
 Util.o: /usr/include/stdio.h /usr/include/_types.h /usr/include/sys/_types.h
@@ -6781,9 +6779,8 @@ Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheel
 Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 Util.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 Util.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
-Util.o: IVehicle.h CompoundSceneNode.h INumberOutput.h IDeviceInterface.h
-Util.o: IVehicleController.h EventReceiver.h EmptyPhaseHandler.h
-Util.o: IPhaseHandler.h Track.hh CameraDataManager.hh
+Util.o: IVehicle.h CompoundSceneNode.h INumberOutput.h EventReceiver.h
+Util.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
 XmlNode.o: XmlNode.h
 XmlNode.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 XmlNode.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7108,9 +7105,8 @@ XmlNode.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btA
 XmlNode.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 XmlNode.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 XmlNode.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-XmlNode.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-XmlNode.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
-XmlNode.o: util.hh
+XmlNode.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+XmlNode.o: CameraDataManager.hh util.hh
 GuiMenu.o: GuiMenu.h
 GuiMenu.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiMenu.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7436,10 +7432,10 @@ GuiMenu.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btA
 GuiMenu.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiMenu.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiMenu.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiMenu.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-GuiMenu.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh CameraDataManager.hh
-GuiMenu.o: util.hh GuiFrame.h Util.hh GuiItemCheckBox.h GuiItemListBox.h
-GuiMenu.o: GuiItemStaticText.h GuiItemSlider.h
+GuiMenu.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiMenu.o: CameraDataManager.hh util.hh GuiFrame.h Util.hh GuiItemCheckBox.h
+GuiMenu.o: GuiItemListBox.h GuiItemListBoxEx.h GuiItemStaticText.h
+GuiMenu.o: GuiItemSlider.h
 GuiItemCheckBox.o: GuiMenu.h
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -7768,10 +7764,9 @@ GuiItemCheckBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dyna
 GuiItemCheckBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemCheckBox.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiItemCheckBox.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiItemCheckBox.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GuiItemCheckBox.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
-GuiItemCheckBox.o: Track.hh CameraDataManager.hh util.hh GuiItemCheckBox.h
-GuiItemCheckBox.o: Util.hh
+GuiItemCheckBox.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiItemCheckBox.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
+GuiItemCheckBox.o: GuiItemCheckBox.h Util.hh
 GuiItemStaticText.o: GuiMenu.h
 GuiItemStaticText.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemStaticText.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -8102,9 +8097,8 @@ GuiItemStaticText.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dy
 GuiItemStaticText.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemStaticText.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
 GuiItemStaticText.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
-GuiItemStaticText.o: INumberOutput.h IDeviceInterface.h IVehicleController.h
-GuiItemStaticText.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
-GuiItemStaticText.o: Track.hh CameraDataManager.hh util.hh
+GuiItemStaticText.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiItemStaticText.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
 GuiItemStaticText.o: GuiItemStaticText.h
 GuiItemListBox.o: GuiItemListBox.h GuiMenu.h
 GuiItemListBox.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -8433,9 +8427,340 @@ GuiItemListBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynam
 GuiItemListBox.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemListBox.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiItemListBox.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiItemListBox.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-GuiItemListBox.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
-GuiItemListBox.o: CameraDataManager.hh util.hh Util.hh
+GuiItemListBox.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h
+GuiItemListBox.o: Track.hh CameraDataManager.hh util.hh Util.hh
+GuiItemListBoxEx.o: GuiItemListBoxEx.h GuiMenu.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
+GuiItemListBoxEx.o: /usr/include/stdio.h /usr/include/_types.h
+GuiItemListBoxEx.o: /usr/include/sys/_types.h /usr/include/sys/cdefs.h
+GuiItemListBoxEx.o: /usr/include/machine/_types.h /usr/include/i386/_types.h
+GuiItemListBoxEx.o: /usr/include/secure/_stdio.h
+GuiItemListBoxEx.o: /usr/include/secure/_common.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/aabbox3d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMath.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrTypes.h
+GuiItemListBoxEx.o: /usr/include/wchar.h /usr/include/stdarg.h
+GuiItemListBoxEx.o: /usr/include/time.h /usr/include/_structs.h
+GuiItemListBoxEx.o: /usr/include/sys/_structs.h /usr/include/_wctype.h
+GuiItemListBoxEx.o: /usr/include/ctype.h /usr/include/runetype.h
+GuiItemListBoxEx.o: /usr/include/math.h /usr/include/architecture/i386/math.h
+GuiItemListBoxEx.o: /usr/include/float.h /usr/include/stdlib.h
+GuiItemListBoxEx.o: /usr/include/Availability.h
+GuiItemListBoxEx.o: /usr/include/AvailabilityInternal.h
+GuiItemListBoxEx.o: /usr/include/sys/wait.h /usr/include/sys/signal.h
+GuiItemListBoxEx.o: /usr/include/sys/appleapiopts.h
+GuiItemListBoxEx.o: /usr/include/machine/signal.h /usr/include/i386/signal.h
+GuiItemListBoxEx.o: /usr/include/i386/_structs.h /usr/include/sys/resource.h
+GuiItemListBoxEx.o: /usr/include/machine/endian.h /usr/include/i386/endian.h
+GuiItemListBoxEx.o: /usr/include/sys/_endian.h
+GuiItemListBoxEx.o: /usr/include/libkern/_OSByteOrder.h
+GuiItemListBoxEx.o: /usr/include/libkern/i386/_OSByteOrder.h
+GuiItemListBoxEx.o: /usr/include/alloca.h /usr/include/machine/types.h
+GuiItemListBoxEx.o: /usr/include/i386/types.h /usr/include/limits.h
+GuiItemListBoxEx.o: /usr/include/machine/limits.h /usr/include/i386/limits.h
+GuiItemListBoxEx.o: /usr/include/i386/_limits.h /usr/include/sys/syslimits.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/plane3d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector3d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line3d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CDynamicMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDynamicMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReferenceCounted.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterial.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SColor.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/matrix4.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector2d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/dimension2d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/rect.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/position2d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrString.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrAllocator.h
+GuiItemListBoxEx.o: /usr/include/memory.h /usr/include/string.h
+GuiItemListBoxEx.o: /usr/include/secure/_string.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrArray.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/heapsort.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialFlags.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterialLayer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/S3DVertex.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexIndex.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EHardwareBufferFlags.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EPrimitiveTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVertexBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IIndexBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CVertexBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CIndexBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/coreutil.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/path.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ECullingTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDebugSceneTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverFeatures.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIAlignment.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIElementTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMeshWriterEnums.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMessageBoxFlags.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeAnimatorTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ETerrainElements.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/fast_atof.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD2.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3Shader.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileSystem.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLReader.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrXML.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileArchive.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReadFile.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileList.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoDriver.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITexture.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImage.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/triangle3d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SExposedVideoData.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/quaternion.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributeExchangingObject.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IEventReceiver.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILogger.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/Keycodes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITriangleSelector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrList.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line2d.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EAttributes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBoneSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardTextSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICameraSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICursorControl.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDummyTransformationSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGeometryCreator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGPUProgrammingServices.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EShaderTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIButton.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElement.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUICheckBox.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIColorSelectDialog.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIComboBox.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIContextMenu.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEditBox.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElementFactory.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEnvironment.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISkin.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFileOpenDialog.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFont.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFontBitmap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImage.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIInOutFader.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIListBox.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIMeshViewer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIScrollBar.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpinBox.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpriteBank.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIStaticText.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITabControl.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITable.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIToolbar.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIWindow.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITreeView.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImageList.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageLoader.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageWriter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SLight.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRenderer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRendererServices.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshCache.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshLoader.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshManipulator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexManipulator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshWriter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMetaTriangleSelector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IOSOperator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSystemSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAnimatedMeshSceneNodeEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SParticle.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleBoxEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleCylinderEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleMeshEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRingEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSphereEmitter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAttractionAffector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAffector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleFadeOutAffector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleGravityAffector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRotationAffector.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3LevelMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrlichtDevice.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDeviceTypes.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoModeList.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITimer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneCollisionManager.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneManager.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SceneParameters.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISkinnedMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSkinMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraFPS.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraMaya.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCollisionResponse.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorFactory.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeFactory.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneUserDataSerializer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShaderConstantSetCallBack.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShadowVolumeSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITerrainSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITextSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVolumeLightSceneNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IWriteFile.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLWriter.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightManager.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SAnimatedMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SIrrCreationParameters.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SKeyMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferLightMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferTangents.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
+GuiItemListBoxEx.o: XmlNode.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+GuiItemListBoxEx.o: /usr/include/assert.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuadWord.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDispatcher.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btPersistentManifold.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransformUtil.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btManifoldResult.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCallback.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btPolyhedralConvexShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexInternalShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionMargin.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAabbUtil2.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btSphereShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCylinderShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConeShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConcaveShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleCallback.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexHullShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMesh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStridingMeshInterface.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btOptimizedBvh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btQuantizedBvh.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleInfoMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btSerializer.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btStackAlloc.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCompoundShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTetrahedronShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btEmptyShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btMultiSphereShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btUniformScalingShape.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionConfiguration.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btSimpleBroadphase.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btAxisSweep3.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvt.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btMultiSapBroadphase.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btDefaultMotionState.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuickprof.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btIDebugDraw.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDynamicsWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btContinuousDynamicsWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btSimpleDynamicsWorld.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btJacobianEntry.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHingeConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConeTwistConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSliderConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btUniversalConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHinge2Constraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConstraintSolver.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btRaycastVehicle.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
+GuiItemListBoxEx.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+GuiItemListBoxEx.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
+GuiItemListBoxEx.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
+GuiItemListBoxEx.o: INumberOutput.h EventReceiver.h EmptyPhaseHandler.h
+GuiItemListBoxEx.o: IPhaseHandler.h Track.hh CameraDataManager.hh util.hh
+GuiItemListBoxEx.o: Util.hh
 GuiItemSlider.o: GuiItemSlider.h GuiMenu.h
 GuiItemSlider.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
 GuiItemSlider.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
@@ -8763,8 +9088,7 @@ GuiItemSlider.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynami
 GuiItemSlider.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 GuiItemSlider.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h Vehicle.h
 GuiItemSlider.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-GuiItemSlider.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-GuiItemSlider.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+GuiItemSlider.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
 GuiItemSlider.o: CameraDataManager.hh util.hh Util.hh
 EmptyPhaseHandler.o: EmptyPhaseHandler.h IPhaseHandler.h
 EmptyPhaseHandler.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -9096,8 +9420,8 @@ EmptyPhaseHandler.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dy
 EmptyPhaseHandler.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 EmptyPhaseHandler.o: ResourceManager.h lua/lunar.h Vehicle.h IVehicle.h
 EmptyPhaseHandler.o: CompoundSceneNode.h gmlog.h INumberOutput.h
-EmptyPhaseHandler.o: IDeviceInterface.h IVehicleController.h EventReceiver.h
-EmptyPhaseHandler.o: Track.hh XmlNode.h CameraDataManager.hh util.hh
+EmptyPhaseHandler.o: EventReceiver.h Track.hh XmlNode.h CameraDataManager.hh
+EmptyPhaseHandler.o: util.hh
 IVehicleController.o: IVehicleController.h
 IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
 IVehicleController.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
@@ -9634,7 +9958,7 @@ JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffe
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
 JoystickInterface.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
 JoystickInterface.o: JoystickInterface.h EventReceiver.h IDeviceInterface.h
-JoystickInterface.o: IVehicleController.h
+JoystickInterface.o: XmlNode.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
@@ -9757,7 +10081,8 @@ JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Ve
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 JoystickInterface.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
-JoystickInterface.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
-JoystickInterface.o: PhyWorld.h config.h ResourceManager.h lua/lunar.h
-JoystickInterface.o: Vehicle.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
-JoystickInterface.o: XmlNode.h CameraDataManager.hh util.hh
+JoystickInterface.o: ResourceManager.h lua/lunar.h PhyWorld.h config.h
+JoystickInterface.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
+JoystickInterface.o: INumberOutput.h EmptyPhaseHandler.h IPhaseHandler.h
+JoystickInterface.o: Track.hh CameraDataManager.hh util.hh
+JoystickInterface.o: IVehicleController.h

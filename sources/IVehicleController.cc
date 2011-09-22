@@ -24,9 +24,17 @@ static const char * actionNames[IVehicleController::va_numActions]=
   "accelerate",
   "decelerate",
   "brake",
+
+  "change camera",
+  "camera up",
+  "camera down",
+
+  "action 1",
+  "action 2",
+  "action 3",
 };
 
-const char * IVehicleController::getActionString(unsigned actionId)
+const char * IVehicleController::getActionDefaultString(unsigned actionId)
 {
   if(actionId < va_numActions) 
     return actionNames[actionId];

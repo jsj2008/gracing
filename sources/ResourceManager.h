@@ -35,6 +35,10 @@ class Track;
 class IDeviceInterface;
 class IVehicleController;
 
+
+void stupid_store(void * mem, unsigned size);
+void stupid_assert(void * mem);
+
 class ResourceManager 
 {
   public:
@@ -111,6 +115,9 @@ class ResourceManager
     void startRace(unsigned humanVehicles, unsigned totVehicles);
     inline void endRace()  { m_mustEndRace=true; }
     inline void resumeRace() { m_mustResumeRace=true; }
+    void   startControllerLearning(unsigned deviceId, 
+                unsigned controllerId,unsigned action,const char * callbackCode);
+    void stopControllerLearning();
 
     void setSplitScreenModality(int l);
 
@@ -123,7 +130,6 @@ class ResourceManager
     ResourceManager();
 
     std::vector<IDeviceInterface *> m_inputDevices;
-    std::vector<IVehicleController *> m_controllers;
 
     void loadConfig(const std::string & filename);
     void saveConfig(const std::string & filename);
@@ -175,6 +181,13 @@ class ResourceManager
     unsigned   m_choosenVehicles[m_max_vehicles];
     Track *    m_track;
 
+    IVehicleController * m_controllerLearning;
+    std::string          m_genericCallbackCode;
+    
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   phase handlers status 
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     bool       m_mustStartRace;
     bool       m_mustEndRace;
     bool       m_mustResumeRace;

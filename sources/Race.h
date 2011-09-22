@@ -138,6 +138,9 @@ class Race : public  IPhaseHandler
       unsigned             rank;
 
       CameraData *         cameraData;
+      bool                 waitChangeCamera;
+      bool                 waitcameraUp;
+      bool                 waitcameraDown;
 
     };
 

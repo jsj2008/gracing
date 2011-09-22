@@ -92,6 +92,7 @@ void VehicleAutoController::init(
         const btVector3 vehicleDirection,
         const btVector3 startPosition)
 {
+  GM_LOG("%s start\n",__FUNCTION__);
   unsigned size=0;
   size=controlPoints.size();
   double bestDistance=1000000.;
@@ -123,6 +124,7 @@ void VehicleAutoController::init(
     m_currentIndex = bestDistanceIndex;
 
   m_initialized=true;
+  GM_LOG("%s stop\n",__FUNCTION__);
 }
 
 

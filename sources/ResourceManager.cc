@@ -45,6 +45,29 @@ extern "C" {
 #include "lualib.h"
 } 
 
+struct ControllerChooser {
+  unsigned deviceId;
+  unsigned controllerId;
+  std::vector<IDeviceInterface*> & deviceList;
+  ControllerChooser(std::vector<IDeviceInterface*> & deviceList) 
+    : deviceList(deviceList)
+  { 
+    deviceId=0; 
+    controllerId=0;
+  }
+
+  IVehicleController * getController()
+  {
+    if(deviceId == deviceList.size())
+      return 0;
+    if(controllerId == deviceList[deviceId]->getNumController()) {
+      if(++deviceId == deviceList.size())
+        return 0;
+      controllerId=0;
+    }
+    return deviceList[deviceId]->getController(controllerId++);
+  }
+}; 
 
 extern bool globalDone;
 static EventReceiver g_eventReceiver;
@@ -144,6 +167,18 @@ int getActionsList(lua_State * L)
   return 1;
 }
 
+int startLearnAction(lua_State * L)
+{
+  unsigned dev,contr,act;
+  const char * callback;
+  dev=luaL_checkinteger(L,1);
+  contr=luaL_checkinteger(L,2);
+  act=luaL_checkinteger(L,3);
+  callback=luaL_checkstring(L,4);
+  ResourceManager::getInstance()->startControllerLearning(dev,contr,act,callback);
+  return 0;
+}
+
 int getInputDeviceNumControllers(lua_State * L)
 {
   int deviceId;
@@ -189,7 +224,9 @@ struct embFunctions_s {
   { "setSplitScreenMode", setSplitScreenModality },
   { "getInputDevices", getInputDevices },
   { "getInputDeviceNumControllers", getInputDeviceNumControllers },
+
   { "getActionsForController",getActionsList },
+  { "startLearnAction", startLearnAction },
   { 0,0 }
 };
 
@@ -406,6 +443,7 @@ ResourceManager::ResourceManager()
   m_totVehicles=4;
   m_mustStartRace=false;
   m_mustResumeRace=false;
+  m_controllerLearning=0;
   m_mustEndRace=false;
   //{ m_max_vehicles=4 };
   //unsigned   m_choosenVehicles[m_max_vehicles];
@@ -451,9 +489,6 @@ void ResourceManager::saveConfig(const std::string & filename)
     device->getConfiguration(node);
   }
 
-
-  
-
   m_configRoot->save(filename);
 }
 
@@ -487,6 +522,28 @@ void ResourceManager::getResourceCompletePath(const char * filename, std::string
   path=m_rootDir + std::string(filename);
 }
 
+void ResourceManager::startControllerLearning(unsigned deviceId, 
+    unsigned controllerId, unsigned action, const char * callback)
+{
+  if(deviceId < m_inputDevices.size() &&
+     controllerId < m_inputDevices[deviceId]->getNumController()) {
+    m_controllerLearning = 
+       m_inputDevices[deviceId]->getController(controllerId);
+    m_controllerLearning->startLearnAction(action);
+    if(callback) 
+      m_genericCallbackCode=callback;
+    GM_LOG("start learning controller\n");
+  }
+}
+
+void ResourceManager::stopControllerLearning()
+{
+ if(m_controllerLearning) {
+   m_controllerLearning=0;
+   lua_doString(m_genericCallbackCode.c_str());
+ }
+}
+
 
 void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 {
@@ -509,7 +566,6 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   // - keyboard
   KeyboardInterface * keyboardInterface;
   keyboardInterface = new KeyboardInterface(&g_eventReceiver);
-  m_inputDevices.push_back(keyboardInterface);
 
   // - joystick(s)
   core::array<SJoystickInfo> devices;
@@ -518,17 +574,16 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
     for(u32 joystick = 0; joystick < devices.size(); ++joystick) {
       joystickInterface=new JoystickInterface(m_device,devices[joystick]);
       m_inputDevices.push_back(joystickInterface);
-      for(u32 i = 0; i < joystickInterface->getNumController(); i++) 
-        m_controllers.push_back(joystickInterface->getController(i));
     }
 
+  // NB: keyboard is pushed last 
+  //     because the order in which the devices
+  //     appear in the m_inputDevices vector
+  //     is the order they are choosen in the race
+  //     (and keyboard must be used only when
+  //      there is no joystick)
+  m_inputDevices.push_back(keyboardInterface);
 
-  for(u32 i = 0; i < keyboardInterface->getNumController(); i++) 
-    m_controllers.push_back(keyboardInterface->getController(i));
-
-  // this can be asserted due
-  // to the presence of the keyboard interface !!
-  assert(m_controllers.size() >= 2);
 
   // set the configuration for the input devices
   XmlNode * inputDevicesNode;
@@ -597,7 +652,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_menu->setHasFrame(true);
   m_menu->load("menu.xml");
   //m_menu->setGroup(L"main");
-  m_menu->setGroup(L"options");
+  m_menu->setGroup(L"racesetup");
   m_menu->centerOnTheScreen();
   getEventReceiver()->addListener(m_menu);
 
@@ -857,17 +912,25 @@ void ResourceManager::stepPhaseHandler() {
     return;
   } 
 
-  
+  if(m_controllerLearning) {
+   if(!m_controllerLearning->isLearningAction() || 
+      getEventReceiver()->OneShotKey(irr::KEY_ESCAPE)) {
+      stopControllerLearning();
+   }
+  }
+
   if(m_mustResumeRace && m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
     static_cast<Race*>(m_currentPhaseHandler)->togglePause();
     m_mustResumeRace=false;
   }
-    
+
   
   done=m_currentPhaseHandler->step();
 
+
   if(done || m_mustEndRace) {
     if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {
+      ControllerChooser controllerChooser(m_inputDevices);
 
       m_currentPhaseHandler->unprepare();
 
@@ -875,26 +938,26 @@ void ResourceManager::stepPhaseHandler() {
 
       const std::vector<IVehicle*> & vehicles=getVehiclesList();
       assert(vehicles.size() >= 4);
-      assert(m_controllers.size() >= m_humanVehicles);
-
-      unsigned totController=0;
 
       for(unsigned i=0; i < m_totVehicles; i++) {
-        GM_LOG("adding vehicle '%s'\n",
-              vehicles[m_choosenVehicles[i]]->getName().c_str());
-        if(i < m_humanVehicles) 
-          static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(vehicles[m_choosenVehicles[i]],
-              m_controllers[totController++],
-              vehicles[m_choosenVehicles[i]]->getName().c_str(),true);
-        else
-          static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
-              vehicles[m_choosenVehicles[i]],
-              new VehicleAutoController(),
-              vehicles[m_choosenVehicles[i]]->getName().c_str(),false);
+        IVehicleController * controller;
+        bool followed;
+        if(i < m_humanVehicles) {
+          controller=controllerChooser.getController();
+          followed=true;
+        } else {
+          controller=new VehicleAutoController();
+          followed=true;
+        }
+
+        static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
+            vehicles[m_choosenVehicles[i]],
+            controller,
+            vehicles[m_choosenVehicles[i]]->getName().c_str(),followed);
       }
       static_cast<Race*>(m_phaseHandlers[pa_race])->restart();
       m_currentPhaseHandler = m_phaseHandlers[pa_race];
-      GM_LOG("staring race\n");
+      GM_LOG("starting race\n");
     } else if(m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
       m_mustEndRace = false;
       m_phaseHandlers[pa_race]->unprepare();

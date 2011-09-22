@@ -37,13 +37,23 @@ bool EventReceiver::OnEvent(const SEvent& event)
         KeysPressed--;
     }
     KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
-    for(unsigned i=0; i< m_listeners.size(); i++) 
-      m_listeners[i]->keyboardEvent(event.KeyInput);
+    if(m_grabingListener)
+      m_grabingListener->keyboardEvent(event.KeyInput);
+    else 
+      for(unsigned i=0; i< m_listeners.size(); i++) 
+        m_listeners[i]->keyboardEvent(event.KeyInput);
   } else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
     if( event.MouseInput.X >= 0 && event.MouseInput.Y >= 0 ) 
-      for(unsigned i=0; i< m_listeners.size(); i++) 
-        m_listeners[i]->mouseEvent(event.MouseInput);
+      if(m_grabingListener)
+        m_grabingListener->mouseEvent(event.MouseInput);
+      else
+        for(unsigned i=0; i< m_listeners.size(); i++) 
+          m_listeners[i]->mouseEvent(event.MouseInput);
+
   } else if( event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
+    if(m_grabingListener)
+      m_grabingListener->joystickEvent(event.JoystickEvent);
+    else
       for(unsigned i=0; i< m_listeners.size(); i++) 
         m_listeners[i]->joystickEvent(event.JoystickEvent);
   }
@@ -78,5 +88,6 @@ EventReceiver::EventReceiver()
     OneShotKeyIsDown[i]=false;
   }
   KeysPressed = 0;
+  m_grabingListener=0;
 }
 

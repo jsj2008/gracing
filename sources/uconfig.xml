@@ -14,8 +14,13 @@
         <action action="1" code="39" descr="steer right RIGHT" />
         <action action="2" code="38" descr="accelerate UP" />
         <action action="3" code="40" descr="decelerate DOWN" />
-        <action action="4" code="0" descr="brake not defined" />
-        <action action="5" code="0" descr="undefined not defined" />
+        <action action="4" code="45" descr="brake INSERT" />
+        <action action="5" code="190" descr="change camera PERIOD" />
+        <action action="6" code="44" descr="camera up SNAPSHOT" />
+        <action action="7" code="77" descr="camera down KEY_M" />
+        <action action="8" code="0" descr="action 1 not defined" />
+        <action action="9" code="0" descr="action 2 not defined" />
+        <action action="10" code="0" descr="action 3 not defined" />
       </device>
       <device>
         <action action="0" code="83" descr="steer left KEY_S" />
@@ -23,7 +28,12 @@
         <action action="2" code="87" descr="accelerate KEY_W" />
         <action action="3" code="90" descr="decelerate KEY_Z" />
         <action action="4" code="0" descr="brake not defined" />
-        <action action="5" code="0" descr="undefined not defined" />
+        <action action="5" code="0" descr="change camera not defined" />
+        <action action="6" code="0" descr="camera up not defined" />
+        <action action="7" code="0" descr="camera down not defined" />
+        <action action="8" code="0" descr="action 1 not defined" />
+        <action action="9" code="0" descr="action 2 not defined" />
+        <action action="10" code="0" descr="action 3 not defined" />
       </device>
     </device>
     <device name="Twin USB Joystick" >
