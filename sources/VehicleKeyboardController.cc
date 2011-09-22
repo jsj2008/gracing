@@ -404,6 +404,12 @@ void VehicleKeyboardController::updateCommands(
 
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_cameraDown]))
     commands.cameraDown=true;
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_cameraLeft]))
+    commands.cameraLeft=true;
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_cameraRight]))
+    commands.cameraRight=true;
 }
 
 KeyboardInterface::KeyboardInterface(EventReceiver * er)
