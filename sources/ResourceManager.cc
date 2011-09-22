@@ -202,7 +202,7 @@ int setConfig(lua_State * L) {
 
 int setSplitScreenModality(lua_State * L) {
   int l;
-  l=luaL_checknumber(L,2);
+  l=luaL_checknumber(L,1);
   ResourceManager::getInstance()->setSplitScreenModality(l);
   return 0;
 }
@@ -947,7 +947,7 @@ void ResourceManager::stepPhaseHandler() {
           followed=true;
         } else {
           controller=new VehicleAutoController();
-          followed=true;
+          followed=false;
         }
 
         static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(

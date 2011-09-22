@@ -69,14 +69,21 @@ class IVehicle : public CompoundSceneNode
     bool     controlsEnabled;
     double   throttling;
     enum {
+      steerNone,
       steerLeft,
-      steerRite,
-      steerNone
+      steerRite
     }        steering;
 
     bool      changeCamera;
     bool      cameraUp;
     bool      cameraDown;
+    bool      cameraLeft;
+    bool      cameraRight;
+
+    void reset() { 
+      memset(this,0,sizeof(*this));
+      //throttling=0.; steering=steerNone; changeCamera=cameraUp=cameraDown=false;
+    }
   } m_vehicleCommands;
 
   virtual void             setEnableControls(bool enable)=0;

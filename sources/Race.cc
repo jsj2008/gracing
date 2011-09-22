@@ -209,23 +209,39 @@ void Race::updateVehiclesInfo()
     vehiclePosition = vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
     vpar.vehicleSpeed = vinfo.vehicle->getSpeed();
 
+    IVehicle::VehicleCommands & cmds=vinfo.vehicle->getVehicleCommands();
+
+    cmds.reset();
+
     vinfo.controller->updateCommands(
         vpar,
         controlPoints,
-        vinfo.vehicle->getVehicleCommands());
+        cmds);
 
-////////////////////////////////////////////////////////////
     if(vinfo.cameraData) {
-      IVehicle::VehicleCommands & cmds=vinfo.vehicle->getVehicleCommands();
-    
-      if(vinfo.waitChangeCamera && cmds.changeCamera) {
-        vinfo.cameraData->cameraAnim->nextCameraType();
+
+      VehicleCameraAnimator * camAnim=
+        vinfo.cameraData->cameraAnim;
+      if(cmds.changeCamera) {
+        if(vinfo.waitChangeCamera) 
+          //vinfo.cameraData->cameraAnim->nextCameraType();
+          camAnim->nextCameraType();
         vinfo.waitChangeCamera=false;
-      } else {
+      } else 
         vinfo.waitChangeCamera=true;
-      }
-    }
-////////////////////////////////////////////////////////////
+
+      if(cmds.cameraUp) 
+        camAnim->moveXY(0.,CAMERA_STEP);
+
+      if(cmds.cameraDown) 
+        camAnim->moveXY(0.,-CAMERA_STEP);
+
+      if(cmds.cameraLeft) 
+        camAnim->moveXY(CAMERA_STEP,0);
+
+      if(cmds.cameraRight) 
+        camAnim->moveXY(CAMERA_STEP,0);
+    } 
 
     double newDist;
 
@@ -281,33 +297,6 @@ void Race::updateVehiclesInfo()
     }
 
     // check to see if the vehicle is on the road
-
-//    unsigned nindex=
-//      nextIndexVehicleControlPoint(vinfo.controlPointIndex,controlPoints);
-//    btVector3 p1=vehiclePosition - controlPoints[vinfo.controlPointIndex];
-//    btVector3 p2=controlPoints[nindex] - controlPoints[vinfo.controlPointIndex];
-//
-//    btScalar p1_project_length=p1.dot(p2) /  p2.length2();
-//    btVector3 p1_project= p2 * p1_project_length ;
-
-#if 0
-    btScalar dist=
-        (vehiclePosition-
-            controlPoints[vinfo.controlPointIndex] + p1_project).length();
-#endif
-
-//    if(debugDrawer) {
-//      btVector3 color(0.,0.,1.);
-//      btVector3 color2(0.,1.,0.);
-//      if(vinfo.controlPointIndex%2)
-//        debugDrawer->drawLine(vehiclePosition,
-//            controlPoints[vinfo.controlPointIndex] + p1_project,
-//            color);
-//      else
-//        debugDrawer->drawLine(vehiclePosition,
-//            controlPoints[vinfo.controlPointIndex] + p1_project,
-//            color2);
-//    }
   }
 }
 

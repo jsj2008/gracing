@@ -44,6 +44,8 @@ class IVehicleController
       va_changeCamera,
       va_cameraUp,
       va_cameraDown,
+      va_cameraLeft,
+      va_cameraRight,
 
       va_action1,
       va_action2,

@@ -28,6 +28,8 @@ static const char * actionNames[IVehicleController::va_numActions]=
   "change camera",
   "camera up",
   "camera down",
+  "camera left",
+  "camera right",
 
   "action 1",
   "action 2",

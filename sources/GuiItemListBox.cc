@@ -22,8 +22,8 @@ static bool registered=false;
 const char * GuiItemListBox::className = LISTBOX_CLASSNAME;
 Lunar<GuiItemListBox>::RegType  GuiItemListBox::methods[]= 
 {
-  methodWithName(GuiItemListBox, lgetvalue, "getvalue"),
-  methodWithName(GuiItemListBox, lsetvalue, "setvalue"),
+  methodWithName(GuiItemListBox, lgetvalue, "getValue"),
+  methodWithName(GuiItemListBox, lsetvalue, "setValue"),
   methodWithName(GuiItemListBox, lclearItems, "clearItems"),
   methodWithName(GuiItemListBox, laddItem, "addItem"),
   { 0,0 }
