@@ -211,6 +211,10 @@ void Track::load()
       loadTriggers(node);
     } else if(node->getName() == "track_start_pos") {
       Util::parseVector(node->getText().c_str(), m_startPosition);
+      GM_LOG("control points: %f,%f,%f,\n",
+          m_startPosition.X,
+          m_startPosition.Y,
+          m_startPosition.Z);
     } else if(node->getName() == "track_start_rot") {
       m_startRotation=Util::parseFloat(node->getText().c_str());
     } else if(node->getName() == "skydome") {

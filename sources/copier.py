@@ -24,11 +24,11 @@ vehicles=[
   "sprinter",
   "turing_machine",
   "tractor",
-  "skate",
   "rocket"
 ]
 
 tracks=[
+  "toylevel",
   "devtrack",
   "tuxtollway",
   "farm",

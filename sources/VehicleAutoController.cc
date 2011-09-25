@@ -29,8 +29,20 @@ extern GuiCommunicator * TEMP_communicator;
 #endif
 
 CFG_PARAM_D(glob_autocontrolAngleEpsilon)=.2;
-CFG_PARAM_D(glob_autocontrolAngleBraking)=.5;
 CFG_PARAM_D(glob_autocontrolDistance)=4.0;
+
+// when the absolute value of speed times the 'angle' is 
+// greater the Braking Factor, the autocontroller
+// decides to brake the vehicle
+CFG_PARAM_D(glob_autocontrolBrakingFactor)=30.5;
+
+// when the absolute value of speed times the 'angle' is 
+// greater the Braking Factor, the autocontroller
+// decides to stop throttling.
+// (please note that the Unthrottle Factor must
+//  lesser than the Braking Factor)
+CFG_PARAM_D(glob_autocontrolUnthrottleFactor)=25.5;
+
 
 VehicleAutoController::VehicleAutoController()
 {
@@ -49,7 +61,6 @@ void VehicleAutoController::updateCommands(
   if(!m_initialized)
     return;
 
-
   btVector3 dir = controlPoints[m_currentIndex] - parameters.vehiclePosition;
   btVector3 dir2 = controlPoints[nextIndex] - parameters.vehiclePosition;
 
@@ -57,6 +68,11 @@ void VehicleAutoController::updateCommands(
   double dist2 = dir2.length();
 
   if(dist2 < dist || dist < glob_autocontrolDistance) {
+    GM_LOG("following: %f,%f,%f %d\n",
+        controlPoints[m_currentIndex].getX(),
+        controlPoints[m_currentIndex].getY(),
+        controlPoints[m_currentIndex].getZ(),
+        m_currentIndex);
     m_currentIndex = nextIndex;
     dir = dir2;
     dist = dist2;
@@ -80,9 +96,16 @@ void VehicleAutoController::updateCommands(
     steering = "left";
   }
 
-  if(dot > glob_autocontrolAngleBraking || 
-     dot < - glob_autocontrolAngleBraking ) {
-    commands.throttling = -1.;
+  double bfactor = fabs(dot * parameters.vehicleSpeed);
+
+  if(bfactor > glob_autocontrolUnthrottleFactor) {
+    commands.throttling = 0.;
+    if(bfactor >  glob_autocontrolBrakingFactor) {
+      commands.brake=true;
+      GM_LOG("braking %f\n",bfactor);
+    } else {
+      GM_LOG("unthrottling %f\n",bfactor);
+    }
   }
   SHOW("s:%s,sp:%2.3f",steering,parameters.vehicleSpeed);
 }

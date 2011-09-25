@@ -74,6 +74,8 @@ class IVehicle : public CompoundSceneNode
       steerRite
     }        steering;
 
+    bool      brake;
+
     bool      changeCamera;
     bool      cameraUp;
     bool      cameraDown;

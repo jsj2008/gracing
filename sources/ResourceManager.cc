@@ -686,7 +686,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   //thetrack=new Track(device,world,"beach.zip");
 
   if(!m_track) 
-    m_track=new Track(m_device,m_world,"farm.zip");
+    m_track=new Track(m_device,m_world,"toylevel.zip");
 }
 
 
@@ -949,6 +949,8 @@ void ResourceManager::stepPhaseHandler() {
           controller=new VehicleAutoController();
           followed=false;
         }
+
+        followed=true;
 
         static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
             vehicles[m_choosenVehicles[i]],

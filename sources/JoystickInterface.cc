@@ -497,9 +497,11 @@ void JoystickInterface::setConfiguration(XmlNode * root)
       joy->setAction(code,type,analog,index,value);
     }
     actions.clear();
-    devices[i]->getChildren("action",actions);
+    devices[i]->getChildren("gui-action",actions);
     for(unsigned j=0; j<actions.size(); j++) {
       XmlNode * act=actions[j];
+      GM_LOG("setting gui action '%s'\n",
+        IVehicleController::getActionDefaultString(i));
       act->get("code",code);
       act->get("type",type);
       act->get("analog",analog);

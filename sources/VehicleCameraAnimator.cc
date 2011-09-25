@@ -232,15 +232,12 @@ void 	VehicleCameraAnimator::animateNode (irr::scene::ISceneNode *node, irr::u32
     double t,t1;
     m_changingCamera=!m_transiction->doit(m_transictionTime, t);
 
-    if(!m_changingCamera) 
-      GM_LOG("end transiction %f\n",t);
-
-
     t1=1.-t;
     m_transictionTime += m_transictionStep;
     m_camPosition= t1 * ccpos + t * m_camPosition;
     m_camTarget= t1* cctar + t * m_camTarget;
     m_camUpDir= t1 * ccup + t * m_camUpDir;
+    GM_LOG("%f,%f,%f\n",m_camTarget.X,m_camTarget.Y,m_camTarget.Z);
   } else {
     camAnim->doit(pos,forward, m_camPosition, m_camTarget,m_camUpDir);
   }

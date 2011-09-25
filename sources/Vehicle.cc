@@ -728,9 +728,14 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
     } else {
       m_throttle=0.;
     }
-    m_vehicleCommands.throttling=0;
 
-    // hnalde steering
+    if(m_vehicleCommands.brake) {
+      m_brake=1.;
+    }
+
+    //m_vehicleCommands.throttling=0;
+
+    // halde steering
     switch(m_vehicleCommands.steering) {
       case VehicleCommands::steerLeft:
         m_steering -= m_steeringIncrement;
@@ -750,7 +755,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
           m_steering = 0.;
         break;
     };
-    m_vehicleCommands.steering=VehicleCommands::steerNone;
+    //m_vehicleCommands.steering=VehicleCommands::steerNone;
   }
 
   // steps:
