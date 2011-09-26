@@ -86,6 +86,7 @@ int startRace(lua_State * L)
   unsigned hum,tot;
   hum=luaL_checknumber(L,1);
   tot=luaL_checknumber(L,2);
+  GM_LOG("starting race %d uhuman\n",hum);
   ResourceManager::getInstance()->startRace(hum,tot);
   return 0;
 }
@@ -651,8 +652,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_menu->setVisible(true);
   m_menu->setHasFrame(true);
   m_menu->load("menu.xml");
-  //m_menu->setGroup(L"main");
-  m_menu->setGroup(L"racesetup");
+  m_menu->setGroup(L"main");
+  //m_menu->setGroup(L"racesetup");
   m_menu->centerOnTheScreen();
   getEventReceiver()->addListener(m_menu);
 
@@ -906,9 +907,10 @@ void ResourceManager::stepPhaseHandler() {
   if(m_mustStartRace) {
     m_mustStartRace = false;
     hideMenu();
-    static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
-                                 m_humanVehicles,m_totVehicles,m_choosenVehicles);
+    GM_LOG("must start race: %d\n",m_humanVehicles);
     m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
+    static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
+          m_humanVehicles,m_totVehicles,m_choosenVehicles);
     return;
   } 
 
@@ -925,7 +927,8 @@ void ResourceManager::stepPhaseHandler() {
   }
 
   
-  done=m_currentPhaseHandler->step();
+  if(!done)
+    done=m_currentPhaseHandler->step();
 
 
   if(done || m_mustEndRace) {

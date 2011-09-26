@@ -84,16 +84,11 @@ void VehicleAutoController::updateCommands(
 
   commands.throttling = 1.;
 
-  const char * steering;
-
-  steering = "none";
   if(dot < -glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
-    steering = "rite";
   }
   if(dot > glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerLeft;
-    steering = "left";
   }
 
   double bfactor = fabs(dot * parameters.vehicleSpeed);
