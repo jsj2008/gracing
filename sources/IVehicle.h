@@ -63,16 +63,22 @@ class IVehicle : public CompoundSceneNode
   // position/physics reset //
   virtual void reset(const irr::core::vector3d<float>&pos, double rotation)=0;
 
+  virtual void getThrottleAndSteer(double & throttle, double & steer)=0;
+
   // commands //
   struct VehicleCommands 
   {
     bool     controlsEnabled;
     double   throttling;
+#ifdef ANALOG_CONTROLS
+    double steering;
+#else
     enum {
       steerNone,
       steerLeft,
       steerRite
     }        steering;
+#endif
 
     bool      brake;
 

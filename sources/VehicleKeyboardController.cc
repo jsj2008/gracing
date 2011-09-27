@@ -22,6 +22,10 @@
 
 #define  NOT_DEFINED "not defined"
 
+CFG_PARAM_D(glob_throttleIncrement)=0.2; // min: .2, max:
+CFG_PARAM_D(glob_throttleDecrement)=0.01;
+CFG_PARAM_D(glob_steeringIncrement)=0.005f;
+
 static const char * keyDescr[256]={
   /* 0x00 */ NOT_DEFINED,
   /* 0x01 */ "LBUTTON",
@@ -380,6 +384,37 @@ void VehicleKeyboardController::updateCommands(
    IVehicle::VehicleCommands &    commands)
 {
   assert(m_eventReceiver);
+
+#ifdef ANALOG_CONTROLS
+  bool dec;
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_accelerate])) 
+    commands.throttling = parameters.throttle + glob_throttleIncrement;
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_decelerate])) 
+    commands.throttling = parameters.throttle - glob_throttleDecrement;
+  
+  dec=true;
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerLeft])) {
+    commands.steering= parameters.steering - glob_steeringIncrement;
+    dec=false;
+  }
+
+  if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerRight])) {
+    commands.steering= parameters.steering + glob_steeringIncrement;
+    dec=false;
+  }
+
+  if(dec) {
+    if(parameters.steering > glob_steeringIncrement) {
+      commands.steering = parameters.steering - glob_steeringIncrement;
+      GM_LOG("zogno %f\n",commands.steering);
+    } else if(parameters.steering < -glob_steeringIncrement) {
+      commands.steering = parameters.steering + glob_steeringIncrement;
+      GM_LOG("zogno %f\n",commands.steering);
+    }
+  }
+
+#else
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_accelerate])) {
     commands.throttling=1.;
   }
@@ -395,6 +430,7 @@ void VehicleKeyboardController::updateCommands(
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_steerRight])) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
   }
+#endif
 
   if(m_eventReceiver->IsKeyDown(m_keyForAction[va_changeCamera])) 
     commands.changeCamera=true;

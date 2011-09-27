@@ -27,6 +27,10 @@ struct SVehicleParameters
   btVector3 vehicleRightDirection;
   btVector3 vehiclePosition;
   double    vehicleSpeed;
+#ifdef ANALOG_CONTROLS
+  double    throttle;
+  double    steering;
+#endif
 
 };
 

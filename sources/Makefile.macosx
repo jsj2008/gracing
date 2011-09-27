@@ -4,7 +4,6 @@ blender=/Applications/blender-2.56a-beta-OSX-10.5-x86_64/blender.app/Contents/Ma
 # irrlicht paths and libraries
 irr_home=/Users/gianni/MyLibraries/irrlicht-1.7.2
 irr_inc_dir=-I $(irr_home)/include/ -D_IRR_STATIC_LIB_ -DBASE_DIR="\"Resources/\""
-#-arch i386 
 irr_lib_dir=$(irr_home)/source/Irrlicht/MacOSX/build/Release/ -framework Cocoa -framework OpenGL -framework Carbon -framework IOKit  -lIrrlicht  \
 						-L/usr/X11R6/lib -lXxf86vm -lXext -lX11 \
 						-dylib_file \
@@ -29,6 +28,8 @@ resources_macosx_dir=../resources.macosx
 cplusplus=g++ 
 ctags=ectags
 
+defines=-DANALOG_CONTROLS
+
 include sources.mak
 ##########################################################
 tgt_appl_dir=$(tgt_dir)/Contents/MacOs
@@ -44,11 +45,9 @@ src_fonts_dir=$(resources_dir)/gfx/fonts
 src_textures_dir=$(resources_dir)/gfx/textures
 src_themes_dir=$(resources_dir)/themes
 
-ccflags=$(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Ilua -Ilua/lua-5.1.4
+ccflags=$(defines) $(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Ilua -Ilua/lua-5.1.4
 
 
-#				-DVEHICLES_DIR=\"demo.app/Contents/Resources/Vehicles/\" \
-# -DTRACKS_DIR=\"demo.app/Contents/Resources/Tracks/\"
 				
 ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) lua/lua-5.1.4/src/liblua.a \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names

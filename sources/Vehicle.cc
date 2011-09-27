@@ -86,9 +86,6 @@
   };
 
 CFG_PARAM_D(glob_chassisDefaultMass)=5.5; // min: .8, max: 5.5
-CFG_PARAM_D(glob_steeringIncrement)=0.005f;
-CFG_PARAM_D(glob_throttleIncrement)=0.2; // min: .2, max:
-CFG_PARAM_D(glob_throttleDecrement)=0.01;
 CFG_PARAM_D(glob_maxThrottle)=2.7;    // min: .7, max: 2.7
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
@@ -239,12 +236,16 @@ Vehicle::Vehicle(
 
   // accell dynamic info
   m_throttle=0.;
+#ifndef ANALOG_CONTROLS
   m_throttleIncrement=glob_throttleIncrement;
   m_throttleDecrement=glob_throttleDecrement;
+#endif 
 
   // steering dynamic info
   m_steering = 0.;
+#ifndef ANALOG_CONTROLS
   m_steeringIncrement = glob_steeringIncrement;
+#endif
   m_steeringClamp = glob_steeringClamp;
 
   m_wheelFriction = glob_wheelFriction;
@@ -613,7 +614,11 @@ void Vehicle::reset(const irr::core::vector3d<float>&pos, double rotation)
     m_brake=0.;
 
     m_vehicleCommands.throttling=0.;
+#ifdef ANALOG_CONTROLS
+    m_vehicleCommands.steering=0.;
+#else
     m_vehicleCommands.steering=IVehicle::VehicleCommands::steerNone;
+#endif
 
     // reset position
     btTransform trans=btTransform::getIdentity();
@@ -709,9 +714,22 @@ irr::core::vector3df Vehicle::getChassisPos()
   return m_chassisNode->getPosition();
 }
 
+
+#define _clamp(_x,_min,_max) (_x) = (_x) < (_min) ? (_min) : ( (_x) > (_max) ? (_max) : (_x))
+
 void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
 {
   if(m_controlsEnabled) {
+#ifdef ANALOG_CONTROLS
+    m_throttle = m_vehicleCommands.throttling;
+    m_steering = m_vehicleCommands.steering;
+    _clamp(m_throttle, -glob_maxThrottle, glob_maxThrottle);
+    _clamp(m_steering, -m_steeringClamp, m_steeringClamp); 
+
+    if(m_vehicleCommands.brake) {
+      m_brake=1.;
+    }
+#else 
     if(m_vehicleCommands.throttling > 0.) {
       m_brake=0.;
       m_throttle+=m_throttleIncrement;
@@ -756,6 +774,7 @@ void Vehicle::updateAction(btCollisionWorld* world, btScalar deltaTime)
         break;
     };
     //m_vehicleCommands.steering=VehicleCommands::steerNone;
+#endif
   }
 
   // steps:

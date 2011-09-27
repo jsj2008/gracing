@@ -208,6 +208,8 @@ void Race::updateVehiclesInfo()
     vpar.vehicleRightDirection = vinfo.vehicle->getChassisRightDirection();
     vehiclePosition = vpar.vehiclePosition = vectIrrToBullet(vinfo.vehicle->getChassisPos());
     vpar.vehicleSpeed = vinfo.vehicle->getSpeed();
+    
+    vinfo.vehicle->getThrottleAndSteer(vpar.throttle,vpar.steering);
 
     IVehicle::VehicleCommands & cmds=vinfo.vehicle->getVehicleCommands();
 

@@ -84,12 +84,14 @@ void VehicleAutoController::updateCommands(
 
   commands.throttling = 1.;
 
+#ifndef ANALOG_CONTROLS
   if(dot < -glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerRite;
   }
   if(dot > glob_autocontrolAngleEpsilon) {
     commands.steering=IVehicle::VehicleCommands::steerLeft;
   }
+#endif 
 
   double bfactor = fabs(dot * parameters.vehicleSpeed);
 

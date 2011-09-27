@@ -26,7 +26,8 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiItemSlider.cc \
         EmptyPhaseHandler.cc \
         IVehicleController.cc \
-        JoystickInterface.cc
+        JoystickInterface.cc \
+        PathWay.cc
 
 
 subdirs=lua

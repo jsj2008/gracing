@@ -54,8 +54,13 @@ class Vehicle : public IVehicle, public btActionInterface, public btMotionState
 
     virtual double getRestHeight(/*float x, float y*/);
 
-    void reset(const irr::core::vector3d<float>& position, double rotation);
+    void reset( const irr::core::vector3d<float>& position, double rotation);
+
     
+    void getThrottleAndSteer(double & throttle, double & steer) {
+      throttle=m_throttle;
+      steer=m_steering;
+    }
 
     virtual void setEnableControls(bool enable);
 
