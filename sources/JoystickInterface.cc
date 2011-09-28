@@ -25,8 +25,17 @@ enum {
   ac_axis
 };
 
+
 #define AXIS_UP_THRESHOLD     32000
 #define AXIS_DOWN_THRESHOLD  -32000
+
+#ifndef ANALOG_CONTROLS
+#error Digital control not implemented for joysticks
+#endif
+
+CFG_PARAM_D(glob_joystick_throttleIncrement)=0.2; // min: .2, max:
+CFG_PARAM_D(glob_joystick_throttleDecrement)=0.01;
+CFG_PARAM_D(glob_joystick_steeringIncrement)=0.005f;
 
 enum {
   naxes= irr::SEvent::SJoystickEvent::NUMBER_OF_AXES,
@@ -248,8 +257,36 @@ class Joystick : public IVehicleController, public IEventListener
       for(unsigned i=0; i < va_numActions; i++) {
         char buffer[128];
         JoystickInterface::getActionString(buffer,128,m_actions[i].joyact);
-        GM_LOG("  '%s' -> %s\n",IVehicleController::getActionString(i),buffer);
+        GM_LOG("  '%s' [%d] -> %s\n",IVehicleController::getActionString(i),i,buffer);
       }
+    }
+
+    inline void executeAction(JoystickInterface::JoystickAction & ac,
+        double in_variable,
+        double & out_variable,
+        double increment)
+    {
+      switch(ac.type) {
+        case ac_axis:
+          if((ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)  ||
+              (ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)) {
+            out_variable = in_variable + increment;
+            return;
+          } 
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index]) {
+            out_variable = in_variable + increment;
+            return;
+          }
+          break;
+      }
+#if 0
+      if(in_variable > glob_steeringIncrement)
+        out_variable = in_variable - increment;
+      else if(in_variable < -glob_steeringIncrement) 
+        out_variable = in_variable + increment;
+#endif
     }
 
     void updateCommands(
@@ -257,72 +294,34 @@ class Joystick : public IVehicleController, public IEventListener
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)
     {
+      if(!m_controllingVehicle)
+        return ;
       // accelerate
-      JoystickInterface::JoystickAction  & ac=
-          m_actions[va_accelerate].joyact;
-      switch(ac.type) {
-        case ac_axis:
-          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
-            commands.throttling=1.f;
-          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
-            commands.throttling=1.f;
-          break;
-        case ac_button:
-          if(m_buttonsPrevValues[ac.index])
-            commands.throttling=1.f;
-          break;
-      }
 
-      // decelerate
-      ac=m_actions[va_decelerate].joyact;
-      switch(ac.type) {
-        case ac_axis:
-          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
-            commands.throttling=-1.f;
-          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
-            commands.throttling=-1.f;
-          break;
-        case ac_button:
-          if(m_buttonsPrevValues[ac.index])
-            commands.throttling=1.f;
-          break;
-      }
+      executeAction(
+        m_actions[va_accelerate].joyact,
+        parameters.throttle,
+        commands.throttling,
+        glob_joystick_throttleIncrement);
 
-      // steer left
-      ac=m_actions[va_steerLeft].joyact;
-      switch(ac.type) {
-#ifdef ANALOG_CONTROLS
-#else
-        case ac_axis:
-          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
-            commands.steering=IVehicle::VehicleCommands::steerLeft;
-          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
-            commands.steering=IVehicle::VehicleCommands::steerLeft;
-          break;
-        case ac_button:
-          if(m_buttonsPrevValues[ac.index])
-            commands.steering=IVehicle::VehicleCommands::steerLeft;
-          break;
-#endif
-      }
+      executeAction(
+        m_actions[va_decelerate].joyact,
+        parameters.throttle,
+        commands.throttling,
+        -glob_joystick_throttleIncrement);
 
-      // steer right
-      ac=m_actions[va_steerRight].joyact;
-      switch(ac.type) {
-#ifdef ANALOG_CONTROLS
-#else
-        case ac_axis:
-          if(ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)
-            commands.steering=IVehicle::VehicleCommands::steerRite;
-          else if(ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)
-            commands.steering=IVehicle::VehicleCommands::steerRite;
-          break;
-        case ac_button:
-          if(m_buttonsPrevValues[ac.index])
-            commands.steering=IVehicle::VehicleCommands::steerRite;
-          break;
-#endif
-      }
+      executeAction(
+        m_actions[va_steerLeft].joyact,
+        parameters.steering,
+        commands.steering,
+        -glob_joystick_steeringIncrement);
+
+      executeAction(
+        m_actions[va_steerRight].joyact,
+        parameters.steering,
+        commands.steering,
+        glob_joystick_steeringIncrement);
+
     }
 
     void generateAction(irr::s16 action, bool pressed)
@@ -388,16 +387,15 @@ class Joystick : public IVehicleController, public IEventListener
 
     void joystickEvent(const JoystickInterface::JoystickEvent & event)
     {
-      if(!m_controllingVehicle) {
-        joystickEventGui(event);
-      } else {
+      if(m_controllingVehicle) {
         bool dummyBool;
         irr::s16 dummyS16;
         for(unsigned i=0; i<nbuttons; i++) 
           checkButton(event,i,dummyBool);
         for(unsigned i=0; i<naxes; i++)
           checkAxis(event,i,dummyS16);
-      }
+      } else 
+        joystickEventGui(event);
     }
 
 };
@@ -437,7 +435,7 @@ std::string  JoystickInterface::getName()
 
 unsigned JoystickInterface::getNumController()
 {
-  return 0;
+  return m_controllers.size();
 }
 
 IVehicleController * JoystickInterface::getController(unsigned index)
@@ -482,7 +480,7 @@ void JoystickInterface::setConfiguration(XmlNode * root)
   unsigned type;
   bool     analog;
   int      index;
-  unsigned code;
+  unsigned action;
   int      value;
 
   for(unsigned i=0; i<m_controllers.size(); i++) {
@@ -498,12 +496,12 @@ void JoystickInterface::setConfiguration(XmlNode * root)
     devices[i]->getChildren("action",actions);
     for(unsigned j=0; j<actions.size(); j++) {
       XmlNode * act=actions[j];
-      act->get("code",code);
+      act->get("action",action);
       act->get("type",type);
       act->get("analog",analog);
       act->get("index",index);
       act->get("value",value);
-      joy->setAction(code,type,analog,index,value);
+      joy->setAction(action,type,analog,index,value);
     }
     actions.clear();
     devices[i]->getChildren("gui-action",actions);
@@ -513,12 +511,12 @@ void JoystickInterface::setConfiguration(XmlNode * root)
       GM_LOG("setting gui action '%s'\n",
         IVehicleController::getActionDefaultString(i));
 #endif
-      act->get("code",code);
+      act->get("action",action);
       act->get("type",type);
       act->get("analog",analog);
       act->get("index",index);
       act->get("value",value);
-      joy->setGuiAction(code,type,analog,index,value);
+      joy->setGuiAction(action,type,analog,index,value);
     }
     GM_LOG("************** ACTIONS *********\n");
     joy->debugDumpActions();
@@ -542,7 +540,7 @@ void JoystickInterface::getConfiguration(XmlNode * root)
     for(unsigned j=0; j < IVehicleController::va_numActions; j++) {
       XmlNode * act=node->addChild("action");
       joystick->getAction(j,type,analog,index,value);
-      act->set("code",j);
+      act->set("action",j);
       act->set("type",type);
       act->set("analog",analog);
       act->set("index",index);
@@ -552,7 +550,7 @@ void JoystickInterface::getConfiguration(XmlNode * root)
     for(unsigned j=0; j < Joystick::ga_numGuiActions; j++) {
       XmlNode * act=node->addChild("gui-action");
       joystick->getGuiAction(j,type,analog,index,value);
-      act->set("code",j);
+      act->set("action",j);
       act->set("type",type);
       act->set("analog",analog);
       act->set("index",index);

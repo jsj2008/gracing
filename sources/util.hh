@@ -274,7 +274,6 @@ class Util
 
 };
 
-
 class XmlNode;
 XmlNode * loadXml(const char * filename, const char * manifestName);
 

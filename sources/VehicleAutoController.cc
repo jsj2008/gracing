@@ -55,56 +55,9 @@ void VehicleAutoController::updateCommands(
     const std::vector<btVector3> & controlPoints,
     IVehicle::VehicleCommands &    commands)
 {
-  unsigned size = controlPoints.size();
-  unsigned nextIndex = (m_currentIndex + 1) % size;
-
   if(!m_initialized)
     return;
 
-  btVector3 dir = controlPoints[m_currentIndex] - parameters.vehiclePosition;
-  btVector3 dir2 = controlPoints[nextIndex] - parameters.vehiclePosition;
-
-  double dist = dir.length();
-  double dist2 = dir2.length();
-
-  if(dist2 < dist || dist < glob_autocontrolDistance) {
-    GM_LOG("following: %f,%f,%f %d\n",
-        controlPoints[m_currentIndex].getX(),
-        controlPoints[m_currentIndex].getY(),
-        controlPoints[m_currentIndex].getZ(),
-        m_currentIndex);
-    m_currentIndex = nextIndex;
-    dir = dir2;
-    dist = dist2;
-  }
-
-  dir /= dist;
-
-  double dot = parameters.vehicleRightDirection.dot( dir );
-
-  commands.throttling = 1.;
-
-#ifndef ANALOG_CONTROLS
-  if(dot < -glob_autocontrolAngleEpsilon) {
-    commands.steering=IVehicle::VehicleCommands::steerRite;
-  }
-  if(dot > glob_autocontrolAngleEpsilon) {
-    commands.steering=IVehicle::VehicleCommands::steerLeft;
-  }
-#endif 
-
-  double bfactor = fabs(dot * parameters.vehicleSpeed);
-
-  if(bfactor > glob_autocontrolUnthrottleFactor) {
-    commands.throttling = 0.;
-    if(bfactor >  glob_autocontrolBrakingFactor) {
-      commands.brake=true;
-      GM_LOG("braking %f\n",bfactor);
-    } else {
-      GM_LOG("unthrottling %f\n",bfactor);
-    }
-  }
-  SHOW("s:%s,sp:%2.3f",steering,parameters.vehicleSpeed);
 }
 
 void VehicleAutoController::init(
@@ -112,39 +65,12 @@ void VehicleAutoController::init(
         const btVector3 vehicleDirection,
         const btVector3 startPosition)
 {
-  GM_LOG("%s start\n",__FUNCTION__);
-  unsigned size=0;
-  size=controlPoints.size();
-  double bestDistance=1000000.;
-  unsigned bestDistanceIndex=0xffff;
-  for(unsigned i=0; i<size; i++) {
-    const btVector3 & cpnt = controlPoints[i];
-    double dist =  (cpnt - startPosition).length();
-    if(dist < bestDistance) {
-      bestDistance = dist;
-      bestDistanceIndex = i;
-    }
-
-#if 0
-    GM_LOG("[%d] %2.2f %2.2f %2.2f - dist: %2.2f\n",
-        i,
-        cpnt.getX(),
-        cpnt.getY(),
-        cpnt.getZ(),dist);
-#endif
-  }
-
-  unsigned otherIndex = (bestDistanceIndex + 1) % size;
-
-  double dot = vehicleDirection.dot( controlPoints[bestDistanceIndex] - startPosition );
-
-  if(dot < 0)
-    m_currentIndex = otherIndex;
-  else
-    m_currentIndex = bestDistanceIndex;
-
   m_initialized=true;
-  GM_LOG("%s stop\n",__FUNCTION__);
+
+  m_pathway.initialize(controlPoints,5.);
+
+  btVector3 tangent;
+  m_pathway.closestPoint(startPosition,tangent);
 }
 
 

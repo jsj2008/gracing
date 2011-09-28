@@ -67,6 +67,8 @@ class IVehicleController
         const std::vector<btVector3> & controlPoints,
         IVehicle::VehicleCommands &    commands)=0;
 
+    virtual ~IVehicleController() { };
+
     static const char *  getActionDefaultString(unsigned actionId);
     const char *         getActionString(unsigned actionId) { return getActionDefaultString(actionId); }
     virtual void         getActionSettingString(unsigned actionId, 

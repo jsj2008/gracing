@@ -215,6 +215,7 @@ void Race::updateVehiclesInfo()
 
     cmds.reset();
 
+
     vinfo.controller->updateCommands(
         vpar,
         controlPoints,
@@ -268,6 +269,8 @@ void Race::updateVehiclesInfo()
             vehiclePosition,
             controlPoints);
 
+      if(vinfo.cameraData) 
+        vinfo.cameraData->cockpit->setLap(1,vinfo.controlPointIndex);
 
       if(newDist > vinfo.ctrlPntDistance + WRONG_WAY_EPSILON) {
 #if 0

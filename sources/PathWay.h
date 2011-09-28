@@ -24,6 +24,8 @@
 class PathWay
 {
   public:
+  PathWay();
+
   PathWay(
     const std::vector<btVector3> & controlPoints,
     const float                    radius);

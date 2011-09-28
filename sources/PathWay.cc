@@ -16,7 +16,46 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "PathWay.h"
+#include "gmlog.h"
 
+double pointSegmentDistance(
+    const btVector3 & point,
+    const btVector3 & ep0, 
+    const btVector3 & ep1,
+    const btVector3 & segmentNormal,
+    const double    & segmentLength,
+          btVector3 & onPath)
+{
+  btVector3 local = point - ep0;
+
+  // find the projection of "local" onto "segmentNormal"
+  double segmentProjection = segmentNormal.dot (local);
+
+  // handle boundary cases: when projection is not on segment, the
+  // nearest point is one of the endpoints of the segment
+  if (segmentProjection < 0)
+  {
+    onPath = ep0;
+    segmentProjection = 0;
+    return (point - ep0).length();
+  }
+  if (segmentProjection > segmentLength)
+  {
+    onPath = ep1;
+    segmentProjection = segmentLength;
+    return (point - ep1).length();
+  }
+
+  // otherwise nearest point is projection point on segment
+  onPath = segmentNormal * segmentProjection;
+  onPath +=  ep0;
+  return (point - onPath).length();
+
+}
+
+PathWay::PathWay()
+{
+}
 
 PathWay::PathWay(
     const std::vector<btVector3> & controlPoints,
@@ -53,11 +92,28 @@ void PathWay::closestPoint(
     btVector3 & tangent)
 {
   float minDistance=1e10;
+  btVector3 onPath, minOnPath;
+  unsigned i_minus_one;
+  unsigned gi;
 
   for(unsigned i=0; i < m_points.size(); i++)  {
-    double len = m_lengths[i];
-    btVector3 norm=m_normals[i];
-    
+    if(i==0)
+      i_minus_one=m_points.size()-1;
+    else
+      i_minus_one=i-1;
+    double d = pointSegmentDistance(point,
+        m_points[i_minus_one], m_points[i],
+        m_normals[i],m_lengths[i],
+        onPath);
+    GM_LOG("index: %d ",i);
+    if(d < minDistance) {
+      GM_LOG(" good ****\n");
+      gi=i;
+      minDistance = d;
+      minOnPath = onPath;
+      tangent=m_normals[i];
+    } else {
+      GM_LOG(" no good ****\n");
+    }
   }
-
 }

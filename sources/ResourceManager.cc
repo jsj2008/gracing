@@ -953,8 +953,6 @@ void ResourceManager::stepPhaseHandler() {
           followed=false;
         }
 
-        followed=true;
-
         static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
             vehicles[m_choosenVehicles[i]],
             controller,

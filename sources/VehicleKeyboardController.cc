@@ -405,13 +405,10 @@ void VehicleKeyboardController::updateCommands(
   }
 
   if(dec) {
-    if(parameters.steering > glob_steeringIncrement) {
+    if(parameters.steering > glob_steeringIncrement)
       commands.steering = parameters.steering - glob_steeringIncrement;
-      GM_LOG("zogno %f\n",commands.steering);
-    } else if(parameters.steering < -glob_steeringIncrement) {
+    else if(parameters.steering < -glob_steeringIncrement) 
       commands.steering = parameters.steering + glob_steeringIncrement;
-      GM_LOG("zogno %f\n",commands.steering);
-    }
   }
 
 #else

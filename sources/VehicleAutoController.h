@@ -18,6 +18,7 @@
 #define IVEHICLE_AUTO_CONTROLLER_H
 #include "IVehicleController.h"
 #include "EventReceiver.h"
+#include "PathWay.h"
 #include <irrlicht.h>
 
 class VehicleAutoController : public IVehicleController
@@ -39,9 +40,8 @@ class VehicleAutoController : public IVehicleController
     void        stopControlVehicle()  { }
 
   private:
-    unsigned   m_currentIndex;
-    bool       m_initialized;
-    btVector3  m_previousPos;
+    PathWay m_pathway;
+    bool    m_initialized;
 };
 
 #endif
