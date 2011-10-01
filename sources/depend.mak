@@ -2278,7 +2278,7 @@ ResourceManager.o: IVehicleController.h Race.h VehicleCameraAnimator.h
 ResourceManager.o: Tweening.h GuiReadySetGo.h GuiCronometer.h
 ResourceManager.o: GuiCommunicator.h GuiFrame.h GuiCockpit.h VehicleChooser.h
 ResourceManager.o: VehicleKeyboardController.h VehicleNullController.h
-ResourceManager.o: VehicleAutoController.h
+ResourceManager.o: VehicleAutoController.h PathWay.h
 VehicleCameraAnimator.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleCameraAnimator.o: gmlog.h /usr/include/stdio.h /usr/include/_types.h
 VehicleCameraAnimator.o: /usr/include/sys/_types.h
@@ -5590,10 +5590,10 @@ VehicleAutoController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshB
 VehicleAutoController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
 VehicleAutoController.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
 VehicleAutoController.o: gmlog.h INumberOutput.h PhyWorld.h config.h
-VehicleAutoController.o: EventReceiver.h Util.hh GuiCommunicator.h GuiFrame.h
-VehicleAutoController.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
-VehicleAutoController.o: EmptyPhaseHandler.h IPhaseHandler.h Track.hh
-VehicleAutoController.o: CameraDataManager.hh util.hh
+VehicleAutoController.o: EventReceiver.h PathWay.h Util.hh GuiCommunicator.h
+VehicleAutoController.o: GuiFrame.h XmlNode.h ResourceManager.h lua/lunar.h
+VehicleAutoController.o: Vehicle.h EmptyPhaseHandler.h IPhaseHandler.h
+VehicleAutoController.o: Track.hh CameraDataManager.hh util.hh
 VehicleChooser.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleChooser.o: VehicleChooser.h
 VehicleChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -10086,3 +10086,143 @@ JoystickInterface.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
 JoystickInterface.o: INumberOutput.h EmptyPhaseHandler.h IPhaseHandler.h
 JoystickInterface.o: Track.hh CameraDataManager.hh util.hh
 JoystickInterface.o: IVehicleController.h
+PathWay.o: PathWay.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+PathWay.o: /usr/include/math.h /usr/include/architecture/i386/math.h
+PathWay.o: /usr/include/sys/cdefs.h /usr/include/stdlib.h
+PathWay.o: /usr/include/Availability.h /usr/include/AvailabilityInternal.h
+PathWay.o: /usr/include/_types.h /usr/include/sys/_types.h
+PathWay.o: /usr/include/machine/_types.h /usr/include/i386/_types.h
+PathWay.o: /usr/include/sys/wait.h /usr/include/sys/signal.h
+PathWay.o: /usr/include/sys/appleapiopts.h /usr/include/machine/signal.h
+PathWay.o: /usr/include/i386/signal.h /usr/include/i386/_structs.h
+PathWay.o: /usr/include/sys/_structs.h /usr/include/sys/resource.h
+PathWay.o: /usr/include/machine/endian.h /usr/include/i386/endian.h
+PathWay.o: /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h
+PathWay.o: /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h
+PathWay.o: /usr/include/machine/types.h /usr/include/i386/types.h
+PathWay.o: /usr/include/float.h /usr/include/assert.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuadWord.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDispatcher.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btPersistentManifold.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransformUtil.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btManifoldResult.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCallback.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btPolyhedralConvexShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexInternalShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionMargin.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAabbUtil2.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btSphereShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCylinderShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConeShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConcaveShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleCallback.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexHullShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMesh.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStridingMeshInterface.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btOptimizedBvh.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btQuantizedBvh.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleInfoMap.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btSerializer.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btStackAlloc.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+PathWay.o: /usr/include/memory.h /usr/include/string.h
+PathWay.o: /usr/include/secure/_string.h /usr/include/secure/_common.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCompoundShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTetrahedronShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btEmptyShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btMultiSphereShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btUniformScalingShape.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionConfiguration.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btSimpleBroadphase.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btAxisSweep3.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvt.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btMultiSapBroadphase.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btDefaultMotionState.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuickprof.h
+PathWay.o: /usr/include/stdio.h /usr/include/secure/_stdio.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btIDebugDraw.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDynamicsWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btContinuousDynamicsWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btSimpleDynamicsWorld.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btJacobianEntry.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHingeConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConeTwistConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSliderConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btUniversalConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHinge2Constraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConstraintSolver.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btRaycastVehicle.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
+PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+PathWay.o: gmlog.h

@@ -197,7 +197,6 @@ void VehicleCameraAnimator::setCameraType(unsigned camType)
     m_transictionTime=0.;
     m_transictionStep= .5 /  15; // TODO: request resource manager the framerare
     m_changingCamera=true;
-    GM_LOG("starting tranction from %d to %d\n",m_oldCamType,m_camType);
   } else {
     m_oldCamType=m_camType;
     m_camType=camType % 3;
@@ -237,7 +236,6 @@ void 	VehicleCameraAnimator::animateNode (irr::scene::ISceneNode *node, irr::u32
     m_camPosition= t1 * ccpos + t * m_camPosition;
     m_camTarget= t1* cctar + t * m_camTarget;
     m_camUpDir= t1 * ccup + t * m_camUpDir;
-    GM_LOG("%f,%f,%f\n",m_camTarget.X,m_camTarget.Y,m_camTarget.Z);
   } else {
     camAnim->doit(pos,forward, m_camPosition, m_camTarget,m_camUpDir);
   }

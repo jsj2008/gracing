@@ -150,13 +150,6 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   m_device = device;
   m_splitType=0;
 
-#ifdef ONLY_1_CAM
-  m_camera = 0;
-  m_cameraAnim = 0;
-  m_followedVehicleIndex=invalidVehicleIndex;
-#endif
-
-
   // cock pit!!
   unsigned sw,sh;
   ResourceManager::getInstance()->getScreenHeight(sh);
@@ -165,11 +158,6 @@ Race::Race(irr::IrrlichtDevice * device, PhyWorld * world)
   px1=5;     py1=sh-height;
   px2=px1+width;
   py2=py1+height;
-
-#ifdef ONLY_1_CAM
-  m_cockpit = new GuiCockpit(m_guiEnv,m_guiEnv->getRootGUIElement(),3,
-      irr::core::rect<irr::s32>(px1,py1,px2,py2),device->getTimer());
-#endif
 
   m_status=rs_notRunning;
   //restart();
@@ -622,6 +610,8 @@ void Race::updateCamerasViewPort()
   ResourceManager::getInstance()->getScreenWidth(width);
   m_wholeScreenViewPort=irr::core::rect<irr::s32>(0,0,width,height);
 
+  GM_LOG("m_nCameras: %d, vehicles: %d\n",m_nCameras,m_nVehicles);
+
   if(m_nCameras==1) {
     // one camera -> whole screen
     m_cameraData[0]->setViewPort(0,0,width,height);
@@ -645,12 +635,6 @@ void Race::lapTriggered(void * userdata)
   if(vinfo->waitingForLapTrigger) {
     vinfo->waitingForLapTrigger=false;
     vinfo->lapNumber++;
-#if ONLY_1_CAM
-    if(vinfo->index==m_followedVehicleIndex) {
-      m_communicator->show("lap %d",vinfo->lapNumber+1);
-      m_cockpit->setLap(vinfo->lapNumber+1,m_totalLaps);
-    }
-#endif
     if(vinfo->lapNumber == m_totalLaps) 
       vehicleFinished(*vinfo);
   }

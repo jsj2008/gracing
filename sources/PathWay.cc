@@ -57,20 +57,46 @@ PathWay::PathWay()
 {
 }
 
+void PathWay::updateOnPath(btVector3 point)
+{
+  btVector3 tangent;
+  unsigned  index;
+  double    distanceToPath;
+
+  closestPoint(point,
+        tangent,
+        m_targetPoint,
+        distanceToPath,
+        index);
+  if(index != m_currentIndex) {
+    m_currentIndex = index;
+    GM_LOG("following %d\n",index);
+  }
+}
+
+void PathWay::getTarget(btVector3 & target)
+{
+  target=m_targetPoint;
+}
+
 PathWay::PathWay(
     const std::vector<btVector3> & controlPoints,
+    const btVector3                initialPosition,
     const float                    radius)
 {
-  initialize(controlPoints,radius);
+  initialize(controlPoints,initialPosition,radius);
 }
 
 void PathWay::initialize(
     const std::vector<btVector3> & controlPoints,
+    const btVector3                initialPosition,
     const float                    radius)
 {
   m_radius=radius;
+  m_currentIndex=0xffff;
 
   unsigned i_minus_one;
+  m_points.clear();
 
   for(unsigned i=0; i<controlPoints.size(); i++) {
     m_points.push_back(controlPoints[i]);
@@ -85,11 +111,26 @@ void PathWay::initialize(
     m_normals.push_back(normal);
     m_totalLength += length;
   }
+
+  btVector3 tangent;
+  btVector3 pointToFollow;
+  double    distanceToPath;
+  unsigned  index;
+
+  closestPoint(initialPosition,
+        tangent,
+        pointToFollow,
+        distanceToPath,
+        index);
+  m_currentIndex = index;
 }
 
 void PathWay::closestPoint(
     const btVector3 & point,
-    btVector3 & tangent)
+    btVector3 & tangent,
+    btVector3 & pointToFollow,
+    double    & distanceToPath,
+    unsigned  & index)
 {
   float minDistance=1e10;
   btVector3 onPath, minOnPath;
@@ -105,15 +146,15 @@ void PathWay::closestPoint(
         m_points[i_minus_one], m_points[i],
         m_normals[i],m_lengths[i],
         onPath);
-    GM_LOG("index: %d ",i);
     if(d < minDistance) {
-      GM_LOG(" good ****\n");
       gi=i;
       minDistance = d;
       minOnPath = onPath;
       tangent=m_normals[i];
-    } else {
-      GM_LOG(" no good ****\n");
-    }
+    } 
   }
+  
+  index=gi;
+  pointToFollow=m_points[gi];
+  distanceToPath=minDistance;
 }

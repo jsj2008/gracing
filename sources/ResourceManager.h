@@ -87,6 +87,8 @@ class ResourceManager
     unsigned getInputDeviceNumControllers(unsigned);
     void getControllerActions(unsigned deviceId, unsigned controllerId,
         std::vector<std::string> & list);
+    const char * getControllerActionName(unsigned deviceId,
+        unsigned controllerId,unsigned actionId);
 
     void saveConfig();
 

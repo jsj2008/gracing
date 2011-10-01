@@ -132,6 +132,43 @@ class Joystick : public IVehicleController, public IEventListener
       }
     }
 
+    const char * getActionString(unsigned actionId) 
+    { 
+      if(actionId < va_numActions) {
+        return IVehicleController::getActionDefaultString(actionId);
+      } 
+      actionId -= va_numActions;
+      if(actionId < ga_numGuiActions) {
+        return m_guiActionName[actionId];
+      }
+      return "";
+    }
+
+    void getActionSettingString(unsigned actionId, std::string & outString)
+    {
+      char b1[128];
+      char b2[128];
+      if(actionId < va_numActions) {
+        JoystickInterface::getActionString(b1,128,m_actions[actionId].joyact);
+        snprintf(b2,128," %s %s",IVehicleController::getActionString(actionId),b1);
+        outString = b2;
+        return;
+      } 
+      actionId -= va_numActions;
+      if(actionId < ga_numGuiActions) {
+        JoystickInterface::getActionString(b1,128,m_actions[actionId].joyact);
+        snprintf(b2,128,"gui %s %s", m_guiActionName[actionId], "not set");
+        outString = b2;
+        return;
+      }
+      outString = "";
+    }
+
+    unsigned getNumActions()
+    {
+      return va_numActions + ga_numGuiActions;
+    }
+
     void setAction(unsigned vaction,
         unsigned type,
         bool     analog,
@@ -139,8 +176,6 @@ class Joystick : public IVehicleController, public IEventListener
         int      value)
     {
       if(vaction < va_numActions) {
-      GM_LOG("action: %d, type: %d,analog:%d, index:%d, value:%d\n",
-          vaction,type,analog,index,value);
         m_actions[vaction].action = vaction;
         m_actions[vaction].joyact.type = type;
         m_actions[vaction].joyact.analog = analog;
@@ -507,10 +542,6 @@ void JoystickInterface::setConfiguration(XmlNode * root)
     devices[i]->getChildren("gui-action",actions);
     for(unsigned j=0; j<actions.size(); j++) {
       XmlNode * act=actions[j];
-#if 0
-      GM_LOG("setting gui action '%s'\n",
-        IVehicleController::getActionDefaultString(i));
-#endif
       act->get("action",action);
       act->get("type",type);
       act->get("analog",analog);

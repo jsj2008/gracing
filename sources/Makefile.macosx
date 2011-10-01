@@ -17,7 +17,7 @@ bt_inc_dir=-I$(bt_home)/src
 bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
 
-log_enabled=-DLOG_ENABLED
+log_enabled=-DLOG_ENABLED -DLOG_TO_STDOUT
 
 appl_name=gracing
 

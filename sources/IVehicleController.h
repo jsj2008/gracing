@@ -70,7 +70,8 @@ class IVehicleController
     virtual ~IVehicleController() { };
 
     static const char *  getActionDefaultString(unsigned actionId);
-    const char *         getActionString(unsigned actionId) { return getActionDefaultString(actionId); }
+
+    virtual const char * getActionString(unsigned actionId) { return getActionDefaultString(actionId); }
     virtual void         getActionSettingString(unsigned actionId, 
                                     std::string & outString) { outString = ""; }
     virtual unsigned     getNumActions() { return 0; }

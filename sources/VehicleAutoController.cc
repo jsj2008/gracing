@@ -28,26 +28,15 @@ extern GuiCommunicator * TEMP_communicator;
 #define ADD(fmt,...) 
 #endif
 
-CFG_PARAM_D(glob_autocontrolAngleEpsilon)=.2;
-CFG_PARAM_D(glob_autocontrolDistance)=4.0;
-
-// when the absolute value of speed times the 'angle' is 
-// greater the Braking Factor, the autocontroller
-// decides to brake the vehicle
-CFG_PARAM_D(glob_autocontrolBrakingFactor)=30.5;
-
-// when the absolute value of speed times the 'angle' is 
-// greater the Braking Factor, the autocontroller
-// decides to stop throttling.
-// (please note that the Unthrottle Factor must
-//  lesser than the Braking Factor)
-CFG_PARAM_D(glob_autocontrolUnthrottleFactor)=25.5;
-
 
 VehicleAutoController::VehicleAutoController()
 {
    m_initialized=false;
 }
+
+
+static const float dt=1/60.;
+static btVector3  pointToFollow;
 
 
 void VehicleAutoController::updateCommands(
@@ -58,6 +47,22 @@ void VehicleAutoController::updateCommands(
   if(!m_initialized)
     return;
 
+  m_pathway.updateOnPath(parameters.vehiclePosition);
+  btVector3 target;
+
+  m_pathway.getTarget(target);
+
+  target = target - parameters.vehiclePosition;
+
+  double dot=target.dot(parameters.vehicleRightDirection);
+
+#define EPS .3
+#define DIVISOR 10.
+  if(fabs(dot-parameters.steering) > EPS)
+    commands.steering -= (dot-parameters.steering) / 10.;
+  else
+    commands.steering -= parameters.steering;
+  commands.throttling=200.;
 }
 
 void VehicleAutoController::init(
@@ -67,10 +72,7 @@ void VehicleAutoController::init(
 {
   m_initialized=true;
 
-  m_pathway.initialize(controlPoints,5.);
-
-  btVector3 tangent;
-  m_pathway.closestPoint(startPosition,tangent);
+  m_pathway.initialize(controlPoints,startPosition,5.);
 }
 
 

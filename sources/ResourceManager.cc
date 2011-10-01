@@ -143,6 +143,22 @@ int getInputDevices(lua_State * L)
   return 1;
 }
 
+int getControllerActionName(lua_State * L)
+{
+  unsigned deviceId;
+  unsigned controllerId;
+  unsigned actionId;
+
+  deviceId=luaL_checkinteger(L,1);
+  controllerId=luaL_checkinteger(L,2);
+  actionId=luaL_checkinteger(L,3);
+
+  const char * name;
+  name=ResourceManager::getInstance()->getControllerActionName(deviceId,controllerId,actionId);
+  lua_pushstring(L,name);
+  return 1;
+}
+
 int getActionsList(lua_State * L)
 {
 
@@ -159,6 +175,7 @@ int getActionsList(lua_State * L)
   std::vector<std::string> list;
 
   ResourceManager::getInstance()->getControllerActions(deviceId,controllerId,list);
+  GM_LOG("zognan\n");
 
   for(unsigned i=0; i < list.size(); i++) {
     lua_pushnumber(L, i+1);
@@ -225,8 +242,8 @@ struct embFunctions_s {
   { "setSplitScreenMode", setSplitScreenModality },
   { "getInputDevices", getInputDevices },
   { "getInputDeviceNumControllers", getInputDeviceNumControllers },
-
   { "getActionsForController",getActionsList },
+  { "getControllerActionName", getControllerActionName },
   { "startLearnAction", startLearnAction },
   { 0,0 }
 };
@@ -953,6 +970,8 @@ void ResourceManager::stepPhaseHandler() {
           followed=false;
         }
 
+          followed=true;
+
         static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
             vehicles[m_choosenVehicles[i]],
             controller,
@@ -1014,6 +1033,16 @@ void ResourceManager::getInputDeviceList(std::vector<std::string> & list)
   for(unsigned i=0; i < m_inputDevices.size(); i++) {
     list.push_back(m_inputDevices[i]->getName());
   }
+}
+
+const char * ResourceManager::getControllerActionName(unsigned deviceId,
+    unsigned controllerId,unsigned actionId)
+{
+  if(deviceId < m_inputDevices.size() && 
+     controllerId < m_inputDevices[deviceId]->getNumController()) {
+    return m_inputDevices[deviceId]->getController(controllerId)->getActionString(actionId);
+  }
+  return "";
 }
 
 void ResourceManager::getControllerActions(unsigned deviceId, unsigned controllerId,

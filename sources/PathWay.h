@@ -24,19 +24,28 @@
 class PathWay
 {
   public:
-  PathWay();
+    PathWay();
 
-  PathWay(
-    const std::vector<btVector3> & controlPoints,
-    const float                    radius);
+    PathWay(
+        const std::vector<btVector3> & controlPoints,
+        btVector3                      point,
+        const float                    radius);
 
-  void initialize(
-    const std::vector<btVector3> & controlPoints,
-    const float                    radius);
+    void initialize(
+        const std::vector<btVector3> & controlPoints,
+        btVector3                      point,
+        const float                    radius);
 
-  void closestPoint(
-    const btVector3 & point,
-    btVector3 & tangent);
+    void updateOnPath(btVector3 point);
+
+    void getTarget(btVector3 & target);
+
+    void closestPoint(
+        const btVector3 & point,
+        btVector3 & tangent,
+        btVector3 & pointToFollow,
+        double    & distanceToPath,
+        unsigned & index);
 
   private:
 
@@ -45,6 +54,11 @@ class PathWay
     std::vector<btVector3> m_normals;
     float              m_radius;
     float              m_totalLength;
+
+
+    unsigned           m_currentIndex;
+    float              m_currentPathDistance;
+    btVector3          m_targetPoint;
 };
 
 #endif
