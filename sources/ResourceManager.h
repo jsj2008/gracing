@@ -117,9 +117,14 @@ class ResourceManager
     void startRace(unsigned humanVehicles, unsigned totVehicles);
     inline void endRace()  { m_mustEndRace=true; }
     inline void resumeRace() { m_mustResumeRace=true; }
+
+    /* controllers configuration */
     void   startControllerLearning(unsigned deviceId, 
                 unsigned controllerId,unsigned action,const char * callbackCode);
     void stopControllerLearning();
+    void addControllerToDevice(unsigned deviceId);
+
+
 
     void setSplitScreenModality(int l);
 

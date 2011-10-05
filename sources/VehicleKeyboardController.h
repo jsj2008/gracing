@@ -31,6 +31,7 @@ class KeyboardInterface : public IDeviceInterface
     virtual std::string          getName();
     virtual unsigned             getNumController();
     virtual IVehicleController * getController(unsigned);
+    virtual void                 addController();
 
     virtual void setConfiguration(XmlNode * node);
     virtual void getConfiguration(XmlNode * node);

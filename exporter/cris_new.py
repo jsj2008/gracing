@@ -280,14 +280,14 @@ def binWrite_face(fp,face):
 
 def binWrite_textureCoords(fp,n_vertices,data):
   if n_vertices==4:
-    v=struct.pack("ffffffff" , data.uv1[0], data.uv1[1],\
-      data.uv2[0], data.uv2[1],\
-      data.uv3[0], data.uv3[1],\
-      data.uv4[0], data.uv4[1])
+    v=struct.pack("ffffffff" , data.uv1[1], -data.uv1[0],\
+      data.uv2[1], -data.uv2[0],\
+      data.uv3[1], -data.uv3[0],\
+      data.uv4[1], -data.uv4[0])
   else:
-    v=struct.pack("ffffff" , data.uv1[0], data.uv1[1],\
-      data.uv2[0], data.uv2[1],\
-      data.uv3[0], data.uv3[1])
+    v=struct.pack("ffffff" , data.uv1[1], -data.uv1[0],\
+      data.uv2[1], -data.uv2[0],\
+      data.uv3[1], -data.uv3[0])
   fp.write(v)
 
 def binWrite_faceWithTexture(fp,face,textIndex):
@@ -443,9 +443,10 @@ class XmlMeshNode(XmlNode):
       for uvc in uv_array:
         node=XmlNode("uvcord")
         node.setProp("index",idx)
-        #node.setText("%f,%f"%(uvc[0],uvc[1]))
         node.setProp("U",uvc[0])
-        node.setProp("V",uvc[1])
+        node.setProp("V",-uvc[1])
+#node.setProp("U",uvc[0])
+#node.setProp("V",uvc[1])
 
         idx=idx+1
         uvcoords.addChild(node)

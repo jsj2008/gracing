@@ -26,6 +26,7 @@ class IDeviceInterface
     virtual std::string          getName()=0;
     virtual unsigned             getNumController()=0;
     virtual IVehicleController * getController(unsigned)=0;
+    virtual void                 addController()=0;
 
     virtual void setConfiguration(XmlNode * node)=0;
     virtual void getConfiguration(XmlNode * node)=0;

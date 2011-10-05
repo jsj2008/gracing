@@ -57,8 +57,10 @@ class Joystick : public IVehicleController, public IEventListener
       }
     };
 
-    ConfigElement m_actions[va_numActions];
-    bool          m_controllingVehicle;
+    ConfigElement       m_actions[va_numActions];
+    bool                m_controllingVehicle;
+    bool                m_isLearning;
+    unsigned            m_actionToLearn;
     JoystickInterface * m_owner;
 
     irr::s16  m_axisPrevValues[irr::SEvent::SJoystickEvent::NUMBER_OF_AXES];
@@ -89,10 +91,25 @@ class Joystick : public IVehicleController, public IEventListener
     {
       m_controllingVehicle=true;
     }
+
     void stopControlVehicle()
     { 
       m_controllingVehicle=false;
     }
+
+    void startLearnAction(unsigned actionId) 
+    { 
+      GM_LOG("Staring learn action %d\n",actionId);
+      m_isLearning=true;
+      m_actionToLearn=actionId;
+    };
+
+    void stopLearnAction() 
+    { 
+      m_isLearning=false;
+    };
+
+    bool isLearningAction() { return m_isLearning; }
 
     virtual void init(
         const std::vector<btVector3> & controlPoints,
@@ -106,6 +123,7 @@ class Joystick : public IVehicleController, public IEventListener
     {
       m_controllingVehicle=false;
       m_owner=owner;
+      m_isLearning=false;
       for(unsigned i=0; i<naxes; i++) 
         m_guiAxisMustRelease[i]=false;
       clearActions();
@@ -255,7 +273,6 @@ class Joystick : public IVehicleController, public IEventListener
           return;
         }
       }
-
     }
 
     #define ibp(_s,_b)   ((_s) & (1 << (_b)))
@@ -420,9 +437,33 @@ class Joystick : public IVehicleController, public IEventListener
       }
     }
 
+    void learnAction(const JoystickInterface::JoystickEvent & event)
+    {
+      for(unsigned i=0; i < naxes; i++) {
+        irr::s16 value;
+        if(checkAxis(event,i,value)) {
+          GM_LOG("learned action: axis %d value %d\n",i,value);
+          m_isLearning = false;
+          return;
+        }
+      }
+
+      for(unsigned i=0; i < nbuttons; i++) {
+        bool pressed;
+        if(checkButton(event,i,pressed) && pressed) {
+          GM_LOG("learned action: button %d\n",i);
+          m_isLearning = false;
+          return;
+        }
+
+      }
+    }
+
     void joystickEvent(const JoystickInterface::JoystickEvent & event)
     {
-      if(m_controllingVehicle) {
+      if(m_isLearning) {
+        learnAction(event);
+      } if(m_controllingVehicle) {
         bool dummyBool;
         irr::s16 dummyS16;
         for(unsigned i=0; i<nbuttons; i++) 
@@ -432,7 +473,6 @@ class Joystick : public IVehicleController, public IEventListener
       } else 
         joystickEventGui(event);
     }
-
 };
 
 const char * Joystick::m_guiActionName[ga_numGuiActions]={
@@ -554,6 +594,12 @@ void JoystickInterface::setConfiguration(XmlNode * root)
   }
 }
 
+void JoystickInterface::addController()
+{
+  Joystick * joy;
+  joy = new Joystick(this);
+  m_controllers.push_back(joy);
+}
 
 void JoystickInterface::getConfiguration(XmlNode * root)
 {

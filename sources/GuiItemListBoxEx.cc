@@ -150,14 +150,22 @@ void GuiItemListBoxEx::updateGeometry()
   GuiDimension dim2;
   GuiRect rect=m_listDstRect;
   m_itemsRect.clear();
-  
+
   for(unsigned i=0; i<m_visibleItems; i++) {
     if(i < m_items.size()) 
-       dim2 = m_font->getDimension(m_items[i].c_str());
+      dim2 = m_font->getDimension(m_items[i].c_str());
     else 
-       dim2 = m_font->getDimension(L"M");
+      dim2 = m_font->getDimension(L"M");
     _RMAXY(rect) = _RMINY(rect) + _H(dim2);
+
+    if(_RMAXY(rect) > _RMAXY(m_listDstRect)) 
+      _RMAXY(rect) = _RMAXY(m_listDstRect);
+
+    if(_RMAXX(rect) > _RMAXX(m_listDstRect)) 
+      _RMAXX(rect) = _RMAXX(m_listDstRect);
+
     m_itemsRect.push_back(rect);
+
     _RMINY(rect) += _H(dim2);
   }
 }
@@ -367,7 +375,10 @@ void GuiItemListBoxEx::draw()
 {
   irr::video::IVideoDriver * driver = 
                       ResourceManager::getInstance()->getVideoDriver();
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+  m_font->draw(m_caption.c_str(),m_rectangle,
+      irr::video::SColor(255,255,255,255),false,false,0);
+
+
   irr::video::SColor color(100,100,200,200);
   irr::video::SColor color2(200,200,200,200);
 
@@ -380,7 +391,7 @@ void GuiItemListBoxEx::draw()
       break;
     if(m_hilightItem == item) 
       driver->draw2DRectangle(color2,m_itemsRect[i]);
-    m_font->draw(m_items[item].c_str(),m_itemsRect[i],irr::video::SColor(255,255,255,255),false,false);
+    m_font->draw(m_items[item].c_str(),m_itemsRect[i],irr::video::SColor(255,255,255,255),false,false,&m_listDstRect);
  }
 }
 

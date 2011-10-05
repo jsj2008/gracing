@@ -35,6 +35,8 @@ class JoystickInterface : public IEventListener , public IDeviceInterface
     virtual std::string          getName();
     virtual unsigned             getNumController();
     virtual IVehicleController * getController(unsigned);
+    virtual void                 addController();
+
 
   private:
     friend class Joystick;

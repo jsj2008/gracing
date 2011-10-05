@@ -79,6 +79,7 @@ class GuiItemListBoxEx : public IGuiMenuItem
 
     GuiRect    m_listDstRect;
     std::vector<std::wstring>  m_items;
+    //std::vector<IGuiMenuItem*>      m_items;
     std::vector<GuiRect>       m_itemsRect;
     unsigned   m_selectedItem;
     unsigned   m_hilightItem;

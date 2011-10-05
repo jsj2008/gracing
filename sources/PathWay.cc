@@ -63,15 +63,19 @@ void PathWay::updateOnPath(btVector3 point)
   unsigned  index;
   double    distanceToPath;
 
+  // TODO:
+  // optimize the following avoiding
+  // the call to closestPoint:
+  // it compares each point in the path.
+  // comparision can be done only with
+  // the next and previous points.
   closestPoint(point,
         tangent,
         m_targetPoint,
         distanceToPath,
         index);
-  if(index != m_currentIndex) {
+  if(index != m_currentIndex) 
     m_currentIndex = index;
-    GM_LOG("following %d\n",index);
-  }
 }
 
 void PathWay::getTarget(btVector3 & target)

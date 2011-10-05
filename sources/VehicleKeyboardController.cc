@@ -550,3 +550,11 @@ void KeyboardInterface::getConfiguration(XmlNode * root)
     }
   }
 }
+
+void KeyboardInterface::addController()
+{
+  VehicleKeyboardController * controller;
+  EventReceiver * er=ResourceManager::getInstance()->getEventReceiver();
+  controller = new VehicleKeyboardController(er);
+  m_controllers.push_back(controller);
+}

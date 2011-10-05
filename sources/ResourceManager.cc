@@ -91,6 +91,14 @@ int startRace(lua_State * L)
   return 0;
 }
 
+int addController(lua_State * L)
+{
+  unsigned dev;
+  dev=luaL_checknumber(L,1);
+  ResourceManager::getInstance()->addControllerToDevice(dev);
+  return 0;
+}
+
 int showMenu(lua_State * L)
 {
   const char * str;
@@ -175,7 +183,6 @@ int getActionsList(lua_State * L)
   std::vector<std::string> list;
 
   ResourceManager::getInstance()->getControllerActions(deviceId,controllerId,list);
-  GM_LOG("zognan\n");
 
   for(unsigned i=0; i < list.size(); i++) {
     lua_pushnumber(L, i+1);
@@ -245,6 +252,7 @@ struct embFunctions_s {
   { "getActionsForController",getActionsList },
   { "getControllerActionName", getControllerActionName },
   { "startLearnAction", startLearnAction },
+  { "addController", addController },
   { 0,0 }
 };
 
@@ -864,6 +872,21 @@ void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen
   g_eventReceiver.resetOneShotKey();
   m_menu->getParent()->bringToFront(m_menu);
   m_menu->setVisible(true);
+
+  // DEBUG DEBUG
+
+  irr::gui::IGUIElement * e=m_menu->getParent();
+
+  const irr::core::list<irr::gui::IGUIElement *> & list= e->getChildren();
+
+  irr::core::list<irr::gui::IGUIElement *>::ConstIterator it=list.begin();
+
+  for(it=list.begin(); it != list.end(); it++) {
+    GM_LOG("--->%p\n",*it);
+  }
+
+
+
 }
 
 
@@ -932,6 +955,7 @@ void ResourceManager::stepPhaseHandler() {
   } 
 
   if(m_controllerLearning) {
+    GM_LOG("------------------------------------------------------------\n");
    if(!m_controllerLearning->isLearningAction() || 
       getEventReceiver()->OneShotKey(irr::KEY_ESCAPE)) {
       stopControllerLearning();
@@ -1045,6 +1069,11 @@ const char * ResourceManager::getControllerActionName(unsigned deviceId,
   return "";
 }
 
+void ResourceManager::addControllerToDevice(unsigned deviceId)
+{
+  if(deviceId < m_inputDevices.size()) 
+    m_inputDevices[deviceId]->addController();
+}
 void ResourceManager::getControllerActions(unsigned deviceId, unsigned controllerId,
     std::vector<std::string> & list)
 {
