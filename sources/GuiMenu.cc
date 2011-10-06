@@ -485,15 +485,22 @@ void GuiMenu::centerOnTheScreen()
 
 void GuiMenu::setGroup(const std::wstring & name)
 {
+  unsigned gi=0xffff;
   m_items.clear();
   for(unsigned i=0; i<m_groups.size(); i++) 
     if(m_groups[i]->getName() == name) {
       m_groups[i]->fillVector(m_items);
+      gi=i;
+      break;
     }
 
   m_focusedItem = m_items.size();
 
   refreshSize();
+
+  if(gi <  m_groups.size())
+    m_groups[gi]->onShow();
+  
 }
 
 void GuiMenu::load(const std::string & xmlFileName)
@@ -541,6 +548,8 @@ GuiMenu::GuiItemGroup::GuiItemGroup(XmlNode * root)
 {
 
   m_name = L"noname";
+  m_onShow = "";
+  root->get("onShow",m_onShow);
 
   if(!root || root->getName() != "group") {
     GM_LOG("not a valid xml node\n");

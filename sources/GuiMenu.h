@@ -438,9 +438,18 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
             m_items[i]->setTheme(theme);
         }
 
+        inline void onShow()
+        {
+          if(m_onShow != "") {
+            ResourceManager::getInstance()->lua_doString(m_onShow.c_str());
+          }
+
+        }
+
       private:
         std::wstring                m_name;
         std::vector<IGuiMenuItem *> m_items;
+        std::string                 m_onShow;
     };
 
     void refreshSize();

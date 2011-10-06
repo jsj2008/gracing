@@ -955,11 +955,10 @@ void ResourceManager::stepPhaseHandler() {
   } 
 
   if(m_controllerLearning) {
-    GM_LOG("------------------------------------------------------------\n");
-   if(!m_controllerLearning->isLearningAction() || 
-      getEventReceiver()->OneShotKey(irr::KEY_ESCAPE)) {
+    if(!m_controllerLearning->isLearningAction() || 
+        getEventReceiver()->OneShotKey(irr::KEY_ESCAPE)) {
       stopControllerLearning();
-   }
+    }
   }
 
   if(m_mustResumeRace && m_currentPhaseHandler == m_phaseHandlers[pa_race]) {
@@ -993,8 +992,6 @@ void ResourceManager::stepPhaseHandler() {
           controller=new VehicleAutoController();
           followed=false;
         }
-
-          followed=true;
 
         static_cast<Race*>(m_phaseHandlers[pa_race])->addVehicle(
             vehicles[m_choosenVehicles[i]],
@@ -1035,12 +1032,14 @@ bool ResourceManager::cfgSet(const char * name, const char * value)
 
 unsigned ResourceManager::getInputDeviceNumControllers(unsigned deviceIdx)
 {
+#if 0
   GM_LOG("------------------------------\n");
   for(unsigned i=0; i<m_inputDevices.size(); i++) {
     GM_LOG("[% 2d] '%s', controllers: %d\n",i,m_inputDevices[i]->getName().c_str(),
         m_inputDevices[i]->getNumController());
   }
   GM_LOG("------------------------------\n");
+#endif
 
   if(deviceIdx < m_inputDevices.size()) {
     unsigned num;
@@ -1087,7 +1086,7 @@ void ResourceManager::getControllerActions(unsigned deviceId, unsigned controlle
     for(unsigned i=0; i<numActions; i++) {
       std::string actName;
       controller->getActionSettingString(i,actName);
-      GM_LOG("[%d] '%s'\n",i,actName.c_str());
+      //GM_LOG("[%d] '%s'\n",i,actName.c_str());
       list.push_back(actName);
     }
   }

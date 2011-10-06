@@ -99,7 +99,6 @@ class Joystick : public IVehicleController, public IEventListener
 
     void startLearnAction(unsigned actionId) 
     { 
-      GM_LOG("Staring learn action %d\n",actionId);
       m_isLearning=true;
       m_actionToLearn=actionId;
     };
@@ -175,7 +174,7 @@ class Joystick : public IVehicleController, public IEventListener
       actionId -= va_numActions;
       if(actionId < ga_numGuiActions) {
         JoystickInterface::getActionString(b1,128,m_actions[actionId].joyact);
-        snprintf(b2,128,"gui %s %s", m_guiActionName[actionId], "not set");
+        snprintf(b2,128,"%s %s", m_guiActionName[actionId], b1);
         outString = b2;
         return;
       }
@@ -199,7 +198,12 @@ class Joystick : public IVehicleController, public IEventListener
         m_actions[vaction].joyact.analog = analog;
         m_actions[vaction].joyact.index = index;
         m_actions[vaction].joyact.value = value;
+        return;
       }
+
+      vaction -= va_numActions;
+      if(vaction < ga_numGuiActions) 
+        setGuiAction(vaction,type,analog,index,value);
     }
 
     void clearActions()
@@ -227,15 +231,16 @@ class Joystick : public IVehicleController, public IEventListener
         int      index,
         int      value)
     { 
-#if 0
-      GM_LOG("action: %d, type: %d,analog:%d, index:%d, value:%d\n",
+      GM_LOG("SETTING GUI action: %d, type: %d,analog:%d, index:%d, value:%d\n",
           gaction,type,analog,index,value);
-#endif
       if(type ==  ac_axis && value == 0 && index >= 0 && index < naxes) {
+        GM_LOG("1\n");
         m_guiAxisDownAction[index]=gaction;
       } else if(type == ac_axis && value == 1 && index >=0 && index < naxes) {
+        GM_LOG("2\n");
         m_guiAxisUpAction[index]=gaction;
       } else if(type == ac_button && index >0 && index < nbuttons) {
+        GM_LOG("3\n");
         m_guiButtonAction[index]=gaction;
       }
     }
@@ -313,6 +318,24 @@ class Joystick : public IVehicleController, public IEventListener
       }
     }
 
+    inline bool checkAction(JoystickInterface::JoystickAction & ac)
+    {
+      switch(ac.type) {
+        case ac_axis:
+          if((ac.value == 1 && m_axisPrevValues[ac.index] > AXIS_UP_THRESHOLD)  ||
+              (ac.value == 0 && m_axisPrevValues[ac.index] < AXIS_DOWN_THRESHOLD)) {
+            return true;
+          } 
+          break;
+        case ac_button:
+          if(m_buttonsPrevValues[ac.index]) {
+            return true;
+          }
+          break;
+      }
+      return false;
+    }
+
     inline void executeAction(JoystickInterface::JoystickAction & ac,
         double in_variable,
         double & out_variable,
@@ -373,6 +396,8 @@ class Joystick : public IVehicleController, public IEventListener
         parameters.steering,
         commands.steering,
         glob_joystick_steeringIncrement);
+
+      commands.changeCamera=checkAction(m_actions[va_changeCamera].joyact);
 
     }
 
@@ -444,6 +469,8 @@ class Joystick : public IVehicleController, public IEventListener
         if(checkAxis(event,i,value)) {
           GM_LOG("learned action: axis %d value %d\n",i,value);
           m_isLearning = false;
+          value = value < 0 ? 0 : 1;
+          setAction(m_actionToLearn, ac_axis, false,i,value);
           return;
         }
       }
@@ -453,6 +480,7 @@ class Joystick : public IVehicleController, public IEventListener
         if(checkButton(event,i,pressed) && pressed) {
           GM_LOG("learned action: button %d\n",i);
           m_isLearning = false;
+          setAction(m_actionToLearn,ac_button,false,i,0);
           return;
         }
 
@@ -476,7 +504,7 @@ class Joystick : public IVehicleController, public IEventListener
 };
 
 const char * Joystick::m_guiActionName[ga_numGuiActions]={
-      "up","down","left","right","enter","esc"
+      "gui up","gui down","gui left","gui right","gui enter","gui esc"
 };
 //////////////////////////////////////////////////////////////////////////////////////////////
 JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo & device)
@@ -632,25 +660,8 @@ void JoystickInterface::getConfiguration(XmlNode * root)
       act->set("analog",analog);
       act->set("index",index);
       act->set("value",value);
+      //act->set("aname", Joystick::m_guiActionName[j]);
     }
   }
 }
-
-
-#if 0
-action: 1, type: 2,analog:0, index:3, value:0
-action: 2, type: 2,analog:0, index:3, value:1
-action: 3, type: 2,analog:0, index:2, value:0
-action: 4, type: 2,analog:0, index:2, value:1
-action: 5, type: 1,analog:0, index:2, value:0
-
-
-action: 0, type: 2,analog:0, index:2, value:0
-action: 1, type: 2,analog:0, index:2, value:1
-action: 2, type: 1,analog:0, index:2, value:0
-action: 3, type: 1,analog:0, index:1, value:0
-action: 4, type: 0,analog:0, index:0, value:0
-action: 5, type: 0,analog:0, index:0, value:0
-
-#endif
 

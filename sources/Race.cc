@@ -474,6 +474,7 @@ bool Race::gotoState(unsigned state)
       for(unsigned i=0; i<m_nVehicles; i++) {
         CameraData * cd=m_vehicles[i].cameraData;
         if(cd) cd->cockpit->pause();
+        m_vehicles[i].controller->stopControlVehicle();
       }
       m_communicator->unshow();
       ResourceManager::getInstance()->showMenu("in-game");
@@ -484,6 +485,7 @@ bool Race::gotoState(unsigned state)
       for(unsigned i=0; i<m_nVehicles; i++) {
         CameraData * cd=m_vehicles[i].cameraData;
         if(cd) cd->cockpit->stop();
+        m_vehicles[i].controller->stopControlVehicle();
       }
       for(unsigned i=0; i < m_nVehicles; i++) {
         VehicleInfo & vinfo=m_vehicles[m_rank[i]];
@@ -533,6 +535,7 @@ bool Race::gotoState(unsigned state)
         for(unsigned i=0; i<m_nVehicles; i++) {
           CameraData * cd=m_vehicles[i].cameraData;
           if(cd) cd->cockpit->unpause();
+          m_vehicles[i].controller->startControlVehicle();
         }
         ResourceManager::getInstance()->hideMenu();
       } else if(m_status==rs_readySetGo) {
