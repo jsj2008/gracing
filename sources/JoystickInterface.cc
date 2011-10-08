@@ -80,12 +80,14 @@ class Joystick : public IVehicleController, public IEventListener
     };
 
     static const char * m_guiActionName[ga_numGuiActions];
-    //ConfigElement m_guiActions[ga_numGuiActions];
-    irr::s16 m_guiAxisUpAction[naxes];
-    irr::s16 m_guiAxisDownAction[naxes];
+    //irr::s16 m_guiAxisUpAction[naxes];
+    //irr::s16 m_guiAxisDownAction[naxes];
+    //irr::s16 m_guiButtonAction[nbuttons];
+    unsigned m_guiAxisUpAction[naxes];
+    unsigned m_guiAxisDownAction[naxes];
+    unsigned m_guiButtonAction[nbuttons];
     bool     m_guiAxisMustRelease[naxes];
     int      m_guiAxisMustReleaseKey[naxes];
-    irr::s16 m_guiButtonAction[nbuttons];
 
     void startControlVehicle()
     {
@@ -173,7 +175,32 @@ class Joystick : public IVehicleController, public IEventListener
       } 
       actionId -= va_numActions;
       if(actionId < ga_numGuiActions) {
-        JoystickInterface::getActionString(b1,128,m_actions[actionId].joyact);
+        bool found=false;
+
+        for(unsigned i=0; i < naxes; i++) {
+          if(m_guiAxisDownAction[i]==actionId) {
+            snprintf(b1,128,"axis %d down",i);
+            found=true;
+            break;
+          };
+          if(m_guiAxisUpAction[i]==actionId) {
+            snprintf(b1,128,"axis %d up",i);
+            found=true;
+            break;
+          }
+        }
+
+        if(!found) {
+          for(unsigned i=0; i < nbuttons; i++) 
+            if(m_guiButtonAction[i]==actionId) {
+              snprintf(b1,127,"button %d",i);
+              found=true;
+              break;
+            }
+        }
+
+        if(!found) 
+          snprintf(b1,128,"not found");
         snprintf(b2,128,"%s %s", m_guiActionName[actionId], b1);
         outString = b2;
         return;
@@ -202,8 +229,14 @@ class Joystick : public IVehicleController, public IEventListener
       }
 
       vaction -= va_numActions;
-      if(vaction < ga_numGuiActions) 
+      if(vaction < ga_numGuiActions) {
+        if(value < 0) 
+          value = 0;
+        else if(value > 0)
+          value = 1;
+          
         setGuiAction(vaction,type,analog,index,value);
+      }
     }
 
     void clearActions()
@@ -234,13 +267,10 @@ class Joystick : public IVehicleController, public IEventListener
       GM_LOG("SETTING GUI action: %d, type: %d,analog:%d, index:%d, value:%d\n",
           gaction,type,analog,index,value);
       if(type ==  ac_axis && value == 0 && index >= 0 && index < naxes) {
-        GM_LOG("1\n");
         m_guiAxisDownAction[index]=gaction;
       } else if(type == ac_axis && value == 1 && index >=0 && index < naxes) {
-        GM_LOG("2\n");
         m_guiAxisUpAction[index]=gaction;
       } else if(type == ac_button && index >0 && index < nbuttons) {
-        GM_LOG("3\n");
         m_guiButtonAction[index]=gaction;
       }
     }
@@ -256,21 +286,21 @@ class Joystick : public IVehicleController, public IEventListener
       index = 0;
       analog = 0;
       for(unsigned i=0; i<naxes; i++) {
-        if(m_guiAxisDownAction[i] == (int)gaction) {
+        if(m_guiAxisDownAction[i] == gaction) {
           type = ac_axis;
           value = 0;
           analog = 0;
           index = i;
           return;
         }
-        if(m_guiAxisUpAction[i] == (int)gaction) {
+        if(m_guiAxisUpAction[i] == gaction) {
           type = ac_axis;
           value = 1;
           analog = 0;
           index = i;
           return;
         }
-        if(m_guiButtonAction[i] == (int)gaction) {
+        if(m_guiButtonAction[i] == gaction) {
           type = ac_button;
           value = 0;
           index = i;
@@ -483,12 +513,25 @@ class Joystick : public IVehicleController, public IEventListener
           setAction(m_actionToLearn,ac_button,false,i,0);
           return;
         }
-
       }
     }
 
     void joystickEvent(const JoystickInterface::JoystickEvent & event)
     {
+#if 0
+      for(unsigned i=0; i < naxes; i++) {
+        irr::s16 value;
+        if(checkAxis(event,i,value)) {
+          GM_LOG("learned action: axis %d value %d\n",i,value);
+        }
+      }
+      for(unsigned i=0; i < nbuttons; i++) {
+        bool pressed;
+        if(checkButton(event,i,pressed)) {
+          GM_LOG("learned action: button %d pressed: %s\n",i,pressed?"yes":"no");
+        }
+      }
+#endif
       if(m_isLearning) {
         learnAction(event);
       } if(m_controllingVehicle) {
@@ -504,7 +547,7 @@ class Joystick : public IVehicleController, public IEventListener
 };
 
 const char * Joystick::m_guiActionName[ga_numGuiActions]={
-      "gui up","gui down","gui left","gui right","gui enter","gui esc"
+      "gui none", "gui up","gui down","gui left","gui right","gui enter","gui esc"
 };
 //////////////////////////////////////////////////////////////////////////////////////////////
 JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo & device)
@@ -517,6 +560,7 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
   joy = new Joystick(this);
   m_controllers.push_back(joy);
 
+#if 0
   joy->setGuiAction(Joystick::ga_up,ac_axis,false,3,0);
   joy->setGuiAction(Joystick::ga_down,ac_axis,false,3,1);
   joy->setGuiAction(Joystick::ga_left,ac_axis,false,2,0);
@@ -529,6 +573,7 @@ JoystickInterface::JoystickInterface(irr::IrrlichtDevice *, const SJoystickInfo 
   joy->setAction(IVehicleController::va_steerRight,ac_axis,false,2,1);
   GM_LOG("************** ACTIONS *********\n");
   joy->debugDumpActions();
+#endif
 }
 
 std::string  JoystickInterface::getName()
@@ -562,12 +607,20 @@ void JoystickInterface::getActionString(char * buffer,
       if(action.analog)
         snprintf(buffer,bufferSize,"axis %d value: %d",action.index,action.value);
       else {
-        if(action.value > AXIS_UP_THRESHOLD)
+        if(action.value == 1)
           snprintf(buffer,bufferSize,"axis %d pressed up",action.index);
-        else if(action.value < AXIS_DOWN_THRESHOLD)
+        else if(action.value == 0)
           snprintf(buffer,bufferSize,"axis %d pressed down",action.index);
+        else 
+          snprintf(buffer,bufferSize,"axis %d %d???? ",action.index,action.value);
+#if 0
+        if(action.value > AXIS_UP_THRESHOLD)
+          snprintf(buffer,bufferSize,"axis %d pressed up %d",action.index,action.value);
+        else if(action.value < AXIS_DOWN_THRESHOLD)
+          snprintf(buffer,bufferSize,"axis %d pressed down",action.index,action.value);
         else
-          snprintf(buffer,bufferSize,"axis %d released",action.index);
+          snprintf(buffer,bufferSize,"axis %d rel %d",action.index,action.value);
+#endif
       }
       break;
     case ac_none:

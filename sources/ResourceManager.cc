@@ -618,7 +618,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   if(inputDevicesNode) {
     for(unsigned i=0; i < m_inputDevices.size(); i++) {
       IDeviceInterface * di=m_inputDevices[i];
-      GM_LOG("looking for configuration for '%s':",di->getName().c_str());
+      GM_LOG("looking for configuration for '%s':\n",di->getName().c_str());
       XmlNode * node=inputDevicesNode->getChildByAttr("name",di->getName());
       if(node) {
         di->setConfiguration(node);
