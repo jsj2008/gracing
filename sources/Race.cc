@@ -257,8 +257,11 @@ void Race::updateVehiclesInfo()
             vehiclePosition,
             controlPoints);
 
-      if(vinfo.cameraData) 
-        vinfo.cameraData->cockpit->setLap(1,vinfo.controlPointIndex);
+      if(vinfo.cameraData)  {
+        //vinfo.cameraData->cockpit->setLap(1,vinfo.controlPointIndex);
+        vinfo.cameraData->cockpit->setLap(vinfo.lapNumber+1,m_totalLaps);
+        vinfo.cameraData->cockpit->setRank(vinfo.rank+1, m_nVehicles);
+      }
 
       if(newDist > vinfo.ctrlPntDistance + WRONG_WAY_EPSILON) {
 #if 0
