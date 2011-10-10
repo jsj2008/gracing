@@ -33,6 +33,7 @@
 #include "IPhaseHandler.h"
 #include "Race.h"
 #include "VehicleChooser.h"
+#include "TrackChooser.h"
 
 // vehicle controllers
 #include "VehicleKeyboardController.h"
@@ -583,6 +584,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
   m_texturesDir = m_rootDir + std::string("/Textures/");
+  m_track=0;
 
   
   ///////////////////
@@ -683,18 +685,21 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   getEventReceiver()->addListener(m_menu);
 
   /////////////////////////////////
-  // load menus                  //
+  // load vehicles and tracks    //
   /////////////////////////////////
   loadVehicles();
+  loadTracks();
 
   /////////////////////////////////
   // phase handlers menus        //
   /////////////////////////////////
   m_phaseHandlers[pa_vehicleChooser]=new VehicleChooser(device,m_world);
   m_phaseHandlers[pa_race] = new Race(device,m_world);
+  m_phaseHandlers[pa_trackChooser] = new DefaultTrackChooser(device,m_world);
   m_phaseHandlers[pa_empty] = new EmptyPhaseHandler(device,m_world);
   m_currentPhaseHandler = m_phaseHandlers[pa_empty];
 
+#if 0
   const XmlNode * defaultTrack;
   cfgGet("default-track",defaultTrack);
 
@@ -710,6 +715,7 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   //thetrack=new Track(device,world,"tuxtollway.zip");
   //thetrack=new Track(device,world,"jungle.zip");
   //thetrack=new Track(device,world,"beach.zip");
+#endif
 
   if(!m_track) 
     m_track=new Track(m_device,m_world,"farm.zip");
@@ -837,6 +843,24 @@ EventReceiver * ResourceManager::getEventReceiver()
 }
 
     
+void ResourceManager::loadTracks()
+{
+  std::vector<std::string> files;
+  int type=DT_REG;
+  unsigned nFiles;
+
+  nFiles=listDirectory(m_trackDir.c_str(),files,type);
+  std::string vpath;
+
+  for(unsigned i=0; i < nFiles; i++) {
+    getVehicleCompletePath(files[i].c_str(), vpath);
+    GM_LOG("track: '%s' --> '%s'\n",vpath.c_str(),files[i].c_str());
+
+    Track * track=new Track(m_device,m_world,files[i].c_str());
+    m_tracks.push_back(track);
+  }
+}
+
 void ResourceManager::loadVehicles()
 {
   // first retrieve the list of files
@@ -944,6 +968,7 @@ void ResourceManager::stepPhaseHandler() {
   //       this is __VERY__ ugly.
   bool done;
 
+#if 0
   if(m_mustStartRace) {
     m_mustStartRace = false;
     hideMenu();
@@ -953,6 +978,16 @@ void ResourceManager::stepPhaseHandler() {
           m_humanVehicles,m_totVehicles,m_choosenVehicles);
     return;
   } 
+#endif
+
+  if(m_mustStartRace) {
+    GM_LOG("---------\n");
+    m_mustStartRace = false;
+    hideMenu();
+    m_currentPhaseHandler= m_phaseHandlers[pa_trackChooser];
+    static_cast<ITrackChooser*>(m_currentPhaseHandler)->prepare();
+    return;
+  }
 
   if(m_controllerLearning) {
     if(!m_controllerLearning->isLearningAction() || 
@@ -970,6 +1005,18 @@ void ResourceManager::stepPhaseHandler() {
   if(!done)
     done=m_currentPhaseHandler->step();
 
+  if(done && m_currentPhaseHandler == m_phaseHandlers[pa_trackChooser]) {
+
+    m_mustStartRace = false;
+    hideMenu();
+    GM_LOG("must start race: %d\n",m_humanVehicles);
+    m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
+    static_cast<ITrackChooser*>(m_phaseHandlers[pa_trackChooser])->unprepare();
+    static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
+          m_humanVehicles,m_totVehicles,m_choosenVehicles);
+    return;
+
+  }
 
   if(done || m_mustEndRace) {
     if(m_currentPhaseHandler == m_phaseHandlers[pa_vehicleChooser]) {

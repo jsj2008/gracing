@@ -179,10 +179,11 @@ void GuiMenu::draw()
 {
   if(!m_isVisible)
     return;
-
+    
   if(m_hasFrame && m_frame)
     m_frame->draw();
 
+  
   if(m_focusedItem < m_items.size()) {
     IGuiMenuItem * item=m_items[m_focusedItem];
 

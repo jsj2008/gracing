@@ -14,6 +14,7 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         VehicleKeyboardController.cc \
         VehicleAutoController.cc \
         VehicleChooser.cc \
+        TrackChooser.cc \
         EventReceiver.cc \
         Race.cc \
         Util.cc \

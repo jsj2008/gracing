@@ -142,6 +142,7 @@ class ResourceManager
     void saveConfig(const std::string & filename);
 
     void loadVehicles();
+    void loadTracks();
 
     irr::IrrlichtDevice *  m_device;
     irr::io::IFileSystem * m_fileSystem;
@@ -166,12 +167,12 @@ class ResourceManager
     irr::gui::IGUIFont *  m_fontSmall;
     irr::gui::IGUIFont *  m_fontBig;
 
-    std::vector<IVehicle*> m_vehicles;
 
     enum {
       pa_race=0,
       pa_vehicleChooser=1,
-      pa_empty=2,
+      pa_trackChooser=2,
+      pa_empty=3,
 
       pa_numPhaseHandlers
     };
@@ -186,7 +187,11 @@ class ResourceManager
     unsigned   m_totVehicles;
     enum       { m_max_vehicles=4 };
     unsigned   m_choosenVehicles[m_max_vehicles];
-    Track *    m_track;
+    Track *    m_track; 
+
+    std::vector<IVehicle*> m_vehicles;
+    std::vector<Track*>    m_tracks;
+
 
     IVehicleController * m_controllerLearning;
     std::string          m_genericCallbackCode;
