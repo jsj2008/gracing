@@ -91,15 +91,6 @@ btRigidBody * PhyWorld::createRigidBody(
 	btRigidBody* body = new btRigidBody(cInfo);
 	body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
 
-	//addRigidBody(body);
-
-#if 0
-  if(node) {
-    meshBinder * mbinder=new meshBinder(body,node);
-    m_binds.push_back(mbinder);
-  }
-#endif
-
 	return body;
 }
 
@@ -155,10 +146,6 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
 
   n_buffers=mesh->getMeshBufferCount();
   u16 * indices;
-#if 0
-  meshBinder * mbinder=new meshBinder();
-  mbinder->irrNode=meshNode;
-#endif
 
   meshNode->grab();
 
@@ -196,10 +183,6 @@ btRigidBody * PhyWorld::addStaticMesh(scene::ISceneNode * meshNode)
   btRigidBody* body = new btRigidBody(rbInfo);
   addRigidBody(body);
 
-#if 0
-  mbinder->body=body;
-  m_binds.push_back(mbinder);
-#endif
   return body;
 }
 
@@ -229,13 +212,36 @@ btRigidBody * PhyWorld::addDynamicSphere(irr::scene::ISceneNode * node,
     rbInfo(btMass,motionState,shape,localInertia);
   btRigidBody* body = new btRigidBody(rbInfo);
 
-#if 0
-  meshBinder * mbinder=new meshBinder(body,node);
-  m_binds.push_back(mbinder);
-#endif
 
   addRigidBody(body);
   return body;
+}
+
+void PhyWorld::clear()
+{
+  for(unsigned i=0; i<m_rigidBodies.size(); i++) {
+    btRigidBody * body = m_rigidBodies[i];
+    btDiscreteDynamicsWorld::removeRigidBody(body);
+  }
+  m_rigidBodies.clear();
+}
+
+void PhyWorld::addRigidBody(btRigidBody * body)
+{
+  m_rigidBodies.push_back(body);
+  btDiscreteDynamicsWorld::addRigidBody(body);
+}
+
+void PhyWorld::removeRigidBody(btRigidBody * body)
+{
+  //for(unsigned i=0; i<m_rigidBodies.size(); i++) 
+  std::vector<btRigidBody*>::iterator it;
+  for(it=m_rigidBodies.begin(); it != m_rigidBodies.end(); it++)
+    if(*it == body) {
+      m_rigidBodies.erase(it);
+      break;
+    }
+  btDiscreteDynamicsWorld::removeRigidBody(body);
 }
 
 void PhyWorld::step()

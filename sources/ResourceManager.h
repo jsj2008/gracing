@@ -103,8 +103,11 @@ class ResourceManager
     inline irr::IrrlichtDevice *      getDevice()      { return m_device; }
     inline irr::gui::IGUIEnvironment *getGuiEnv()      { return m_device->getGUIEnvironment(); }
 
-
+    
+    /* game status handling */
     inline const std::vector<IVehicle*> & getVehiclesList() { return m_vehicles; }
+    inline const std::vector<Track*> &    getTracksList() { return m_tracks; }
+    inline void                           setUsedTrack(Track * track) { m_track=track; }
 
     inline void getScreenHeight(unsigned & height) { height=m_screenHeight; }
     inline void getScreenWidth(unsigned & width) { width=m_screenWidth; }
@@ -119,7 +122,7 @@ class ResourceManager
     inline void resumeRace() { m_mustResumeRace=true; }
 
     /* controllers configuration */
-    void   startControllerLearning(unsigned deviceId, 
+    void startControllerLearning(unsigned deviceId, 
                 unsigned controllerId,unsigned action,const char * callbackCode);
     void stopControllerLearning();
     void addControllerToDevice(unsigned deviceId);

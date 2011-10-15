@@ -90,7 +90,6 @@ CFG_PARAM_D(glob_maxThrottle)=2.7;    // min: .7, max: 2.7
 CFG_PARAM_D(glob_steeringClamp)=0.3f;
 CFG_PARAM_D(glob_wheelRadius)=0.5f;
 CFG_PARAM_D(glob_wheelWidth)=0.4f;
-CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
 CFG_PARAM_D(glob_suspensionCompression)=4.4f;
 CFG_PARAM_D(glob_rollInfluence)=0.1f;//1.0f;
 CFG_PARAM_D(glob_suspensionRestLength)=.1; //.6;
@@ -101,7 +100,10 @@ CFG_PARAM_D(glob_maxSuspensionTravel)=.1;
 CFG_PARAM_D(glob_maxSuspensionForce)=6000.;
 CFG_PARAM_D(glob_wheelsDampingCompression)=4.4;
 CFG_PARAM_D(glob_wheelsDampingRelaxation)=20.; //.83;
-CFG_PARAM_D(glob_frictionSlip)=.5;
+
+
+CFG_PARAM_D(glob_wheelFriction)=1000;//BT_LARGE_FLOAT;
+CFG_PARAM_D(glob_frictionSlip)=2.; //.5;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +171,11 @@ struct WheelContactPoint
 	btScalar	m_maxImpulse;
 
 
-	WheelContactPoint(btRigidBody* body0,btRigidBody* body1,const btVector3& frictionPosWorld,const btVector3& frictionDirectionWorld, btScalar maxImpulse)
+	WheelContactPoint(
+      btRigidBody* body0,btRigidBody* body1,
+      const btVector3& frictionPosWorld,
+      const btVector3& frictionDirectionWorld, 
+      btScalar maxImpulse)
 		:m_body0(body0),
 		m_body1(body1),
 		m_frictionPositionWorld(frictionPosWorld),
@@ -248,7 +254,7 @@ Vehicle::Vehicle(
 #endif
   m_steeringClamp = glob_steeringClamp;
 
-  m_wheelFriction = glob_wheelFriction;
+  m_wheelFriction = glob_wheelFriction; // NO MORE USED !!!
   m_suspensionStiffness = glob_suspensionStiffness;
   m_suspensionDamping = glob_suspensionDamping;
   m_suspensionCompression = glob_suspensionCompression;

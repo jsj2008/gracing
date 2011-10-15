@@ -43,9 +43,14 @@ class DefaultTrackChooser : public ITrackChooser
    virtual void unprepare();
 
   private:
-   unsigned m_counter;
     irr::video::ITexture  * m_background;
+    irr::video::ITexture  * m_trackShot;
+    irr::video::ITexture  * m_defaultTrackShot;
     irr::core::rect<irr::s32>  m_dstRect;
     irr::core::rect<irr::s32>  m_srcRect;
+
+    unsigned                   m_currentTrackIndex;
+
+    void setTrack();
 };
 #endif

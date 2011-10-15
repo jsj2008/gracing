@@ -17,7 +17,8 @@ bt_inc_dir=-I$(bt_home)/src
 bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
 
-log_enabled=-DLOG_ENABLED -DLOG_TO_STDOUT
+#log_enabled=-DLOG_ENABLED -DLOG_TO_STDOUT
+log_enabled=
 
 appl_name=gracing
 
@@ -115,6 +116,7 @@ copy_files:
 # TEXTURES
 	@$(copier) --cp $(src_textures_dir)/clouds.png $(tgt_textures_dir)
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/default-track-shot.png $(tgt_res_dir)
     
 
 clean: clean_subdirs

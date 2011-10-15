@@ -29,8 +29,6 @@ vehicles=[
 
 tracks=[
   "toylevel",
-  "devtrack",
-  "tuxtollway",
   "farm",
   "jungle",
   "beach",

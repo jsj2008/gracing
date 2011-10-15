@@ -79,15 +79,14 @@ Track::Track(
   enum {
     buffer_len=1024
   };
-  //char buffer[buffer_len];
-  ResourceManager::getInstance()->getTrackCompletePath(filename, m_filename);
-  //m_filename=strdup(buffer);
+  ResourceManager * resmanager=ResourceManager::getInstance();
+  resmanager->getTrackCompletePath(filename, m_filename);
   m_loaded=false;
   m_world=world;
   m_filesystem->grab();
-  //m_device->grab();
 
   m_rootNode=loadXml(m_filename.c_str());
+
 
   gContactAddedCallback=cb_ContactAddedCallback;
 }
@@ -102,7 +101,8 @@ XmlNode * Track::loadXml(const char * filename)
   if(!res) 
     return 0;
 
-  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->createXMLReaderUTF8(MANIFEST_NAME);
+  irr::io::IXMLReaderUTF8 * xml=ResourceManager::getInstance()->
+    createXMLReaderUTF8(MANIFEST_NAME);
 
   if(!xml)
     return 0;
@@ -110,7 +110,18 @@ XmlNode * Track::loadXml(const char * filename)
   node=new XmlNode(xml);
   assert(node && node->getName() == "track"); // TODO: this must not be an assert!!!
 
+  if(!node->get("name",m_name))
+    m_name=filename;
+
   xml->drop();
+
+  std::string shotFilename;
+  node->get("track-shot",shotFilename);
+  std::string imgpath = /*resmanager->getResourcePath() + */shotFilename;
+  m_trackshot =
+    ResourceManager::getInstance()->getVideoDriver()->getTexture(imgpath.c_str());
+  if(m_trackshot)
+    m_trackshot->grab();
 
   res=m_filesystem->removeFileArchive(m_filesystem->getAbsolutePath(mypath));
   assert(res);
@@ -166,6 +177,12 @@ void Track::loadTriggers(XmlNode * root)
       body->setUserPointer((void*)tt_lap);
     }
   }
+}
+
+void Track::getShotImageFilename(std::string & filename)
+{
+  filename="";
+  m_rootNode->get("track-shot",filename);
 }
 
 void Track::loadControlPoints(XmlNode * root)
@@ -396,6 +413,8 @@ void Track::unload()
     m_skydome->remove();
     m_skydome=0;
   }
+
+  m_world->clear();
 
   m_loaded=false;
 }

@@ -844,6 +844,19 @@ def createZipFile(root,xmlfile,path,srcdir):
         else:
           log("skipping skydome image (src: '%s', dst: '%s')"%(iname,dname))
 
+    iname=root.getProp("track-shot")
+    if iname != "" and iname != None:
+        if iname in inserted_images.keys():
+          continue
+        inserted_images[iname]=True
+        dname = iname
+        iname = srcdir + "/" + iname
+        if os.path.exists(iname):
+          log("Zipping shot '%s' as '%s'"%(iname,dname))
+          zf.write(iname,dname)
+        else:
+          log("skipping skydome image (src: '%s', dst: '%s')"%(iname,dname))
+
   log("Zipping '%s' as '%s'"%(xmlfile,os.path.basename(xmlfile)))
   zf.write(xmlfile,os.path.basename(xmlfile))
   zf.close()
@@ -1214,6 +1227,12 @@ class export_OT_track(bpy.types.Operator):
           if m and len(m.groups()) == 1:
             n=int(m.group(1))-1
             skydomeTextures[n]=value
+        elif key == "track-name":
+          root.setProp("name",value)
+        elif key == "track-shot":
+          root.setProp("track-shot",value)
+          absSrc=buildPath(value)
+          copy_image(absSrc,tmpdir)
         else:
           node=XmlNode(key)
           node.setText(value)
@@ -1251,7 +1270,6 @@ class export_OT_track(bpy.types.Operator):
   def handleTrackProfile(self, obj):
     if obj.type != 'CURVE':
       return
-
 
     ctrlPoints=XmlNode("control-points")
     

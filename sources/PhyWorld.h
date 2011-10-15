@@ -17,6 +17,7 @@
 #ifndef PHYWORLD_H
 #define PHYWORLD_H
 #include <irrlicht.h>
+#include <vector>
 #include "config.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -40,7 +41,13 @@ class PhyWorld : public btDiscreteDynamicsWorld
 
     void step();
 
+    void clear();
+
     ~PhyWorld();
+
+    void addRigidBody(btRigidBody * body);
+
+    void removeRigidBody(btRigidBody * body);
 
     // debug stuff
 
@@ -54,6 +61,8 @@ class PhyWorld : public btDiscreteDynamicsWorld
         btCollisionDispatcher               *dispatcher,
         btSequentialImpulseConstraintSolver *solver,
         btDefaultCollisionConfiguration     *collisionConfiguration);
+
+    std::vector<btRigidBody *>              m_rigidBodies;
 
     CFG_PARAM_D(m_frameDuration);
     CFG_PARAM_D(m_frameSubsteps);

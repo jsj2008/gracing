@@ -45,7 +45,15 @@ class Track
     // TODO: find a more general form for trigger callback
     void registerLapCallback(Race * race, IVehicle * vehicle, void * userdata);
 
+
+    void getShotImageFilename(std::string & filename);
+    inline irr::video::ITexture * getShotImage() { return m_trackshot; }
+
+    inline std::string getName() { return m_name; }
   private:
+
+    std::string                                   m_name;
+    irr::video::ITexture  *                       m_trackshot;
 
     void loadLights( irr::io::IReadFile * file ,
         irr::scene::ISceneManager* smgr );
@@ -63,14 +71,10 @@ class Track
     // resources loaded
     irr::core::array<irr::scene::ILightSceneNode*>   
                                                    m_lights;
-    //irr::core::array<irr::scene::IAnimatedMeshSceneNode*>   
     irr::core::array<irr::scene::IMeshSceneNode*>   
                                                    m_sceneNodes;
     irr::scene::ILightSceneNode *                  m_sun;
     irr::scene::ISceneNode *                       m_skydome;
-
-    //irr::scene::ICameraSceneNode *                 m_camera;
-    //CameraDataManager *                            m_cammgr;
 
     bool                                           m_loaded;
     std::string                                    m_filename;
