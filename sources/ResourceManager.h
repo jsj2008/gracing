@@ -34,6 +34,7 @@ class GuiMenu;
 class Track;
 class IDeviceInterface;
 class IVehicleController;
+class AudioLayer;
 
 
 void stupid_store(void * mem, unsigned size);
@@ -56,6 +57,7 @@ class ResourceManager
     void getConfigCompletePath(const char * filename, std::string & path);
     void getResourceCompletePath(const char * filename, std::string & path);
     void getTexturesCompletePath(const char * texturesName, std::string & path);
+    void getAudioCompletePath(const char * texturesName, std::string & path);
     inline const std::string & getResourcePath() { return m_rootDir; }
     inline irr::io::IXMLReaderUTF8 * createXMLReaderUTF8(const std::string & filename)
     {
@@ -128,7 +130,6 @@ class ResourceManager
     void addControllerToDevice(unsigned deviceId);
 
 
-
     void setSplitScreenModality(int l);
 
     /* lua stuff */
@@ -155,6 +156,7 @@ class ResourceManager
     std::string m_trackDir;
     std::string m_vehicleDir;
     std::string m_texturesDir;
+    std::string m_audioDir;
 
     XmlNode *   m_configRoot;
 
@@ -198,6 +200,8 @@ class ResourceManager
 
     IVehicleController * m_controllerLearning;
     std::string          m_genericCallbackCode;
+
+    AudioLayer *         m_audioLayer;
     
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

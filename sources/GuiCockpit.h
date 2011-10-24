@@ -85,6 +85,9 @@ class GuiCockpit : public  INumberOutput, public irr::gui::IGUIElement
     unsigned                            m_rank;
     unsigned                            m_totRank;
 
+    unsigned                            m_bodyWidth;
+    unsigned                            m_bodyHeight;
+
 };
 
 #endif

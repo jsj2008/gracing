@@ -17,8 +17,11 @@ bt_inc_dir=-I$(bt_home)/src
 bt_lib_dir=-L$(bt_build_home)/src/BulletDynamics -L$(bt_build_home)/src/BulletCollision -L$(bt_build_home)/src/LinearMath
 bt_libs=-lBulletDynamics -lBulletCollision -lLinearMath
 
-#log_enabled=-DLOG_ENABLED -DLOG_TO_STDOUT
-log_enabled=
+# openal (and ogg vorbis) stuff
+openal_inc_dir=
+openal_libs=-framework OpenAL  -logg -lvorbis -lvorbisfile
+
+log_enabled=-DLOG_ENABLED -DLOG_TO_STDOUT
 
 appl_name=gracing
 
@@ -29,9 +32,10 @@ resources_macosx_dir=../resources.macosx
 cplusplus=g++ 
 ctags=ectags
 
-defines=-DANALOG_CONTROLS
+defines=-DANALOG_CONTROLS -DTHREAD_USE_POSIX
 
 include sources.mak
+sources=$(common_sources) $(mac_sources)
 ##########################################################
 tgt_appl_dir=$(tgt_dir)/Contents/MacOs
 tgt_res_dir=$(tgt_dir)/Contents/Resources
@@ -39,18 +43,19 @@ tgt_cnt_dir=$(tgt_dir)/Contents
 tgt_vehicles_dir=$(tgt_res_dir)/Vehicles
 tgt_tracks_dir=$(tgt_res_dir)/Tracks
 tgt_textures_dir=$(tgt_res_dir)/Textures
+tgt_music_dir=$(tgt_res_dir)/Audio
 
 src_vehicles_dir=$(resources_dir)/vehicles
 src_tracks_dir=$(resources_dir)/tracks
 src_fonts_dir=$(resources_dir)/gfx/fonts
 src_textures_dir=$(resources_dir)/gfx/textures
 src_themes_dir=$(resources_dir)/themes
+src_music_dir=$(resources_dir)/audio
 
-ccflags=$(defines) $(irr_inc_dir) $(bt_inc_dir) -g -Wall $(log_enabled) -Ilua -Ilua/lua-5.1.4
-
+ccflags=$(defines) $(irr_inc_dir) $(bt_inc_dir) $(openal_inc_dir) -g -Wall $(log_enabled) -Ilua -Ilua/lua-5.1.4
 
 				
-ldflags=-L$(irr_lib_dir)  $(irr_libs)  $(bt_lib_dir) $(bt_libs) lua/lua-5.1.4/src/liblua.a \
+ldflags=-L$(irr_lib_dir)  $(irr_libs) $(openal_libs) $(bt_lib_dir) $(bt_libs) lua/lua-5.1.4/src/liblua.a \
   -O3 -DNDEBUG -Wl,-search_paths_first -headerpad_max_install_names
 
 objs=$(subst .cc,.o,$(sources))
@@ -100,6 +105,7 @@ copy_files:
 # GUI ELEMENTS
 	@$(copier) --cp $(resources_dir)/roombox.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/cockpit.zip $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/cockpit-2.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/frame.zip $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/background.png $(tgt_res_dir);
 # VEHICLES
@@ -117,6 +123,9 @@ copy_files:
 	@$(copier) --cp $(src_textures_dir)/clouds.png $(tgt_textures_dir)
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/default-track-shot.png $(tgt_res_dir)
+
+# MUSIC
+	@$(copier) --cp $(src_music_dir)/Boom_boom_boom.ogg $(tgt_music_dir)
     
 
 clean: clean_subdirs

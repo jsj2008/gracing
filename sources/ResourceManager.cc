@@ -40,6 +40,8 @@
 #include "VehicleNullController.h"
 #include "VehicleAutoController.h"
 
+#include "AudioLayer.h"
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -472,8 +474,6 @@ ResourceManager::ResourceManager()
   m_mustResumeRace=false;
   m_controllerLearning=0;
   m_mustEndRace=false;
-  //{ m_max_vehicles=4 };
-  //unsigned   m_choosenVehicles[m_max_vehicles];
 
 }
 
@@ -532,6 +532,11 @@ void ResourceManager::getVehicleCompletePath(const char * vehicleName, std::stri
 }
 
 
+void ResourceManager::getAudioCompletePath(const char * audioName, std::string & path)
+{
+  path=m_audioDir + std::string(audioName);
+}
+
 void ResourceManager::getTexturesCompletePath(const char * texturesName, std::string & path)
 {    
   path=m_texturesDir + std::string(texturesName);
@@ -580,13 +585,18 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_device=device;
   m_fileSystem=m_device->getFileSystem();
   m_world = PhyWorld::buildMe();
+  m_audioLayer=AudioLayer::getInstance();
+
+  std::string path;
+
 
   m_trackDir = m_rootDir + std::string("/Tracks/");
   m_vehicleDir = m_rootDir + std::string("/Vehicles/");
   m_texturesDir = m_rootDir + std::string("/Textures/");
+  m_audioDir = m_rootDir + std::string("/Audio/");
+  GM_LOG("------------------------------%s\n",m_audioDir.c_str());
   m_track=0;
 
-  
   ///////////////////
   // input devices //
   ///////////////////
@@ -719,6 +729,9 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   if(!m_track) 
     m_track=new Track(m_device,m_world,"farm.zip");
+
+  getAudioCompletePath("Boom_boom_boom.ogg",path);
+  m_audioLayer->loadSong(path.c_str());
 }
 
 

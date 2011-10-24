@@ -50,7 +50,8 @@ class DefaultTrackChooser : public ITrackChooser
     irr::core::rect<irr::s32>  m_srcRect;
 
     unsigned                   m_currentTrackIndex;
+    bool                       m_animating;
 
-    void setTrack();
+    void setTrack(unsigned);
 };
 #endif

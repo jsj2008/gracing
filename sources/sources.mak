@@ -1,4 +1,4 @@
-sources=main.cc Track.cc CCrisMeshFileLoader.cc \
+common_sources=main.cc Track.cc CCrisMeshFileLoader.cc \
 				CameraDataManager.cc PhyWorld.cc \
 				Vehicle.cc IrrMotionState.cc \
         ResourceManager.cc\
@@ -28,7 +28,11 @@ sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         EmptyPhaseHandler.cc \
         IVehicleController.cc \
         JoystickInterface.cc \
+        AudioLayer.cc \
         PathWay.cc
+
+mac_sources=PosixThread.cc
+win32_sources=Win32Thread.cc
 
 
 subdirs=lua

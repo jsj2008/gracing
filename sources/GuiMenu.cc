@@ -499,9 +499,8 @@ void GuiMenu::setGroup(const std::wstring & name)
 
   refreshSize();
 
-  if(gi <  m_groups.size())
+  if(gi < m_groups.size())
     m_groups[gi]->onShow();
-  
 }
 
 void GuiMenu::load(const std::string & xmlFileName)

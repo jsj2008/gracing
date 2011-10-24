@@ -443,7 +443,6 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
           if(m_onShow != "") {
             ResourceManager::getInstance()->lua_doString(m_onShow.c_str());
           }
-
         }
 
       private:

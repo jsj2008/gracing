@@ -39,8 +39,10 @@ paths=[
   "Contents/Resources",
   "Contents/Resources/Vehicles",
   "Contents/Resources/Tracks",
-  "Contents/Resources/Textures"
+  "Contents/Resources/Textures",
+  "Contents/Resources/Audio"
 ]
+
 
 
 def error(message):

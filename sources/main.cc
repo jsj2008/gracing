@@ -30,9 +30,6 @@
 #include "EventReceiver.h"
 #include "GuiMenu.h"
 
-
-
-
 using namespace irr;
 using namespace core;
 using namespace scene;

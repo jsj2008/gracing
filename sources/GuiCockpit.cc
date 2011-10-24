@@ -40,7 +40,11 @@ GuiCockpit::GuiCockpit(
   XmlNode * root=0;
 
   std::string path_name;
-  resmanager->getResourceCompletePath("cockpit.zip",path_name);
+
+  std::string cockpitFileName="cockpit.zip";
+
+  resmanager->cfgGet("cockpit",cockpitFileName);
+  resmanager->getResourceCompletePath(cockpitFileName.c_str(),path_name);
 
   irr::io::path mypath(path_name.c_str());
   bool res=resmanager->getFileSystem()->addFileArchive(mypath);
@@ -144,14 +148,16 @@ GuiCockpit::GuiCockpit(
   m_lap=0;
   m_rank=0;
   m_totRank=0;
+  m_bodyWidth=m_bodyRect.getWidth();   //200;
+  m_bodyHeight=m_bodyRect.getHeight(); //115;
 }
 
 void GuiCockpit::setPosition(irr::s32 posX, irr::s32 posY)
 {
   AbsoluteRect.UpperLeftCorner.X = posX;
   AbsoluteRect.UpperLeftCorner.Y = posY;
-  AbsoluteRect.LowerRightCorner.X = AbsoluteRect.UpperLeftCorner.X + 200;
-  AbsoluteRect.LowerRightCorner.Y = AbsoluteRect.UpperLeftCorner.Y + 115;
+  AbsoluteRect.LowerRightCorner.X = AbsoluteRect.UpperLeftCorner.X + m_bodyWidth;
+  AbsoluteRect.LowerRightCorner.Y = AbsoluteRect.UpperLeftCorner.Y + m_bodyHeight;
 
   m_handDstRect.UpperLeftCorner = AbsoluteRect.UpperLeftCorner + m_handPosition - m_handCenter;
   m_handDstRect.LowerRightCorner = m_handDstRect.UpperLeftCorner + m_handRect.getWidth();

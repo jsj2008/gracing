@@ -45,11 +45,12 @@ class GuiItemListBoxEx : public IGuiMenuItem
     virtual bool selfDrawFocused() { return true; }
     virtual void drawFocus();
 
-    virtual void  onMouseMove(const GuiPoint & point);
-    virtual void  onMouseClick(const GuiPoint & point);
-    virtual void  onMouseLeave(const GuiPoint & point);
-    virtual void  onMouseEnter(const GuiPoint & point);
-    virtual void  onKeyClick(const irr::SEvent::SKeyInput & keyinput);
+    virtual void onMouseMove(const GuiPoint & point);
+    virtual void onMouseClick(const GuiPoint & point);
+    virtual void onMouseLeave(const GuiPoint & point);
+    virtual void onMouseEnter(const GuiPoint & point);
+    virtual void onKeyClick(const irr::SEvent::SKeyInput & keyinput);
+
     virtual bool retainFocusGoingNext();
     virtual bool retainFocusGoingPrev();
 

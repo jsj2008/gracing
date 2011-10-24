@@ -2277,8 +2277,10 @@ ResourceManager.o: JoystickInterface.h IDeviceInterface.h
 ResourceManager.o: IVehicleController.h Race.h VehicleCameraAnimator.h
 ResourceManager.o: Tweening.h GuiReadySetGo.h GuiCronometer.h
 ResourceManager.o: GuiCommunicator.h GuiFrame.h GuiCockpit.h VehicleChooser.h
-ResourceManager.o: VehicleKeyboardController.h VehicleNullController.h
-ResourceManager.o: VehicleAutoController.h PathWay.h
+ResourceManager.o: TrackChooser.h VehicleKeyboardController.h
+ResourceManager.o: VehicleNullController.h VehicleAutoController.h PathWay.h
+ResourceManager.o: AudioLayer.h Thread.h /usr/include/pthread.h
+ResourceManager.o: /usr/include/pthread_impl.h /usr/include/sched.h
 VehicleCameraAnimator.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 VehicleCameraAnimator.o: gmlog.h /usr/include/stdio.h /usr/include/_types.h
 VehicleCameraAnimator.o: /usr/include/sys/_types.h
@@ -5923,6 +5925,335 @@ VehicleChooser.o: IVehicle.h CompoundSceneNode.h gmlog.h INumberOutput.h
 VehicleChooser.o: XmlNode.h ResourceManager.h lua/lunar.h Vehicle.h
 VehicleChooser.o: EventReceiver.h EmptyPhaseHandler.h Track.hh
 VehicleChooser.o: CameraDataManager.hh util.hh Tweening.h
+TrackChooser.o: gmlog.h /usr/include/stdio.h /usr/include/_types.h
+TrackChooser.o: /usr/include/sys/_types.h /usr/include/sys/cdefs.h
+TrackChooser.o: /usr/include/machine/_types.h /usr/include/i386/_types.h
+TrackChooser.o: /usr/include/secure/_stdio.h /usr/include/secure/_common.h
+TrackChooser.o: TrackChooser.h IPhaseHandler.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/aabbox3d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMath.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrTypes.h
+TrackChooser.o: /usr/include/wchar.h /usr/include/stdarg.h
+TrackChooser.o: /usr/include/time.h /usr/include/_structs.h
+TrackChooser.o: /usr/include/sys/_structs.h /usr/include/_wctype.h
+TrackChooser.o: /usr/include/ctype.h /usr/include/runetype.h
+TrackChooser.o: /usr/include/math.h /usr/include/architecture/i386/math.h
+TrackChooser.o: /usr/include/float.h /usr/include/stdlib.h
+TrackChooser.o: /usr/include/Availability.h
+TrackChooser.o: /usr/include/AvailabilityInternal.h /usr/include/sys/wait.h
+TrackChooser.o: /usr/include/sys/signal.h /usr/include/sys/appleapiopts.h
+TrackChooser.o: /usr/include/machine/signal.h /usr/include/i386/signal.h
+TrackChooser.o: /usr/include/i386/_structs.h /usr/include/sys/resource.h
+TrackChooser.o: /usr/include/machine/endian.h /usr/include/i386/endian.h
+TrackChooser.o: /usr/include/sys/_endian.h
+TrackChooser.o: /usr/include/libkern/_OSByteOrder.h
+TrackChooser.o: /usr/include/libkern/i386/_OSByteOrder.h
+TrackChooser.o: /usr/include/alloca.h /usr/include/machine/types.h
+TrackChooser.o: /usr/include/i386/types.h /usr/include/limits.h
+TrackChooser.o: /usr/include/machine/limits.h /usr/include/i386/limits.h
+TrackChooser.o: /usr/include/i386/_limits.h /usr/include/sys/syslimits.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/plane3d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector3d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line3d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CDynamicMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDynamicMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReferenceCounted.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterial.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SColor.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/matrix4.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector2d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/dimension2d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/rect.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/position2d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrString.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrAllocator.h
+TrackChooser.o: /usr/include/memory.h /usr/include/string.h
+TrackChooser.o: /usr/include/secure/_string.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrArray.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/heapsort.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialFlags.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterialLayer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/S3DVertex.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexIndex.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EHardwareBufferFlags.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EPrimitiveTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVertexBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IIndexBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CVertexBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CIndexBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/coreutil.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/path.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ECullingTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDebugSceneTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverFeatures.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIAlignment.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIElementTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMeshWriterEnums.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMessageBoxFlags.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeAnimatorTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ETerrainElements.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/fast_atof.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD2.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD3.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3Shader.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileSystem.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLReader.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrXML.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileArchive.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReadFile.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileList.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoDriver.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITexture.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImage.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/triangle3d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SExposedVideoData.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/quaternion.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributeExchangingObject.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimator.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IEventReceiver.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILogger.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/Keycodes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITriangleSelector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrList.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line2d.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EAttributes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBoneSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardTextSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICameraSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICursorControl.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDummyTransformationSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGeometryCreator.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGPUProgrammingServices.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EShaderTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIButton.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElement.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUICheckBox.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIColorSelectDialog.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIComboBox.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIContextMenu.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEditBox.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElementFactory.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEnvironment.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISkin.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFileOpenDialog.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFont.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFontBitmap.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImage.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIInOutFader.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIListBox.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIMeshViewer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIScrollBar.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpinBox.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpriteBank.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIStaticText.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITabControl.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITable.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIToolbar.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIWindow.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITreeView.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImageList.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageLoader.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageWriter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SLight.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRenderer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRendererServices.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshCache.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshLoader.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshManipulator.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexManipulator.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshWriter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMetaTriangleSelector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IOSOperator.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSystemSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAnimatedMeshSceneNodeEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SParticle.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleBoxEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleCylinderEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleMeshEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRingEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSphereEmitter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAttractionAffector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAffector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleFadeOutAffector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleGravityAffector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRotationAffector.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3LevelMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrlichtDevice.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDeviceTypes.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoModeList.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITimer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneCollisionManager.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneManager.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SceneParameters.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISkinnedMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSkinMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraFPS.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraMaya.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCollisionResponse.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorFactory.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeFactory.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneUserDataSerializer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShaderConstantSetCallBack.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShadowVolumeSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITerrainSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITextSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVolumeLightSceneNode.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IWriteFile.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLWriter.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightManager.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SAnimatedMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SIrrCreationParameters.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SKeyMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferLightMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferTangents.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
+TrackChooser.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
+TrackChooser.o: PhyWorld.h config.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+TrackChooser.o: /usr/include/assert.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuadWord.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDispatcher.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btPersistentManifold.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransformUtil.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btManifoldResult.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCallback.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btPolyhedralConvexShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexInternalShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionMargin.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAabbUtil2.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btSphereShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCylinderShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConeShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConcaveShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleCallback.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexHullShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMesh.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStridingMeshInterface.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btOptimizedBvh.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btQuantizedBvh.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleInfoMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btSerializer.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btStackAlloc.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCompoundShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTetrahedronShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btEmptyShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btMultiSphereShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btUniformScalingShape.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionConfiguration.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btSimpleBroadphase.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btAxisSweep3.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvt.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btMultiSapBroadphase.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btDefaultMotionState.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuickprof.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btIDebugDraw.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDynamicsWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btContinuousDynamicsWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btSimpleDynamicsWorld.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btJacobianEntry.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHingeConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConeTwistConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSliderConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btUniversalConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHinge2Constraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConstraintSolver.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btRaycastVehicle.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
+TrackChooser.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+TrackChooser.o: ResourceManager.h lua/lunar.h Vehicle.h IVehicle.h
+TrackChooser.o: CompoundSceneNode.h INumberOutput.h EventReceiver.h
+TrackChooser.o: EmptyPhaseHandler.h Track.hh XmlNode.h CameraDataManager.hh
+TrackChooser.o: util.hh
 EventReceiver.o: /usr/include/assert.h /usr/include/sys/cdefs.h
 EventReceiver.o: EventReceiver.h
 EventReceiver.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
@@ -10086,6 +10417,334 @@ JoystickInterface.o: Vehicle.h IVehicle.h CompoundSceneNode.h gmlog.h
 JoystickInterface.o: INumberOutput.h EmptyPhaseHandler.h IPhaseHandler.h
 JoystickInterface.o: Track.hh CameraDataManager.hh util.hh
 JoystickInterface.o: IVehicleController.h
+AudioLayer.o: AudioLayer.h Thread.h /usr/include/pthread.h
+AudioLayer.o: /usr/include/_types.h /usr/include/sys/_types.h
+AudioLayer.o: /usr/include/sys/cdefs.h /usr/include/machine/_types.h
+AudioLayer.o: /usr/include/i386/_types.h /usr/include/pthread_impl.h
+AudioLayer.o: /usr/include/sched.h /usr/include/time.h
+AudioLayer.o: /usr/include/_structs.h /usr/include/sys/_structs.h gmlog.h
+AudioLayer.o: /usr/include/stdio.h /usr/include/secure/_stdio.h
+AudioLayer.o: /usr/include/secure/_common.h ResourceManager.h
+AudioLayer.o: /usr/include/stdlib.h /usr/include/Availability.h
+AudioLayer.o: /usr/include/AvailabilityInternal.h /usr/include/sys/wait.h
+AudioLayer.o: /usr/include/sys/signal.h /usr/include/sys/appleapiopts.h
+AudioLayer.o: /usr/include/machine/signal.h /usr/include/i386/signal.h
+AudioLayer.o: /usr/include/i386/_structs.h /usr/include/sys/resource.h
+AudioLayer.o: /usr/include/machine/endian.h /usr/include/i386/endian.h
+AudioLayer.o: /usr/include/sys/_endian.h /usr/include/libkern/_OSByteOrder.h
+AudioLayer.o: /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h
+AudioLayer.o: /usr/include/machine/types.h /usr/include/i386/types.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrlicht.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrCompileConfig.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/aabbox3d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMath.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrTypes.h
+AudioLayer.o: /usr/include/wchar.h /usr/include/stdarg.h
+AudioLayer.o: /usr/include/_wctype.h /usr/include/ctype.h
+AudioLayer.o: /usr/include/runetype.h /usr/include/math.h
+AudioLayer.o: /usr/include/architecture/i386/math.h /usr/include/float.h
+AudioLayer.o: /usr/include/limits.h /usr/include/machine/limits.h
+AudioLayer.o: /usr/include/i386/limits.h /usr/include/i386/_limits.h
+AudioLayer.o: /usr/include/sys/syslimits.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/plane3d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector3d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line3d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CDynamicMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDynamicMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReferenceCounted.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterial.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SColor.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/matrix4.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/vector2d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/dimension2d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/rect.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/position2d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrString.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrAllocator.h
+AudioLayer.o: /usr/include/memory.h /usr/include/string.h
+AudioLayer.o: /usr/include/secure/_string.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrArray.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/heapsort.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMaterialFlags.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMaterialLayer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/S3DVertex.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexIndex.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EHardwareBufferFlags.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EPrimitiveTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVertexBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IIndexBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CVertexBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CIndexBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/CMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/coreutil.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/path.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ECullingTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDebugSceneTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverFeatures.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDriverTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIAlignment.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EGUIElementTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMeshWriterEnums.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EMessageBoxFlags.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeAnimatorTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ESceneNodeTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ETerrainElements.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/fast_atof.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD2.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshMD3.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3Shader.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileSystem.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLReader.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrXML.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileArchive.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IReadFile.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IFileList.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoDriver.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITexture.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImage.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/triangle3d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SExposedVideoData.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/quaternion.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAnimatedMeshSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributeExchangingObject.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimator.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IEventReceiver.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILogger.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/Keycodes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITriangleSelector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrList.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IAttributes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/line2d.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EAttributes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBoneSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IBillboardTextSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICameraSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ICursorControl.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IDummyTransformationSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGeometryCreator.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGPUProgrammingServices.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EShaderTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIButton.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElement.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUICheckBox.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIColorSelectDialog.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIComboBox.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIContextMenu.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEditBox.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIElementFactory.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIEnvironment.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISkin.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFileOpenDialog.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFont.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIFontBitmap.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImage.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIInOutFader.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIListBox.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIMeshViewer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIScrollBar.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpinBox.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUISpriteBank.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIStaticText.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITabControl.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITable.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIToolbar.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIWindow.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUITreeView.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IGUIImageList.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageLoader.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IImageWriter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SLight.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRenderer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMaterialRendererServices.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshCache.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshLoader.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshManipulator.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SVertexManipulator.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMeshWriter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IMetaTriangleSelector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IOSOperator.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSystemSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAnimatedMeshSceneNodeEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SParticle.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleBoxEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleCylinderEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleMeshEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRingEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleSphereEmitter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAttractionAffector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleAffector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleFadeOutAffector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleGravityAffector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IParticleRotationAffector.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IQ3LevelMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IrrlichtDevice.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/EDeviceTypes.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVideoModeList.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITimer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/irrMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneCollisionManager.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneManager.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SceneParameters.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISkinnedMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSkinMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraFPS.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCameraMaya.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorCollisionResponse.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeAnimatorFactory.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneNodeFactory.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ISceneUserDataSerializer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShaderConstantSetCallBack.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IShadowVolumeSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITerrainSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ITextSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IVolumeLightSceneNode.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IWriteFile.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/IXMLWriter.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/ILightManager.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SAnimatedMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SIrrCreationParameters.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SKeyMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferLightMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SMeshBufferTangents.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SSharedMeshBuffer.h
+AudioLayer.o: /Users/gianni/MyLibraries/irrlicht-1.7.2/include/SViewFrustum.h
+AudioLayer.o: lua/lunar.h PhyWorld.h config.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+AudioLayer.o: /usr/include/assert.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btScalar.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btVector3.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuadWord.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransform.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedAllocator.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDispatcher.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btPersistentManifold.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btTransformUtil.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btManifoldResult.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btBroadphaseProxy.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCallback.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionObject.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btPolyhedralConvexShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMatrix3x3.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexInternalShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCollisionMargin.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAabbUtil2.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMinMax.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btSphereShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCylinderShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBoxShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConeShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConcaveShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleCallback.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexHullShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMesh.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btStridingMeshInterface.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btOptimizedBvh.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btQuantizedBvh.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleInfoMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btAlignedObjectArray.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btSerializer.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btStackAlloc.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btHashMap.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleMeshShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btCompoundShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btTetrahedronShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btEmptyShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btMultiSphereShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionShapes/btUniformScalingShape.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btSphereSphereCollisionAlgorithm.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionCreateFunc.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionConfiguration.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/CollisionDispatch/btCollisionDispatcher.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btSimpleBroadphase.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btAxisSweep3.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvt.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btMultiSapBroadphase.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/BroadphaseCollision/btDbvtBroadphase.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuaternion.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btDefaultMotionState.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btMotionState.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btQuickprof.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/LinearMath/btIDebugDraw.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDynamicsWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactSolverInfo.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btContinuousDynamicsWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btSimpleDynamicsWorld.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btJacobianEntry.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHingeConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConeTwistConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSliderConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btUniversalConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btHinge2Constraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btConstraintSolver.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btContactConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletCollision/NarrowPhaseCollision/btManifoldPoint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btRaycastVehicle.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/ConstraintSolver/btTypedConstraint.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btVehicleRaycaster.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWheelInfo.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
+AudioLayer.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
+AudioLayer.o: Vehicle.h IVehicle.h CompoundSceneNode.h INumberOutput.h
+AudioLayer.o: EventReceiver.h EmptyPhaseHandler.h IPhaseHandler.h Track.hh
+AudioLayer.o: XmlNode.h CameraDataManager.hh util.hh
 PathWay.o: PathWay.h
 PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletDynamicsCommon.h
 PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/btBulletCollisionCommon.h
@@ -10226,3 +10885,13 @@ PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Vehicle/btWh
 PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btActionInterface.h
 PathWay.o: /Users/gianni/MyLibraries/bullet-2.77/src/BulletDynamics/Dynamics/btRigidBody.h
 PathWay.o: gmlog.h
+PosixThread.o: /usr/include/assert.h /usr/include/sys/cdefs.h
+PosixThread.o: /usr/include/unistd.h /usr/include/_types.h
+PosixThread.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
+PosixThread.o: /usr/include/i386/_types.h /usr/include/sys/unistd.h
+PosixThread.o: /usr/include/sys/select.h /usr/include/sys/appleapiopts.h
+PosixThread.o: /usr/include/sys/_structs.h /usr/include/sys/_select.h
+PosixThread.o: Thread.h /usr/include/pthread.h /usr/include/pthread_impl.h
+PosixThread.o: /usr/include/sched.h /usr/include/time.h
+PosixThread.o: /usr/include/_structs.h gmlog.h /usr/include/stdio.h
+PosixThread.o: /usr/include/secure/_stdio.h /usr/include/secure/_common.h

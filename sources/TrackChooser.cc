@@ -54,32 +54,31 @@ DefaultTrackChooser::DefaultTrackChooser(irr::IrrlichtDevice * device,
     resmanager->getVideoDriver()->getTexture(imgpath.c_str());
 
   m_trackShot = 0;
-  setTrack();
+  m_animating = false;
+  m_currentTrackIndex = 0;
+  setTrack(0);
 
   if(!m_defaultTrackShot) {
     GM_LOG("cannot load the default track shot\n");
   }
-
-
 }
 
 void DefaultTrackChooser::prepare()
 {
-  GM_LOG("%s preparing\n",__PRETTY_FUNCTION__);
   m_currentTrackIndex=0;
 }
 
 void DefaultTrackChooser::unprepare()
 {
-  GM_LOG("%s unpreparing\n",__PRETTY_FUNCTION__);
 }
 
-void DefaultTrackChooser::setTrack()
+void DefaultTrackChooser::setTrack(unsigned index)
 {
+  if(m_animating)
+    return;
   ResourceManager * resmanager=ResourceManager::getInstance();
-  GM_LOG("-->%d \"%s\" \n",m_currentTrackIndex,
-      resmanager->getTracksList()[m_currentTrackIndex]->getName().c_str());
 
+  m_currentTrackIndex = index;
   std::string filename;
 
   resmanager->getTracksList()[m_currentTrackIndex]->
@@ -89,7 +88,6 @@ void DefaultTrackChooser::setTrack()
     resmanager->getTracksList()[m_currentTrackIndex]->getShotImage();
   if(m_trackShot == 0)
     m_trackShot = m_defaultTrackShot;
-  GM_LOG("   ->'%s'\n",imgpath.c_str());
 }
 
 bool DefaultTrackChooser::step()
@@ -129,10 +127,14 @@ bool DefaultTrackChooser::step()
     dstRect.LowerRightCorner.X = 200;
     dstRect.LowerRightCorner.Y = 200;
 
+
+    irr::core::dimension2d<irr::s32> dim;
+    dim=m_trackShot->getSize();
+
     srcRect.UpperLeftCorner.X = 0 ;
     srcRect.UpperLeftCorner.Y = 0;
-    srcRect.LowerRightCorner.X = 512;
-    srcRect.LowerRightCorner.Y = 512;
+    srcRect.LowerRightCorner.X = dim.Width;
+    srcRect.LowerRightCorner.Y = dim.Height;
 
     m_driver->draw2DImage(
       m_trackShot,
@@ -143,20 +145,22 @@ bool DefaultTrackChooser::step()
   m_driver->endScene();
 
   if(erec->OneShotKey(irr::KEY_LEFT)) {
+    unsigned index;
     if(m_currentTrackIndex)
-      m_currentTrackIndex--;
+      index=m_currentTrackIndex-1;
     else
-      m_currentTrackIndex=ResourceManager::getInstance()->getTracksList().size()-1;
-    setTrack();
+      index=ResourceManager::getInstance()->getTracksList().size()-1;
+    setTrack(index);
   }
 
   if(erec->OneShotKey(irr::KEY_RIGHT)) {
+    unsigned index;
     if(m_currentTrackIndex == 
         ResourceManager::getInstance()->getTracksList().size()-1)
-      m_currentTrackIndex=0;
+      index=0;
     else
-      m_currentTrackIndex++;
-    setTrack();
+      index=m_currentTrackIndex+1;
+    setTrack(index);
   }
 
   if(erec->OneShotKey(irr::KEY_RETURN)) {

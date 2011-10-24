@@ -1,12 +1,11 @@
 <!-- these are only test entries -->
 <default-track name="jungle.zip"/>
 <start-auto-player>no</start-auto-player>
-
+<cockpit>cockpit-2.zip</cockpit>
 <video>
 <resolution>0</resolution>
 <fullscreen>false</fullscreen>
 </video>
-
 <input-devices>
     <device name="keyboard" >
       <device>
