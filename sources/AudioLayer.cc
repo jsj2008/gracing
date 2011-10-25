@@ -43,6 +43,10 @@ static OggVorbis_File  g_oggStream;     // stream handle
 static vorbis_info*    g_vorbisInfo;    // some formatting data
 static vorbis_comment* g_vorbisComment; // user comments
 
+static unsigned  g_bufferDuration=50;
+static bool      g_songLoaded=false;
+static bool      g_playing=false;
+
 
 static const char * errorString(int code)
 {
@@ -89,8 +93,11 @@ AudioLayer::AudioLayer()
 {
   GM_LOG("creating audiolayer\n");
 
-  m_bufferDuration=1000;
+  g_bufferDuration=1000;
+  g_songLoaded=false;
+  g_playing=false;
   g_device = alcOpenDevice(NULL); // select the "preferred g_device"
+
   if(!g_device) {
     check();
     return;
@@ -118,16 +125,27 @@ bool AudioLayer::executeCommand(Command & cmd)
     case cmd_loadSong:
       _loadSong(cmd.m_arg0);
       break;
+    case cmd_startSong:
+      _startSong();
+      break;
   }
   return false;
 }
 
 
+void AudioLayer::_startSong()
+{
+  if(!g_songLoaded)
+    return;
+
+  g_playing=true;
+}
+
 void AudioLayer::_loadSong(const char * songFileName)
 {
   FILE*  oggFile;       // file handle
 
-  if(m_songLoaded) {
+  if(g_songLoaded) {
     GM_LOG("deleting previous song\n");
     // TODO: release song resources
   }
@@ -180,10 +198,10 @@ void AudioLayer::_loadSong(const char * songFileName)
 
 
   unsigned samplePerSec = g_vorbisInfo->rate * g_vorbisInfo->channels;
-  m_bufferDuration=(1000 * BUFFER_SIZE) / samplePerSec;
-  m_bufferDuration=100;
+  g_bufferDuration=(1000 * BUFFER_SIZE) / samplePerSec;
+  g_bufferDuration=100;
 
-  m_songLoaded=true;
+  g_songLoaded=true;
 }
 
 void AudioLayer::displaySongInfo()
@@ -205,17 +223,14 @@ void AudioLayer::displaySongInfo()
 void AudioLayer::playback()
 {
   if(isPlaying()) {
-    GM_LOG("zokka 1\n");
     return;
   }
 
   if(!stream(g_buffers[0])) {
-    GM_LOG("zokka\n");
     return;
   }
 
   if(!stream(g_buffers[1])) {
-    GM_LOG("zikka\n");
     return;
   }
 
@@ -225,6 +240,14 @@ void AudioLayer::playback()
 
 void AudioLayer::startSong()
 {
+
+  m_commands.put(Command(cmd_startSong,0,0));
+
+#if 0
+  if(!g_songLoaded)
+    return;
+  g_playing=true;
+#endif
 }
 
 bool AudioLayer::stream(ALuint buffer) 
@@ -286,13 +309,23 @@ void AudioLayer::run()
     ResourceManager::getInstance()->getDevice();
 
   bool done=false;
-  m_songLoaded = false;
+  g_songLoaded = false;
   while(!done) {
-    if(! m_commands.isEmpty()) {
+    if(!m_commands.isEmpty()) {
       Command cmd;
       m_commands.get(cmd);
       cmd.dump();
       done=executeCommand(cmd);
+    }
+
+    if(g_playing) {
+      if(!update()) {
+        GM_LOG("song terminated\n");
+        g_playing=false;
+      } else {
+        if(!isPlaying())
+          playback();
+      }
     }
     device->sleep(50);
   }

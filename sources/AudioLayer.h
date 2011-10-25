@@ -36,6 +36,7 @@ class AudioLayer : public Thread
    private:
 
      void _loadSong(const char * songFileName);
+     void _startSong();
 
      /* commands */
      enum {
@@ -56,7 +57,8 @@ class AudioLayer : public Thread
        Command(unsigned cmd, const char * arg0, unsigned arg1) 
        {
          m_cmd = cmd;
-         strncpy(m_arg0,arg0,arg0_size);
+         if(arg0)
+           strncpy(m_arg0,arg0,arg0_size);
          m_arg1 = arg1;
        }
 
@@ -90,7 +92,5 @@ class AudioLayer : public Thread
      bool update();
      void playback();
 
-     unsigned  m_bufferDuration;
-     bool      m_songLoaded;
 
 };

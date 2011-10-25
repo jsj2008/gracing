@@ -732,6 +732,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   getAudioCompletePath("Boom_boom_boom.ogg",path);
   m_audioLayer->loadSong(path.c_str());
+  m_audioLayer->startSong();
+
 }
 
 
