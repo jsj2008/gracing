@@ -125,7 +125,8 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/default-track-shot.png $(tgt_res_dir)
 
 # MUSIC
-	@$(copier) --cp $(src_music_dir)/Boom_boom_boom.ogg $(tgt_music_dir)
+	@$(copier) --cp $(src_music_dir)/gracing-soundtrack.ogg $(tgt_music_dir)
+	@$(copier) --cp $(src_music_dir)/pickup.wav  $(tgt_music_dir)
     
 
 clean: clean_subdirs

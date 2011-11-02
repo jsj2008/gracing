@@ -72,6 +72,20 @@ class Util
       return val;
     }
 
+    static inline irr::s32 readS32(irr::io::IReadFile * file)
+    {
+      irr::s32 val;
+      file->read(&val,sizeof(val));
+      return val;
+    }
+
+    static inline irr::s16 readS16(irr::io::IReadFile * file)
+    {
+      irr::s16 val;
+      file->read(&val,sizeof(val));
+      return val;
+    }
+
     static inline int readInt(irr::io::IReadFile * file) 
     {
       int val;

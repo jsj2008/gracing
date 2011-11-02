@@ -29,6 +29,7 @@
 #include "GUISpeedometer.h"
 #include "EventReceiver.h"
 #include "GuiMenu.h"
+#include "AudioLayer.h"
 
 using namespace irr;
 using namespace core;
@@ -232,51 +233,6 @@ int main(int argc, char ** av)
   unsigned long startFrameTime;
   unsigned long endFrameTime;
   unsigned long frameDuration = 1000 / glob_frameRate;
-
-#if 0
-  // phase handlers
-  VehicleChooser *    vehicleChooser;
-  Race *              race;
-  EmptyPhaseHandler *  emptyPhaseHandler;
-
-  IPhaseHandler *  currentPhaseHandler;
-
-  vehicleChooser=new VehicleChooser(device,world);
-  race = new Race(device,world);
-  emptyPhaseHandler=new EmptyPhaseHandler(device,world);
-  currentPhaseHandler = 0;
-
-
-
-#define START_CHOOSER 1
-#ifdef START_CHOOSER
-  currentPhaseHandler = new VehicleChooser(device,world);
-#else
-  const std::vector<IVehicle*> & vehicles=
-    resmanager->getVehiclesList();
-  assert(vehicles.size() >= 4);
-  race->setTrack(thetrack);
-  race->addVehicle(vehicles[1],
-      new VehicleKeyboardController(resmanager->getEventReceiver()), 
-      //new VehicleAutoController(), 
-      "gonorra",true);
-  race->addVehicle(vehicles[0], 
-      new VehicleAutoController(), 
-      "ccaaspeedstar");
-  race->addVehicle(vehicles[3], new VehicleAutoController(),
-      "speedstar");
-  race->restart();
-  currentPhaseHandler = race;
-#endif
-
-
-  unsigned runningVehicles[3];
-
-  // temp init !!!!!
-  vehicleChooser->prepare(1,3,runningVehicles);
-  currentPhaseHandler=emptyPhaseHandler;
-
-#endif
 
   globalDone = false;
 

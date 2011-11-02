@@ -29,23 +29,37 @@
 #include <vorbis/vorbisfile.h>
 
 #include "ResourceManager.h"
-#define BUFFER_SIZE (8*4096)
+#define BUFFER_SIZE   (8*4096)
+#define MAX_N_BUFFERS 16
+
+struct SoundBuffer {
+  ALuint          buffer;
+  ALuint          source;
+  bool            used;
+
+  SoundBuffer()
+  {
+    buffer=0;
+    used=false;
+  };
+};
 
 
-static AudioLayer * instance=0;
-
-static ALuint       g_buffers[2];
-static ALCdevice  * g_device;
-static ALCcontext * g_context;
-static ALuint       g_source;
-static ALenum       g_format;     // internal g_format
+static AudioLayer *    instance=0;
+static ALuint          g_buffers[2];
+static ALCdevice  *    g_device;
+static ALCcontext *    g_context;
+static ALuint          g_source;
+static ALenum          g_format;     // internal g_format
 static OggVorbis_File  g_oggStream;     // stream handle
 static vorbis_info*    g_vorbisInfo;    // some formatting data
 static vorbis_comment* g_vorbisComment; // user comments
+static unsigned        g_bufferDuration=50;
+static bool            g_songLoaded=false;
+static bool            g_playing=false;
+enum                   { MAX_N_SOUNDS=16 };
+static SoundBuffer     g_samples[MAX_N_SOUNDS];
 
-static unsigned  g_bufferDuration=50;
-static bool      g_songLoaded=false;
-static bool      g_playing=false;
 
 
 static const char * errorString(int code)
@@ -82,10 +96,8 @@ static bool check()
 
 AudioLayer * AudioLayer::getInstance()
 {
-  GM_LOG("super\n");
   if(!instance)
     instance = new AudioLayer();
-  GM_LOG("saper\n");
   return instance;
 }
 
@@ -119,11 +131,22 @@ void AudioLayer::loadSong(const char * songFileName)
   m_commands.put(Command(cmd_loadSong,songFileName,0));
 }
 
+void AudioLayer::loadSample(unsigned index, const char * sampleFileName) 
+{
+  m_commands.put(Command(cmd_loadSample,sampleFileName,index));
+}
+
 bool AudioLayer::executeCommand(Command & cmd)
 {
   switch(cmd.m_cmd) {
     case cmd_loadSong:
       _loadSong(cmd.m_arg0);
+      break;
+    case cmd_loadSample:
+      _loadSample(cmd.m_arg1,cmd.m_arg0);
+      break;
+    case cmd_playSample:
+      _playSample(cmd.m_arg1);
       break;
     case cmd_startSong:
       _startSong();
@@ -308,6 +331,8 @@ void AudioLayer::run()
   irr::IrrlichtDevice *device =
     ResourceManager::getInstance()->getDevice();
 
+
+
   bool done=false;
   g_songLoaded = false;
   while(!done) {
@@ -331,6 +356,11 @@ void AudioLayer::run()
   }
 }
 
+void AudioLayer::playSample(unsigned index)
+{
+  m_commands.put(Command(cmd_playSample,0,index));
+}
+
 
 
 bool AudioLayer::isPlaying()
@@ -350,3 +380,152 @@ void AudioLayer::stopSong()
 {
   GM_LOG("stop playing song\n");
 }
+
+void AudioLayer::_freeSample(unsigned index)
+{
+  if(index >= MAX_N_SOUNDS)
+    return;
+  if(!g_samples[index].used)
+    return;
+
+  // ... free the openAl sample
+}
+
+void AudioLayer::_playSample(unsigned index)
+{
+  ALenum state;
+  if(index >= MAX_N_SOUNDS)
+    return;
+
+  alGetSourcei(g_samples[index].source, AL_SOURCE_STATE, &state);
+
+  if(state == AL_PLAYING)
+    GM_LOG("not playing, becaouse alreadu playing\n");
+
+  GM_LOG("ufo\n");
+  alSourcePlay(g_samples[index].source);
+}
+
+void AudioLayer::_loadSample(unsigned index, const char * name) 
+{
+  char xbuffer[5];
+  short audioFormat;
+  short channels;
+  int sampleRate;
+  int byteRate;
+  short bitsPerSample;
+  int dataSize;
+  ALenum  format;
+  float duration;
+
+
+  if(index >= MAX_N_SOUNDS)
+    return;
+
+  _freeSample(index);
+
+  alGenBuffers(1,  & g_samples[index].buffer);
+  alGenSources(1, &g_samples[index].source);
+
+  alSource3f(g_samples[index].source, AL_POSITION,        0.0, 0.0, 0.0);
+  alSource3f(g_samples[index].source, AL_VELOCITY,        0.0, 0.0, 0.0);
+  alSource3f(g_samples[index].source, AL_DIRECTION,       0.0, 0.0, 0.0);
+  alSourcef (g_samples[index].source, AL_ROLLOFF_FACTOR,  0.0          );
+  alSourcei (g_samples[index].source, AL_SOURCE_RELATIVE, AL_TRUE      );
+
+  irr::io::IFileSystem *  filesystem=ResourceManager::getInstance()->getFileSystem();
+
+  irr::io::IReadFile * rfile=filesystem->
+    createAndOpenFile (name);
+
+  if(!rfile) {
+    GM_LOG("Cannot open '%s'\n",name);
+    goto error_and_exit;
+  }
+
+  xbuffer[4] = '\0';
+  rfile->read(xbuffer,4);
+  if (strcmp(xbuffer, "RIFF") != 0) {
+    GM_LOG( "Not a WAV file (missing RIFF)\n");
+    goto error_close_and_exit;
+  }
+  Util::readInt(rfile);
+  rfile->read(xbuffer,4);
+  if (strcmp(xbuffer, "WAVE") != 0) {
+    GM_LOG( "Not a WAV file (missing WAVE)\n");
+    goto error_close_and_exit;
+  }
+  rfile->read(xbuffer,4);
+  if (strcmp(xbuffer, "fmt ") != 0) {
+    GM_LOG( "Not a WAV file (missing fmt )");
+    goto error_close_and_exit;
+  }
+  Util::readInt(rfile);
+
+  audioFormat = Util::readS16(rfile); 
+  channels = Util::readS16(rfile); 
+  sampleRate = Util::readS32(rfile);
+  byteRate = Util::readS32(rfile); 
+  Util::readS16(rfile);
+  bitsPerSample = Util::readS16(rfile);
+
+
+  if(bitsPerSample != 16) {
+    
+  }
+
+  rfile->read(xbuffer,4);
+  if(strcmp(xbuffer,"data") != 0) {
+    GM_LOG("Invalid WAF file (missing 'data')\n");
+    goto error_close_and_exit;
+  }
+
+  dataSize=Util::readS16(rfile);
+
+  GM_LOG("Audio format : %d\n",audioFormat);
+  GM_LOG("Channers     : %d\n",channels);
+  GM_LOG("Sample rate  : %d\n",sampleRate);
+  GM_LOG("Byte rate    : %d\n",byteRate);
+  GM_LOG("Bits/Sample  : %d\n",bitsPerSample);
+  GM_LOG("Data size    : %d\n",dataSize);
+
+  g_samples[index].used=true;
+
+  unsigned char * data;
+  data=new unsigned char [dataSize];
+
+  rfile->read(data,dataSize);
+
+  duration = float(dataSize) / byteRate;
+
+  format = AL_FORMAT_MONO16;
+
+  alBufferData(g_samples[index].buffer, format, data, dataSize, sampleRate);
+  free(data);
+  alSourceQueueBuffers(g_samples[index].source, 1, &g_samples[index].buffer);
+
+
+error_close_and_exit:
+  rfile->drop();
+error_and_exit:
+  return;
+
+#if 0
+  if (audioFormat != 16) {
+    short extraParams = file_read_int16_le(xbuffer, file);
+    file_ignore_bytes(file, extraParams);
+  }
+
+  if (fread(xbuffer, sizeof(char), 4, file) != 4 || strcmp(xbuffer, "data") != 0)
+    throw "Invalid WAV file";
+
+  int dataChunkSize = file_read_int32_le(xbuffer, file);
+  unsigned char* bufferData = file_allocate_and_read_bytes(file, (size_t) dataChunkSize);
+
+  float duration = float(dataChunkSize) / byteRate;
+  alBufferData(buffer, GetFormatFromInfo(channels, bitsPerSample), bufferData, dataChunkSize, sampleRate);
+  free(bufferData);
+  fclose(f);
+#endif
+}
+

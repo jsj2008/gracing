@@ -17,6 +17,7 @@
 
 #include "GuiMenu.h"
 #include "GuiItemStaticText.h"
+#include "AudioLayer.h"
 
 #include <lunar.h>
 
@@ -88,11 +89,14 @@ void GuiItemStaticText::draw()
 
 void GuiItemStaticText::onMouseClick(const GuiPoint & point)
 {
+  GM_LOG("socka\n");
+  ResourceManager::getInstance()->getAudioLayer()->playSample(0);
   executeCode(m_onClick.c_str());
 }
 
 void GuiItemStaticText::onKeyClick(const irr::SEvent::SKeyInput & event) 
 {
+  ResourceManager::getInstance()->getAudioLayer()->playSample(0);
   if(event.Key == irr::KEY_RETURN)
     executeCode(m_onClick.c_str());
 }

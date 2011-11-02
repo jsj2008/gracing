@@ -104,6 +104,7 @@ class ResourceManager
     inline lua_State *                getLuaState()    { return m_lua; }
     inline irr::IrrlichtDevice *      getDevice()      { return m_device; }
     inline irr::gui::IGUIEnvironment *getGuiEnv()      { return m_device->getGUIEnvironment(); }
+    inline AudioLayer *               getAudioLayer()  { return m_audioLayer; }
 
     
     /* game status handling */

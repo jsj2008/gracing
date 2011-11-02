@@ -26,6 +26,10 @@ class AudioLayer : public Thread
      virtual ~AudioLayer();
 
      virtual void loadSong(const char * songFileName);
+     virtual void loadSample(unsigned index, const char * sampleFileName);
+
+     virtual void playSample(unsigned index);
+
      virtual void startSong();
      virtual void stopSong();
      virtual void displaySongInfo();
@@ -37,13 +41,19 @@ class AudioLayer : public Thread
 
      void _loadSong(const char * songFileName);
      void _startSong();
+     void _loadSample(unsigned index, const char * wavFileName);
+     void _freeSample(unsigned index);
+     void _loadSample(unsigned index);
+     void _playSample(unsigned index);
 
      /* commands */
      enum {
        cmd_none,
        cmd_loadSong,
        cmd_startSong,
-       cmd_stopSong
+       cmd_stopSong,
+       cmd_loadSample,
+       cmd_playSample,
      };
 
      struct Command {
@@ -71,11 +81,17 @@ class AudioLayer : public Thread
            case cmd_loadSong: 
              GM_LOG("load song '%s'\n",m_arg0); 
              break;
+           case cmd_loadSample: 
+             GM_LOG("load sample '%s'\n",m_arg0); 
+             break;
            case cmd_startSong: 
              GM_LOG("start song\n");
              break;
            case cmd_stopSong: 
              GM_LOG("stop song\n");
+             break;
+           case cmd_playSample: 
+             GM_LOG("play sample %d\n",m_arg1);
              break;
            default:
              GM_LOG("unknow\n");
@@ -91,6 +107,4 @@ class AudioLayer : public Thread
      bool stream(unsigned );
      bool update();
      void playback();
-
-
 };

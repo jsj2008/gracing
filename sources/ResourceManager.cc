@@ -730,10 +730,18 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   if(!m_track) 
     m_track=new Track(m_device,m_world,"farm.zip");
 
-  getAudioCompletePath("Boom_boom_boom.ogg",path);
+
+  std::string trackFileName;
+
+  cfgGet("main-music",trackFileName);
+  getAudioCompletePath(trackFileName.c_str(),path);
+#if 0
   m_audioLayer->loadSong(path.c_str());
   m_audioLayer->startSong();
+#endif
 
+  getAudioCompletePath("pickup.wav",path);
+  m_audioLayer->loadSample(0,path.c_str());
 }
 
 
@@ -905,6 +913,7 @@ void ResourceManager::loadVehicles()
 
 void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen) 
 {
+
   m_menu->setGroup(name);
   if(centerOnTheScreen)
     m_menu->centerOnTheScreen();
@@ -923,9 +932,6 @@ void ResourceManager::showMenu(const std::wstring & name, bool centerOnTheScreen
   for(it=list.begin(); it != list.end(); it++) {
     GM_LOG("--->%p\n",*it);
   }
-
-
-
 }
 
 

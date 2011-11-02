@@ -2,6 +2,7 @@
 <default-track name="jungle.zip"/>
 <start-auto-player>no</start-auto-player>
 <cockpit>cockpit-2.zip</cockpit>
+<main-music>gracing-soundtrack.ogg</main-music>
 <video>
 <resolution>0</resolution>
 <fullscreen>false</fullscreen>
