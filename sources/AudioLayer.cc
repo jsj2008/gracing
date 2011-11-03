@@ -36,6 +36,7 @@ struct SoundBuffer {
   ALuint          buffer;
   ALuint          source;
   bool            used;
+  float           gain;
 
   SoundBuffer()
   {
@@ -126,9 +127,24 @@ AudioLayer::AudioLayer()
   check();
 }
 
+void AudioLayer::setFxVolume(float f)
+{
+  m_commands.put(Command(cmd_setFxVolume,f));
+}
+
+void AudioLayer::setSongVolume(float f)
+{
+  m_commands.put(Command(cmd_setSongVolume,f));
+}
+
 void AudioLayer::loadSong(const char * songFileName)
 {
   m_commands.put(Command(cmd_loadSong,songFileName,0));
+}
+
+void AudioLayer::enableFx(bool  enable)
+{
+  m_commands.put(Command(cmd_enableSamples,0,enable));
 }
 
 void AudioLayer::loadSample(unsigned index, const char * sampleFileName) 
@@ -151,6 +167,15 @@ bool AudioLayer::executeCommand(Command & cmd)
     case cmd_startSong:
       _startSong();
       break;
+    case cmd_setSongVolume:
+      _setSongVolume(cmd.m_arg2);
+      break;
+    case cmd_setFxVolume:
+      _setFxVolume(cmd.m_arg2);
+      break;
+    case cmd_enableSamples:
+      _enableSamples(cmd.m_arg1);
+      break;
   }
   return false;
 }
@@ -162,6 +187,34 @@ void AudioLayer::_startSong()
     return;
 
   g_playing=true;
+}
+
+void AudioLayer::_setFxVolume(float volume)
+{
+  for(unsigned i=0; i<MAX_N_BUFFERS; i++) 
+    if(g_samples[i].used) {
+      GM_LOG("setting fx volume %f\n",volume);
+      g_samples[i].gain = volume;
+      alSourcef(g_samples[i].source, AL_GAIN, g_samples[i].gain);
+    }
+}
+
+void AudioLayer::_enableSamples(unsigned v)
+{
+  if(v) {
+    for(unsigned i=0; i<MAX_N_BUFFERS; i++) 
+      if(g_samples[i].used) 
+        alSourcef(g_samples[i].source, AL_GAIN, g_samples[i].gain);
+  } else {
+    for(unsigned i=0; i<MAX_N_BUFFERS; i++) 
+      if(g_samples[i].used) 
+        alSourcef(g_samples[i].source, AL_GAIN, 0);
+  }
+}
+
+void AudioLayer::_setSongVolume(float f)
+{
+  alSourcef(g_source, AL_GAIN, f);
 }
 
 void AudioLayer::_loadSong(const char * songFileName)
@@ -211,7 +264,10 @@ void AudioLayer::_loadSong(const char * songFileName)
     return;
   }
 
-  alSourcef(g_source, AL_GAIN, 1.0);
+  double gain=1.;
+
+  ResourceManager::getInstance()->cfgGet("audio/music-volume",gain);
+  alSourcef(g_source, AL_GAIN, gain);
 
   alSource3f(g_source, AL_POSITION,        0.0, 0.0, 0.0);
   alSource3f(g_source, AL_VELOCITY,        0.0, 0.0, 0.0);
@@ -339,7 +395,7 @@ void AudioLayer::run()
     if(!m_commands.isEmpty()) {
       Command cmd;
       m_commands.get(cmd);
-      cmd.dump();
+      //cmd.dump();
       done=executeCommand(cmd);
     }
 
@@ -402,7 +458,6 @@ void AudioLayer::_playSample(unsigned index)
   if(state == AL_PLAYING)
     GM_LOG("not playing, becaouse alreadu playing\n");
 
-  GM_LOG("ufo\n");
   alSourcePlay(g_samples[index].source);
 }
 
@@ -426,6 +481,22 @@ void AudioLayer::_loadSample(unsigned index, const char * name)
 
   alGenBuffers(1,  & g_samples[index].buffer);
   alGenSources(1, &g_samples[index].source);
+
+
+  double gain=1.;
+  bool   fxEnabled=true;
+
+  ResourceManager::getInstance()->cfgGet("audio/fx-volume",gain);
+  ResourceManager::getInstance()->cfgGet("audio/fx-enabled",fxEnabled);
+
+  g_samples[index].gain = gain;
+  g_samples[index].used = true;
+
+    
+  if(!fxEnabled)
+    gain = 0.;
+
+  alSourcef(g_source, AL_GAIN, gain);
 
   alSource3f(g_samples[index].source, AL_POSITION,        0.0, 0.0, 0.0);
   alSource3f(g_samples[index].source, AL_VELOCITY,        0.0, 0.0, 0.0);

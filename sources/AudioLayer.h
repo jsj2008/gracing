@@ -27,13 +27,19 @@ class AudioLayer : public Thread
 
      virtual void loadSong(const char * songFileName);
      virtual void loadSample(unsigned index, const char * sampleFileName);
-
      virtual void playSample(unsigned index);
+
+     virtual void enableFx(bool enabled);
+
+     virtual void setSongVolume(float volume);
+     virtual void setFxVolume(float volume);
 
      virtual void startSong();
      virtual void stopSong();
      virtual void displaySongInfo();
      virtual bool isPlaying();
+
+
 
      virtual void run();
 
@@ -45,6 +51,9 @@ class AudioLayer : public Thread
      void _freeSample(unsigned index);
      void _loadSample(unsigned index);
      void _playSample(unsigned index);
+     void _setSongVolume(float volume);
+     void _enableSamples(unsigned value);
+     void _setFxVolume(float volume);
 
      /* commands */
      enum {
@@ -54,6 +63,9 @@ class AudioLayer : public Thread
        cmd_stopSong,
        cmd_loadSample,
        cmd_playSample,
+       cmd_setSongVolume,
+       cmd_enableSamples,
+       cmd_setFxVolume
      };
 
      struct Command {
@@ -61,8 +73,17 @@ class AudioLayer : public Thread
        unsigned char m_cmd;
        char          m_arg0[arg0_size];
        unsigned      m_arg1;
+       float         m_arg2;
 
        Command() { m_cmd=cmd_none; }
+
+       Command(unsigned cmd, float f)
+       {
+         m_cmd=cmd;
+         m_arg0[0]=0;
+         m_arg1=0;
+         m_arg2=f;
+       }
 
        Command(unsigned cmd, const char * arg0, unsigned arg1) 
        {
@@ -92,6 +113,12 @@ class AudioLayer : public Thread
              break;
            case cmd_playSample: 
              GM_LOG("play sample %d\n",m_arg1);
+             break;
+           case cmd_enableSamples: 
+             GM_LOG("enable samples %d\n",m_arg1);
+             break;
+           case cmd_setFxVolume: 
+             GM_LOG("setting fx volume %f\n",m_arg2);
              break;
            default:
              GM_LOG("unknow\n");

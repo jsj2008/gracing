@@ -89,7 +89,6 @@ void GuiItemStaticText::draw()
 
 void GuiItemStaticText::onMouseClick(const GuiPoint & point)
 {
-  GM_LOG("socka\n");
   ResourceManager::getInstance()->getAudioLayer()->playSample(0);
   executeCode(m_onClick.c_str());
 }

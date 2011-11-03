@@ -94,6 +94,30 @@ int startRace(lua_State * L)
   return 0;
 }
 
+int enableFX(lua_State * L)
+{
+  unsigned enable;
+  enable=luaL_checknumber(L,1);
+  ResourceManager::getInstance()->getAudioLayer()->enableFx(enable);
+  return 0;
+}
+
+int setFxVolume(lua_State * L)
+{
+  float volume;
+  volume=luaL_checknumber(L,1);
+  ResourceManager::getInstance()->getAudioLayer()->setFxVolume(volume);
+  return 0;
+}
+
+int setMusicVolume(lua_State * L)
+{
+  float volume;
+  volume=luaL_checknumber(L,1);
+  ResourceManager::getInstance()->getAudioLayer()->setSongVolume(volume);
+  return 0;
+}
+
 int addController(lua_State * L)
 {
   unsigned dev;
@@ -256,6 +280,8 @@ struct embFunctions_s {
   { "getControllerActionName", getControllerActionName },
   { "startLearnAction", startLearnAction },
   { "addController", addController },
+  { "setMusicVolume", setMusicVolume },
+  { "setFxVolume", setFxVolume },
   { 0,0 }
 };
 
@@ -735,10 +761,8 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
 
   cfgGet("main-music",trackFileName);
   getAudioCompletePath(trackFileName.c_str(),path);
-#if 0
   m_audioLayer->loadSong(path.c_str());
   m_audioLayer->startSong();
-#endif
 
   getAudioCompletePath("pickup.wav",path);
   m_audioLayer->loadSample(0,path.c_str());
