@@ -82,6 +82,9 @@ IGuiMenuItem::IGuiMenuItem(const char * className)
   m_selectable = true;
   m_className = className;
   m_font = ResourceManager::getInstance()->getSystemFont();
+
+  m_captionVCenter=true;
+  m_captionHCenter=false;
 }
 
 void IGuiMenuItem::setTheme(GuiTheme * theme) 

@@ -59,7 +59,6 @@ typedef irr::video::ITexture              GuiImage;
     )
 
 
-
 #define _LOGRECT(rect) do { GM_LOG("rect: %d,%d,%d,%d\n",_RMINX(rect),_RMINY(rect),_RMAXX(rect),_RMAXY(rect)); } while(0)
 #define _LOGDIM(dim) do { GM_LOG("dim: %d,%d\n",_W(dim),_H(dim)); } while(0)
 
@@ -343,6 +342,9 @@ class IGuiMenuItem
     bool         m_selectable;
     GuiFont *    m_font;
 
+    bool m_captionVCenter;
+    bool m_captionHCenter;
+
     enum { m_luaNameSize=40 };
     char m_luaName[m_luaNameSize];
     std::string m_boundCfgName;
@@ -444,6 +446,7 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
             ResourceManager::getInstance()->lua_doString(m_onShow.c_str());
           }
         }
+
 
       private:
         std::wstring                m_name;

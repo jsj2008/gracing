@@ -98,7 +98,8 @@ void GuiItemCheckBox::init(XmlNode * node)
 
 void GuiItemCheckBox::draw()
 {
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),
+      m_captionHCenter,m_captionVCenter);
 
   irr::video::IVideoDriver * driver = ResourceManager::getInstance()->getVideoDriver();
 

@@ -305,15 +305,35 @@ GuiDimension GuiItemListBox::getPreferredSize()
   // TODO: take into account the arrow rectangle
   _W(dim) += getItemMaxWidth();
 
+
+  int maxHeight;
+
+  maxHeight = _H(dim);
+
+  if(_RH(m_rightButton.dstRect) > maxHeight)
+    maxHeight = _RH(m_rightButton.dstRect);
+
+  if(_RH(m_leftButton.dstRect) > maxHeight)
+    maxHeight = _RH(m_leftButton.dstRect);
+
+  if(_RH(m_rightButtonHi.dstRect) > maxHeight)
+    maxHeight = _RH(m_rightButtonHi.dstRect);
+
+  if(_RH(m_leftButtonHi.dstRect) > maxHeight)
+    maxHeight = _RH(m_leftButtonHi.dstRect);
+
+  _H(dim)= maxHeight;
+
   return dim;
 }
 
 void GuiItemListBox::draw()
 {
-  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),false,false);
+  m_font->draw(m_caption.c_str(),m_rectangle,irr::video::SColor(255,255,255,255),
+      m_captionHCenter,m_captionVCenter);
 
   if(m_selectedItem < m_items.size()) 
-     m_font->draw(m_items[m_selectedItem].c_str(),m_itemDstRect,irr::video::SColor(255,255,255,255),true,false);
+     m_font->draw(m_items[m_selectedItem].c_str(),m_itemDstRect,irr::video::SColor(255,255,255,255),true,true);
 
   if(m_mouseOver == mouseOnLeftImage  && m_leftButtonHi.image && m_mustHighlight)
     m_leftButtonHi.draw();
