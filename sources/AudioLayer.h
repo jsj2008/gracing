@@ -30,6 +30,7 @@ class AudioLayer : public Thread
      virtual void playSample(unsigned index);
 
      virtual void enableFx(bool enabled);
+     virtual void enableSong(bool enabled);
 
      virtual void setSongVolume(float volume);
      virtual void setFxVolume(float volume);
@@ -54,6 +55,7 @@ class AudioLayer : public Thread
      void _setSongVolume(float volume);
      void _enableSamples(unsigned value);
      void _setFxVolume(float volume);
+     void _enableSong(unsigned enable);
 
      /* commands */
      enum {
@@ -64,6 +66,7 @@ class AudioLayer : public Thread
        cmd_loadSample,
        cmd_playSample,
        cmd_setSongVolume,
+       cmd_enableSong,
        cmd_enableSamples,
        cmd_setFxVolume
      };
@@ -115,6 +118,9 @@ class AudioLayer : public Thread
              GM_LOG("play sample %d\n",m_arg1);
              break;
            case cmd_enableSamples: 
+             GM_LOG("enable samples %d\n",m_arg1);
+             break;
+           case cmd_enableSong: 
              GM_LOG("enable samples %d\n",m_arg1);
              break;
            case cmd_setFxVolume: 

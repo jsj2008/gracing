@@ -148,7 +148,7 @@ GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
 
   m_focusedItem = 0xffff; // m_items.size();
 
-  m_theme=new GuiTheme("theme-default.zip");
+  m_theme=new GuiTheme("veryrounded.zip");
 
   _H(m_dimension)=100;
   _W(m_dimension)=600;

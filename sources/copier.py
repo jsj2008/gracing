@@ -14,6 +14,8 @@ ACTION_BUILD_TREE=4
 ACTION_COPY_FILE=5
 ACTION_REMOVE_DIR=6
 ACTION_EXTRACT_CFG=7
+ACTION_COPY_SAMPLES=8
+ACTION_COPY_THEMES=9
 
 ########## options
 globargs=[]
@@ -43,17 +45,31 @@ paths=[
   "Contents/Resources/Audio"
 ]
 
+samples=[
+  "pickup",
+  "pickup-2",
+  "powerup",
+  "powerup-2"
+]
+
+themes=[
+  "default",
+  "veryrounded"
+]
 
 
 def error(message):
 	print("FATAL: %s"%message)
 	sys.exit(2)
 
-def copy_list(list,src_dir,tgt_dir):
+def copy_list(list,src_dir,tgt_dir,ext=".zip",prependDir=True):
   for f  in list:
     if type(f) == type(""): # is a string
       print(" - copying '%s'"%f)
-      src=src_dir+"/"+f+"/"+f+".zip"
+      if prependDir:
+        src=src_dir+"/"+f+"/"+f+ext #".zip"
+      else:
+        src=src_dir+"/"+f+ext #".zip"
     try:
       shutil.copy(src,tgt_dir)
     except IOError, err:
@@ -130,6 +146,28 @@ def copy_tracks():
   print("Copying tracks to %s"%target_dir)
 
   copy_list(tracks,resource_dir,target_dir)
+
+def copy_themes():
+  if target_dir == None:
+    error("please define a target dir (-tgtdir=...)")
+
+  if resource_dir == None:
+    error("please define a resource dir (-resdir=...)")
+
+  print("Copying themes to %s"%target_dir)
+
+  copy_list(themes,resource_dir,target_dir)
+
+def copy_samples():
+  if target_dir == None:
+    error("please define a target dir for samples (-tgtdir=...)")
+
+  if resource_dir == None:
+    error("please define a resource dir (-resdir=...)")
+
+  print("Copying samples to %s"%target_dir)
+
+  copy_list(samples,resource_dir,target_dir,".wav",False)
 
 
 def extract_configuration():
@@ -218,7 +256,7 @@ def parse_command_line():
   global resource_dir
   global globargs
   try:                                
-    opts, globargs = getopt.getopt(sys.argv[1:], "", ["help", "tgtdir=", "resdir=", "cpv", "cpt", "mkt", "cp", "rmd", "cfg"]) 
+    opts, globargs = getopt.getopt(sys.argv[1:], "", ["help", "tgtdir=", "resdir=", "cpv", "cpt", "mkt", "cp", "rmd", "cfg", "cps", "cph"]) 
   except getopt.GetoptError,err: 
     error(err)                          
   for opt,arg in opts:
@@ -226,6 +264,10 @@ def parse_command_line():
      action=ACTION_COPY_VEHICLES
     if opt == "--cpt":
       action=ACTION_COPY_TRACKS
+    if opt == "--cph":
+      action=ACTION_COPY_THEMES
+    if opt == "--cps":
+      action=ACTION_COPY_SAMPLES
     if opt == "--mkt":
       action=ACTION_BUILD_TREE
     if opt == "--cp":
@@ -247,6 +289,10 @@ elif action == ACTION_COPY_VEHICLES:
   copy_vehicles()
 elif action == ACTION_COPY_TRACKS:
   copy_tracks()
+elif action == ACTION_COPY_SAMPLES:
+  copy_samples()
+elif action == ACTION_COPY_THEMES:
+  copy_themes()
 elif action == ACTION_BUILD_TREE:
   build_tree()
 elif action == ACTION_COPY_FILE:

@@ -94,11 +94,21 @@ int startRace(lua_State * L)
   return 0;
 }
 
-int enableFX(lua_State * L)
+int enableFx(lua_State * L)
 {
   unsigned enable;
-  enable=luaL_checknumber(L,1);
+  luaL_checktype(L,1,LUA_TBOOLEAN);
+  enable=lua_toboolean(L,1);
   ResourceManager::getInstance()->getAudioLayer()->enableFx(enable);
+  return 0;
+}
+
+int enableMusic(lua_State * L)
+{
+  unsigned enable;
+  luaL_checktype(L,1,LUA_TBOOLEAN);
+  enable=lua_toboolean(L,1);
+  ResourceManager::getInstance()->getAudioLayer()->enableSong(enable);
   return 0;
 }
 
@@ -282,6 +292,8 @@ struct embFunctions_s {
   { "addController", addController },
   { "setMusicVolume", setMusicVolume },
   { "setFxVolume", setFxVolume },
+  { "enableMusic", enableMusic },
+  { "enableFx", enableFx },
   { 0,0 }
 };
 
@@ -764,8 +776,40 @@ void ResourceManager::setDevice(irr::IrrlichtDevice *device)
   m_audioLayer->loadSong(path.c_str());
   m_audioLayer->startSong();
 
+  /*
   getAudioCompletePath("pickup.wav",path);
   m_audioLayer->loadSample(0,path.c_str());
+  */
+  XmlNode * audioRoot=m_configRoot->getChild("audio");
+  XmlNode * samplesRoot = 0;
+
+  if(audioRoot)  
+     samplesRoot = audioRoot->getChild("samples");
+  else {
+    GM_LOG("No audio root\n");
+  }
+
+#if 0
+  if(samplesRoot) {
+    std::vector<XmlNode*> samples;
+    audioRoot->getChildren("sample",samples);
+    for(unsigned i=0; i<samples.size(); i++) {
+      XmlNode * sample=samples[i];
+      std::string src="";
+      sample->get("src",src);
+      if(src != "") {
+        getAudioCompletePath(src.c_str(),path);
+        m_audioLayer->loadSample(i,path.c_str());
+      }
+    }
+  } else {
+    GM_LOG("No samples root\n");
+  }
+  m_audioLayer->playSample(0);
+  m_audioLayer->playSample(1);
+  m_audioLayer->playSample(2);
+  m_audioLayer->playSample(3);
+#endif
 }
 
 

@@ -49,8 +49,10 @@ struct SoundBuffer {
 static AudioLayer *    instance=0;
 static ALuint          g_buffers[2];
 static ALCdevice  *    g_device;
+static bool            g_songEnabled;
 static ALCcontext *    g_context;
 static ALuint          g_source;
+static double          g_gain;
 static ALenum          g_format;     // internal g_format
 static OggVorbis_File  g_oggStream;     // stream handle
 static vorbis_info*    g_vorbisInfo;    // some formatting data
@@ -110,6 +112,7 @@ AudioLayer::AudioLayer()
   g_songLoaded=false;
   g_playing=false;
   g_device = alcOpenDevice(NULL); // select the "preferred g_device"
+  g_songEnabled=true;
 
   if(!g_device) {
     check();
@@ -147,6 +150,11 @@ void AudioLayer::enableFx(bool  enable)
   m_commands.put(Command(cmd_enableSamples,0,enable));
 }
 
+void AudioLayer::enableSong(bool  enable)
+{
+  m_commands.put(Command(cmd_enableSong,0,enable));
+}
+
 void AudioLayer::loadSample(unsigned index, const char * sampleFileName) 
 {
   m_commands.put(Command(cmd_loadSample,sampleFileName,index));
@@ -176,6 +184,9 @@ bool AudioLayer::executeCommand(Command & cmd)
     case cmd_enableSamples:
       _enableSamples(cmd.m_arg1);
       break;
+    case cmd_enableSong:
+      _enableSong(cmd.m_arg1);
+      break;
   }
   return false;
 }
@@ -199,6 +210,16 @@ void AudioLayer::_setFxVolume(float volume)
     }
 }
 
+void AudioLayer::_enableSong(unsigned v)
+{
+  g_songEnabled=v;
+  if(v)
+    alSourcef(g_source, AL_GAIN, g_gain);
+  else 
+    alSourcef(g_source, AL_GAIN, 0.);
+  
+}
+
 void AudioLayer::_enableSamples(unsigned v)
 {
   if(v) {
@@ -214,7 +235,9 @@ void AudioLayer::_enableSamples(unsigned v)
 
 void AudioLayer::_setSongVolume(float f)
 {
-  alSourcef(g_source, AL_GAIN, f);
+  g_gain = f;
+  if(g_songEnabled)
+    alSourcef(g_source, AL_GAIN, f);
 }
 
 void AudioLayer::_loadSong(const char * songFileName)
@@ -264,10 +287,17 @@ void AudioLayer::_loadSong(const char * songFileName)
     return;
   }
 
-  double gain=1.;
+  g_gain=1.;
 
-  ResourceManager::getInstance()->cfgGet("audio/music-volume",gain);
-  alSourcef(g_source, AL_GAIN, gain);
+  ResourceManager::getInstance()->cfgGet("audio/music-volume",g_gain);
+  ResourceManager::getInstance()->cfgGet("audio/music-enabled",g_songEnabled);
+
+  if(g_songEnabled)
+    alSourcef(g_source, AL_GAIN, g_gain);
+  else
+    alSourcef(g_source, AL_GAIN, 0.);
+
+  
 
   alSource3f(g_source, AL_POSITION,        0.0, 0.0, 0.0);
   alSource3f(g_source, AL_VELOCITY,        0.0, 0.0, 0.0);
