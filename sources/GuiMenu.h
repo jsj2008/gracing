@@ -77,9 +77,17 @@ class GuiTheme
       return 0;
     }
 
+    
+    irr::gui::IGUIFont *   getFontBig() { return m_fontBig; }
+    irr::gui::IGUIFont *   getFontMedium() { return m_fontMedium; }
+    irr::gui::IGUIFont *   getFontSmall() { return m_fontSmall; }
+
   private:
     std::vector<GuiImage*> m_images;
     XmlNode *              m_root;
+    irr::gui::IGUIFont *   m_fontBig;
+    irr::gui::IGUIFont *   m_fontMedium;
+    irr::gui::IGUIFont *   m_fontSmall;
 };
 
 struct ImgElement
@@ -305,6 +313,7 @@ class IGuiMenuItem
 
   private:
     std::string m_className;
+    unsigned m_fontDimension; 
 
 
   protected:
@@ -368,9 +377,17 @@ class GuiContainerPolicy
 class GuiContainerPolicy_GrowVertical : public GuiContainerPolicy
 {
   public:
+    GuiContainerPolicy_GrowVertical(unsigned m_vspan=5); 
+
+    inline void setVSpan(unsigned vspan) { m_vspan=vspan; }
+
     virtual void applyPolicy(GuiPoint & position,
       GuiDimension & dimension,
       std::vector<IGuiMenuItem *> & items);
+
+
+  private:
+    unsigned m_vspan;
 };
 
 class GuiContainerPolicy_GrowHorizontal : public GuiContainerPolicy
@@ -389,6 +406,8 @@ class GuiMenu : public irr::gui::IGUIElement, public IEventListener
     GuiMenu(irr::gui::IGUIEnvironment* environment,
         irr::gui::IGUIElement* parent, irr::s32 id, 
         const irr::core::rect<irr::s32>& rectangle);
+
+    void setTheme(GuiTheme * theme);
 
     void load(const std::string & xmlFileName);
 

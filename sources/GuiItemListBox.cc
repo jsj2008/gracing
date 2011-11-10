@@ -302,8 +302,10 @@ GuiDimension GuiItemListBox::getPreferredSize()
   GuiDimension dim;
   dim = m_font->getDimension(m_caption.c_str());
 
-  // TODO: take into account the arrow rectangle
   _W(dim) += getItemMaxWidth();
+
+  _W(dim) += _RW(m_rightButton.dstRect);
+  _W(dim) += _RW(m_leftButton.dstRect);
 
 
   int maxHeight;

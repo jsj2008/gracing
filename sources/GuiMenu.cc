@@ -29,6 +29,10 @@
 
 GuiTheme::GuiTheme(const char * filename)
 {
+  m_fontBig=0;
+  m_fontMedium=0;
+  m_fontSmall=0;
+
   irr::io::IFileSystem * fileSystem = ResourceManager::getInstance()->getFileSystem();
   std::string respat=ResourceManager::getInstance()->getResourcePath() + filename;
 
@@ -67,6 +71,37 @@ GuiTheme::GuiTheme(const char * filename)
     }
   }
 
+  nodes.clear();
+  m_root->getChildren("font",nodes);
+
+  GM_LOG("------------------------------>loading font\n");
+  std::string fontName;
+  irr::gui::IGUIFont *  font;
+  for(unsigned i=0; i<nodes.size(); i++) {
+    nodes[i]->get("name",fontName);
+    GM_LOG("------------------------------>loading fonr '%s'\n",fontName.c_str());
+    font = ResourceManager::getInstance()->getGuiEnv()->getFont(fontName.c_str());
+    if(font) {
+      std::string type;
+      nodes[i]->get("type",type);
+      if(type == "big") {
+        m_fontBig=font;
+      } else if(type == "medium") {
+        m_fontMedium=font;
+      GM_LOG("------>type: '%s'\n",type.c_str());
+      } else if(type == "small") {
+        m_fontSmall=font;
+      } else {
+        GM_LOG("not using font\n");
+        font->drop();
+      }
+    } else {
+      GM_LOG("cannot load font\n");
+    }
+  }
+
+  GM_LOG("loglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglogloglog\n");
+
   res=fileSystem->removeFileArchive(fileSystem->getAbsolutePath(mypath));
 
   assert(res);
@@ -85,20 +120,34 @@ IGuiMenuItem::IGuiMenuItem(const char * className)
 
   m_captionVCenter=true;
   m_captionHCenter=false;
+
 }
 
 void IGuiMenuItem::setTheme(GuiTheme * theme) 
 {
-  const XmlNode * node = theme->getNode(m_className.c_str());
   std::string value;
 
-  if(node && node->get("font",value)) {
-    if(value == "big") 
-      m_font = ResourceManager::getInstance()->getSystemFontBig();
-    else if(value == "small") 
-      m_font = ResourceManager::getInstance()->getSystemFontSmall();
-    else if(value == "normal")
-      m_font = ResourceManager::getInstance()->getSystemFont();
+  switch(m_fontDimension) {
+    case 0:
+      if(theme->getFontSmall()) 
+        m_font = theme->getFontSmall();
+      else
+        m_font = ResourceManager::getInstance()->getSystemFontSmall();
+      break;
+    case 2:
+      if(theme->getFontBig()) 
+        m_font = theme->getFontBig();
+      else
+        m_font = ResourceManager::getInstance()->getSystemFontBig();
+      break;
+
+    case 1:
+    default:
+      if(theme->getFontMedium()) 
+        m_font = theme->getFontMedium();
+      else
+        m_font = ResourceManager::getInstance()->getSystemFont();
+      break;
   }
 }
 
@@ -107,13 +156,18 @@ void IGuiMenuItem::init(XmlNode * node)
   if(!node)
     return;
   std::string value;
+  m_fontDimension=1;
   if(node->get("font",value)) {
-    if(value == "big") 
+    if(value == "big") {
+      m_fontDimension=2;
       m_font = ResourceManager::getInstance()->getSystemFontBig();
-    else if(value == "small") 
+    } else if(value == "small") {
+      m_fontDimension=0;
       m_font = ResourceManager::getInstance()->getSystemFontSmall();
-    else if(value == "normal")
+    } else if(value == "normal") {
+      m_fontDimension=1;
       m_font = ResourceManager::getInstance()->getSystemFont();
+    }
   }
 
   node->get("selectable",m_selectable);
@@ -131,6 +185,13 @@ void IGuiMenuItem::init(XmlNode * node)
   if(node->get("bindConfig",value)) {
     m_boundCfgName=value;
   }
+}
+
+void GuiMenu::setTheme(GuiTheme * theme)
+{
+  for(unsigned i=0; i<m_groups.size(); i++) 
+    m_groups[i]->setTheme(theme);
+  refreshSize();
 }
 
 GuiMenu::GuiMenu(irr::gui::IGUIEnvironment* environment,
@@ -229,6 +290,11 @@ void GuiContainerPolicy_GrowHorizontal::applyPolicy(
   }
 }
 
+GuiContainerPolicy_GrowVertical::GuiContainerPolicy_GrowVertical(unsigned vspan)
+{
+  m_vspan=vspan;
+}
+
 void GuiContainerPolicy_GrowVertical::applyPolicy(
     GuiPoint & position,
     GuiDimension & dimension,
@@ -248,14 +314,13 @@ void GuiContainerPolicy_GrowVertical::applyPolicy(
     _H(dimension) += _H(dim);
     _Y(pos) += _H(dim);
 
-    if(_W(dim) > _W(dimension))
+    if(_W(dim) > _W(dimension)) 
       _W(dimension) = _W(dim);
     else
       _W(dim) = _W(dimension);
 
-#if 0
-    _W(dim) = _W(dimension);
-#endif
+    _Y(pos) += m_vspan;
+    _H(dimension) += m_vspan;
 
     (*it)->setSize(dim);
   }
@@ -546,6 +611,7 @@ void GuiMenu::load(const std::string & xmlFileName)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+
 
 GuiMenu::GuiItemGroup::GuiItemGroup(XmlNode * root)
 {

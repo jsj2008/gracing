@@ -242,7 +242,9 @@ void GuiItemSlider::updateHandlePosition()
 
 void GuiItemSlider::setTheme(GuiTheme * theme)
 {
+	IGuiMenuItem::setTheme(theme);
   const XmlNode * root = theme->getNode("slider");
+
 
   const XmlNode * node;
   unsigned idx;

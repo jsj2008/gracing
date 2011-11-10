@@ -80,13 +80,13 @@
 </input-devices>
 <audio>
     <music-volume>0.140000</music-volume>
-    <music-enabled>false</music-enabled>
+    <music-enabled>true</music-enabled>
     <fx-volume>0.000000</fx-volume>
     <fx-enabled>true</fx-enabled>
-    <samples>
+    <!--samples>
       <sample src="pickup.wav" />
       <sample src="pickup-2.wav" />
       <sample src="powerup.wav" />
       <sample src="powerup-2.wav" />
-    </samples>
+    </samples-->
 </audio>
