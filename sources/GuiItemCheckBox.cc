@@ -197,13 +197,40 @@ void GuiItemCheckBox::updateGeometry()
   m_boxDstRect.LowerRightCorner.Y = 
     m_boxDstRect.UpperLeftCorner.Y + _RW(m_boxSrcRect);
 
-  m_checkerDstRect = m_boxDstRect;
+  m_checkerDstRect = m_checkerSrcRect;
+  if(_RW(m_checkerDstRect) >= _RW(m_boxDstRect)) {
+    unsigned delta= _RW(m_checkerDstRect) - _RW(m_boxDstRect);
+    delta /= 2;
+    _RMINX(m_checkerDstRect) = _RMINX(m_boxDstRect) - delta;
+    _RMAXX(m_checkerDstRect) = _RMAXX(m_boxDstRect) + delta;
+  } else {
+    unsigned delta= _RW(m_boxDstRect) - _RW(m_checkerDstRect);
+    delta /= 2;
+    _RMINX(m_checkerDstRect) = _RMINX(m_boxDstRect) + delta;
+    _RMAXX(m_checkerDstRect) = _RMAXX(m_boxDstRect) - delta;
+  }
 
+  if(_RH(m_checkerDstRect) >= _RH(m_boxDstRect)) {
+    unsigned delta= _RH(m_checkerDstRect) - _RH(m_boxDstRect);
+    delta /= 2;
+    _RMINY(m_checkerDstRect) = _RMINY(m_boxDstRect) - delta;
+    _RMAXY(m_checkerDstRect) = _RMAXY(m_boxDstRect) + delta;
+  } else {
+    unsigned delta=_RH(m_boxDstRect) - _RH(m_checkerDstRect);
+    delta /= 2;
+    _RMINY(m_checkerDstRect) = _RMINY(m_boxDstRect) + delta;
+    _RMAXY(m_checkerDstRect) = _RMAXY(m_boxDstRect) - delta;
+  }
+
+
+
+#if 0
   unsigned delta=2;
   _RMINX(m_boxDstRect) += delta;
   _RMINY(m_boxDstRect) += delta;
 
   _RMAXX(m_boxDstRect) -= delta;
   _RMAXY(m_boxDstRect) -= delta;
+#endif
 
 }

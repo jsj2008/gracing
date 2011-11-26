@@ -1057,20 +1057,7 @@ void ResourceManager::stepPhaseHandler() {
   //       this is __VERY__ ugly.
   bool done;
 
-#if 0
   if(m_mustStartRace) {
-    m_mustStartRace = false;
-    hideMenu();
-    GM_LOG("must start race: %d\n",m_humanVehicles);
-    m_currentPhaseHandler= m_phaseHandlers[pa_vehicleChooser];
-    static_cast<VehicleChooser*>(m_phaseHandlers[pa_vehicleChooser])->prepare(
-          m_humanVehicles,m_totVehicles,m_choosenVehicles);
-    return;
-  } 
-#endif
-
-  if(m_mustStartRace) {
-    GM_LOG("---------\n");
     m_mustStartRace = false;
     hideMenu();
     m_currentPhaseHandler= m_phaseHandlers[pa_trackChooser];

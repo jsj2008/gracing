@@ -23,6 +23,7 @@ common_sources=main.cc Track.cc CCrisMeshFileLoader.cc \
         GuiItemCheckBox.cc \
         GuiItemStaticText.cc \
         GuiItemListBox.cc \
+        GuiItemThumbList.cc \
         GuiItemListBoxEx.cc \
         GuiItemSlider.cc \
         EmptyPhaseHandler.cc \

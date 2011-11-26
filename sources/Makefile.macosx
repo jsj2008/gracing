@@ -96,7 +96,7 @@ copy_files:
 	@$(copier) --cp $(target) $(tgt_appl_dir)/
 	@$(copier) --cp config.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_macosx_dir)/Info.plist $(tgt_cnt_dir)
-	@$(copier) --cp $(resources_dir)/gfx/icon/icon.icns $(tgt_res_dir)
+	@$(copier) --cp $(resources_dir)/gfx/icon/icon-2.icns $(tgt_res_dir)/icon.icns
 	@$(copier) --cp $(resources_dir)/menu.xml $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/menu.lua $(tgt_res_dir)
 
@@ -127,10 +127,10 @@ copy_files:
 	@$(copier) --cp $(resources_dir)/gfx/readysetgo.png $(tgt_res_dir)
 	@$(copier) --cp $(resources_dir)/gfx/default-track-shot.png $(tgt_res_dir)
 
+	@$(copier) --cp $(resources_dir)/diskbackground.png  $(tgt_res_dir)
 # MUSIC
 	@$(copier) --cp $(src_music_dir)/gracing-soundtrack.ogg $(tgt_music_dir)
 	@$(copier) --cps --resdir $(src_music_dir)  --tgtdir $(tgt_music_dir)
-
 # THEMES
 	@$(copier) --cph --tgtdir $(tgt_themes_dir) --resdir $(src_themes_dir)
     
@@ -150,9 +150,66 @@ clean_subdirs:
 depend:
 	makedepend  -- $(ccflags) -- $(sources) -f depend.mak
 
+##############################
+# the following part of this makefile is taken from
+#
+# Remko Tronçon 
+# http://el-tramo.be/about
+
+NAME ?= gracing
+VERSION ?= 0.1
+
+SOURCE_DIR ?= ../
+SOURCE_FILES ?= gracing.app
+
+TEMPLATE_DMG ?= template.dmg
+
+MASTER_DMG=$(NAME)-$(VERSION).dmg
+WC_DMG=wc.dmg
+WC_DIR=wc
+
+dist:  all $(MASTER_DMG)
+
+clean_dist:
+	-rm -rf $(TEMPLATE_DMG) $(MASTER_DMG) $(WC_DMG)
+
+$(TEMPLATE_DMG): $(TEMPLATE_DMG).bz2
+	bunzip2 -k $<
+
+$(TEMPLATE_DMG).bz2: 
+	@echo
+	@echo --------------------- Generating empty template --------------------
+	mkdir template
+	hdiutil create -fs HFSX -layout SPUD -size 40m "$(TEMPLATE_DMG)" -srcfolder template -format UDRW -volname "$(NAME)" -quiet
+	rmdir template
+	bzip2 "$(TEMPLATE_DMG)"
+	@echo
+
+$(WC_DMG): $(TEMPLATE_DMG)
+	cp $< $@
+
+$(MASTER_DMG): $(WC_DMG) $(addprefix $(SOURCE_DIR)/,$(SOURCE_FILES))
+	@echo
+	@echo --------------------- Creating Disk Image --------------------
+	mkdir -p $(WC_DIR)
+	hdiutil attach "$(WC_DMG)" -noautoopen -quiet -mountpoint "$(WC_DIR)"
+	for i in $(SOURCE_FILES); do  \
+		rm -rf "$(WC_DIR)/$$i"; \
+		ditto -rsrc "$(SOURCE_DIR)/$$i" "$(WC_DIR)/$$i"; \
+	done
+	#rm -f "$@"
+	#hdiutil create -srcfolder "$(WC_DIR)" -format UDZO -imagekey zlib-level=9 "$@" -volname "$(NAME) $(VERSION)" -scrub -quiet
+	WC_DEV=`hdiutil info | grep "$(WC_DIR)" | grep "Apple_HFS" | awk '{print $$1}'` && \
+	hdiutil detach $$WC_DEV -quiet -force
+	rm -f "$(MASTER_DMG)"
+	hdiutil convert "$(WC_DMG)" -quiet -format UDZO -imagekey zlib-level=9 -o "$@"
+	rm -rf $(WC_DIR)
+	@echo
+
+
 testb:
 	$(blender) -h
   
 include depend.mak
 
-.PHONY: copy_files all clean depend tags genconf subdirs $(subdirs) clean_subdirs
+.PHONY: copy_files all clean depend tags genconf subdirs $(subdirs) clean_subdirs dist

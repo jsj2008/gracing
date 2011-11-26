@@ -92,6 +92,18 @@ void DefaultTrackChooser::setTrack(unsigned index)
 
 bool DefaultTrackChooser::step()
 {
+  m_driver->beginScene(true, true, irr::video::SColor(255,100,101,140));
+  if(m_background)
+    m_driver->draw2DImage (
+        m_background,
+        m_dstRect,
+        m_srcRect,
+        0,
+        0,
+        true);
+  m_guiEnv->drawAll();
+  m_driver->endScene();
+#if 0
   ResourceManager * resman=ResourceManager::getInstance();
   EventReceiver * erec;
   erec=resman->getEventReceiver();
@@ -171,5 +183,8 @@ bool DefaultTrackChooser::step()
     done=true;
   }
 
+  return done;
+#endif
+  bool done=false;
   return done;
 }

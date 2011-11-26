@@ -173,18 +173,16 @@ int main(int argc, char ** av)
 
   resmanager->cfgGet("video/fullscreen",fullscreen);
 
-
   IrrlichtDevice *device =
     createDevice( driverType, dimension2d<u32>(screenWidth, screenHeight), 24,
         fullscreen,
         glob_enableShadows, 
-        glob_enableVSync,
+        fullscreen/*glob_enableVSync*/,
         resmanager->getEventReceiver()); 
   if (!device)
     return 1;
 
   resmanager->setDevice(device);
-
 
   device->setWindowCaption(L"gracing - rosco-p");
 
@@ -197,36 +195,6 @@ int main(int argc, char ** av)
     world->setDebugDrawer(debugDrawer);
     debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawAabb);
   }
-
-
-#if 0
-  Track * thetrack=0;
-
-  // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
-  const XmlNode * defaultTrack;
-  ResourceManager::getInstance()->cfgGet("default-track",defaultTrack);
-
-  if(defaultTrack) {
-    std::string name;
-    defaultTrack->get("name",name);
-    thetrack=new Track(device,world,name.c_str());
-    GM_LOG("got the default track %s!!!!\n",name.c_str());
-  }
-
-  //thetrack=new Track(device,world,"farm.zip");
-  //thetrack=new Track(device,world,"devtrack.zip");
-  //thetrack=new Track(device,world,"tuxtollway.zip");
-  //thetrack=new Track(device,world,"jungle.zip");
-  //thetrack=new Track(device,world,"beach.zip");
-
-  if(!thetrack) 
-    thetrack=new Track(device,world,"farm.zip");
-#endif
-
-  bool autoplayer;
-  ResourceManager::getInstance()->cfgGet("start-auto-player",autoplayer);
-  // temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code temp code
-
 
   int lastFPS=-1;
 
